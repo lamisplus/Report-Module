@@ -1,0 +1,16 @@
+basePackage: org.lamisplus.modules.report
+name: ReportModule
+dependencies: {PatientModule: 1.0.0, TriageModule: 1.0.0, HivModule: 1.0.0 }
+store: true
+menus:
+  - icon:
+    disabled: false
+    name: Report
+    state: report
+    url: /across/resources/static/hiv/index.html
+umdLocation: /across/resources/static/hiv/index.html
+webModules:
+  - breadcrumb: Report
+    name: ReportModule
+    path: report
+    position: 99
