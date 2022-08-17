@@ -7,8 +7,8 @@ menus:
     disabled: false
     name: Report
     state: report
-    url: /across/resources/static/hiv/index.html
-umdLocation: /across/resources/static/hiv/index.html
+    url: /across/resources/static/report/index.html
+umdLocation: /across/resources/static/report/index.html
 webModules:
   - breadcrumb: Report
     name: ReportModule
