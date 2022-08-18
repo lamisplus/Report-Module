@@ -14,7 +14,10 @@ import org.lamisplus.modules.hiv.domain.entity.ARTClinical;
 import org.lamisplus.modules.hiv.domain.entity.ArtPharmacy;
 import org.lamisplus.modules.hiv.domain.entity.HivEnrollment;
 import org.lamisplus.modules.hiv.domain.entity.Regimen;
-import org.lamisplus.modules.hiv.repositories.*;
+import org.lamisplus.modules.hiv.repositories.ARTClinicalRepository;
+import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
+import org.lamisplus.modules.hiv.repositories.HivEnrollmentRepository;
+import org.lamisplus.modules.hiv.repositories.RegimenRepository;
 import org.lamisplus.modules.patient.domain.entity.Person;
 import org.lamisplus.modules.report.domain.PatientLineListDto;
 import org.lamisplus.modules.triage.domain.entity.VitalSign;
@@ -24,7 +27,6 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -36,7 +38,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PatientDataConverter {
+public class PatientReportService {
 
     private final HivEnrollmentRepository hivEnrollmentRepository;
 
@@ -53,21 +55,19 @@ public class PatientDataConverter {
 
     private final RegimenRepository regimenRepository;
 
-    public ByteArrayOutputStream generatePatientLineList() {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream ()){
-            Workbook workbook = new XSSFWorkbook ();
+    public ByteArrayOutputStream generatePatientLineList(Long facilityId) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream (); Workbook workbook = new XSSFWorkbook ()) {
+
             Sheet sh = workbook.createSheet ("Patient-line-list");
             List<String> columnHeadings = getPatientLineListColumnHeadings ();
             Font headerFont = getFont (workbook);
             CellStyle headerStyle = getCellStyle (workbook, headerFont);
             Row headerRow = sh.createRow (0);
             createHeader (columnHeadings, headerStyle, headerRow);
-            fillData (workbook, sh);
+            fillData (workbook, sh, facilityId);
             FileOutputStream fileOut = new FileOutputStream ("runtime/patient_line_list.xlsx");
             workbook.write (fileOut);
             workbook.write (baos);
-            fileOut.close ();
-            workbook.close ();
             LOG.info ("Completed {}", "Completed");
             return baos;
         } catch (Exception e) {
@@ -120,45 +120,45 @@ public class PatientDataConverter {
                 "Current Systolic BP",
                 "Current Diastolic BP",
                 "Adherence",
-               // "Waist Circumference(cm)",
+                // "Waist Circumference(cm)",
                 "First Regimen Line",
                 "First Regimen",
-               // "First NRTI",
-               // "First NNRTI",
+                // "First NRTI",
+                // "First NNRTI",
                 "Current Regimen Line",
                 "Current Regimen",
-               // "Current NRTI",
-               // "Current NNRTI",
+                // "Current NRTI",
+                // "Current NNRTI",
                 "Date Substituted/Switched (yyyy-mm-dd)",
                 "Date of Last Refill",
                 "Last Refill Duration (days)",
                 "Date of Next Refill (yyyy-mm-dd)",
+                "DMOC Type",
+                "Date Devolved (yyyy-mm-dd)",
                 "Last Clinic Stage",
                 "Date of Last Clinic (yyyy-mm-dd)",
                 "Date of Next Clinic (yyyy-mm-dd)",
-               // "Last CD4",
-               // "Last CD4p",
-               // "Date of Last CD4 (yyyy-mm-dd)",
+                // "Last CD4",
+                // "Last CD4p",
+                // "Date of Last CD4 (yyyy-mm-dd)",
                 //"Last Visitec CD4",
                 //"Date of Last Visitec CD4 (yyyy-mm-dd)",
                 //"Last TB-LAM",
                 //"Date of Last TB-LAM (yyyy-mm-dd)",
-               // "Last Cryptococcal Antigen",
+                // "Last Cryptococcal Antigen",
                 //"Date of Last Cryptococcal Antigen (yyyy-mm-dd)",
                 "Last Viral Load",
                 "Date of Last Viral Load (yyyy-mm-dd)",
                 "Viral Load Due Date",
                 "Viral Load Indication",
-                "DMOC Type",
-                "Date Devolved (yyyy-mm-dd)",
-               // "Date Returned to Facility (yyyy-mm-dd)",
-               // "Co-morbidities",
+                // "Date Returned to Facility (yyyy-mm-dd)",
+                // "Co-morbidities",
                 "Case-manager"
         );
     }
 
-    private void fillData(Workbook workbook, Sheet sh) throws ParseException {
-        List<PatientLineListDto> data = getPatientLineListDto ();
+    private void fillData(Workbook workbook, Sheet sh, Long facilityId) {
+        List<PatientLineListDto> data = getPatientLineList (facilityId);
         LOG.info ("data {}", data);
         CreationHelper creationHelper = workbook.getCreationHelper ();
         CellStyle dateStyle = workbook.createCellStyle ();
@@ -168,11 +168,11 @@ public class PatientDataConverter {
 
         //numericStyle.setDataFormat((short) BuiltinFormats.getBuiltinFormat("#,##0.00"));
         // 72 colums
-        int rownum = 1;
+        int rowNum = 1;
         for (int i = 0; i < data.size (); i++) {
-            LOG.info ("rownum-before {}" + (rownum));
-            Row row = sh.createRow (rownum++);
-            LOG.info ("rownum-after{}" + (rownum));
+            LOG.info ("rowNum-before {}" + (rowNum));
+            Row row = sh.createRow (rowNum++);
+            LOG.info ("rowNum-after{}" + (rowNum));
             DateFormat dateFormatExcel = new SimpleDateFormat ("yyyy-MM-dd");
             PatientLineListDto person = data.get (i);
             row.createCell (0).setCellValue (person.getFacilityId ());
@@ -222,16 +222,33 @@ public class PatientDataConverter {
             row.createCell (41).setCellValue (regimen);
             row.createCell (42).setCellValue (person.getCurrentRegimenLine ());
             row.createCell (43).setCellValue (person.getCurrentRegimen ());
-//            row.createCell (44).setCellValue (person.getSex ());
-//            row.createCell (45).setCellValue (person.getSex ());
-//            row.createCell (46).setCellValue (person.getSex ());
-//            row.createCell (47).setCellValue (person.getSex ());
-//            row.createCell (48).setCellValue (person.getSex ());
-//            row.createCell (49).setCellValue (person.getSex ());
-//            row.createCell (50).setCellValue (person.getSex ());
-//            row.createCell (51).setCellValue (person.getSex ());
-//            row.createCell (52).setCellValue (person.getSex ());
-//            row.createCell (53).setCellValue (person.getSex ());
+//            row.createCell (44).setCellValue (set substitution date);
+            if (person.getDateOfLastRefill () != null) {
+                row.createCell (45).setCellValue (dateFormatExcel.format (person.getDateOfLastRefill ()));
+            }
+            if (person.getLastRefillDuration () != null) {
+                row.createCell (46).setCellValue (person.getLastRefillDuration ());
+            }
+            if (person.getDateOfNextRefill () != null) {
+                row.createCell (47).setCellValue (dateFormatExcel.format (person.getDateOfNextRefill ()));
+            }
+            row.createCell (48).setCellValue (person.getDmocType () == null ? "" : person.getDmocType ());
+            Date dateDevolved = person.getDateDevolved ();
+            if (dateDevolved != null) {
+                row.createCell (49).setCellValue (dateFormatExcel.format (dateDevolved));
+            }
+            row.createCell (50).setCellValue (person.getLastClinicStage () == null ? "" : person.getLastClinicStage ());
+            Date dateOfLastClinic = person.getDateOfLastClinic ();
+            if (dateOfLastClinic != null) {
+                row.createCell (51).setCellValue (dateFormatExcel.format (dateOfLastClinic));
+
+            }
+            Date dateOfNextClinic = person.getDateOfNextClinic ();
+            if (dateOfNextClinic != null) {
+                row.createCell (52).setCellValue (dateFormatExcel.format (dateOfNextClinic));
+
+            }
+            // row.createCell (53).setCellValue (person.getSex ());
 //            row.createCell (54).setCellValue (person.getSex ());
 //            row.createCell (55).setCellValue (person.getSex ());
 //            row.createCell (56).setCellValue (person.getSex ());
@@ -305,9 +322,10 @@ public class PatientDataConverter {
     }
 
 
-    private List<PatientLineListDto> getPatientLineListDto() {
+    private List<PatientLineListDto> getPatientLineList(Long facilityId) {
         return hivEnrollmentRepository.findAll ()
                 .stream ()
+                .filter (hivEnrollment -> hivEnrollment.getFacilityId ().equals (facilityId))
                 .map (this::getPatientLineListDto)
                 .collect (Collectors.toList ());
 
@@ -405,6 +423,28 @@ public class PatientDataConverter {
                 .build ();
         processAndSetBaseline (artCommenceOptional, patientLineListDto);
         processAndSetCurrentVitalSignInfo (person, patientLineListDto);
+        processAndSetPharmacyDetails (person, currentDate, patientLineListDto);
+        processAndSetCurrentClinicalVisit (person, patientLineListDto);
+        return patientLineListDto;
+    }
+
+    private void processAndSetCurrentClinicalVisit(Person person, PatientLineListDto patientLineListDto) {
+        List<ARTClinical> clinicVisits = artClinicalRepository.findAllByPersonAndIsCommencementIsFalseAndArchived (person, 0);
+        Optional<ARTClinical> lastClinicVisit = clinicVisits.stream ()
+                .sorted (Comparator.comparing (ARTClinical::getVisitDate))
+                .sorted (Comparator.comparing (ARTClinical::getId).reversed ())
+                .findFirst ();
+        lastClinicVisit.ifPresent (artClinical -> {
+            LOG.info ("current clinic visit {}", artClinical.getVisitDate ());
+            Long clinicalStageId = artClinical.getClinicalStageId ();
+            ApplicationCodesetDTO clinicalStage = applicationCodesetService.getApplicationCodeset (clinicalStageId);
+            patientLineListDto.setLastClinicStage (clinicalStage.getDisplay ());
+            patientLineListDto.setDateOfLastClinic (Date.from (getInstant (artClinical.getVisitDate ())));
+            patientLineListDto.setDateOfNextClinic (Date.from (getInstant (artClinical.getNextAppointment ())));
+        });
+    }
+
+    private void processAndSetPharmacyDetails(Person person, LocalDate currentDate, PatientLineListDto patientLineListDto) {
         List<ArtPharmacy> pharmacies = artPharmacyRepository.getArtPharmaciesByPersonAndArchived (person, 0);
         Optional<ArtPharmacy> currentRefill = pharmacies.stream ()
                 .sorted (Comparator.comparing (ArtPharmacy::getVisitDate))
@@ -414,9 +454,19 @@ public class PatientDataConverter {
             Set<Regimen> regimens = currentRefill1.getRegimens ();
             regimens.forEach (regimen -> {
                 String description = regimen.getRegimenType ().getDescription ();
-                if(description.contains ("Line")){
-                 patientLineListDto.setCurrentRegimenLine (regimen.getRegimenType ().getDescription ());
-                 patientLineListDto.setCurrentRegimen (regimen.getDescription ());
+                Instant instantNextAppointment = getInstant (currentRefill1.getNextAppointment ());
+                patientLineListDto.setDateOfNextRefill (Date.from (instantNextAppointment));
+                Instant instantVisitDate = getInstant (currentRefill1.getVisitDate ());
+                patientLineListDto.setDateOfLastRefill (Date.from (instantVisitDate));
+                patientLineListDto.setLastRefillDuration (currentRefill1.getRefillPeriod ());
+                String devolveType = currentRefill1.getDsdModel ();
+                if (devolveType != null && ! (devolveType.isEmpty ())) {
+                    processAndSetDevolveDate (person, patientLineListDto);
+                    patientLineListDto.setDmocType (devolveType);
+                }
+                if (description.contains ("Line")) {
+                    patientLineListDto.setCurrentRegimenLine (regimen.getRegimenType ().getDescription ());
+                    patientLineListDto.setCurrentRegimen (regimen.getDescription ());
                 }
             });
             int days = Period.between (currentRefill1.getNextAppointment (), currentDate).getDays ();
@@ -432,8 +482,19 @@ public class PatientDataConverter {
             }
 
         });
+    }
 
-        return patientLineListDto;
+    private void processAndSetDevolveDate(Person person, PatientLineListDto patientLineListDto) {
+        Optional<ArtPharmacy> first = artPharmacyRepository.getArtPharmaciesByPersonAndArchived (person, 0)
+                .stream ()
+                .filter (artPharmacy -> artPharmacy.getDsdModel () != null)
+                .sorted (Comparator.comparing (ArtPharmacy::getId))
+                .sorted (Comparator.comparing (ArtPharmacy::getVisitDate))
+                .findFirst ();
+        first.ifPresent (firstDevolve -> {
+            Instant instant = getInstant (firstDevolve.getVisitDate ());
+            patientLineListDto.setDateDevolved (Date.from (instant));
+        });
     }
 
 
@@ -480,5 +541,8 @@ public class PatientDataConverter {
     }
 
 
+    public List<PatientLineListDto> getPatientData(Long facility) {
+        return getPatientLineList (facility);
+    }
 }
 

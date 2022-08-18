@@ -57,8 +57,14 @@ public class PatientLineListDto {
     private String currentRegimenLine;
     private String currentRegimen;
     private Date dateOfLastRefill;
-    private Date lastRefillDuration;
+    private Integer lastRefillDuration;
     private Date dateOfNextRefill;
+    private Date  dateDevolved;
+    private String dmocType;
+    private String lastClinicStage;
+    private Date  dateOfLastClinic;
+    private Date  dateOfNextClinic;
+
 //            "Adherence",
 //            "Waist Circumference(cm)",
 //            "First Regimen Line",
