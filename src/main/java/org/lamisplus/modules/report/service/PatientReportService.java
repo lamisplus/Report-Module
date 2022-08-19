@@ -200,29 +200,57 @@ public class PatientReportService {
             row.createCell (21).setCellValue (dateFormatExcel.format (person.getDateOfConfirmedHIVTest ()));
             row.createCell (22).setCellValue (dateFormatExcel.format (person.getDateOfRegistration ()));
             row.createCell (23).setCellValue (person.getStatusAtRegistration ());
-            row.createCell (24).setCellValue (dateFormatExcel.format (person.getArtStartDate ()));
+            Date artStartDate = person.getArtStartDate ();
+            if (artStartDate != null) {
+                row.createCell (24).setCellValue (dateFormatExcel.format (artStartDate));
+            }
             processAndSetCD4Detail (row, person);
-            row.createCell (27).setCellValue (person.getSystolicBP ());
-            row.createCell (28).setCellValue (person.getDiastolicBP ());
-            row.createCell (29).setCellValue (person.getBaselineWeight ());
-            row.createCell (30).setCellValue (person.getBaselineHeight ());
-            row.createCell (31).setCellValue (person.getBaselineClinicStage ());
-            row.createCell (32).setCellValue (person.getBaselineFunctionalStatus ());
+            Double systolicBP = person.getSystolicBP ();
+            if (systolicBP != null) {
+                row.createCell (27).setCellValue (systolicBP);
+            }
+            Double diastolicBP = person.getDiastolicBP ();
+            if (diastolicBP != null) {
+                row.createCell (28).setCellValue (diastolicBP);
+            }
+            Double baselineWeight = person.getBaselineWeight ();
+            if (baselineWeight != null) {
+                row.createCell (29).setCellValue (baselineWeight);
+            }
+            Double baselineHeight = person.getBaselineHeight ();
+            if (baselineHeight != null) {
+                row.createCell (30).setCellValue (baselineHeight);
+            }
+            row.createCell (31).setCellValue (person.getBaselineClinicStage () == null ? "" : person.getBaselineClinicStage ());
+            row.createCell (32).setCellValue (person.getBaselineFunctionalStatus () == null ? "" : person.getBaselineFunctionalStatus ());
             if (person.getDateCurrentStatus () != null) {
                 row.createCell (33).setCellValue (dateFormatExcel.format (person.getDateCurrentStatus ()));
             }
-            row.createCell (34).setCellValue (person.getCurrentStatus ());
-            row.createCell (35).setCellValue (person.getCurrentWeight ());
-            row.createCell (36).setCellValue (person.getCurrentHeight ());
-            row.createCell (37).setCellValue (person.getCurrentSystolicBP ());
-            row.createCell (38).setCellValue (person.getCurrentDiastolicBP ());
+            row.createCell (34).setCellValue (person.getCurrentStatus () == null ? "" : person.getCurrentStatus ());
+
+            Double currentWeight = person.getCurrentWeight ();
+            if (currentWeight != null) {
+                row.createCell (35).setCellValue (currentWeight);
+            }
+            Double currentHeight = person.getCurrentHeight ();
+            if (currentHeight != null) {
+                row.createCell (36).setCellValue (currentHeight);
+            }
+            Double currentSystolicBP = person.getCurrentSystolicBP ();
+            if (currentSystolicBP != null) {
+                row.createCell (37).setCellValue (currentSystolicBP);
+            }
+            Double currentDiastolicBP = person.getCurrentDiastolicBP ();
+            if (currentDiastolicBP != null) {
+                row.createCell (38).setCellValue (currentDiastolicBP);
+            }
             row.createCell (39).setCellValue ("");
             String regimenLine = person.getFirstRegimenLine () == null ? "" : person.getFirstRegimenLine ();
             String regimen = person.getFirstRegimen () == null ? "" : person.getFirstRegimen ();
             row.createCell (40).setCellValue (regimenLine);
             row.createCell (41).setCellValue (regimen);
-            row.createCell (42).setCellValue (person.getCurrentRegimenLine ());
-            row.createCell (43).setCellValue (person.getCurrentRegimen ());
+            row.createCell (42).setCellValue (person.getCurrentRegimenLine () == null ? "" : person.getCurrentRegimenLine ());
+            row.createCell (43).setCellValue (person.getCurrentRegimen () == null ? "" : person.getCurrentRegimen ());
 //            row.createCell (44).setCellValue (set substitution date);
             if (person.getDateOfLastRefill () != null) {
                 row.createCell (45).setCellValue (dateFormatExcel.format (person.getDateOfLastRefill ()));
@@ -438,8 +466,10 @@ public class PatientReportService {
         lastClinicVisit.ifPresent (artClinical -> {
             LOG.info ("current clinic visit {}", artClinical.getVisitDate ());
             Long clinicalStageId = artClinical.getClinicalStageId ();
-            ApplicationCodesetDTO clinicalStage = applicationCodesetService.getApplicationCodeset (clinicalStageId);
-            patientLineListDto.setLastClinicStage (clinicalStage.getDisplay ());
+            if (clinicalStageId != null) {
+                ApplicationCodesetDTO clinicalStage = applicationCodesetService.getApplicationCodeset (clinicalStageId);
+                patientLineListDto.setLastClinicStage (clinicalStage.getDisplay ());
+            }
             patientLineListDto.setDateOfLastClinic (Date.from (getInstant (artClinical.getVisitDate ())));
             patientLineListDto.setDateOfNextClinic (Date.from (getInstant (artClinical.getNextAppointment ())));
         });
@@ -469,10 +499,10 @@ public class PatientReportService {
                     patientLineListDto.setCurrentRegimenLine (regimen.getRegimenType ().getDescription ());
                     patientLineListDto.setCurrentRegimen (regimen.getDescription ());
                 }
-         });
+            });
             LOG.info ("current date {}", currentDate);
             LOG.info ("next appointment date {}", currentRefill1.getNextAppointment ());
-            long days = ChronoUnit.DAYS.between (currentDate,  currentRefill1.getNextAppointment ());
+            long days = ChronoUnit.DAYS.between (currentDate, currentRefill1.getNextAppointment ());
             LOG.info ("number of days after appointment {}", days);
 //            if (days > 0) {
 //                int abs = Math.abs (days);
@@ -494,7 +524,7 @@ public class PatientReportService {
                 .sorted (Comparator.comparing (ArtPharmacy::getId))
                 .sorted (Comparator.comparing (ArtPharmacy::getVisitDate))
                 .findFirst ();
-            first.ifPresent (firstDevolve -> {
+        first.ifPresent (firstDevolve -> {
             Instant instant = getInstant (firstDevolve.getVisitDate ());
             patientLineListDto.setDateDevolved (Date.from (instant));
         });
