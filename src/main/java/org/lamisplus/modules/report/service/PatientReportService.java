@@ -32,6 +32,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -468,18 +469,20 @@ public class PatientReportService {
                     patientLineListDto.setCurrentRegimenLine (regimen.getRegimenType ().getDescription ());
                     patientLineListDto.setCurrentRegimen (regimen.getDescription ());
                 }
-            });
-            int days = Period.between (currentRefill1.getNextAppointment (), currentDate).getDays ();
+         });
+            LOG.info ("current date {}", currentDate);
+            LOG.info ("next appointment date {}", currentRefill1.getNextAppointment ());
+            long days = ChronoUnit.DAYS.between (currentDate,  currentRefill1.getNextAppointment ());
             LOG.info ("number of days after appointment {}", days);
-            if (days < 0) {
-                int abs = Math.abs (days);
-                if (abs >= 28) {
-                    LOG.info ("number of miss appointment days {}", abs);
-                    patientLineListDto.setCurrentStatus ("IIT");
-                }
-            } else {
-                patientLineListDto.setCurrentStatus ("Active");
-            }
+//            if (days > 0) {
+//                int abs = Math.abs (days);
+//                if (abs >= 28) {
+//                    LOG.info ("number of miss appointment days {}", abs);
+//                    patientLineListDto.setCurrentStatus ("IIT");
+//                }
+//            } else {
+//                patientLineListDto.setCurrentStatus ("Active");
+//            }
 
         });
     }
@@ -491,7 +494,7 @@ public class PatientReportService {
                 .sorted (Comparator.comparing (ArtPharmacy::getId))
                 .sorted (Comparator.comparing (ArtPharmacy::getVisitDate))
                 .findFirst ();
-        first.ifPresent (firstDevolve -> {
+            first.ifPresent (firstDevolve -> {
             Instant instant = getInstant (firstDevolve.getVisitDate ());
             patientLineListDto.setDateDevolved (Date.from (instant));
         });
