@@ -160,7 +160,6 @@ public class PatientReportService {
 
     private void fillData(Workbook workbook, Sheet sh, Long facilityId) {
         List<PatientLineListDto> data = getPatientLineList (facilityId);
-        LOG.info ("data {}", data);
         CreationHelper creationHelper = workbook.getCreationHelper ();
         CellStyle dateStyle = workbook.createCellStyle ();
         dateStyle.setDataFormat (creationHelper.createDataFormat ().getFormat ("yyyy-MM-dd"));
@@ -421,7 +420,11 @@ public class PatientReportService {
         Long entryPointId = hivEnrollment.getEntryPointId ();
         String careEntryPoint = applicationCodesetService.getApplicationCodeset (entryPointId).getDisplay ();
         Date dateAtRegistration = Date.from (getInstant (hivEnrollment.getDateOfRegistration ()));
-        Date dateConfirmedHivTest = Date.from (getInstant (hivEnrollment.getDateConfirmedHiv ()));
+        LocalDate dateConfirmedHiv = hivEnrollment.getDateConfirmedHiv ();
+        Date dateConfirmedHivTest = null;
+        if(dateConfirmedHiv != null){
+         dateConfirmedHivTest = Date.from (getInstant (dateConfirmedHiv));
+        }
         Optional<ARTClinical> artCommenceOptional = artClinicalRepository.findByPersonAndIsCommencementIsTrueAndArchived (person, 0);
         PatientLineListDto patientLineListDto = PatientLineListDto
                 .builder ()
@@ -483,9 +486,10 @@ public class PatientReportService {
                 .findFirst ();
         currentRefill.ifPresent (currentRefill1 -> {
             Set<Regimen> regimens = currentRefill1.getRegimens ();
+            LocalDate nextAppointment = currentRefill1.getNextAppointment ();
             regimens.forEach (regimen -> {
                 String description = regimen.getRegimenType ().getDescription ();
-                Instant instantNextAppointment = getInstant (currentRefill1.getNextAppointment ());
+                Instant instantNextAppointment = getInstant (nextAppointment);
                 patientLineListDto.setDateOfNextRefill (Date.from (instantNextAppointment));
                 Instant instantVisitDate = getInstant (currentRefill1.getVisitDate ());
                 patientLineListDto.setDateOfLastRefill (Date.from (instantVisitDate));
@@ -500,10 +504,18 @@ public class PatientReportService {
                     patientLineListDto.setCurrentRegimen (regimen.getDescription ());
                 }
             });
+
+            patientLineListDto.setCurrentStatus ("Active");
             LOG.info ("current date {}", currentDate);
-            LOG.info ("next appointment date {}", currentRefill1.getNextAppointment ());
-            long days = ChronoUnit.DAYS.between (currentDate, currentRefill1.getNextAppointment ());
+            LOG.info ("next appointment date {}", nextAppointment);
+            if(nextAppointment.isBefore (currentDate)){
+                ///
+            long days = ChronoUnit.DAYS.between (nextAppointment, currentDate);
+            if(days >=29){
+                patientLineListDto.setCurrentStatus ("IIT");
+            }
             LOG.info ("number of days after appointment {}", days);
+            }
 //            if (days > 0) {
 //                int abs = Math.abs (days);
 //                if (abs >= 28) {
