@@ -96,6 +96,8 @@ const Appointment = (props) => {
     const [showContent, setShowContent] = useState(false)
     const [appointmentReport, setAppointmentReport]= useState([])
     const [facilities, setFacilities] = useState([]);
+    const [tableTitle, setTableTitle]= useState("");
+    const [showNoRecord, setShowNoRecord]= useState(false)
     const [objValues, setObjValues]=useState({       
         facilityId:"", startDate:"", endDate:"", type:""
     })
@@ -109,7 +111,23 @@ const Appointment = (props) => {
               .then(response => {                
                 setLoading(false)
                 setShowContent(true)
+                if(objValues.type==='miss-refill'){
+                    setTableTitle(`Missed Refill Appointment  -  From :${objValues.startDate}  - To: ${objValues.endDate}`)
+                }else if(objValues.type==='miss-clinic'){
+                    setTableTitle(`Missed Clinic Appointment   -  From :${objValues.startDate}  - To: ${objValues.endDate}`)
+                }else if(objValues.type==='clinic-appointment'){
+                    setTableTitle(`Clinic Appointment   -  From :${objValues.startDate}  - To: ${objValues.endDate}`)
+                }else if(objValues.type==='refill-appointment'){
+                    setTableTitle(`Refill Appointment   -  From :${objValues.startDate}  - To: ${objValues.endDate}`)
+                }else{
+                    setTableTitle('')
+                }
                 setAppointmentReport(response.data)
+                if(response.data.length <=0){
+                    setShowNoRecord(true)
+                }else{
+                    setShowNoRecord(false)
+                }
               })
               .catch(error => {
                 setLoading(false)
@@ -247,31 +265,38 @@ const Appointment = (props) => {
                             </Message.Content>
                         </Message>
                     )}
+                    {showNoRecord && (
+                        <Message info>
+                            <Message.Content>
+                            {/* <Message.Header>Just one second</Message.Header> */}
+                            <b>No Record Found</b>
+                            </Message.Content>
+                        </Message>
+                    )}
                     {showContent &&(
                         <MaterialTable
                             icons={tableIcons}
-                            title= {objValues.type}
+                            title= {tableTitle}
                             columns={[
                                 { title: "Name", field: "name" },
                                 { title: "Hospital Num", field: "hospitalNum" },
-                                { title: "patientId", field: "patientId" },
-                                
+                                { title: "Patient Id", field: "patientId" },                                
                                 { title: "DOB", field: "dateBirth" },
                                 { title: "Age", field: "age" },
                                 { title: "phone", field: "phone" },
                                 { title: "Art Start Date", field: "artStartDate" },
-                                { title: "dateOfLastVisit", field: "dateOfLastVisit" },
-                                { title: "dateOfNextVisit", field: "dateOfNextVisit" },
-                                { title: "currentStatus", field: "currentStatus" },
-                                { title: "caseManager", field: "caseManager" },
-                                { title: "facilityName", field: "facilityName" },
+                                { title: "Date Of LastVisit", field: "dateOfLastVisit" },
+                                { title: "Date Of NextVisit", field: "dateOfNextVisit" },
+                                { title: "Current Status", field: "currentStatus" },
+                                { title: "Case Manager", field: "caseManager" },
+                                { title: "Facility Name", field: "facilityName" },
                                 { title: "lga", field: "lga" },
-                                { title: "lgaOfResidence", field: "lgaOfResidence" },
+                                { title: "Lga Of Residence", field: "lgaOfResidence" },
                                 { title: "state", field: "state" },
-                                { title: "stateOfResidence", field: "stateOfResidence" },
+                                { title: "State Of Residence", field: "stateOfResidence" },
 
                             ]}
-                            //isLoading={loading}
+                            isLoading={loading}
                             data={appointmentReport.map((row) => ({
                                 name: row.name,
                                 hospitalNum: row.hospitalNum,
@@ -298,7 +323,7 @@ const Appointment = (props) => {
                                             color: "#fff",
                                         },
                                         searchFieldStyle: {
-                                            width : '100%',
+                                            width : '150%',
                                             margingLeft: '250px',
                                         },
                                         filtering: false,
