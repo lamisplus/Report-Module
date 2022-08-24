@@ -57,6 +57,20 @@ public class PatientReportController {
             @RequestParam("endDate") LocalDate end) {
         return ResponseEntity.ok (appointmentReportService.getMissClinicAppointment (facility, start, end));
     }
+ @GetMapping("/clinic-appointment")
+    public ResponseEntity<List<AppointmentReportDto>> getClinicAppointment(
+            @RequestParam("facilityId") Long facility,
+            @RequestParam("startDate") LocalDate start,
+            @RequestParam("endDate") LocalDate end) {
+        return ResponseEntity.ok (appointmentReportService.getClinicAppointment (facility, start, end));
+    }
+    @GetMapping("/refill-appointment")
+    public ResponseEntity<List<AppointmentReportDto>> getRefillAppointment(
+            @RequestParam("facilityId") Long facility,
+            @RequestParam("startDate") LocalDate start,
+            @RequestParam("endDate") LocalDate end) {
+        return ResponseEntity.ok (appointmentReportService.getRefillAppointment (facility, start, end));
+    }
 
 
     private void setStream(ByteArrayOutputStream baos, HttpServletResponse response) throws IOException {

@@ -405,7 +405,7 @@ public class PatientReportService {
         StringBuilder phone = new StringBuilder ();
         if (contactPoint.hasNonNull ("contactPoint") && contactPoint.get ("contactPoint").isArray ()) {
             JsonNode phoneObject = contactPoint.get ("contactPoint").get (1);
-            String phoneValue = phoneObject.isNull () ? "" : phoneObject.get ("value").asText ();
+            String phoneValue = phoneObject == null ? "" : phoneObject.get ("value").asText ();
             phone.append (phoneValue);
         }
         String firstChar = addressDetails.substring (0, 1).toUpperCase ();
@@ -516,15 +516,6 @@ public class PatientReportService {
             }
             LOG.info ("number of days after appointment {}", days);
             }
-//            if (days > 0) {
-//                int abs = Math.abs (days);
-//                if (abs >= 28) {
-//                    LOG.info ("number of miss appointment days {}", abs);
-//                    patientLineListDto.setCurrentStatus ("IIT");
-//                }
-//            } else {
-//                patientLineListDto.setCurrentStatus ("Active");
-//            }
 
         });
     }

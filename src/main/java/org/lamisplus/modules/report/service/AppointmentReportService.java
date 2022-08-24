@@ -42,24 +42,49 @@ public class AppointmentReportService {
         List<Person> trackPatients = getTrackPatients ();
         return artPharmacyRepository.findAll ()
                 .stream ()
-                .filter (artPharmacy -> isWithinDateRange (start, end, artPharmacy.getVisitDate ()) && artPharmacy.getFacilityId ().equals (facilityId))
+                .filter (artPharmacy -> artPharmacy.getVisitDate () != null && isWithinDateRange (start, end, artPharmacy.getVisitDate ()) && artPharmacy.getFacilityId ().equals (facilityId))
                 .filter (artPharmacy -> artPharmacy.getNextAppointment ().isBefore (LocalDate.now ()))
                 .filter (artPharmacy -> trackPatients.contains (artPharmacy.getPerson ()))
                 .map (this::getAppointmentMetaData)
-                .map (this::convertRefillToAppointMentDto)
+                .map (this::convertAppointmentMetaDataToAppointMentDto)
                 .collect (Collectors.toList ());
     }
+
 
     public List<AppointmentReportDto> getMissClinicAppointment(Long facilityId, LocalDate start, LocalDate end) {
         List<Person> trackPatients = getTrackPatients ();
         return artClinicalRepository.findAll ()
                 .stream ()
-                .filter (clinical -> isWithinDateRange (start, end, clinical.getVisitDate ()) && clinical.getFacilityId ().equals (facilityId))
+                .filter (clinical -> clinical.getVisitDate () != null && isWithinDateRange (start, end, clinical.getVisitDate ()) && clinical.getFacilityId ().equals (facilityId))
                 .filter (artClinical -> artClinical.getIsCommencement () != null && ! artClinical.getIsCommencement ())
                 .filter (clinical -> clinical.getNextAppointment ().isBefore (LocalDate.now ()))
                 .filter (clinical -> trackPatients.contains (clinical.getPerson ()))
                 .map (this::getAppointmentMetaData)
-                .map (this::convertRefillToAppointMentDto)
+                .map (this::convertAppointmentMetaDataToAppointMentDto)
+                .collect (Collectors.toList ());
+    }
+
+    public List<AppointmentReportDto> getRefillAppointment(Long facilityId, LocalDate start, LocalDate end) {
+        List<Person> trackPatients = getTrackPatients ();
+        return artPharmacyRepository.findAll ()
+                .stream ()
+                .filter (artPharmacy -> artPharmacy.getNextAppointment ()!= null && isWithinDateRange (start, end, artPharmacy.getNextAppointment ()) && artPharmacy.getFacilityId ().equals (facilityId))
+               // .filter (artPharmacy -> artPharmacy.getNextAppointment ().isBefore (LocalDate.now ()))
+                .filter (artPharmacy -> trackPatients.contains (artPharmacy.getPerson ()))
+                .map (this::getAppointmentMetaData)
+                .map (this::convertAppointmentMetaDataToAppointMentDto)
+                .collect (Collectors.toList ());
+    }
+    public List<AppointmentReportDto> getClinicAppointment(Long facilityId, LocalDate start, LocalDate end) {
+        List<Person> trackPatients = getTrackPatients ();
+        return artClinicalRepository.findAll ()
+                .stream ()
+                .filter (clinical -> clinical.getNextAppointment () != null && isWithinDateRange (start, end, clinical.getNextAppointment ()) && clinical.getFacilityId ().equals (facilityId))
+                .filter (artClinical -> artClinical.getIsCommencement () != null && ! artClinical.getIsCommencement ())
+                //.filter (clinical -> clinical.getNextAppointment ().isBefore (LocalDate.now ()))
+                .filter (clinical -> trackPatients.contains (clinical.getPerson ()))
+                .map (this::getAppointmentMetaData)
+                .map (this::convertAppointmentMetaDataToAppointMentDto)
                 .collect (Collectors.toList ());
     }
 
@@ -83,7 +108,7 @@ public class AppointmentReportService {
     }
 
 
-    private AppointmentReportDto convertRefillToAppointMentDto(AppointmentMetaData metaData) {
+    private AppointmentReportDto convertAppointmentMetaDataToAppointMentDto(AppointmentMetaData metaData) {
         AppointmentReportDto appointmentReportDto = new AppointmentReportDto ();
         appointmentReportDto.setDateOfLastVisit (metaData.getVisitDate ());
         appointmentReportDto.setDateOfNextVisit (metaData.getNextAppointment ());
@@ -146,8 +171,8 @@ public class AppointmentReportService {
         return appointmentReportDto;
     }
 
-    private boolean isWithinDateRange(LocalDate start, LocalDate end, LocalDate visitDate) {
-        return visitDate.equals (start) || visitDate.equals (end) || (visitDate.isAfter (start) && visitDate.isBefore (end));
+    private boolean isWithinDateRange(LocalDate start, LocalDate end, LocalDate checkDate) {
+        return checkDate.equals (start) || checkDate.equals (end) || (checkDate.isAfter (start) && checkDate.isBefore (end));
     }
 
     @NotNull

@@ -15,7 +15,7 @@ public class AppointmentReportDto {
     private String facilityName;
     private String state;
     private String lga;
-    private String patientId;
+    private Long patientId;
     private String hospitalNum;
     private String uniqueID;
     private String name;
