@@ -3,6 +3,7 @@ package org.lamisplus.modules.report.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnit;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
 import org.lamisplus.modules.hiv.domain.entity.ARTClinical;
@@ -12,6 +13,7 @@ import org.lamisplus.modules.hiv.repositories.ARTClinicalRepository;
 import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
 import org.lamisplus.modules.hiv.repositories.HIVStatusTrackerRepository;
 import org.lamisplus.modules.patient.domain.entity.Person;
+import org.lamisplus.modules.report.domain.AppointmentMetaData;
 import org.lamisplus.modules.report.domain.AppointmentReportDto;
 import org.springframework.stereotype.Service;
 
@@ -33,30 +35,59 @@ public class AppointmentReportService {
 
     private final ARTClinicalRepository artClinicalRepository;
 
-    private  final HIVStatusTrackerRepository hivStatusTrackerRepository;
+    private final HIVStatusTrackerRepository hivStatusTrackerRepository;
 
 
     public List<AppointmentReportDto> getMissRefillAppointment(Long facilityId, LocalDate start, LocalDate end) {
-        List<String> status = Arrays.asList ("Stopped Treatment","Died (Confirmed)");
-        List<Person> trackPatients = hivStatusTrackerRepository.findAll ()
-                .stream ()
-                .filter (hivStatusTracker -> ! (status.contains (hivStatusTracker.getHivStatus ())))
-                .map (HIVStatusTracker::getPerson)
-                .collect (Collectors.toList ());
+        List<Person> trackPatients = getTrackPatients ();
         return artPharmacyRepository.findAll ()
                 .stream ()
-                .filter (artPharmacy -> isRefillWithinDateRange (start, end, artPharmacy) && artPharmacy.getFacilityId ().equals (facilityId))
+                .filter (artPharmacy -> isWithinDateRange (start, end, artPharmacy.getVisitDate ()) && artPharmacy.getFacilityId ().equals (facilityId))
                 .filter (artPharmacy -> artPharmacy.getNextAppointment ().isBefore (LocalDate.now ()))
                 .filter (artPharmacy -> trackPatients.contains (artPharmacy.getPerson ()))
+                .map (this::getAppointmentMetaData)
                 .map (this::convertRefillToAppointMentDto)
                 .collect (Collectors.toList ());
     }
 
-    private AppointmentReportDto convertRefillToAppointMentDto(ArtPharmacy artPharmacy) {
-       AppointmentReportDto appointmentReportDto = new AppointmentReportDto ();
-       appointmentReportDto.setDateOfLastVisit (artPharmacy.getVisitDate ());
-       appointmentReportDto.setDateOfNextVisit (artPharmacy.getNextAppointment ());
-        Long facilityId = artPharmacy.getFacilityId ();
+    public List<AppointmentReportDto> getMissClinicAppointment(Long facilityId, LocalDate start, LocalDate end) {
+        List<Person> trackPatients = getTrackPatients ();
+        return artClinicalRepository.findAll ()
+                .stream ()
+                .filter (clinical -> isWithinDateRange (start, end, clinical.getVisitDate ()) && clinical.getFacilityId ().equals (facilityId))
+                .filter (artClinical -> artClinical.getIsCommencement () != null && ! artClinical.getIsCommencement ())
+                .filter (clinical -> clinical.getNextAppointment ().isBefore (LocalDate.now ()))
+                .filter (clinical -> trackPatients.contains (clinical.getPerson ()))
+                .map (this::getAppointmentMetaData)
+                .map (this::convertRefillToAppointMentDto)
+                .collect (Collectors.toList ());
+    }
+
+
+    private AppointmentMetaData getAppointmentMetaData(ARTClinical artClinical) {
+        return AppointmentMetaData.builder ()
+                .nextAppointment (artClinical.getNextAppointment ())
+                .person (artClinical.getPerson ())
+                .facilityId (artClinical.getFacilityId ())
+                .visitDate (artClinical.getVisitDate ())
+                .build ();
+    }
+
+    private AppointmentMetaData getAppointmentMetaData(ArtPharmacy artClinical) {
+        return AppointmentMetaData.builder ()
+                .nextAppointment (artClinical.getNextAppointment ())
+                .person (artClinical.getPerson ())
+                .facilityId (artClinical.getFacilityId ())
+                .visitDate (artClinical.getVisitDate ())
+                .build ();
+    }
+
+
+    private AppointmentReportDto convertRefillToAppointMentDto(AppointmentMetaData metaData) {
+        AppointmentReportDto appointmentReportDto = new AppointmentReportDto ();
+        appointmentReportDto.setDateOfLastVisit (metaData.getVisitDate ());
+        appointmentReportDto.setDateOfNextVisit (metaData.getNextAppointment ());
+        Long facilityId = metaData.getFacilityId ();
         OrganisationUnit facility = organisationUnitService.getOrganizationUnit (facilityId);
         appointmentReportDto.setFacilityName (facility.getName ());
         Long lgaIdOfTheFacility = facility.getParentOrganisationUnitId ();
@@ -65,7 +96,8 @@ public class AppointmentReportService {
         Long stateId = lgaOrgUnitOfFacility.getParentOrganisationUnitId ();
         OrganisationUnit state = organisationUnitService.getOrganizationUnit (stateId);
         appointmentReportDto.setState (state.getName ());
-        Person person = artPharmacy.getPerson ();
+        Person person = metaData.getPerson ();
+        appointmentReportDto.setPatientId (person.getId ());
         Optional<ARTClinical> artCommenceOptional = artClinicalRepository.findByPersonAndIsCommencementIsTrueAndArchived (person, 0);
         artCommenceOptional.ifPresent (artCommence -> appointmentReportDto.setArtStartDate (artCommence.getVisitDate ()));
         appointmentReportDto.setHospitalNum (person.getHospitalNumber ());
@@ -93,7 +125,6 @@ public class AppointmentReportService {
                     for (JsonNode node : town) {
                         addressDetails.append (" " + node.asText ());
                     }
-                    //
                 }
             }
         }
@@ -115,9 +146,18 @@ public class AppointmentReportService {
         return appointmentReportDto;
     }
 
-    private boolean isRefillWithinDateRange(LocalDate start, LocalDate end, ArtPharmacy artPharmacy) {
-        LocalDate visitDate = artPharmacy.getVisitDate ();
+    private boolean isWithinDateRange(LocalDate start, LocalDate end, LocalDate visitDate) {
         return visitDate.equals (start) || visitDate.equals (end) || (visitDate.isAfter (start) && visitDate.isBefore (end));
+    }
+
+    @NotNull
+    private List<Person> getTrackPatients() {
+        List<String> status = Arrays.asList ("Stopped Treatment", "Died (Confirmed)");
+        return hivStatusTrackerRepository.findAll ()
+                .stream ()
+                .filter (hivStatusTracker -> ! (status.contains (hivStatusTracker.getHivStatus ())))
+                .map (HIVStatusTracker::getPerson)
+                .collect (Collectors.toList ());
     }
 
 

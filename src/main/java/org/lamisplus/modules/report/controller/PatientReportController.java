@@ -50,6 +50,13 @@ public class PatientReportController {
             @RequestParam("endDate") LocalDate end) {
         return ResponseEntity.ok (appointmentReportService.getMissRefillAppointment (facility, start, end));
     }
+    @GetMapping("/miss-clinic")
+    public ResponseEntity<List<AppointmentReportDto>> getMissClinicVisit(
+            @RequestParam("facilityId") Long facility,
+            @RequestParam("startDate") LocalDate start,
+            @RequestParam("endDate") LocalDate end) {
+        return ResponseEntity.ok (appointmentReportService.getMissClinicAppointment (facility, start, end));
+    }
 
 
     private void setStream(ByteArrayOutputStream baos, HttpServletResponse response) throws IOException {
