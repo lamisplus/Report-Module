@@ -22,6 +22,7 @@ import java.time.Period;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,7 +39,7 @@ public class AppointmentReportService {
     private final HIVStatusTrackerRepository hivStatusTrackerRepository;
 
 
-    public List<AppointmentReportDto> getMissRefillAppointment(Long facilityId, LocalDate start, LocalDate end) {
+    public Set<AppointmentReportDto> getMissRefillAppointment(Long facilityId, LocalDate start, LocalDate end) {
         List<Person> trackPatients = getTrackPatients ();
         return artPharmacyRepository.findAll ()
                 .stream ()
@@ -47,11 +48,11 @@ public class AppointmentReportService {
                 .filter (artPharmacy -> trackPatients.contains (artPharmacy.getPerson ()))
                 .map (this::getAppointmentMetaData)
                 .map (this::convertAppointmentMetaDataToAppointMentDto)
-                .collect (Collectors.toList ());
+                .collect (Collectors.toSet ());
     }
 
 
-    public List<AppointmentReportDto> getMissClinicAppointment(Long facilityId, LocalDate start, LocalDate end) {
+    public Set<AppointmentReportDto> getMissClinicAppointment(Long facilityId, LocalDate start, LocalDate end) {
         List<Person> trackPatients = getTrackPatients ();
         return artClinicalRepository.findAll ()
                 .stream ()
@@ -61,10 +62,10 @@ public class AppointmentReportService {
                 .filter (clinical -> trackPatients.contains (clinical.getPerson ()))
                 .map (this::getAppointmentMetaData)
                 .map (this::convertAppointmentMetaDataToAppointMentDto)
-                .collect (Collectors.toList ());
+                .collect (Collectors.toSet ());
     }
 
-    public List<AppointmentReportDto> getRefillAppointment(Long facilityId, LocalDate start, LocalDate end) {
+    public Set<AppointmentReportDto> getRefillAppointment(Long facilityId, LocalDate start, LocalDate end) {
         List<Person> trackPatients = getTrackPatients ();
         return artPharmacyRepository.findAll ()
                 .stream ()
@@ -73,9 +74,9 @@ public class AppointmentReportService {
                 .filter (artPharmacy -> trackPatients.contains (artPharmacy.getPerson ()))
                 .map (this::getAppointmentMetaData)
                 .map (this::convertAppointmentMetaDataToAppointMentDto)
-                .collect (Collectors.toList ());
+                .collect (Collectors.toSet ());
     }
-    public List<AppointmentReportDto> getClinicAppointment(Long facilityId, LocalDate start, LocalDate end) {
+    public Set<AppointmentReportDto> getClinicAppointment(Long facilityId, LocalDate start, LocalDate end) {
         List<Person> trackPatients = getTrackPatients ();
         return artClinicalRepository.findAll ()
                 .stream ()
@@ -85,7 +86,7 @@ public class AppointmentReportService {
                 .filter (clinical -> trackPatients.contains (clinical.getPerson ()))
                 .map (this::getAppointmentMetaData)
                 .map (this::convertAppointmentMetaDataToAppointMentDto)
-                .collect (Collectors.toList ());
+                .collect (Collectors.toSet ());
     }
 
 
@@ -122,11 +123,14 @@ public class AppointmentReportService {
         OrganisationUnit state = organisationUnitService.getOrganizationUnit (stateId);
         appointmentReportDto.setState (state.getName ());
         Person person = metaData.getPerson ();
+        if(person != null){
         appointmentReportDto.setPatientId (person.getId ());
         Optional<ARTClinical> artCommenceOptional = artClinicalRepository.findByPersonAndIsCommencementIsTrueAndArchived (person, 0);
         artCommenceOptional.ifPresent (artCommence -> appointmentReportDto.setArtStartDate (artCommence.getVisitDate ()));
         appointmentReportDto.setHospitalNum (person.getHospitalNumber ());
-        String name = person.getFirstName ().concat (" ").concat (person.getOtherName ());
+            String firstName = person.getFirstName();
+            String otherName = person.getOtherName();
+            String name = firstName+" "+otherName;
         appointmentReportDto.setName (name);
         LocalDate dateBirth = person.getDateOfBirth ();
         LocalDate currentDate = LocalDate.now ();
@@ -168,6 +172,7 @@ public class AppointmentReportService {
         String firstChar = addressDetails.substring (0, 1).toUpperCase ();
         String finalAddress = firstChar + addressDetails.substring (1).toLowerCase ();
         appointmentReportDto.setAddress (finalAddress);
+        }
         return appointmentReportDto;
     }
 

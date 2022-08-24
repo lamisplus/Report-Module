@@ -44,8 +44,8 @@ const Reports = (props) => {
                     
                         <br/>
                         <br/>
-                        <div className="col-md-3">
-                        <Menu  size='large' pointing vertical  style={{backgroundColor:"#014D88"}}>
+                        <div className="col-md-2 col-sm-2 col-lg-2">
+                        <Menu  size='small'  vertical  style={{backgroundColor:"#014D88"}}>
                             <Menu.Item
                                 name='inbox'
                                 active={activeItem === 'radet'}
@@ -137,7 +137,7 @@ const Reports = (props) => {
                             </Menu.Item>
                         </Menu>
                         </div>
-                        <div className="col-md-9 float-start" style={{ backgroundColor:"#fff"}}>
+                        <div className="col-md-10 col-sm-10 col-lg-10" style={{ backgroundColor:"#fff"}}>
                         {activeItem==='line-list' && (<PatientLineList handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}     
                         {activeItem==='appointment' && (<Appointment handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
                         {/* {activeItem==='post-test' && (<PostTest handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}

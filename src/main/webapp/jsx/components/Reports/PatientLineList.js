@@ -8,6 +8,9 @@ import {Card} from "@material-ui/core";
 import {token, url as baseUrl } from "../../../api";
 import 'react-phone-input-2/lib/style.css'
 import { Button} from 'semantic-ui-react'
+import { toast} from "react-toastify";
+import FileSaver from "file-saver";
+import { Message, Icon } from 'semantic-ui-react'
 
 
 const useStyles = makeStyles((theme) => ({
@@ -53,16 +56,43 @@ const useStyles = makeStyles((theme) => ({
 
 const PatientLineList = (props) => {
     const classes = useStyles();
-    const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false)
     const [facilities, setFacilities] = useState([]);
-    const handleItemClick =(page, completedMenu)=>{
-        props.handleItemClick(page)
-        if(props.completed.includes(completedMenu)) {
+    const [objValues, setObjValues]=useState({       
+        organisationUnitId:""
+    })
+    const handleSubmit = (e) => {        
+        e.preventDefault();
+        setLoading(true)
+        axios.post(`${baseUrl}reporting/patient-line-list?facilityId=${objValues.organisationUnitId}`,objValues.organisationUnitId,
+           { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
+          
+          )
+              .then(response => {
+                setLoading(false)
+                const fileName ="Patient Line List"
+                const responseData = response.data
+                let blob = new Blob([responseData], {type: "application/octet-stream"});
+                FileSaver.saveAs(blob, `${fileName}.xlsx`);
+                  //toast.success(" Save successful");
+                  //props.setActiveContent('recent-history')
 
-        }else{
-            props.setCompleted([...props.completed, completedMenu])
-        }
-        
+              })
+              .catch(error => {
+                setLoading(false)
+                if(error.response && error.response.data){
+                    let errorMessage = error.response.data.apierror && error.response.data.apierror.message!=="" ? error.response.data.apierror.message :  "Something went wrong, please try again";
+                    toast.error(errorMessage);
+                  }
+                  else{
+                    toast.error("Something went wrong. Please try again...");
+                  }
+              });
+            
+
+    }
+    const handleInputChange = e => {
+        setObjValues ({...objValues,  [e.target.name]: e.target.value});
     }
     useEffect(() => {
         Facilities()
@@ -74,7 +104,7 @@ const PatientLineList = (props) => {
             { headers: {"Authorization" : `Bearer ${token}`} }
         )
         .then((response) => {
-            console.log(response.data);
+            //console.log(response.data);
             setFacilities(response.data.applicationUserOrganisationUnits);
         })
         .catch((error) => {
@@ -99,9 +129,9 @@ const PatientLineList = (props) => {
                                     <Label>Facility*</Label>
                                     <select
                                         className="form-control"
-                                        name="sex"
-                                        id="sex"
-                                        
+                                        name="organisationUnitId"
+                                        id="organisationUnitId"
+                                        onChange={handleInputChange}
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
                                     >
                                         <option value={""}></option>
@@ -118,11 +148,22 @@ const PatientLineList = (props) => {
                             <br />
                             <div className="row">
                             <div className="form-group mb-3 col-md-6">
-                            <Button content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={()=>handleItemClick('pre-test-counsel','basic')}/>
+                            <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={handleSubmit} disabled={objValues.organisationUnitId==="" ? true : false}/>
                             </div>
                             </div>
+
+                            {loading && (
+                                <Message icon>
+                                    <Icon name='circle notched' loading />
+                                <Message.Content>
+                                <Message.Header>Just one second</Message.Header>
+                                    We are fetching that content for you.
+                                </Message.Content>
+                                </Message>
+                            )}
                         </div>
                     </form>
+
                 </CardBody>
             </Card>                                 
         </>

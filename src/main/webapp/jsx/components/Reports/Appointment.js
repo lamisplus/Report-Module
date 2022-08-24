@@ -8,8 +8,47 @@ import {Card} from "@material-ui/core";
 import {token, url as baseUrl } from "../../../api";
 import 'react-phone-input-2/lib/style.css'
 import { Button} from 'semantic-ui-react'
+import MaterialTable from 'material-table';
+import AddBox from '@material-ui/icons/AddBox';
+import ArrowUpward from '@material-ui/icons/ArrowUpward';
+import Check from '@material-ui/icons/Check';
+import ChevronLeft from '@material-ui/icons/ChevronLeft';
+import ChevronRight from '@material-ui/icons/ChevronRight';
+import Clear from '@material-ui/icons/Clear';
+import DeleteOutline from '@material-ui/icons/DeleteOutline';
+import Edit from '@material-ui/icons/Edit';
+import FilterList from '@material-ui/icons/FilterList';
+import FirstPage from '@material-ui/icons/FirstPage';
+import LastPage from '@material-ui/icons/LastPage';
+import Remove from '@material-ui/icons/Remove';
+import SaveAlt from '@material-ui/icons/SaveAlt';
+import Search from '@material-ui/icons/Search';
+import ViewColumn from '@material-ui/icons/ViewColumn';
+import 'react-toastify/dist/ReactToastify.css';
+import 'react-widgets/dist/css/react-widgets.css';
+import { forwardRef } from 'react';
+import { toast} from "react-toastify";
+import { Message, Icon } from 'semantic-ui-react'
 
-
+const tableIcons = {
+    Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
+    Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
+    Clear: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
+    Delete: forwardRef((props, ref) => <DeleteOutline {...props} ref={ref} />),
+    DetailPanel: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
+    Edit: forwardRef((props, ref) => <Edit {...props} ref={ref} />),
+    Export: forwardRef((props, ref) => <SaveAlt {...props} ref={ref} />),
+    Filter: forwardRef((props, ref) => <FilterList {...props} ref={ref} />),
+    FirstPage: forwardRef((props, ref) => <FirstPage {...props} ref={ref} />),
+    LastPage: forwardRef((props, ref) => <LastPage {...props} ref={ref} />),
+    NextPage: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
+    PreviousPage: forwardRef((props, ref) => <ChevronLeft {...props} ref={ref} />),
+    ResetSearch: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
+    Search: forwardRef((props, ref) => <Search {...props} ref={ref} />),
+    SortArrow: forwardRef((props, ref) => <ArrowUpward {...props} ref={ref} />),
+    ThirdStateCheck: forwardRef((props, ref) => <Remove {...props} ref={ref} />),
+    ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
+    };
 const useStyles = makeStyles((theme) => ({
     card: {
         margin: theme.spacing(20),
@@ -53,16 +92,41 @@ const useStyles = makeStyles((theme) => ({
 
 const Appointment = (props) => {
     const classes = useStyles();
-    const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false)
+    const [showContent, setShowContent] = useState(false)
+    const [appointmentReport, setAppointmentReport]= useState([])
     const [facilities, setFacilities] = useState([]);
-    const handleItemClick =(page, completedMenu)=>{
-        props.handleItemClick(page)
-        if(props.completed.includes(completedMenu)) {
+    const [objValues, setObjValues]=useState({       
+        facilityId:"", startDate:"", endDate:"", type:""
+    })
+    const handleSubmit = (e) => {        
+        e.preventDefault();
+        setLoading(true)
+        axios.get(`${baseUrl}reporting/${objValues.type}?facilityId=${objValues.facilityId}&startDate=${objValues.startDate}&endDate=${objValues.endDate} `,
+           { headers: {"Authorization" : `Bearer ${token}`}},
+          
+          )
+              .then(response => {                
+                setLoading(false)
+                setShowContent(true)
+                setAppointmentReport(response.data)
+              })
+              .catch(error => {
+                setLoading(false)
+                setShowContent(false)
+                if(error.response && error.response.data){
+                    let errorMessage = error.response.data.apierror && error.response.data.apierror.message!=="" ? error.response.data.apierror.message :  "Something went wrong, please try again";
+                    toast.error(errorMessage);
+                  }
+                  else{
+                    toast.error("Something went wrong. Please try again...");
+                  }
+              });
+            
 
-        }else{
-            props.setCompleted([...props.completed, completedMenu])
-        }
-        
+    }
+    const handleInputChange = e => {
+        setObjValues ({...objValues,  [e.target.name]: e.target.value});
     }
     useEffect(() => {
         Facilities()
@@ -74,7 +138,6 @@ const Appointment = (props) => {
             { headers: {"Authorization" : `Bearer ${token}`} }
         )
         .then((response) => {
-            console.log(response.data);
             setFacilities(response.data.applicationUserOrganisationUnits);
         })
         .catch((error) => {
@@ -97,34 +160,29 @@ const Appointment = (props) => {
                             <div className="form-group  col-md-6">
                                 <FormGroup>
                                     <Label>Start Date*</Label>
-                                    <select
+                                    <input
+                                        type="date"
                                         className="form-control"
-                                        name="sex"
-                                        id="sex"
-                                        
+                                        name="startDate"
+                                        id="startDate"
+                                        onChange={handleInputChange}
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
-                                    >
-                                        <option value={""}></option>
-                                        <option value={""}>Patient Data</option>
-                                        
-                                    </select>
+                                    />
                                     
                                 </FormGroup>
                             </div>
                             <div className="form-group  col-md-6">
                                 <FormGroup>
                                     <Label>End Date*</Label>
-                                    <select
+                                    <input
+                                        type="date"
                                         className="form-control"
-                                        name="sex"
-                                        id="sex"
-                                        
+                                        name="endDate"
+                                        id="endDate"
+                                        onChange={handleInputChange}
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
-                                    >
-                                        <option value={""}></option>
-                                        <option value={""}>Patient Data</option>
-                                        
-                                    </select>
+                                    />
+                                     
                                     
                                 </FormGroup>
                             </div>
@@ -133,9 +191,9 @@ const Appointment = (props) => {
                                     <Label>Facility*</Label>
                                     <select
                                         className="form-control"
-                                        name="sex"
-                                        id="sex"
-                                        
+                                        name="facilityId"
+                                        id="facilityId"
+                                        onChange={handleInputChange}
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
                                     >
                                         <option value={""}></option>
@@ -153,13 +211,16 @@ const Appointment = (props) => {
                                     <Label>Type*</Label>
                                     <select
                                         className="form-control"
-                                        name="sex"
-                                        id="sex"
-                                        
+                                        name="type"
+                                        id="type"
+                                        onChange={handleInputChange}
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
                                     >
                                         <option value={""}></option>
-                                        <option value={""}>Patient Line </option>
+                                        <option value="miss-refill">Missed Refill Appointment</option>
+                                        <option value="miss-clinic">Missed Clinic Appointment </option>
+                                        <option value="clinic-appointment">Scheduled Clinic Visit(Clinic Appointment)</option>
+                                        <option value="refill-appointment">Scheduled Refill Visit(Refill Appointment)</option>
                                         
                                     </select>
                                     
@@ -168,11 +229,87 @@ const Appointment = (props) => {
                             <br />
                             <div className="row">
                             <div className="form-group mb-3 col-md-6">
-                            <Button content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={()=>handleItemClick('pre-test-counsel','basic')}/>
+                            <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={handleSubmit}
+                                disabled={objValues.facilityId==="" || objValues.startDate==="" || objValues.endDate===""  || objValues.type==="" ? true : false}
+                            />
                             </div>
                             </div>
                         </div>
                     </form>
+
+                    <br/>
+                    {loading && (
+                        <Message icon>
+                            <Icon name='circle notched' loading />
+                            <Message.Content>
+                            <Message.Header>Just one second</Message.Header>
+                            We are fetching that content for you.
+                            </Message.Content>
+                        </Message>
+                    )}
+                    {showContent &&(
+                        <MaterialTable
+                            icons={tableIcons}
+                            title= {objValues.type}
+                            columns={[
+                                { title: "Name", field: "name" },
+                                { title: "Hospital Num", field: "hospitalNum" },
+                                { title: "patientId", field: "patientId" },
+                                
+                                { title: "DOB", field: "dateBirth" },
+                                { title: "Age", field: "age" },
+                                { title: "phone", field: "phone" },
+                                { title: "Art Start Date", field: "artStartDate" },
+                                { title: "dateOfLastVisit", field: "dateOfLastVisit" },
+                                { title: "dateOfNextVisit", field: "dateOfNextVisit" },
+                                { title: "currentStatus", field: "currentStatus" },
+                                { title: "caseManager", field: "caseManager" },
+                                { title: "facilityName", field: "facilityName" },
+                                { title: "lga", field: "lga" },
+                                { title: "lgaOfResidence", field: "lgaOfResidence" },
+                                { title: "state", field: "state" },
+                                { title: "stateOfResidence", field: "stateOfResidence" },
+
+                            ]}
+                            //isLoading={loading}
+                            data={appointmentReport.map((row) => ({
+                                name: row.name,
+                                hospitalNum: row.hospitalNum,
+                                patientId:row.patientId,
+                                dateBirth: row.dateBirth,
+                                age: row.age,
+                                phone: row.phone,
+                                artStartDate: row.artStartDate,
+                                dateOfLastVisit: row.dateOfLastVisit,
+                                dateOfNextVisit:row.dateOfNextVisit,
+                                currentStatus: row.currentStatus,
+                                caseManager: row.caseManager,
+                                facilityName: row.facilityName,
+                                lga:row.lga,
+                                lgaOfResidence: row.lgaOfResidence,
+                                state: row.state,
+                                stateOfResidence:row.stateOfResidence,
+                                
+                                }))}
+                            
+                                        options={{
+                                        headerStyle: {
+                                            backgroundColor: "#014d88",
+                                            color: "#fff",
+                                        },
+                                        searchFieldStyle: {
+                                            width : '100%',
+                                            margingLeft: '250px',
+                                        },
+                                        filtering: false,
+                                        exportButton: true,
+                                        searchFieldAlignment: 'left',
+                                        pageSizeOptions:[10,20,100, 500,1000,2000,3000],
+                                        pageSize:10,
+                                        debounceInterval: 400
+                            }}
+                        />
+                    )}
                 </CardBody>
             </Card>                                 
         </>

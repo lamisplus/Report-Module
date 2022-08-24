@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -44,28 +45,28 @@ public class PatientReportController {
     }
 
     @GetMapping("/miss-refill")
-    public ResponseEntity<List<AppointmentReportDto>> patientLineList(
+    public ResponseEntity<Set<AppointmentReportDto>> patientLineList(
             @RequestParam("facilityId") Long facility,
             @RequestParam("startDate") LocalDate start,
             @RequestParam("endDate") LocalDate end) {
         return ResponseEntity.ok (appointmentReportService.getMissRefillAppointment (facility, start, end));
     }
     @GetMapping("/miss-clinic")
-    public ResponseEntity<List<AppointmentReportDto>> getMissClinicVisit(
+    public ResponseEntity<Set<AppointmentReportDto>> getMissClinicVisit(
             @RequestParam("facilityId") Long facility,
             @RequestParam("startDate") LocalDate start,
             @RequestParam("endDate") LocalDate end) {
         return ResponseEntity.ok (appointmentReportService.getMissClinicAppointment (facility, start, end));
     }
  @GetMapping("/clinic-appointment")
-    public ResponseEntity<List<AppointmentReportDto>> getClinicAppointment(
+    public ResponseEntity<Set<AppointmentReportDto>> getClinicAppointment(
             @RequestParam("facilityId") Long facility,
             @RequestParam("startDate") LocalDate start,
             @RequestParam("endDate") LocalDate end) {
         return ResponseEntity.ok (appointmentReportService.getClinicAppointment (facility, start, end));
     }
     @GetMapping("/refill-appointment")
-    public ResponseEntity<List<AppointmentReportDto>> getRefillAppointment(
+    public ResponseEntity<Set<AppointmentReportDto>> getRefillAppointment(
             @RequestParam("facilityId") Long facility,
             @RequestParam("startDate") LocalDate start,
             @RequestParam("endDate") LocalDate end) {
