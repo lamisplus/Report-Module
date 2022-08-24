@@ -323,7 +323,7 @@ const Appointment = (props) => {
                                             color: "#fff",
                                         },
                                         searchFieldStyle: {
-                                            width : '150%',
+                                            width : '100%',
                                             margingLeft: '250px',
                                         },
                                         filtering: false,
