@@ -6,6 +6,7 @@ import org.lamisplus.modules.report.domain.AppointmentReportDto;
 import org.lamisplus.modules.report.domain.PatientLineListDto;
 import org.lamisplus.modules.report.service.AppointmentReportService;
 import org.lamisplus.modules.report.service.PatientReportService;
+import org.lamisplus.modules.report.service.RadetService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,8 @@ public class PatientReportController {
 
     private final AppointmentReportService appointmentReportService;
 
+    private  final RadetService radetService;
+
 
     @PostMapping("/patient-line-list")
     public void patientLineList(HttpServletResponse response, @RequestParam("facilityId") Long facility) throws IOException {
@@ -38,7 +41,17 @@ public class PatientReportController {
         setStream (baos, response);
         messagingTemplate.convertAndSend ("/topic/patient-line-list/status", "end");
     }
-
+    @GetMapping("/radet")
+    public void  getRadet(
+            HttpServletResponse response,
+            @RequestParam("facilityId") Long facility,
+            @RequestParam("startDate") LocalDate start,
+            @RequestParam("endDate") LocalDate end) throws IOException {
+        messagingTemplate.convertAndSend ("/topic/radet", "start");
+        ByteArrayOutputStream baos = radetService.generateRadet (facility, start, end);
+        setStream (baos, response);
+        messagingTemplate.convertAndSend ("/topic/radet", "end");
+    }
     @GetMapping("/patient-line-list")
     public ResponseEntity<List<PatientLineListDto>> patientLineList(@RequestParam("facilityId") Long facility) {
         return ResponseEntity.ok (patientReportService.getPatientData (facility));
