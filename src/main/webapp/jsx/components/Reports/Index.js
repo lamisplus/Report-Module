@@ -9,7 +9,7 @@ import { Icon, Menu } from 'semantic-ui-react'
 import 'semantic-ui-css/semantic.min.css';
 import PatientLineList from './PatientLineList';
 import Appointment from './Appointment'
-
+import Radet from './Radet'
 
 const useStyles = makeStyles((theme) => ({
 
@@ -52,7 +52,7 @@ const Reports = (props) => {
                                 onClick={()=>handleItemClick('radet')}
                                 style={{backgroundColor:activeItem === 'radet' ? '#000': ""}}
                             >               
-                                <span style={{color:'#fff'}}> RADET CONVERTER</span>
+                                <span style={{color:'#fff'}}> RADET REPORT</span>
                                 
                             </Menu.Item>
                             <Menu.Item
@@ -140,8 +140,8 @@ const Reports = (props) => {
                         <div className="col-md-9 col-sm-9 col-lg-9 float-start" style={{ backgroundColor:"#fff"}}>
                         {activeItem==='line-list' && (<PatientLineList handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}     
                         {activeItem==='appointment' && (<Appointment handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
-                        {/* {activeItem==='post-test' && (<PostTest handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
-                        {activeItem==='indexing' && (<IndexingContactTracing handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
+                        {activeItem==='radet' && (<Radet handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}     
+                       {/* {activeItem==='indexing' && (<IndexingContactTracing handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
                         {activeItem==='recency-testing' && (<RecencyTesting  handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
                         {activeItem==='others' && (<Others handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)} */}
                             
