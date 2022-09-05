@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.audit4j.core.util.Log;
 import org.jetbrains.annotations.NotNull;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnit;
 import org.lamisplus.modules.base.service.ApplicationCodesetService;
@@ -22,6 +23,7 @@ import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -46,7 +48,7 @@ public class RadetService {
 
     public ByteArrayOutputStream generateRadet(Long facilityId, LocalDate start, LocalDate end) {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); Workbook workbook = new XSSFWorkbook()) {
-            Sheet sh = workbook.createSheet("Patient-line-list");
+            Sheet sh = workbook.createSheet("radet");
             List<String> columnHeadings = getRadetColumnHeadings();
             Font headerFont = getFont(workbook);
             CellStyle headerStyle = getCellStyle(workbook, headerFont);
@@ -54,8 +56,8 @@ public class RadetService {
             createHeader(columnHeadings, headerStyle, headerRow);
             fillData(workbook, sh, facilityId, start, end);
             workbook.write(baos);
-            FileOutputStream fileOut = new FileOutputStream ("runtime/radet.xlsx");
-            workbook.write (fileOut);
+            FileOutputStream fileOut = new FileOutputStream("runtime/radet.xlsx");
+            workbook.write(fileOut);
             LOG.info("Completed {}", "Completed");
             return baos;
         } catch (Exception e) {
@@ -69,24 +71,31 @@ public class RadetService {
                 .stream()
                 .map(ArtPharmacy::getPerson)
                 .collect(Collectors.toSet());
-        Set<RadetDto> radetData = artPharmacyRepository.findAll()
+        Log.info("patient size: {}", radetPatients.size());
+        Set<RadetDto> radetData = getRadetDtos(facilityId, start, end, radetPatients);
+        Log.info("radetData{}", radetData);
+        int rowNum = 1;
+        LOG.info("rowNum-before {}", rowNum);
+        Row row = sh.createRow(rowNum++);
+        LOG.info("rowNum-after{}", rowNum);
+        DateFormat dateFormatExcel = new SimpleDateFormat("yyyy-MM-dd");
+        for (RadetDto radetData1 : radetData) {
+            populateDemographicColunms(radetData1, row, rowNum, dateFormatExcel);
+        }
+
+
+    }
+
+    @NotNull
+    private Set<RadetDto> getRadetDtos(Long facilityId, LocalDate start, LocalDate end, Set<Person> radetPatients) {
+        return artPharmacyRepository.findAll()
                 .stream()
-                .filter(artPharmacy -> radetPatients.contains(radetPatients))
+                .filter(artPharmacy -> radetPatients.contains(artPharmacy.getPerson()))
                 .filter(artPharmacy -> artPharmacy.getVisitDate().equals(start)
                         || artPharmacy.getVisitDate().equals(end)
-                        && (artPharmacy.getVisitDate().isAfter(start) && artPharmacy.getVisitDate().isBefore(end)))
+                        || (artPharmacy.getVisitDate().isAfter(start) && artPharmacy.getVisitDate().isBefore(end)))
                 .map(artPharmacy -> getRadetDto(facilityId, artPharmacy))
                 .collect(Collectors.toSet());
-        radetData.forEach(radetData1 -> {
-            int rowNum = 1;
-            LOG.info("rowNum-before {}", rowNum);
-            Row row = sh.createRow(rowNum++);
-            LOG.info("rowNum-after{}", rowNum);
-            DateFormat dateFormatExcel = new SimpleDateFormat("yyyy-MM-dd");
-            populateDemographicColunms(radetData1, row, dateFormatExcel);
-        });
-
-
     }
 
     private RadetDto getRadetDto(Long facilityId, ArtPharmacy artPharmacy) {
@@ -101,27 +110,26 @@ public class RadetService {
         radetDto.setLga(lgaOrgUnitOfFacility.getName());
         radetDto.setFacilityName(facilityName);
         Person person = artPharmacy.getPerson();
+        int years = Period.between(person.getDateOfBirth(), LocalDate.now()).getYears();
         radetDto.setPatientId(person.getUuid());
         radetDto.setHospitalNum(person.getHospitalNumber());
         radetDto.setDateBirth(Date.valueOf(person.getDateOfBirth()));
-        radetDto.setAge(1);
+        radetDto.setAge(years);
         radetDto.setSex(person.getSex());
         return radetDto;
-
-
     }
 
 
-    private static void populateDemographicColunms(RadetDto datum, Row row, DateFormat dateFormatExcel) {
-        row.createCell(1).setCellValue(datum.getFacilityName());
+    private static void populateDemographicColunms(RadetDto datum, Row row, int column, DateFormat dateFormatExcel) {
+        row.createCell(0).setCellValue(column);
+        row.createCell(1).setCellValue(datum.getState());
         row.createCell(2).setCellValue(datum.getLga());
-        row.createCell(3).setCellValue(datum.getState());
+        row.createCell(3).setCellValue(datum.getFacilityName());
         row.createCell(4).setCellValue(datum.getPatientId());
         row.createCell(5).setCellValue(datum.getHospitalNum());
-        row.createCell(6).setCellValue(datum.getUniqueID());
-        row.createCell(9).setCellValue(dateFormatExcel.format(datum.getDateBirth()));
-        row.createCell(10).setCellValue(datum.getAge());
-        row.createCell(11).setCellValue(datum.getSex());
+        row.createCell(6).setCellValue(dateFormatExcel.format(datum.getDateBirth()));
+        row.createCell(7).setCellValue(datum.getAge());
+        row.createCell(8).setCellValue(datum.getSex());
     }
 
 
