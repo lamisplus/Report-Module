@@ -3,7 +3,7 @@ name: ReportModule
 dependencies: {PatientModule: 1.0.0, TriageModule: 1.0.0, HivModule: 1.0.0 }
 store: true
 menus:
-  - icon:
+  - icon: fa-sharp fa-solid fa-file-chart-column
     disabled: false
     name: Report
     state: report

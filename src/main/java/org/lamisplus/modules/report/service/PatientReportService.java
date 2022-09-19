@@ -493,7 +493,7 @@ public class PatientReportService {
     private void processAndSetCurrentVitalSignInfo(Person person, PatientLineListDto patientLineListDto) {
         List<VitalSign> vitalSigns = vitalSignRepository.getVitalSignByPersonAndArchived(person, 0);
         Optional<VitalSign> currentVitalSign = vitalSigns.stream()
-                .sorted(Comparator.comparing(VitalSign::getEncounterDate))
+                .sorted(Comparator.comparing(VitalSign::getCaptureDate))
                 .sorted(Comparator.comparing(VitalSign::getId).reversed())
                 .findFirst();
         currentVitalSign.ifPresent(vitalSign -> {

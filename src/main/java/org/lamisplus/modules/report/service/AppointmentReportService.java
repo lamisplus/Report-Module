@@ -172,7 +172,7 @@ public class AppointmentReportService {
             StringBuilder phone = new StringBuilder();
             if (contactPoint.hasNonNull("contactPoint") && contactPoint.get("contactPoint").isArray()) {
                 JsonNode phoneObject = contactPoint.get("contactPoint").get(1);
-                String phoneValue = phoneObject.isNull() ? "" : phoneObject.get("value").asText();
+                String phoneValue = phoneObject == null ? "" : phoneObject.get("value").asText();
                 phone.append(phoneValue);
             }
             appointmentReportDto.setPhone(phone.toString());
