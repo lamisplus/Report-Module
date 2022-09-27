@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.LocalDate;
 
-import java.util.Date;
 
 @Data
 @Builder
@@ -21,7 +21,7 @@ public class PatientLineListDto {
     private String uniqueID;
     private String surname;
     private String otherName;
-    private Date dateBirth;
+    private LocalDate dateBirth;
     private Integer age;
     private String sex;
     private String maritalStatus;
@@ -34,12 +34,12 @@ public class PatientLineListDto {
     private Boolean archived;
 
     private String careEntryPoint;
-    private Date dateOfConfirmedHIVTest;
-    private Date dateOfRegistration;
+    private LocalDate dateOfConfirmedHIVTest;
+    private LocalDate dateOfRegistration;
     private String statusAtRegistration;
     private String currentStatus;
-    private Date dateCurrentStatus;
-    private Date artStartDate;
+    private LocalDate dateCurrentStatus;
+    private LocalDate artStartDate;
     private Double baselineCD4;
     private Double baselineCDP;
     private Double baselineWeight;
@@ -56,14 +56,14 @@ public class PatientLineListDto {
     private String firstRegimen;
     private String currentRegimenLine;
     private String currentRegimen;
-    private Date dateOfLastRefill;
+    private LocalDate dateOfLastRefill;
     private Integer lastRefillDuration;
-    private Date dateOfNextRefill;
-    private Date  dateDevolved;
+    private LocalDate dateOfNextRefill;
+    private LocalDate  dateDevolved;
     private String dmocType;
     private String lastClinicStage;
-    private Date  dateOfLastClinic;
-    private Date  dateOfNextClinic;
+    private LocalDate  dateOfLastClinic;
+    private LocalDate  dateOfNextClinic;
 
 //            "Adherence",
 //            "Waist Circumference(cm)",

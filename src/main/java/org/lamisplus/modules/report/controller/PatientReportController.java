@@ -4,13 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.report.domain.AppointmentReportDto;
 import org.lamisplus.modules.report.domain.PatientLineListDto;
-import org.lamisplus.modules.report.service.AppointmentReportService;
-import org.lamisplus.modules.report.service.PatientReportService;
-import org.lamisplus.modules.report.service.RadetService;
+import org.lamisplus.modules.report.service.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -32,15 +31,27 @@ public class PatientReportController {
     private final AppointmentReportService appointmentReportService;
 
     private  final RadetService radetService;
+    
+    private final GenerateExcelService generateExcelService;
 
 
     @PostMapping("/patient-line-list")
     public void patientLineList(HttpServletResponse response, @RequestParam("facilityId") Long facility) throws IOException {
         messagingTemplate.convertAndSend ("/topic/patient-line-list/status", "start");
-        ByteArrayOutputStream baos = patientReportService.generatePatientLineList (facility);
+        ByteArrayOutputStream baos = generateExcelService.generatePatientLine (response, facility);
         setStream (baos, response);
         messagingTemplate.convertAndSend ("/topic/patient-line-list/status", "end");
     }
+    @GetMapping("/patient-line-list/{facilityId}")
+    public void   patientLineList1(HttpServletResponse response, @PathVariable("facilityId") Long facility) {
+        String facilityName = generateExcelService.getFacilityName(facility);
+        response.setContentType("application/octet-stream");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=radet_" + facilityName + Constants.EXCEL_EXTENSION_XLSX;
+        response.setHeader(headerKey, headerValue);
+        generateExcelService.generatePatientLine(response,facility);
+    }
+    
     @GetMapping("/radet")
     public void  getRadet(
             HttpServletResponse response,
