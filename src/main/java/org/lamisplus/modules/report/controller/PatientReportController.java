@@ -23,87 +23,92 @@ import java.util.Set;
 @RequestMapping("/api/v1/reporting")
 @RequiredArgsConstructor
 public class PatientReportController {
-
-    private final SimpMessageSendingOperations messagingTemplate;
-
-    private final PatientReportService patientReportService;
-
-    private final AppointmentReportService appointmentReportService;
-
-    private  final RadetService radetService;
-    
-    private final GenerateExcelService generateExcelService;
-
-
-    @PostMapping("/patient-line-list")
-    public void patientLineList(HttpServletResponse response, @RequestParam("facilityId") Long facility) throws IOException {
-        messagingTemplate.convertAndSend ("/topic/patient-line-list/status", "start");
-        ByteArrayOutputStream baos = generateExcelService.generatePatientLine (response, facility);
-        setStream (baos, response);
-        messagingTemplate.convertAndSend ("/topic/patient-line-list/status", "end");
-    }
-    @GetMapping("/patient-line-list/{facilityId}")
-    public void   patientLineList1(HttpServletResponse response, @PathVariable("facilityId") Long facility) {
-        String facilityName = generateExcelService.getFacilityName(facility);
-        response.setContentType("application/octet-stream");
-        String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=radet_" + facilityName + Constants.EXCEL_EXTENSION_XLSX;
-        response.setHeader(headerKey, headerValue);
-        generateExcelService.generatePatientLine(response,facility);
-    }
-    
-    @GetMapping("/radet")
-    public void  getRadet(
-            HttpServletResponse response,
-            @RequestParam("facilityId") Long facility,
-            @RequestParam("startDate") LocalDate start,
-            @RequestParam("endDate") LocalDate end) throws IOException {
-        messagingTemplate.convertAndSend ("/topic/radet", "start");
-        ByteArrayOutputStream baos = radetService.generateRadet (facility, start, end);
-        setStream (baos, response);
-        messagingTemplate.convertAndSend ("/topic/radet", "end");
-    }
-    @GetMapping("/patient-line-list")
-    public ResponseEntity<List<PatientLineListDto>> patientLineList(@RequestParam("facilityId") Long facility) {
-        return ResponseEntity.ok (patientReportService.getPatientData (facility));
-    }
-
-    @GetMapping("/miss-refill")
-    public ResponseEntity<Set<AppointmentReportDto>> patientLineList(
-            @RequestParam("facilityId") Long facility,
-            @RequestParam("startDate") LocalDate start,
-            @RequestParam("endDate") LocalDate end) {
-        return ResponseEntity.ok (appointmentReportService.getMissRefillAppointment (facility, start, end));
-    }
-    @GetMapping("/miss-clinic")
-    public ResponseEntity<Set<AppointmentReportDto>> getMissClinicVisit(
-            @RequestParam("facilityId") Long facility,
-            @RequestParam("startDate") LocalDate start,
-            @RequestParam("endDate") LocalDate end) {
-        return ResponseEntity.ok (appointmentReportService.getMissClinicAppointment (facility, start, end));
-    }
- @GetMapping("/clinic-appointment")
-    public ResponseEntity<Set<AppointmentReportDto>> getClinicAppointment(
-            @RequestParam("facilityId") Long facility,
-            @RequestParam("startDate") LocalDate start,
-            @RequestParam("endDate") LocalDate end) {
-        return ResponseEntity.ok (appointmentReportService.getClinicAppointment (facility, start, end));
-    }
-    @GetMapping("/refill-appointment")
-    public ResponseEntity<Set<AppointmentReportDto>> getRefillAppointment(
-            @RequestParam("facilityId") Long facility,
-            @RequestParam("startDate") LocalDate start,
-            @RequestParam("endDate") LocalDate end) {
-        return ResponseEntity.ok (appointmentReportService.getRefillAppointment (facility, start, end));
-    }
-
-
-    private void setStream(ByteArrayOutputStream baos, HttpServletResponse response) throws IOException {
-        response.setHeader ("Content-Type", "application/octet-stream");
-        response.setHeader ("Content-Length", Integer.toString (baos.size ()));
-        OutputStream outputStream = response.getOutputStream ();
-        outputStream.write (baos.toByteArray ());
-        outputStream.close ();
-        response.flushBuffer ();
-    }
+	
+	private final SimpMessageSendingOperations messagingTemplate;
+	
+	private final PatientReportService patientReportService;
+	
+	private final AppointmentReportService appointmentReportService;
+	
+	private final RadetService radetService;
+	
+	private final GenerateExcelService generateExcelService;
+	
+	
+	@PostMapping("/patient-line-list")
+	public void patientLineList(HttpServletResponse response, @RequestParam("facilityId") Long facility) throws IOException {
+		messagingTemplate.convertAndSend("/topic/patient-line-list/status", "start");
+		ByteArrayOutputStream baos = generateExcelService.generatePatientLine(response, facility);
+		setStream(baos, response);
+		messagingTemplate.convertAndSend("/topic/patient-line-list/status", "end");
+	}
+	
+	@GetMapping("/patient-line-list/{facilityId}")
+	public void patientLineList1(HttpServletResponse response, @PathVariable("facilityId") Long facility) {
+		String facilityName = generateExcelService.getFacilityName(facility);
+		response.setContentType("application/octet-stream");
+		String headerKey = "Content-Disposition";
+		String headerValue = "attachment; filename=radet_" + facilityName + Constants.EXCEL_EXTENSION_XLSX;
+		response.setHeader(headerKey, headerValue);
+		generateExcelService.generatePatientLine(response, facility);
+	}
+	
+	@GetMapping("/radet")
+	public void getRadet(
+			HttpServletResponse response,
+			@RequestParam("facilityId") Long facility,
+			@RequestParam("startDate") LocalDate start,
+			@RequestParam("endDate") LocalDate end) throws IOException {
+		messagingTemplate.convertAndSend("/topic/radet", "start");
+		ByteArrayOutputStream baos = generateExcelService.generateRadet(facility, start, end);
+		setStream(baos, response);
+		messagingTemplate.convertAndSend("/topic/radet", "end");
+	}
+	
+	@GetMapping("/patient-line-list")
+	public ResponseEntity<List<PatientLineListDto>> patientLineList(@RequestParam("facilityId") Long facility) {
+		return ResponseEntity.ok(patientReportService.getPatientData(facility));
+	}
+	
+	@GetMapping("/miss-refill")
+	public ResponseEntity<Set<AppointmentReportDto>> patientLineList(
+			@RequestParam("facilityId") Long facility,
+			@RequestParam("startDate") LocalDate start,
+			@RequestParam("endDate") LocalDate end) {
+		return ResponseEntity.ok(appointmentReportService.getMissRefillAppointment(facility, start, end));
+	}
+	
+	@GetMapping("/miss-clinic")
+	public ResponseEntity<Set<AppointmentReportDto>> getMissClinicVisit(
+			@RequestParam("facilityId") Long facility,
+			@RequestParam("startDate") LocalDate start,
+			@RequestParam("endDate") LocalDate end) {
+		return ResponseEntity.ok(appointmentReportService.getMissClinicAppointment(facility, start, end));
+	}
+	
+	@GetMapping("/clinic-appointment")
+	public ResponseEntity<Set<AppointmentReportDto>> getClinicAppointment(
+			@RequestParam("facilityId") Long facility,
+			@RequestParam("startDate") LocalDate start,
+			@RequestParam("endDate") LocalDate end) {
+		return ResponseEntity.ok(appointmentReportService.getClinicAppointment(facility, start, end));
+	}
+	
+	@GetMapping("/refill-appointment")
+	public ResponseEntity<Set<AppointmentReportDto>> getRefillAppointment(
+			@RequestParam("facilityId") Long facility,
+			@RequestParam("startDate") LocalDate start,
+			@RequestParam("endDate") LocalDate end) {
+		return ResponseEntity.ok(appointmentReportService.getRefillAppointment(facility, start, end));
+	}
+	
+	
+	private void setStream(ByteArrayOutputStream baos, HttpServletResponse response) throws IOException {
+		response.setHeader("Content-Type", "application/octet-stream");
+		response.setHeader("Content-Length", Integer.toString(baos.size()));
+		OutputStream outputStream = response.getOutputStream();
+		outputStream.write(baos.toByteArray());
+		outputStream.close();
+		response.flushBuffer();
+	}
 }

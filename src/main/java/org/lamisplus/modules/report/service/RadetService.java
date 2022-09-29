@@ -2,201 +2,246 @@ package org.lamisplus.modules.report.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.audit4j.core.util.Log;
 import org.jetbrains.annotations.NotNull;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnit;
+import org.lamisplus.modules.base.module.ModuleService;
 import org.lamisplus.modules.base.service.ApplicationCodesetService;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
-import org.lamisplus.modules.hiv.domain.entity.ArtPharmacy;
-import org.lamisplus.modules.hiv.repositories.ARTClinicalRepository;
-import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
+import org.lamisplus.modules.hiv.domain.dto.BiometricRadetDto;
+import org.lamisplus.modules.hiv.domain.dto.ViralLoadRadetDto;
+import org.lamisplus.modules.hiv.domain.entity.*;
+import org.lamisplus.modules.hiv.repositories.*;
 import org.lamisplus.modules.patient.domain.entity.Person;
+import org.lamisplus.modules.patient.repository.VisitRepository;
+import org.lamisplus.modules.report.domain.PatientLineListDto;
 import org.lamisplus.modules.report.domain.RadetDto;
+import org.lamisplus.modules.triage.domain.entity.VitalSign;
 import org.lamisplus.modules.triage.repository.VitalSignRepository;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.sql.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static org.lamisplus.modules.report.service.ExcellUtil.*;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class RadetService {
-
-    private final ArtPharmacyRepository artPharmacyRepository;
-
-    private final OrganisationUnitService organisationUnitService;
-
-    private final ApplicationCodesetService applicationCodesetService;
-
-    private final ARTClinicalRepository artClinicalRepository;
-
-    private final VitalSignRepository vitalSignRepository;
-
-    public ByteArrayOutputStream generateRadet(Long facilityId, LocalDate start, LocalDate end) {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); Workbook workbook = new XSSFWorkbook()) {
-            Sheet sh = workbook.createSheet("radet");
-            List<String> columnHeadings = getRadetColumnHeadings();
-            Font headerFont = getFont(workbook);
-            CellStyle headerStyle = getCellStyle(workbook, headerFont);
-            Row headerRow = sh.createRow(0);
-            createHeader(columnHeadings, headerStyle, headerRow);
-            fillData(workbook, sh, facilityId, start, end);
-            workbook.write(baos);
-            FileOutputStream fileOut = new FileOutputStream("runtime/radet.xlsx");
-            workbook.write(fileOut);
-            LOG.info("Completed {}", "Completed");
-            return baos;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private void fillData(Workbook workbook, Sheet sh, Long facilityId, LocalDate start, LocalDate end) {
-        Set<Person> radetPatients = artPharmacyRepository.findAll()
-                .stream()
-                .map(ArtPharmacy::getPerson)
-                .collect(Collectors.toSet());
-        Log.info("patient size: {}", radetPatients.size());
-        Set<RadetDto> radetData = getRadetDtos(facilityId, start, end, radetPatients);
-        Log.info("radetData{}", radetData);
-        int rowNum = 1;
-        LOG.info("rowNum-before {}", rowNum);
-        Row row = sh.createRow(rowNum++);
-        LOG.info("rowNum-after{}", rowNum);
-        DateFormat dateFormatExcel = new SimpleDateFormat("yyyy-MM-dd");
-        for (RadetDto radetData1 : radetData) {
-            populateDemographicColunms(radetData1, row, rowNum, dateFormatExcel);
-        }
-
-
-    }
-
-    @NotNull
-    private Set<RadetDto> getRadetDtos(Long facilityId, LocalDate start, LocalDate end, Set<Person> radetPatients) {
-        return artPharmacyRepository.findAll()
-                .stream()
-                .filter(artPharmacy -> radetPatients.contains(artPharmacy.getPerson()))
-                .filter(artPharmacy -> artPharmacy.getVisitDate().equals(start)
-                        || artPharmacy.getVisitDate().equals(end)
-                        || (artPharmacy.getVisitDate().isAfter(start) && artPharmacy.getVisitDate().isBefore(end)))
-                .map(artPharmacy -> getRadetDto(facilityId, artPharmacy))
-                .collect(Collectors.toSet());
-    }
-
-    private RadetDto getRadetDto(Long facilityId, ArtPharmacy artPharmacy) {
-        OrganisationUnit facility = organisationUnitService.getOrganizationUnit(facilityId);
-        String facilityName = facility.getName();
-        Long lgaIdOfTheFacility = facility.getParentOrganisationUnitId();
-        OrganisationUnit lgaOrgUnitOfFacility = organisationUnitService.getOrganizationUnit(lgaIdOfTheFacility);
-        Long stateId = lgaOrgUnitOfFacility.getParentOrganisationUnitId();
-        OrganisationUnit state = organisationUnitService.getOrganizationUnit(stateId);
-        RadetDto radetDto = new RadetDto();
-        radetDto.setState(state.getName());
-        radetDto.setLga(lgaOrgUnitOfFacility.getName());
-        radetDto.setFacilityName(facilityName);
-        Person person = artPharmacy.getPerson();
-        int years = Period.between(person.getDateOfBirth(), LocalDate.now()).getYears();
-        radetDto.setPatientId(person.getUuid());
-        radetDto.setHospitalNum(person.getHospitalNumber());
-        radetDto.setDateBirth(Date.valueOf(person.getDateOfBirth()));
-        radetDto.setAge(years);
-        radetDto.setSex(person.getSex());
-        return radetDto;
-    }
-
-
-    private static void populateDemographicColunms(RadetDto datum, Row row, int column, DateFormat dateFormatExcel) {
-        row.createCell(0).setCellValue(column);
-        row.createCell(1).setCellValue(datum.getState());
-        row.createCell(2).setCellValue(datum.getLga());
-        row.createCell(3).setCellValue(datum.getFacilityName());
-        row.createCell(4).setCellValue(datum.getPatientId());
-        row.createCell(5).setCellValue(datum.getHospitalNum());
-        row.createCell(6).setCellValue(dateFormatExcel.format(datum.getDateBirth()));
-        row.createCell(7).setCellValue(datum.getAge());
-        row.createCell(8).setCellValue(datum.getSex());
-    }
-
-
-    @NotNull
-    private List<String> getRadetColumnHeadings() {
-        return Arrays.asList(
-                "S/No.",
-                "State",
-                "LGA",
-                "Facility Name",
-                "Patient Id",
-                "Hospital Num",
-                "Unique ID",
-                "Age",
-                "Sex",
-                "Current Weight (kg)",
-                "Date Birth (yyyy-mm-dd)",
-                "ART Start Date (yyyy-mm-dd)",
-                "Last Pickup Date (yyyy-mm-dd)",
-                "Months of ARV Refill",
-                "Date of TPT Start (yyyy-mm-dd)",
-                "TPT Type",
-                "TPT Completion date (yyyy-mm-dd)",
-                "Regimen Line at ART Start",
-                "Regimen at ART Start",
-                "Current Regimen Line",
-                "Current ART Regimen",
-                "Date of Regimen Switch/ Substitution",
-                "Pregnancy Status",
-                "Date of Full Disclosure (yyyy-mm-dd)",
-                "Date Enrolled on OTZ (yyyy-mm-dd)",
-                "Number of Support Group (OTZ Club) meeting attended",
-                "Number of OTZ Modules completed",
-                "Date of Viral Load Sample Collection (yyyy-mm-dd)",
-                "Current Viral Load (c/ml)",
-                "Date of Current Viral Load (yyyy-mm-dd)",
-                "Viral Load Indication",
-                "VL Result After VL Sample Collection (c/ml)",
-                "Date of VL Result After VL Sample Collection (yyyy-mm-dd)",
-                "Previous ART Status",
-                "Confirmed Date of Previous ART Status",
-                "Current ART Status",
-                "Date of Current ART Status",
-                "RTT",
-                "If Dead, Cause of Dead",
-                "VA Cause of Dead",
-                "If Transferred out, new Facility",
-                "ART Enrollment Setting",
-                "Date Commenced DMOC (yyyy-mm-dd)",
-                "Type of DMOC",
-                "Date of Return of DMOC Client to Facility (yyyy-mm-dd)",
-                "Date of Commencement of EAC (yyyy-mm-dd)",
-                "Number of EAC Sessions Completed",
-                "Date of 3rd EAC Completion (yyyy-mm-dd)",
-                "Date of Extended EAC Completion (yyyy-mm-dd)",
-                "Date of Repeat Viral Load - Post EAC VL Sample Collected (yyyy-mm-dd)",
-                "Co-morbidities",
-                "Date of Cervical Cancer Screening (yyyy-mm-dd)",
-                "Cervical Cancer Screening Type",
-                "Cervical Cancer Screening Method",
-                "Result of Cervical Cancer Screening",
-                "Date of Precancerous Lesions Treatment (yyyy-mm-dd)",
-                "Date Returned to Facility (yyyy-mm-dd)",
-                "Precancerous Lesions Treatment Methods",
-                "Date Biometrics Enrolled (yyyy-mm-dd)",
-                "Valid Biometrics Enrolled?",
-                "Case-manager"
-        );
-    }
+	
+	private final ArtPharmacyRepository artPharmacyRepository;
+	
+	private final OrganisationUnitService organisationUnitService;
+	
+	private final ApplicationCodesetService applicationCodesetService;
+	
+	private final ARTClinicalRepository artClinicalRepository;
+	
+	private final VitalSignRepository vitalSignRepository;
+	
+	private final RegimenRepository regimenRepository;
+	
+	
+	private final HivEnrollmentRepository hivEnrollmentRepository;
+	
+	
+	private final HIVEacRepository hIVEacRepository;
+	
+	private final HIVEacSessionRepository hIVEacSessionRepository;
+	
+	private final ModuleService moduleService;
+	
+	
+	@NotNull
+	public Set<Person> getRadetEligibles() {
+		return artPharmacyRepository.findAll()
+				.stream()
+				.map(ArtPharmacy::getPerson)
+				.collect(Collectors.toSet());
+	}
+	
+	@NotNull
+	public Set<RadetDto> getRadetDtos(Long facilityId, LocalDate start, LocalDate end, Set<Person> radetPatients) {
+		return artPharmacyRepository.findAll()
+				.stream()
+				.filter(artPharmacy -> radetPatients.contains(artPharmacy.getPerson()))
+				.filter(artPharmacy -> artPharmacy.getVisitDate().equals(start)
+						|| artPharmacy.getVisitDate().equals(end)
+						|| (artPharmacy.getVisitDate().isAfter(start) && artPharmacy.getVisitDate().isBefore(end)))
+				.map(artPharmacy -> buildRadetDto(facilityId, artPharmacy, start.minusDays(1), end.plusDays(1)))
+				.collect(Collectors.toSet());
+	}
+	
+	private RadetDto buildRadetDto(Long facilityId, ArtPharmacy artPharmacy, LocalDate start, LocalDate end) {
+		
+		OrganisationUnit facility = organisationUnitService.getOrganizationUnit(facilityId);
+		String facilityName = facility.getName();
+		Long lgaIdOfTheFacility = facility.getParentOrganisationUnitId();
+		OrganisationUnit lgaOrgUnitOfFacility = organisationUnitService.getOrganizationUnit(lgaIdOfTheFacility);
+		Long stateId = lgaOrgUnitOfFacility.getParentOrganisationUnitId();
+		OrganisationUnit state = organisationUnitService.getOrganizationUnit(stateId);
+		RadetDto radetDto = new RadetDto();
+		radetDto.setState(state.getName());
+		radetDto.setLga(lgaOrgUnitOfFacility.getName());
+		radetDto.setFacilityName(facilityName);
+		Person person = artPharmacy.getPerson();
+		int years = Period.between(person.getDateOfBirth(), LocalDate.now()).getYears();
+		radetDto.setDateBirth(Date.valueOf(person.getDateOfBirth()));
+		radetDto.setAge(years);
+		radetDto.setSex(person.getSex());
+		radetDto.setPatientId(person.getUuid());
+		radetDto.setHospitalNum(person.getHospitalNumber());
+		
+		//enrollment
+		Optional<HivEnrollment> enrollment =
+				hivEnrollmentRepository.getHivEnrollmentByPersonAndArchived(person, 0);
+		enrollment.ifPresent(e -> {
+			radetDto.setUniqueID(e.getUniqueId());
+			Long enrollmentSettingId = e.getEnrollmentSettingId();
+			String enrollmentSetting = applicationCodesetService.getApplicationCodeset(enrollmentSettingId).getDisplay();
+			radetDto.setArtEnrollmentSetting(enrollmentSetting);
+		});
+		
+		
+		//art commence
+		Optional<ARTClinical> artCommencement =
+				artClinicalRepository.findByPersonAndIsCommencementIsTrueAndArchived(person, 0);
+		artCommencement.ifPresent(c -> {
+			radetDto.setArtStartDate(c.getVisitDate());
+			long regimenId = c.getRegimenId();
+			Optional<Regimen> regimen = getRegimen(regimenId);
+			regimen.ifPresent(r ->
+			{
+				radetDto.setRegimenAtStart(r.getDescription());
+				radetDto.setRegimenLineAtStart(r.getRegimenType().getDescription());
+			});
+		});
+		
+		// current vital sign
+		Optional<VitalSign> currentVitalSign = vitalSignRepository.getVitalSignByPersonAndArchived(person, 0)
+				.stream()
+				.sorted(Comparator.comparing(VitalSign::getCaptureDate))
+				.sorted(Comparator.comparing(VitalSign::getId).reversed())
+				.filter(vitalSign -> {
+					LocalDateTime captureDate = vitalSign.getCaptureDate();
+					return captureDate.isAfter(start.atStartOfDay()) && captureDate.isBefore(end.atStartOfDay());
+				})
+				.findFirst();
+		currentVitalSign.ifPresent(v -> radetDto.setCurrentWeight(v.getBodyWeight()));
+		
+		
+		//current pharmacy
+		Optional<ArtPharmacy> currentPharmacyVisit = artPharmacyRepository.getArtPharmaciesByPersonAndArchived(person, 0)
+				.stream()
+				.sorted(Comparator.comparing(ArtPharmacy::getVisitDate))
+				.sorted(Comparator.comparing(ArtPharmacy::getId).reversed())
+				.filter(cPharmacy -> {
+					LocalDateTime visitDate = cPharmacy.getVisitDate().atStartOfDay();
+					return visitDate.isAfter(start.atStartOfDay()) && visitDate.isBefore(end.atStartOfDay());
+				})
+				.findFirst();
+		
+		currentPharmacyVisit.ifPresent(p -> {
+			radetDto.setMonthOfArvRefills(0);
+			int refillPeriod = artPharmacyRepository.sumRefillPeriodsByPersonAndDateRange
+					(person.getUuid(), start.plusDays(1), end.minusDays(1));
+			if (refillPeriod > 0) {
+				radetDto.setMonthOfArvRefills(refillPeriod / 30);
+			}
+			radetDto.setLastPickupDate(p.getVisitDate());
+			Set<Regimen> regimens = p.getRegimens();
+			regimens.forEach(regimen -> setCurrentRegimen(radetDto, regimen, p.getVisitDate()));
+		});
+		
+		//current eac
+		Optional<HIVEac> currentHivEac = hIVEacRepository.getAllByPersonAndArchived(person, 0)
+				.stream()
+				.sorted(Comparator.comparing(HIVEac::getDateOfLastViralLoad))
+				.sorted(Comparator.comparing(HIVEac::getId).reversed())
+				.filter(cEac -> {
+					LocalDateTime visitDate = cEac.getDateOfLastViralLoad().atStartOfDay();
+					return visitDate.isAfter(start.atStartOfDay()) && visitDate.isBefore(end.atStartOfDay());
+				})
+				.findFirst();
+		currentHivEac.ifPresent(eac -> {
+			List<HIVEacSession> eacSessions = hIVEacSessionRepository.getHIVEacSesByEac(eac);
+			radetDto.setNumberOfEACSessionsCompleted(eacSessions.size());
+			if (!eacSessions.isEmpty()) {
+				LocalDate eacCommenceDate = eacSessions.get(0).getFollowUpDate();
+				radetDto.setDateOfCommencementOfEAC(eacCommenceDate);
+				if (eacSessions.size() > 1) {
+					HIVEacSession hivEacSession = eacSessions.get(2);
+					if (hivEacSession != null) {
+						radetDto.setDateOf3rdEACCompletion(hivEacSession.getFollowUpDate());
+					}
+				}
+				if (eacSessions.size() > 2) {
+					HIVEacSession extHivEacSession = eacSessions.get(3);
+					if (extHivEacSession != null) {
+						radetDto.setDateOfExtendedEACCompletion(extHivEacSession.getFollowUpDate());
+					}
+				}
+			}
+			
+		});
+		//current viral load
+		boolean labExist = moduleService.exist("Lab");
+		if (labExist) {
+			Log.info(" in lab info {}", labExist);
+			Optional<ViralLoadRadetDto> viralLoadDetails =
+					hIVEacRepository.getPatientCurrentViralLoadDetails(person.getId(), start.plusDays(1), end.minusDays(1));
+			viralLoadDetails.ifPresent(currentViralLoad -> {
+				Log.info("current viral load indication {}", currentViralLoad.getIndicationId() + " : ressult :=> " + currentViralLoad.getResult());
+				String viralLoadIndication =
+						applicationCodesetService.getApplicationCodeset(currentViralLoad.getIndicationId()).getDisplay();
+				radetDto.setViralLoadIndication(viralLoadIndication);
+				radetDto.setDateOfViralLoadSampleCollection(currentViralLoad.getDateSampleCollected());
+				radetDto.setCurrentViralLoad(currentViralLoad.getResult());
+				radetDto.setDateOfCurrentViralLoad(currentViralLoad.getResultDate());
+			});
+		}
+		//current biometrics
+		boolean bioExist = moduleService.exist("Bio");
+		Log.info(" out side biometric info {}", bioExist);
+		if (bioExist) {
+			Log.info(" in biometric info {}", bioExist);
+			List<BiometricRadetDto> biometricFingers =
+					hIVEacRepository.getPatientBiometricInfo(person.getUuid(), start.plusDays(1), end.minusDays(1));
+			if (!biometricFingers.isEmpty()) {
+				Log.info(" number capture {}", biometricFingers.size());
+				BiometricRadetDto biometricRadetDto = biometricFingers.get(0);
+				Log.info(" number capture date:  {}", biometricRadetDto.getDateCaptured());
+				radetDto.setDateBiometricsEnrolled(biometricRadetDto.getDateCaptured());
+				radetDto.setValidBiometricsEnrolled("YES");
+			}
+		}
+		return radetDto;
+	}
+	
+	@NotNull
+	private Optional<Regimen> getRegimen(long regimenId) {
+		return regimenRepository.findById(regimenId);
+	}
+	
+	
+	private static void setCurrentRegimen(RadetDto radetDto, Regimen regimen, LocalDate visitDate) {
+		String description = regimen.getRegimenType().getDescription();
+		if (description.contains("Line")) {
+			radetDto.setCurrentRegimenLine(regimen.getRegimenType().getDescription());
+			radetDto.setCurrentRegimen(regimen.getDescription());
+		}
+		if (description.contains("IPT")) {
+			radetDto.setIptStartDate(visitDate);
+			radetDto.setIptType(regimen.getDescription());
+		}
+		
+	}
+	
+	
 }

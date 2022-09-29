@@ -181,24 +181,19 @@ public class PatientReportService {
 				.sorted(Comparator.comparing(ArtPharmacy::getVisitDate))
 				.sorted(Comparator.comparing(ArtPharmacy::getId).reversed())
 				.findFirst();
+		
 		currentRefill.ifPresent(currentRefill1 -> {
-			Set<Regimen> regimens = currentRefill1.getRegimens();
 			LocalDate nextAppointment = currentRefill1.getNextAppointment();
-			regimens.forEach(regimen -> {
-				String description = regimen.getRegimenType().getDescription();
-				patientLineListDto.setDateOfNextRefill(nextAppointment);
-				patientLineListDto.setDateOfLastRefill(currentRefill1.getVisitDate());
-				patientLineListDto.setLastRefillDuration(currentRefill1.getRefillPeriod());
-				String devolveType = currentRefill1.getDsdModel();
-				if (devolveType != null && !(devolveType.isEmpty())) {
-					processAndSetDevolveDate(person, patientLineListDto);
-					patientLineListDto.setDmocType(devolveType);
-				}
-				if (description.contains("Line")) {
-					patientLineListDto.setCurrentRegimenLine(regimen.getRegimenType().getDescription());
-					patientLineListDto.setCurrentRegimen(regimen.getDescription());
-				}
-			});
+			patientLineListDto.setDateOfNextRefill(nextAppointment);
+			patientLineListDto.setDateOfLastRefill(currentRefill1.getVisitDate());
+			patientLineListDto.setLastRefillDuration(currentRefill1.getRefillPeriod());
+			String devolveType = currentRefill1.getDsdModel();
+			if (devolveType != null && !(devolveType.isEmpty())) {
+				processAndSetDevolveDate(person, patientLineListDto);
+				patientLineListDto.setDmocType(devolveType);
+			}
+			Set<Regimen> regimens = currentRefill1.getRegimens();
+			regimens.forEach(regimen -> setCurrentRegimen(patientLineListDto, regimen));
 			patientLineListDto.setCurrentStatus("Active");
 			LOG.info("current date {}", currentDate);
 			LOG.info("next appointment date {}", nextAppointment);
@@ -212,6 +207,14 @@ public class PatientReportService {
 			}
 			
 		});
+	}
+	
+	private static void setCurrentRegimen(PatientLineListDto patientLineListDto, Regimen regimen) {
+		String description = regimen.getRegimenType().getDescription();
+		if (description.contains("Line")) {
+			patientLineListDto.setCurrentRegimenLine(regimen.getRegimenType().getDescription());
+			patientLineListDto.setCurrentRegimen(regimen.getDescription());
+		}
 	}
 	
 	private void processAndSetDevolveDate(Person person, PatientLineListDto patientLineListDto) {

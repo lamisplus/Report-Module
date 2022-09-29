@@ -9,6 +9,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
@@ -79,6 +80,8 @@ public class ExcelService {
 		write(listData);
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		workbook.write(bao);
+		FileOutputStream fileOut = new FileOutputStream("runtime/"+sheetName+".xlsx");
+		workbook.write(fileOut);
 		workbook.close();
 		bao.close();
 		return bao;
