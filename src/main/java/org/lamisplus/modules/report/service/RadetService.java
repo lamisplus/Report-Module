@@ -13,8 +13,6 @@ import org.lamisplus.modules.hiv.domain.dto.ViralLoadRadetDto;
 import org.lamisplus.modules.hiv.domain.entity.*;
 import org.lamisplus.modules.hiv.repositories.*;
 import org.lamisplus.modules.patient.domain.entity.Person;
-import org.lamisplus.modules.patient.repository.VisitRepository;
-import org.lamisplus.modules.report.domain.PatientLineListDto;
 import org.lamisplus.modules.report.domain.RadetDto;
 import org.lamisplus.modules.triage.domain.entity.VitalSign;
 import org.lamisplus.modules.triage.repository.VitalSignRepository;

@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.report.domain.AppointmentReportDto;
 import org.lamisplus.modules.report.domain.PatientLineListDto;
-import org.lamisplus.modules.report.service.*;
+import org.lamisplus.modules.report.service.AppointmentReportService;
+import org.lamisplus.modules.report.service.Constants;
+import org.lamisplus.modules.report.service.GenerateExcelService;
+import org.lamisplus.modules.report.service.PatientReportService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -30,7 +32,6 @@ public class PatientReportController {
 	
 	private final AppointmentReportService appointmentReportService;
 	
-	private final RadetService radetService;
 	
 	private final GenerateExcelService generateExcelService;
 	
@@ -63,6 +64,26 @@ public class PatientReportController {
 		ByteArrayOutputStream baos = generateExcelService.generateRadet(facility, start, end);
 		setStream(baos, response);
 		messagingTemplate.convertAndSend("/topic/radet", "end");
+	}
+	
+	@GetMapping("/pharmacy/{facilityId}")
+	public void generatePharmacy(HttpServletResponse response, @PathVariable("facilityId") Long facility) throws IOException {
+		messagingTemplate.convertAndSend("/topic/pharmacy", "start");
+		ByteArrayOutputStream baos = generateExcelService.generatePharmacyReport(facility);
+		setStream(baos, response);
+		messagingTemplate.convertAndSend("/topic/pharmacy", "end");
+	}
+	
+	@GetMapping("/biometric")
+	public void generateBiometric(HttpServletResponse response,
+	                              @RequestParam("facilityId") Long facility,
+	                              @RequestParam("startDate") LocalDate start,
+	                              @RequestParam("endDate") LocalDate end
+	) throws IOException {
+		messagingTemplate.convertAndSend("/topic/biometric", "start");
+		ByteArrayOutputStream baos = generateExcelService.generateBiometricReport(facility, start, end);
+		setStream(baos, response);
+		messagingTemplate.convertAndSend("/topic/biometric", "end");
 	}
 	
 	@GetMapping("/patient-line-list")

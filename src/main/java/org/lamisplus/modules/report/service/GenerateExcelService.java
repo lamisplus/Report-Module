@@ -2,11 +2,14 @@ package org.lamisplus.modules.report.service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 
 public interface GenerateExcelService {
  
  ByteArrayOutputStream generatePatientLine(HttpServletResponse response, Long facilityId);
  ByteArrayOutputStream generateRadet(Long facilityId, LocalDate start, LocalDate end);
+ ByteArrayOutputStream generatePharmacyReport(Long facilityId) throws IOException;
+ ByteArrayOutputStream generateBiometricReport(Long facilityId,  LocalDate start, LocalDate end) throws IOException;
  String getFacilityName(Long facilityId);
 }

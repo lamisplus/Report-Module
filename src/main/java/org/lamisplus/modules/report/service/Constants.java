@@ -156,4 +156,38 @@ public class Constants {
 					"Case-manager"
 			);
 	
+	public static final String PHARMACY_SHEET = "pharmacy-report";
+	public static final String BIOMETRIC_SHEET_SHEET = "biometric-report";
+	public static final List<String> PHARMACY_HEADER =
+			Arrays.asList(
+					"S/No.",
+					"Facility Id",
+					"Facility Name",
+					"Patient Id",
+					"Hospital Num",
+					"Date Visit(yyyy-mm-dd)",
+					"Regimen Line",
+					"Regimen",
+					"Refill Period",
+					"MMD_Type",
+					"Next Appointment (yyyy-mm-dd)",
+					"DSD Model"
+			);
+	public static final List<String> BIOMETRIC_HEADER =
+			Arrays.asList(
+					"S/No.",
+					"State",
+					"Facility Name",
+					"Hospital Number",
+					"Name",
+					//"current status",
+					"Hospital Num",
+					"Date of Birth",
+					"Age",
+					"Sex",
+					"Address",
+					"Enrollment Date (yyyy-mm-dd)",
+					"Number of Fingers Captured",
+					"Fingers Valid"
+			);
 }

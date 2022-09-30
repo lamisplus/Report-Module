@@ -1,8 +1,15 @@
 package org.lamisplus.modules.report.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.NonNull;
+
+import org.lamisplus.modules.hiv.domain.entity.ArtPharmacy;
+import org.lamisplus.modules.hiv.domain.entity.Regimen;
+import org.lamisplus.modules.hiv.repositories.RegimenRepository;
+import org.lamisplus.modules.report.domain.BiometricReportDto;
 import org.lamisplus.modules.report.domain.PatientLineListDto;
 import org.lamisplus.modules.report.domain.RadetDto;
+
 
 import java.util.*;
 
@@ -96,16 +103,13 @@ public class GenerateExcelDataHelper {
 			map.put(index++, String.valueOf(patient.getCurrentWeight()));
 			map.put(index++, String.valueOf(patient.getLastPickupDate()));
 			map.put(index++, String.valueOf(patient.getMonthOfArvRefills()));
-			
 			map.put(index++, String.valueOf(patient.getIptStartDate()));
 			map.put(index++, patient.getIptType());
 			map.put(index++, String.valueOf(patient.getIptCompletedDate()));
-			
 			map.put(index++, patient.getRegimenLineAtStart());
 			map.put(index++, patient.getRegimenAtStart());
 			map.put(index++, patient.getCurrentRegimenLine());
 			map.put(index++, patient.getCurrentRegimen());
-			
 			map.put(index++, String.valueOf(patient.getDateOfRegimenSwitch()));
 			map.put(index++, patient.getPregnancyStatus());
 			map.put(index++, String.valueOf(patient.getDateOfFullDisclosure()));
@@ -147,6 +151,90 @@ public class GenerateExcelDataHelper {
 			result.add(map);
 		}
 		return result;
+	}
+	
+	public static List<Map<Integer, String>> fillBiometricDataMapper(@NonNull List<BiometricReportDto> biometrics) {
+		
+		List<Map<Integer, String>> result = new ArrayList<>();
+		for (BiometricReportDto dto : biometrics) {
+			Map<Integer, String> map = new HashMap<>();
+			int index = 0;
+			map.put(index++, String.valueOf(index++));
+			map.put(index++, dto.getState());
+			map.put(index++, dto.getFacilityName());
+			map.put(index++, dto.getHospitalNum());
+			map.put(index++, dto.getName());
+			map.put(index++, String.valueOf(dto.getAge()));
+			map.put(index++, dto.getSex());
+			map.put(index++, String.valueOf(dto.getDateBirth()));
+			map.put(index++, String.valueOf(dto.getAge()));
+			map.put(index++, dto.getAddress());
+			map.put(index++, String.valueOf(dto.getEnrollDate()));
+			map.put(index++, String.valueOf(dto.getFingers()));
+			map.put(index, dto.getValid());
+			result.add(map);
+		}
+		return result;
+	}
+	
+	
+	public static List<Map<Integer, String>> fillPharmacyDataMapper(
+			@NonNull List<ArtPharmacy> pharmacies,
+			String facility, RegimenRepository repository) {
+		List<Map<Integer, String>> result = new ArrayList<>();
+		for (ArtPharmacy pharmacy : pharmacies) {
+			StringBuilder regimenReceived = new StringBuilder();
+			StringBuilder type = new StringBuilder();
+			StringBuilder qty = new StringBuilder();
+			JsonNode extra = pharmacy.getExtra();
+			String regimens = "regimens";
+			setRegimen(repository, regimenReceived, type, qty, extra, regimens);
+			Map<Integer, String> map = new HashMap<>();
+			int index = 0;
+			map.put(index++, String.valueOf(index++));
+			map.put(index++, String.valueOf(pharmacy.getFacilityId()));
+			map.put(index++, facility);
+			map.put(index++, pharmacy.getPerson().getUuid());
+			map.put(index++, pharmacy.getPerson().getHospitalNumber());
+			map.put(index++, String.valueOf(pharmacy.getVisitDate()));
+			map.put(index++, type.toString());
+			map.put(index++, regimenReceived.toString());
+			map.put(index++, qty.toString());
+			map.put(index++, pharmacy.getMmdType());
+			map.put(index++, String.valueOf(pharmacy.getNextAppointment()));
+			map.put(index, pharmacy.getDsdModel());
+			result.add(map);
+		}
+		return result;
+	}
+	
+	private static void setRegimen(
+			RegimenRepository repository,
+			StringBuilder regimenReceived,
+			StringBuilder type,
+			StringBuilder qty,
+			JsonNode extra, String regimens) {
+		if (extra.hasNonNull(regimens)) {
+			JsonNode jsonNode = extra.get(regimens);
+			for (JsonNode regimen : jsonNode) {
+				if (regimen.hasNonNull("id")) {
+					JsonNode regimenId = regimen.get("id");
+					JsonNode dispenseQuantity = regimen.get("dispenseQuantity");
+					long id = regimenId.asLong();
+					long refillQty = dispenseQuantity.asLong();
+					qty.append(refillQty + ",");
+					Optional<Regimen> optionalRegimen = repository.findById(id);
+					optionalRegimen.ifPresent(regimen1 -> {
+						String description = regimen1.getDescription();
+						String regimenType = regimen1.getRegimenType().getDescription();
+						regimenReceived.append(description + ",");
+						type.append(regimenType + ",");
+						
+					});
+				}
+				
+			}
+		}
 	}
 	
 	
