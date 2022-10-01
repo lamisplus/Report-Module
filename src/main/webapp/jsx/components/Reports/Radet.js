@@ -59,12 +59,35 @@ const PatientLineList = (props) => {
     const [loading, setLoading] = useState(false)
     const [facilities, setFacilities] = useState([]);
     const [objValues, setObjValues]=useState({       
-        organisationUnitId:""
+        organisationUnitId:"",
+        startDate:"",
+        endDate:""
     })
+    useEffect(() => {
+        Facilities()
+      }, []);
+    //Get list of WhoStaging
+    const Facilities =()=>{
+    axios
+        .get(`${baseUrl}account`,
+            { headers: {"Authorization" : `Bearer ${token}`} }
+        )
+        .then((response) => {
+            //console.log(response.data);
+            setFacilities(response.data.applicationUserOrganisationUnits);
+        })
+        .catch((error) => {
+        //console.log(error);
+        });
+    
+    }
+    const handleInputChange = e => {
+        setObjValues ({...objValues,  [e.target.name]: e.target.value});
+    }
     const handleSubmit = (e) => {        
         e.preventDefault();
         setLoading(true)
-        axios.get(`${baseUrl}reporting/radet?facilityId=${objValues.organisationUnitId}`,objValues.organisationUnitId,
+        axios.get(`${baseUrl}reporting/radet?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
            { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
           
           )
@@ -91,27 +114,8 @@ const PatientLineList = (props) => {
             
 
     }
-    const handleInputChange = e => {
-        setObjValues ({...objValues,  [e.target.name]: e.target.value});
-    }
-    useEffect(() => {
-        Facilities()
-      }, []);
-    //Get list of WhoStaging
-    const Facilities =()=>{
-    axios
-        .get(`${baseUrl}account`,
-            { headers: {"Authorization" : `Bearer ${token}`} }
-        )
-        .then((response) => {
-            //console.log(response.data);
-            setFacilities(response.data.applicationUserOrganisationUnits);
-        })
-        .catch((error) => {
-        //console.log(error);
-        });
     
-    }
+    
 
     return (
         <>
@@ -123,14 +127,46 @@ const PatientLineList = (props) => {
                 <br/>
                     <form >
                         <div className="row">
-
-                            <div className="form-group  col-md-4">
+                        <div className="form-group  col-md-6">
+                                <FormGroup>
+                                    <Label>Start Date*</Label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        name="startDate"
+                                        id="startDate"
+                                        value={objValues.startDate}
+                                        onChange={handleInputChange}
+                                        style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
+                                    />
+                                    
+                                </FormGroup>
+                            </div>
+                            <div className="form-group  col-md-6">
+                                <FormGroup>
+                                    <Label>End Date*</Label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        name="endDate"
+                                        id="endDate"
+                                        min={objValues.startDate}
+                                        value={objValues.endDate}
+                                        onChange={handleInputChange}
+                                        style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
+                                    />
+                                     
+                                    
+                                </FormGroup>
+                            </div>
+                            <div className="form-group  col-md-6">
                                 <FormGroup>
                                     <Label>Facility*</Label>
                                     <select
                                         className="form-control"
                                         name="organisationUnitId"
                                         id="organisationUnitId"
+                                        value={objValues.organisationUnitId}
                                         onChange={handleInputChange}
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
                                     >
