@@ -59,9 +59,7 @@ const PharmacyReport = (props) => {
     const [loading, setLoading] = useState(false)
     const [facilities, setFacilities] = useState([]);
     const [objValues, setObjValues]=useState({       
-        organisationUnitId:"",
-        startDate:"",
-        endDate:""
+        organisationUnitId:""
     })
     useEffect(() => {
         Facilities()
@@ -87,7 +85,7 @@ const PharmacyReport = (props) => {
     const handleSubmit = (e) => {        
         e.preventDefault();
         setLoading(true)
-        axios.get(`${baseUrl}reporting/pharmacy?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
+        axios.get(`${baseUrl}reporting/pharmacy?facilityId=${objValues.organisationUnitId}`,
            { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
           
           )
@@ -127,38 +125,7 @@ const PharmacyReport = (props) => {
                 <br/>
                     <form >
                         <div className="row">
-                        <div className="form-group  col-md-6">
-                                <FormGroup>
-                                    <Label>Start Date*</Label>
-                                    <input
-                                        type="date"
-                                        className="form-control"
-                                        name="startDate"
-                                        id="startDate"
-                                        value={objValues.startDate}
-                                        onChange={handleInputChange}
-                                        style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
-                                    />
-                                    
-                                </FormGroup>
-                            </div>
-                            <div className="form-group  col-md-6">
-                                <FormGroup>
-                                    <Label>End Date*</Label>
-                                    <input
-                                        type="date"
-                                        className="form-control"
-                                        name="endDate"
-                                        id="endDate"
-                                        min={objValues.startDate}
-                                        value={objValues.endDate}
-                                        onChange={handleInputChange}
-                                        style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
-                                    />
-                                     
-                                    
-                                </FormGroup>
-                            </div>
+                        
                             <div className="form-group  col-md-6">
                                 <FormGroup>
                                     <Label>Facility*</Label>
