@@ -57,16 +57,7 @@ const Reports = (props) => {
                                 <span style={{color:'#fff'}}> RADET REPORT</span>
                                 
                             </Menu.Item>
-                            <Menu.Item
-                                name='spam'
-                                active={activeItem === 'prep'}
-                                onClick={()=>handleItemClick('prep')}
-                                style={{backgroundColor:activeItem === 'prep' ? '#000': ""}}
-                            >
-                            {/* <Label>2</Label> */}
-                            <span style={{color:'#fff'}}>PREP REPORT</span>
                             
-                            </Menu.Item>
                             <Menu.Item
                                 name='spam'
                                 active={activeItem === 'appointment'}
@@ -116,6 +107,16 @@ const Reports = (props) => {
                             {/* <Label>4</Label> */}
                             <span style={{color:'#fff'}}>DEVOLVE REPORT</span>
                            
+                            </Menu.Item>
+                            <Menu.Item
+                                name='spam'
+                                active={activeItem === 'prep'}
+                                onClick={()=>handleItemClick('prep')}
+                                style={{backgroundColor:activeItem === 'prep' ? '#000': ""}}
+                            >
+                            {/* <Label>2</Label> */}
+                            <span style={{color:'#fff'}}>PREP REPORT</span>
+                            
                             </Menu.Item>
                             <Menu.Item
                                 name='inbox'

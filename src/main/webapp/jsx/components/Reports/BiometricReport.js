@@ -97,6 +97,7 @@ const BiometricReport = (props) => {
                 const responseData = response.data
                 let blob = new Blob([responseData], {type: "application/octet-stream"});
                 FileSaver.saveAs(blob, `${fileName}.xlsx`);
+                toast.success(" Report generated successful");
                   //toast.success(" Save successful");
                   //props.setActiveContent('recent-history')
 

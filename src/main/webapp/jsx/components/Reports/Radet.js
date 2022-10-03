@@ -73,7 +73,7 @@ const PatientLineList = (props) => {
             { headers: {"Authorization" : `Bearer ${token}`} }
         )
         .then((response) => {
-            //console.log(response.data);
+        console.log(response.data);
             setFacilities(response.data.applicationUserOrganisationUnits);
         })
         .catch((error) => {
@@ -97,7 +97,7 @@ const PatientLineList = (props) => {
                 const responseData = response.data
                 let blob = new Blob([responseData], {type: "application/octet-stream"});
                 FileSaver.saveAs(blob, `${fileName}.xlsx`);
-                  //toast.success(" Save successful");
+                toast.success(" Report generated successful");
                   //props.setActiveContent('recent-history')
 
               })
