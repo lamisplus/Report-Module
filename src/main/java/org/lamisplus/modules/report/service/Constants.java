@@ -181,7 +181,7 @@ public class Constants {
 					"Hospital Number",
 					"Name",
 					//"current status",
-					"Hospital Num",
+					//"Hospital Num",
 					"Date of Birth",
 					"Age",
 					"Sex",
