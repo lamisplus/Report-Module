@@ -10,6 +10,8 @@ import 'semantic-ui-css/semantic.min.css';
 import PatientLineList from './PatientLineList';
 import Appointment from './Appointment'
 import Radet from './Radet'
+import BiometricReport from './BiometricReport'
+import PharmacyReport from './PharmacyReport'
 
 const useStyles = makeStyles((theme) => ({
 
@@ -38,13 +40,13 @@ const Reports = (props) => {
     return (
         <>
             <ToastContainer autoClose={3000} hideProgressBar />
-
-                <form >
+            <Card >
+                <CardBody>
                     <div className="row">
-                    
+                    <form >
                         <br/>
                         <br/>
-                        <div className="col-md-3 col-sm-3 col-lg-3 float-start">
+                        <div className="col-md-3 float-start">
                         <Menu  size='small'  vertical  style={{backgroundColor:"#014D88"}}>
                             <Menu.Item
                                 name='inbox'
@@ -55,26 +57,7 @@ const Reports = (props) => {
                                 <span style={{color:'#fff'}}> RADET REPORT</span>
                                 
                             </Menu.Item>
-                            <Menu.Item
-                                name='spam'
-                                active={activeItem === 'prep'}
-                                onClick={()=>handleItemClick('prep')}
-                                style={{backgroundColor:activeItem === 'prep' ? '#000': ""}}
-                            >
-                            {/* <Label>2</Label> */}
-                            <span style={{color:'#fff'}}>PREP CONVERTER</span>
                             
-                            </Menu.Item>
-                            <Menu.Item
-                                name='inbox'
-                                active={activeItem === 'art'}
-                                onClick={()=>handleItemClick('art')}
-                                style={{backgroundColor:activeItem === 'art' ? '#000': ""}}
-                            >               
-                                <span style={{color:'#fff'}}>ART SUMMARY REPORT</span>
-                               
-                                {/* <Label color='teal'>3</Label> */}
-                            </Menu.Item>
                             <Menu.Item
                                 name='spam'
                                 active={activeItem === 'appointment'}
@@ -96,22 +79,12 @@ const Reports = (props) => {
                            
                             </Menu.Item>
                             <Menu.Item
-                                name='spam'
-                                active={activeItem === 'devolve'}
-                                onClick={()=>handleItemClick('devolve')}
-                                style={{backgroundColor:activeItem === 'devolve' ? '#000': ""}}
-                            >
-                            {/* <Label>4</Label> */}
-                            <span style={{color:'#fff'}}>DEVOLVE REPORT</span>
-                           
-                            </Menu.Item>
-                            <Menu.Item
                                 name='inbox'
-                                active={activeItem === 'gap'}
-                                onClick={()=>handleItemClick('gap')}
-                                style={{backgroundColor:activeItem === 'gap' ? '#000': ""}}
+                                active={activeItem === 'pharmacy-report'}
+                                onClick={()=>handleItemClick('pharmacy-report')}
+                                style={{backgroundColor:activeItem === 'pharmacy-report' ? '#000': ""}}
                             >               
-                                <span style={{color:'#fff'}}>GAP ANALYZER</span>
+                                <span style={{color:'#fff'}}>PHARMACY REPORT</span>
                                 
                             {/* <Label color='teal'>5</Label> */}
                             </Menu.Item>
@@ -126,6 +99,26 @@ const Reports = (props) => {
                             {/* <Label color='teal'>5</Label> */}
                             </Menu.Item>
                             <Menu.Item
+                                name='spam'
+                                active={activeItem === 'devolve'}
+                                onClick={()=>handleItemClick('devolve')}
+                                style={{backgroundColor:activeItem === 'devolve' ? '#000': ""}}
+                            >
+                            {/* <Label>4</Label> */}
+                            <span style={{color:'#fff'}}>DEVOLVE REPORT</span>
+                           
+                            </Menu.Item>
+                            <Menu.Item
+                                name='spam'
+                                active={activeItem === 'prep'}
+                                onClick={()=>handleItemClick('prep')}
+                                style={{backgroundColor:activeItem === 'prep' ? '#000': ""}}
+                            >
+                            {/* <Label>2</Label> */}
+                            <span style={{color:'#fff'}}>PREP REPORT</span>
+                            
+                            </Menu.Item>
+                            <Menu.Item
                                 name='inbox'
                                 active={activeItem === 'ict'}
                                 onClick={()=>handleItemClick('ict')}
@@ -135,22 +128,31 @@ const Reports = (props) => {
                                
                             {/* <Label color='teal'>5</Label> */}
                             </Menu.Item>
+                            <Menu.Item
+                                name='inbox'
+                                active={activeItem === 'art'}
+                                onClick={()=>handleItemClick('art')}
+                                style={{backgroundColor:activeItem === 'art' ? '#000': ""}}
+                            >               
+                                <span style={{color:'#fff'}}>ART SUMMARY REPORT</span>
+                               
+                                {/* <Label color='teal'>3</Label> */}
+                            </Menu.Item>
                         </Menu>
                         </div>
-                        <div className="col-md-9 col-sm-9 col-lg-9 float-start" style={{ backgroundColor:"#fff"}}>
+                        <div className="col-md-9 float-end" style={{ backgroundColor:"#fff"}}>
                         {activeItem==='line-list' && (<PatientLineList handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}     
                         {activeItem==='appointment' && (<Appointment handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
                         {activeItem==='radet' && (<Radet handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}     
-                       {/* {activeItem==='indexing' && (<IndexingContactTracing handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
-                        {activeItem==='recency-testing' && (<RecencyTesting  handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
-                        {activeItem==='others' && (<Others handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)} */}
+                        {activeItem==='biometric' && (<BiometricReport handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
+                        {activeItem==='pharmacy-report' && (<PharmacyReport  handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
+                        {/* {activeItem==='others' && (<Others handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)} */}
                             
-                        </div>                                   
+                        </div>
+                        </form>                                   
                     </div>
-
-                
-                    </form>
-                                             
+            </CardBody>
+            </Card>                                 
         </>
     );
 };
