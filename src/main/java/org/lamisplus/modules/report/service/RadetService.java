@@ -9,9 +9,11 @@ import org.lamisplus.modules.base.module.ModuleService;
 import org.lamisplus.modules.base.service.ApplicationCodesetService;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
 import org.lamisplus.modules.hiv.domain.dto.BiometricRadetDto;
+import org.lamisplus.modules.hiv.domain.dto.StatusDto;
 import org.lamisplus.modules.hiv.domain.dto.ViralLoadRadetDto;
 import org.lamisplus.modules.hiv.domain.entity.*;
 import org.lamisplus.modules.hiv.repositories.*;
+import org.lamisplus.modules.hiv.service.HIVStatusTrackerService;
 import org.lamisplus.modules.patient.domain.entity.Person;
 import org.lamisplus.modules.report.domain.RadetDto;
 import org.lamisplus.modules.triage.domain.entity.VitalSign;
@@ -55,6 +57,8 @@ public class RadetService {
 	
 	private final ModuleService moduleService;
 	
+	private final HIVStatusTrackerService hivStatusTrackerService;
+	
 	
 	@NotNull
 	public Set<Person> getRadetEligibles() {
@@ -95,6 +99,17 @@ public class RadetService {
 		radetDto.setSex(person.getSex());
 		radetDto.setPatientId(person.getUuid());
 		radetDto.setHospitalNum(person.getHospitalNumber());
+		//current status
+		StatusDto currentStatus = hivStatusTrackerService.getPersonCurrentHIVStatusByPersonId(person.getId(), start, end);
+		radetDto.setCurrentARTStatus(currentStatus.getStatus());
+		radetDto.setDateOfCurrentARTStatus(currentStatus.getStatusDate());
+		
+		//previous
+		
+		LocalDate startOfPreviousQtr = start.minusDays(90);
+		StatusDto previousStatus = hivStatusTrackerService.getPersonCurrentHIVStatusByPersonId(person.getId(), startOfPreviousQtr, start);
+		radetDto.setPreviousARTStatus(previousStatus.getStatus());
+		radetDto.setConfirmedDateOfPreviousARTStatus(previousStatus.getStatusDate());
 		
 		//enrollment
 		Optional<HivEnrollment> enrollment =
