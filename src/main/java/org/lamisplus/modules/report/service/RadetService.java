@@ -174,13 +174,13 @@ public class RadetService {
 				LocalDate eacCommenceDate = eacSessions.get(0).getFollowUpDate();
 				radetDto.setDateOfCommencementOfEAC(eacCommenceDate);
 				if (eacSessions.size() > 1) {
-					HIVEacSession hivEacSession = eacSessions.get(2);
+					HIVEacSession hivEacSession = eacSessions.get(1);
 					if (hivEacSession != null) {
 						radetDto.setDateOf3rdEACCompletion(hivEacSession.getFollowUpDate());
 					}
 				}
 				if (eacSessions.size() > 2) {
-					HIVEacSession extHivEacSession = eacSessions.get(3);
+					HIVEacSession extHivEacSession = eacSessions.get(2);
 					if (extHivEacSession != null) {
 						radetDto.setDateOfExtendedEACCompletion(extHivEacSession.getFollowUpDate());
 					}

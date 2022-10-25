@@ -164,10 +164,9 @@ public class GenerateExcelDataHelper {
 			map.put(index++, dto.getFacilityName());
 			map.put(index++, dto.getHospitalNum());
 			map.put(index++, dto.getName());
-			map.put(index++, String.valueOf(dto.getAge()));
-			map.put(index++, dto.getSex());
 			map.put(index++, String.valueOf(dto.getDateBirth()));
 			map.put(index++, String.valueOf(dto.getAge()));
+			map.put(index++, dto.getSex());
 			map.put(index++, dto.getAddress());
 			map.put(index++, String.valueOf(dto.getEnrollDate()));
 			map.put(index++, String.valueOf(dto.getFingers()));
