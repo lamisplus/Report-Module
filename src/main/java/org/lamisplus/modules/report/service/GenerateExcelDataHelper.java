@@ -220,9 +220,9 @@ public class GenerateExcelDataHelper {
 		if (extra.hasNonNull(regimens)) {
 			JsonNode jsonNode = extra.get(regimens);
 			for (JsonNode regimen : jsonNode) {
-				if (regimen.hasNonNull("id")) {
-					JsonNode regimenId = regimen.get("id");
-					JsonNode dispenseQuantity = regimen.get("dispenseQuantity");
+				if (regimen.hasNonNull("regimenId")) {
+					JsonNode regimenId = regimen.get("regimenId");
+					JsonNode dispenseQuantity = regimen.get("dispense");
 					long id = regimenId.asLong();
 					long refillQty = dispenseQuantity.asLong();
 					qty.append(refillQty + ",");

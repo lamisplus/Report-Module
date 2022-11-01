@@ -43,14 +43,15 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("Start generating patient line list for facility: " + getFacilityName(facilityId));
 		try {
 			List<PatientLineListDto> data = patientReportService.getPatientLineList(facilityId);
+			System.out.println("fullData 1: " + data.size());
 			ExcelService generator = new ExcelService();
 			List<Map<Integer, String>> fullData = GenerateExcelDataHelper.fillPatientLineListDataMapper(data);
+			System.out.println("fullData 2: " + fullData.size());
 			return generator.generate(Constants.PATIENT_LINE_LIST, fullData, Constants.PATIENT_LINE_LIST_HEADER);
 		} catch (IOException e) {
 			LOG.error("Error Occurred when generating PATIENT LINE LIST!!!");
 			e.printStackTrace();
 		}
-		
 		LOG.info("End generate patient line list ");
 		return null;
 	}
@@ -73,6 +74,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	
 	@Override
 	public ByteArrayOutputStream generatePharmacyReport(Long facilityId) {
+		LOG.info("generating Pharmacy");
 		try {
 			String facilityName = getFacilityName(facilityId);
 			List<ArtPharmacy> pharmacies = artPharmacyRepository.findAll()
