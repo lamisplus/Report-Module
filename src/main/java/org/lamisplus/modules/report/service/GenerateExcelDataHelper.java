@@ -3,6 +3,7 @@ package org.lamisplus.modules.report.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.NonNull;
 
+import org.audit4j.core.util.Log;
 import org.lamisplus.modules.hiv.domain.entity.ArtPharmacy;
 import org.lamisplus.modules.hiv.domain.entity.Regimen;
 import org.lamisplus.modules.hiv.repositories.RegimenRepository;
@@ -80,6 +81,7 @@ public class GenerateExcelDataHelper {
 			map.put(index, "");
 			result.add(map);
 		}
+		Log.info("result: " + result.size());
 		return result;
 	}
 	
@@ -163,7 +165,7 @@ public class GenerateExcelDataHelper {
 			map.put(index++, dto.getState());
 			map.put(index++, dto.getFacilityName());
 			map.put(index++, dto.getHospitalNum());
-			map.put(index++, dto.getName());
+			map.put(index++, getStringValue(dto.getName()));
 			map.put(index++, getStringValue(String.valueOf(dto.getDateBirth())));
 			map.put(index++, getStringValue(String.valueOf(dto.getAge())));
 			map.put(index++, dto.getSex());

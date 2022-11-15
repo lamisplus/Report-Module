@@ -43,12 +43,12 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("Start generating patient line list for facility: " + getFacilityName(facilityId));
 		try {
 			List<PatientLineListDto> data = patientReportService.getPatientLineList(facilityId);
-			System.out.println("fullData 1: " + data.size());
+			LOG.info("fullData 1: " + data.size());
 			ExcelService generator = new ExcelService();
 			List<Map<Integer, String>> fullData = GenerateExcelDataHelper.fillPatientLineListDataMapper(data);
 			System.out.println("fullData 2: " + fullData.size());
 			return generator.generate(Constants.PATIENT_LINE_LIST, fullData, Constants.PATIENT_LINE_LIST_HEADER);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			LOG.error("Error Occurred when generating PATIENT LINE LIST!!!");
 			e.printStackTrace();
 		}
@@ -64,7 +64,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			ExcelService generator = new ExcelService();
 			List<Map<Integer, String>> data = GenerateExcelDataHelper.fillRadetDataMapper(radetData);
 			return generator.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			LOG.error("Error Occurred when generating RADET !!!");
 			e.printStackTrace();
 		}
@@ -86,7 +86,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			LOG.info("Pharmacy final data {}", data);
 			ExcelService generator = new ExcelService();
 			return generator.generate(Constants.PHARMACY_SHEET, data, Constants.PHARMACY_HEADER);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			LOG.info("Error Occurred when generating Pharmacy");
 			e.printStackTrace();
 		}
@@ -95,13 +95,15 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	}
 	
 	@Override
-	public ByteArrayOutputStream generateBiometricReport(Long facilityId, LocalDate start, LocalDate end) throws IOException {
+	public ByteArrayOutputStream generateBiometricReport(Long facilityId, LocalDate start, LocalDate end){
 		try {
+			LOG.info("start to generate biometric report");
 			List<BiometricReportDto> biometricReportDtoList = biometricReportService.getBiometricReportDtoList(facilityId, start, end);
 			List<Map<Integer, String>> biometricData = GenerateExcelDataHelper.fillBiometricDataMapper(biometricReportDtoList);
+			LOG.info("biometric report size {}", biometricData.size());
 			ExcelService generator = new ExcelService();
 			return generator.generate(Constants.BIOMETRIC_SHEET_SHEET, biometricData, Constants.BIOMETRIC_HEADER);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			LOG.info("Error Occurred when generating biometric data", e);
 		}
 		LOG.info("End generate biometric report");

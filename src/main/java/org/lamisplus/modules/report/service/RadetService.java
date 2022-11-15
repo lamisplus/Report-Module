@@ -204,21 +204,21 @@ public class RadetService {
 			
 		});
 		//current viral load
-		boolean labExist = moduleService.exist("Lab");
-		if (labExist) {
-			Log.info(" in lab info {}", labExist);
-			Optional<ViralLoadRadetDto> viralLoadDetails =
-					hIVEacRepository.getPatientCurrentViralLoadDetails(person.getId(), start.plusDays(1), end.minusDays(1));
-			viralLoadDetails.ifPresent(currentViralLoad -> {
-				Log.info("current viral load indication {}", currentViralLoad.getIndicationId() + " : ressult :=> " + currentViralLoad.getResult());
-				String viralLoadIndication =
-						applicationCodesetService.getApplicationCodeset(currentViralLoad.getIndicationId()).getDisplay();
-				radetDto.setViralLoadIndication(viralLoadIndication);
-				radetDto.setDateOfViralLoadSampleCollection(currentViralLoad.getDateSampleCollected());
-				radetDto.setCurrentViralLoad(currentViralLoad.getResult());
-				radetDto.setDateOfCurrentViralLoad(currentViralLoad.getResultDate());
-			});
-		}
+//		boolean labExist = moduleService.exist("Lab");
+//		if (labExist) {
+//			Log.info(" in lab info {}", labExist);
+//			Optional<ViralLoadRadetDto> viralLoadDetails =
+//					hIVEacRepository.getPatientCurrentViralLoadDetails(person.getId(), start.plusDays(1), end.minusDays(1));
+//			viralLoadDetails.ifPresent(currentViralLoad -> {
+//				Log.info("current viral load indication {}", currentViralLoad.getIndicationId() + " : ressult :=> " + currentViralLoad.getResult());
+//				String viralLoadIndication =
+//						applicationCodesetService.getApplicationCodeset(currentViralLoad.getIndicationId()).getDisplay();
+//				radetDto.setViralLoadIndication(viralLoadIndication);
+//				radetDto.setDateOfViralLoadSampleCollection(currentViralLoad.getDateSampleCollected());
+//				radetDto.setCurrentViralLoad(currentViralLoad.getResult());
+//				radetDto.setDateOfCurrentViralLoad(currentViralLoad.getResultDate());
+//			});
+//		}
 		//current biometrics
 		boolean bioExist = moduleService.exist("Bio");
 		Log.info(" out side biometric info {}", bioExist);

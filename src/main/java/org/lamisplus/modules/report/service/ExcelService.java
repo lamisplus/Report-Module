@@ -6,11 +6,11 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.audit4j.core.util.Log;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +20,8 @@ public class ExcelService {
 	
 	private XSSFWorkbook workbook;
 	private XSSFSheet sheet;
+	
+	
 	
 	public ExcelService() {
 		this.workbook = new XSSFWorkbook();
@@ -75,16 +77,22 @@ public class ExcelService {
 	public ByteArrayOutputStream generate(
 			String sheetName,
 			List<Map<Integer, String>> listData,
-			List<String> headers) throws IOException {
-		writeHeader(sheetName, headers);
-		write(listData);
-		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		workbook.write(bao);
-		FileOutputStream fileOut = new FileOutputStream("runtime/"+sheetName+".xlsx");
-		workbook.write(fileOut);
-		workbook.close();
-		bao.close();
-		return bao;
+			List<String> headers)  {
+		try {
+			writeHeader(sheetName, headers);
+			write(listData);
+			ByteArrayOutputStream bao = new ByteArrayOutputStream();
+			workbook.write(bao);
+			Log.info("last row {}", workbook.getSheet(sheetName).getLastRowNum());
+			FileOutputStream fileOut = new FileOutputStream("runtime/" + sheetName + ".xlsx");
+			workbook.write(fileOut);
+			workbook.close();
+			bao.close();
+			return bao;
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 }
