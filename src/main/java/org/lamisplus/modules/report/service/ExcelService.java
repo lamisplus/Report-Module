@@ -42,7 +42,6 @@ public class ExcelService {
 	}
 	
 	private void createCell(Row row, int columnCount, Object value, CellStyle style) {
-		sheet.autoSizeColumn(columnCount);
 		Cell cell = row.createCell(columnCount);
 		if (value instanceof Integer) {
 			cell.setCellValue((Integer) value);
@@ -71,6 +70,7 @@ public class ExcelService {
 			for (Integer key : map.keySet()) {
 				createCell(row, columnCount++, map.get(key), style);
 			}
+			sheet.autoSizeColumn(columnCount);
 		}
 	}
 	

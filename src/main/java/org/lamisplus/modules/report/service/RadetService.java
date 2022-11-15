@@ -24,10 +24,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -77,6 +74,7 @@ public class RadetService {
 						|| artPharmacy.getVisitDate().equals(end)
 						|| (artPharmacy.getVisitDate().isAfter(start) && artPharmacy.getVisitDate().isBefore(end)))
 				.map(artPharmacy -> buildRadetDto(facilityId, artPharmacy, start.minusDays(1), end.plusDays(1)))
+				.filter(Objects::nonNull)
 				.collect(Collectors.toSet());
 	}
 	
@@ -162,9 +160,9 @@ public class RadetService {
 		
 		currentPharmacyVisit.ifPresent(p -> {
 			radetDto.setMonthOfArvRefills(0);
-			int refillPeriod = artPharmacyRepository.sumRefillPeriodsByPersonAndDateRange
+			Integer refillPeriod = artPharmacyRepository.sumRefillPeriodsByPersonAndDateRange
 					(person.getUuid(), start.plusDays(1), end.minusDays(1));
-			if (refillPeriod > 0) {
+			if (refillPeriod != null  &&  refillPeriod > 0) {
 				radetDto.setMonthOfArvRefills(refillPeriod / 30);
 			}
 			radetDto.setLastPickupDate(p.getVisitDate());
@@ -204,21 +202,25 @@ public class RadetService {
 			
 		});
 		//current viral load
-//		boolean labExist = moduleService.exist("Lab");
-//		if (labExist) {
-//			Log.info(" in lab info {}", labExist);
-//			Optional<ViralLoadRadetDto> viralLoadDetails =
-//					hIVEacRepository.getPatientCurrentViralLoadDetails(person.getId(), start.plusDays(1), end.minusDays(1));
-//			viralLoadDetails.ifPresent(currentViralLoad -> {
-//				Log.info("current viral load indication {}", currentViralLoad.getIndicationId() + " : ressult :=> " + currentViralLoad.getResult());
-//				String viralLoadIndication =
-//						applicationCodesetService.getApplicationCodeset(currentViralLoad.getIndicationId()).getDisplay();
-//				radetDto.setViralLoadIndication(viralLoadIndication);
-//				radetDto.setDateOfViralLoadSampleCollection(currentViralLoad.getDateSampleCollected());
-//				radetDto.setCurrentViralLoad(currentViralLoad.getResult());
-//				radetDto.setDateOfCurrentViralLoad(currentViralLoad.getResultDate());
-//			});
-//		}
+		boolean labExist = moduleService.exist("Lab");
+		if (labExist) {
+			Log.info(" in lab info {}", labExist);
+			Optional<ViralLoadRadetDto> viralLoadDetails =
+					hIVEacRepository.getPatientCurrentViralLoadDetails(person.getId(), start.plusDays(1).atStartOfDay(), end.minusDays(1).atStartOfDay());
+			viralLoadDetails.ifPresent(currentViralLoad -> {
+				Log.info("current viral load indication {}", currentViralLoad.getIndicationId() + " : ressult :=> " + currentViralLoad.getResult());
+				String viralLoadIndication =
+						applicationCodesetService.getApplicationCodeset(currentViralLoad.getIndicationId()).getDisplay();
+				radetDto.setViralLoadIndication(viralLoadIndication);
+				if(currentViralLoad.getDateSampleCollected() != null){
+					radetDto.setDateOfViralLoadSampleCollection(currentViralLoad.getDateSampleCollected().toLocalDate());
+				}
+				if(currentViralLoad.getResultDate() != null){
+					radetDto.setDateOfCurrentViralLoad(currentViralLoad.getResultDate().toLocalDate());
+				}
+				radetDto.setCurrentViralLoad(currentViralLoad.getResult());
+			});
+		}
 		//current biometrics
 		boolean bioExist = moduleService.exist("Bio");
 		Log.info(" out side biometric info {}", bioExist);
