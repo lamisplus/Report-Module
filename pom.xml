@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>com.foreach.across</groupId>
 		<artifactId>across-application-parent</artifactId>
@@ -9,76 +10,38 @@
 		<relativePath/>
 	</parent>
 
+
 	<groupId>org.lamisplus.modules</groupId>
 	<artifactId>report</artifactId>
 	<version>1.0.0</version>
 	<packaging>jar</packaging>
-
 	<name>report-module</name>
 	<description>report-module</description>
 
-	<repositories>
-	<repository>
-		<id>foreach-nexus</id>
-		<name>Foreach nexus</name>
-		<url>https://repository.foreach.be/nexus/repository/public/</url>
-	</repository>
-	<repository>
-		<id>mvn-repo</id>
-		<url>https://raw.github.com/lamisplus/maven-repo/master</url>
-		<releases>
-			<enabled>true</enabled>
-		</releases>
-		<snapshots>
-			<enabled>true</enabled>
-		</snapshots>
-	</repository>
-	<repository>
-		<releases>
-			<enabled>true</enabled>
-		</releases>
-		<id>infobelt-nexus</id>
-		<url>https://nexus.jx.infobelt.com/repository/maven-releases/</url>
-	</repository>
-</repositories>
+	<properties>
+		<java.version>1.8</java.version>
+		<mapstruct.version>1.4.2.Final</mapstruct.version>
+		<org.projectlombok.version>1.18.4</org.projectlombok.version>
+		<jjwt.version>0.11.2</jjwt.version>
+		<build.revision>1.0.0</build.revision>
+		<audit4j.version>2.5.0</audit4j.version>
+		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
+	</properties>
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>io.zonky.test.postgres</groupId>
-				<artifactId>embedded-postgres-binaries-bom</artifactId>
-				<version>13.2.0</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency></dependencies>
+		</dependencies>
 	</dependencyManagement>
 
+	<repositories>
+		<repository>
+			<id>foreach-nexus</id>
+			<name>Foreach nexus</name>
+			<url>https://repository.foreach.be/nexus/repository/public/</url>
+		</repository>
+	</repositories>
+
 	<dependencies>
-		<dependency>
-			<groupId>com.foreach.across</groupId>
-			<artifactId>across-test</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>com.foreach.across</groupId>
-					<artifactId>across-core</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-configuration-processor</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<scope>runtime</scope>
-		</dependency>
 
 
 		<dependency>
@@ -111,9 +74,93 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.mchange</groupId>
+			<artifactId>c3p0</artifactId>
+			<version>0.9.5.5</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.audit4j</groupId>
+			<artifactId>audit4j-core</artifactId>
+			<version>2.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-messaging</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.foreach.across</groupId>
+			<artifactId>across-test</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.foreach.across</groupId>
+					<artifactId>across-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>com.foreach.across</groupId>
+			<artifactId>across-autoconfigure</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.foreach.across.modules</groupId>
+					<artifactId>across-hibernate-module</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<version>${lombok.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>${mapstruct.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.9.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.lamisplus.modules</groupId>
+			<artifactId>base-module</artifactId>
+			<version>2.0.0</version>
 		</dependency>
 
 		<dependency>
@@ -143,12 +190,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.mapstruct</groupId>
-			<artifactId>mapstruct</artifactId>
-			<version>1.4.2.Final</version>
-		</dependency>
-
-		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.11.0</version>
@@ -161,34 +202,15 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-core</artifactId>
-			<version>5.3.12</version>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.3.0</version>
 		</dependency>
+
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-websocket</artifactId>
-			<version>5.3.5</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-			<version>5.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-			<version>5.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-web</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-core</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>6.0.10.Final</version>
 		</dependency>
 
 		<dependency>
@@ -210,6 +232,18 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.vladmihalcea</groupId>
+			<artifactId>hibernate-types-52</artifactId>
+			<version>2.8.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>5.4.0.Final</version>
+		</dependency>
+
+		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>okhttp</artifactId>
 			<version>4.9.1</version>
@@ -224,29 +258,6 @@
 		<dependency>
 			<groupId>com.foreach.across.modules</groupId>
 			<artifactId>across-hibernate-module</artifactId>
-			<version>4.1.0.RELEASE</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.springtestdbunit</groupId>
-			<artifactId>spring-test-dbunit</artifactId>
-			<version>1.3.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.zonky.test.postgres</groupId>
-			<artifactId>embedded-postgres-binaries-windows-amd64</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.zonky.test</groupId>
-			<artifactId>embedded-database-spring-test</artifactId>
-			<version>1.6.3</version>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 	</dependencies>
 
@@ -270,72 +281,77 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
+				<version>3.8.0</version>
 				<configuration>
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
-							<version>1.18.4</version>
+							<version>${lombok.version}</version>
+						</path>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>${mapstruct.version}</version>
 						</path>
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
-			            <plugin>
-							<groupId>com.github.eirslett</groupId>
-							<artifactId>frontend-maven-plugin</artifactId>
-							<version>1.12.1</version>
-							<executions>
-								<execution>
-									<id>install node and npm</id>
-									<goals>
-										<goal>install-node-and-npm</goal>
-									</goals>
-									<configuration>
-										<nodeVersion>v16.13.2</nodeVersion>
-										<npmVersion>8.1.2</npmVersion>
-									</configuration>
-								</execution>
-								<execution>
-									<id>npm install</id>
-									<goals>
-										<goal>npm</goal>
-									</goals>
-									<configuration>
-										<arguments>install</arguments>
-									</configuration>
-								</execution>
-								<execution>
-									<id>npm run build</id>
-									<goals>
-										<goal>npm</goal>
-									</goals>
-									<configuration>
-										<arguments>run build</arguments>
-									</configuration>
-								</execution>
-							</executions>
-						</plugin>
-			            <plugin>
-			                <artifactId>maven-antrun-plugin</artifactId>
-			                <executions>
-			                    <execution>
-			                        <phase>generate-resources</phase>
-			                        <configuration>
-			                            <target>
-			                                <copy todir="${project.build.directory}/classes/views/static/reports">
-			                                    <fileset dir="${project.basedir}/build"/>
-			                                </copy>
-			                            </target>
-			                        </configuration>
-			                        <goals>
-			                            <goal>run</goal>
-			                        </goals>
-			                    </execution>
-			                </executions>
-			            </plugin>
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>1.12.1</version>
+				<executions>
+					<execution>
+						<id>install node and npm</id>
+						<goals>
+							<goal>install-node-and-npm</goal>
+						</goals>
+						<configuration>
+							<nodeVersion>v16.13.2</nodeVersion>
+							<npmVersion>8.1.2</npmVersion>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm install</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<arguments>install</arguments>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm run build</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<arguments>run build</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>generate-resources</phase>
+						<configuration>
+							<target>
+								<copy todir="${project.build.directory}/classes/views/static/report">
+									<fileset dir="${project.basedir}/build"/>
+								</copy>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>
