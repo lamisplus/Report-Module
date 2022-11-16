@@ -22,6 +22,7 @@ public class GenerateExcelDataHelper {
 			Map<Integer, String> map = new HashMap<>();
 			int index = 0;
 			map.put(index++, getStringValue(String.valueOf(patient.getFacilityId())));
+			map.put(index++, getStringValue(patient.getDatimId()));
 			map.put(index++, patient.getFacilityName());
 			map.put(index++, patient.getLga());
 			map.put(index++, patient.getState());
@@ -74,10 +75,10 @@ public class GenerateExcelDataHelper {
 			map.put(index++, patient.getLastClinicStage());
 			map.put(index++, getStringValue(String.valueOf(patient.getDateOfLastClinic())));
 			map.put(index++, getStringValue(String.valueOf(patient.getDateOfNextClinic())));
-			map.put(index++, "");
-			map.put(index++, "");
-			map.put(index++, "");
-			map.put(index++, "");
+			map.put(index++, getStringValue(String.valueOf(patient.getDateOfSampleCollection())));
+			map.put(index++, getStringValue(String.valueOf(patient.getCurrentVl())));
+			map.put(index++, getStringValue(String.valueOf(patient.getDateCurrentVl())));
+			map.put(index++, getStringValue(String.valueOf(patient.getVlIndication())));
 			map.put(index, "");
 			result.add(map);
 		}

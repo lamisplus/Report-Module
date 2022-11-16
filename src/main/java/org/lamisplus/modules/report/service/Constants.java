@@ -16,6 +16,7 @@ public class Constants {
 	// headers
 	public static final List<String> PATIENT_LINE_LIST_HEADER = Arrays.asList(
 			"Facility Id",
+			"Datim Id",
 			"Facility Name",
 			"LGA",
 			"State",
@@ -82,9 +83,9 @@ public class Constants {
 			//"Date of Last TB-LAM (yyyy-mm-dd)",
 			// "Last Cryptococcal Antigen",
 			//"Date of Last Cryptococcal Antigen (yyyy-mm-dd)",
+			"Date of Sample Collection",
 			"Last Viral Load",
 			"Date of Last Viral Load (yyyy-mm-dd)",
-			"Viral Load Due Date",
 			"Viral Load Indication",
 			// "Date Returned to Facility (yyyy-mm-dd)",
 			// "Co-morbidities",
