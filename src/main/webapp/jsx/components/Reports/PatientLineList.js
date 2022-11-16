@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
 const PatientLineList = (props) => {
     const classes = useStyles();
     const [loading, setLoading] = useState(false)
-    const [facilities, setFacilities] = useState([]);
+    const [facilitiesUpdate, setFacilities] = useState([]);
     const [objValues, setObjValues]=useState({       
         organisationUnitId:""
     })
@@ -105,7 +105,7 @@ const PatientLineList = (props) => {
             { headers: {"Authorization" : `Bearer ${token}`} }
         )
         .then((response) => {
-            //console.log(response.data);
+            console.log(response.data);
             setFacilities(response.data.applicationUserOrganisationUnits);
         })
         .catch((error) => {
@@ -113,7 +113,7 @@ const PatientLineList = (props) => {
         });
     
     }
-
+console.log(facilitiesUpdate)
     return (
         <>
             
@@ -136,7 +136,7 @@ const PatientLineList = (props) => {
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
                                     >
                                         <option value={""}></option>
-                                        {facilities.map((value) => (
+                                        {facilitiesUpdate.map((value) => (
                                             <option key={value.id} value={value.organisationUnitId}>
                                                 {value.organisationUnitName}
                                             </option>
