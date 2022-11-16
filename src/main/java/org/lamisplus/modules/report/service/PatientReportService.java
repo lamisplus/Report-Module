@@ -5,19 +5,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.audit4j.core.util.Log;
 import org.jetbrains.annotations.NotNull;
 import org.lamisplus.modules.base.domain.dto.ApplicationCodesetDTO;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnit;
+import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
+import org.lamisplus.modules.base.module.ModuleService;
 import org.lamisplus.modules.base.service.ApplicationCodesetService;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
+import org.lamisplus.modules.hiv.domain.dto.ViralLoadRadetDto;
 import org.lamisplus.modules.hiv.domain.entity.ARTClinical;
 import org.lamisplus.modules.hiv.domain.entity.ArtPharmacy;
 import org.lamisplus.modules.hiv.domain.entity.HivEnrollment;
 import org.lamisplus.modules.hiv.domain.entity.Regimen;
-import org.lamisplus.modules.hiv.repositories.ARTClinicalRepository;
-import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
-import org.lamisplus.modules.hiv.repositories.HivEnrollmentRepository;
-import org.lamisplus.modules.hiv.repositories.RegimenRepository;
+import org.lamisplus.modules.hiv.repositories.*;
 import org.lamisplus.modules.patient.domain.entity.Person;
 import org.lamisplus.modules.report.domain.PatientLineListDto;
 import org.lamisplus.modules.triage.domain.entity.VitalSign;
@@ -28,10 +29,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,11 +54,18 @@ public class PatientReportService {
 	
 	private final RegimenRepository regimenRepository;
 	
+	private final HIVEacRepository hIVEacRepository;
+	
+	private final ModuleService moduleService;
+	
 	
 	public List<PatientLineListDto> getPatientLineList(Long facilityId) {
 		return hivEnrollmentRepository.findAll()
-				.stream()
+				.parallelStream()
 				.filter(hivEnrollment -> hivEnrollment.getFacilityId().equals(facilityId))
+				.filter(Objects::nonNull)
+				.filter(hivEnrollment -> hivEnrollment.getStatusAtRegistrationId() != null)
+				.filter(Objects::nonNull)
 				.map(this::getPatientLineListDto)
 				.collect(Collectors.toList());
 		
@@ -70,6 +75,11 @@ public class PatientReportService {
 	private PatientLineListDto getPatientLineListDto(HivEnrollment hivEnrollment) {
 		Long facilityId = hivEnrollment.getFacilityId();
 		OrganisationUnit facility = organisationUnitService.getOrganizationUnit(facilityId);
+		String datim_id = facility.getOrganisationUnitIdentifiers()
+				.stream()
+				.filter(identifier -> identifier.getName().equalsIgnoreCase("DATIM_ID"))
+				.map(OrganisationUnitIdentifier::getCode)
+				.findFirst().orElse("");
 		Long lgaIdOfTheFacility = facility.getParentOrganisationUnitId();
 		OrganisationUnit lgaOrgUnitOfFacility = organisationUnitService.getOrganizationUnit(lgaIdOfTheFacility);
 		Long stateId = lgaOrgUnitOfFacility.getParentOrganisationUnitId();
@@ -80,11 +90,24 @@ public class PatientReportService {
 		int age = Period.between(dateBirth, currentDate).getYears();
 		JsonNode maritalStatus = person.getMaritalStatus();
 		String fieldName = "display";
-		String maritalStatusValue = maritalStatus.isNull() ? "" : maritalStatus.get(fieldName).asText();
+		StringBuilder maritalStatusValue = new StringBuilder();
+		if(maritalStatus != null){
+			String maritalStatusValue1 = maritalStatus.isNull() ? "" : maritalStatus.get(fieldName).asText();
+			maritalStatusValue.append(maritalStatusValue1);
+		}
 		JsonNode education = person.getEducation();
-		String educationValue = education.isNull() ? "" : education.get(fieldName).asText();
+		StringBuilder educationValue = new StringBuilder();
+		if(education != null) {
+			String educationValue1 = education.isNull() ? "" : education.get(fieldName).asText();
+			educationValue.append(educationValue1);
+		}
 		JsonNode occupation = person.getEmploymentStatus();
-		String occupationValue = education.isNull() ? "" : occupation.get(fieldName).asText();
+		StringBuilder occupationValue = new StringBuilder();
+		if (occupation != null) {
+			String occupationValue1 = occupation.isNull() ? "" : occupation.get(fieldName).asText();
+			occupationValue.append(occupationValue1);
+			
+		}
 		JsonNode address = person.getAddress();
 		JsonNode address1 = address.get("address");
 		Long stateOfResidenceId = null;
@@ -118,14 +141,24 @@ public class PatientReportService {
 		Integer archived = person.getArchived();
 		boolean finalArchived = archived != 0;
 		Long statusAtRegistrationId = hivEnrollment.getStatusAtRegistrationId();
-		String statusAtRegistration = applicationCodesetService.getApplicationCodeset(statusAtRegistrationId).getDisplay();
+		StringBuilder statusAtRegistration = new StringBuilder();
+		if(statusAtRegistrationId != null && statusAtRegistrationId > 0){
+			String statusAtRegistration1 =
+					applicationCodesetService.getApplicationCodeset(statusAtRegistrationId).getDisplay();
+			statusAtRegistration.append(statusAtRegistration1);
+		}
 		Long entryPointId = hivEnrollment.getEntryPointId();
-		String careEntryPoint = applicationCodesetService.getApplicationCodeset(entryPointId).getDisplay();
+		StringBuilder careEntryPoint = new StringBuilder();
+		if (entryPointId != null && entryPointId > 0){
+			String careEntryPoint1 = applicationCodesetService.getApplicationCodeset(entryPointId).getDisplay();
+			careEntryPoint.append(careEntryPoint1);
+		}
 		LocalDate dateConfirmedHiv = hivEnrollment.getDateConfirmedHiv();
-		Optional<ARTClinical> artCommenceOptional = artClinicalRepository.findByPersonAndIsCommencementIsTrueAndArchived(person, 0);
+		Optional<ARTClinical> artCommenceOptional = artClinicalRepository.findTopByPersonAndIsCommencementIsTrueAndArchived(person, 0);
 		PatientLineListDto patientLineListDto = PatientLineListDto
 				.builder()
 				.facilityId(facilityId)
+				.datimId(datim_id)
 				.facilityName(facility.getName())
 				.surname(person.getSurname())
 				.otherName(person.getFirstName())
@@ -134,9 +167,9 @@ public class PatientReportService {
 				.archived(finalArchived)
 				.age(age)
 				.dateBirth(dateBirth)
-				.maritalStatus(maritalStatusValue)
-				.education(educationValue)
-				.occupation(occupationValue)
+				.maritalStatus(maritalStatusValue.toString())
+				.education(educationValue.toString())
+				.occupation(occupationValue.toString())
 				.lgaOfResidence(lgaOfResidency.getName())
 				.stateOfResidence(stateOfResidency.getName())
 				.patientId(hivEnrollment.getUuid())
@@ -145,8 +178,8 @@ public class PatientReportService {
 				.lga(lgaOrgUnitOfFacility.getName())
 				.state(state.getName())
 				.sex(person.getSex())
-				.statusAtRegistration(statusAtRegistration)
-				.careEntryPoint(careEntryPoint)
+				.statusAtRegistration(statusAtRegistration.toString())
+				.careEntryPoint(careEntryPoint.toString())
 				.dateOfRegistration(hivEnrollment.getDateOfRegistration())
 				.dateOfConfirmedHIVTest(dateConfirmedHiv)
 				.build();
@@ -154,6 +187,7 @@ public class PatientReportService {
 		processAndSetCurrentVitalSignInfo(person, patientLineListDto);
 		processAndSetPharmacyDetails(person, currentDate, patientLineListDto);
 		processAndSetCurrentClinicalVisit(person, patientLineListDto);
+		processAndSetVl(patientLineListDto, person.getId());
 		return patientLineListDto;
 	}
 	
@@ -166,7 +200,7 @@ public class PatientReportService {
 		lastClinicVisit.ifPresent(artClinical -> {
 			LOG.info("current clinic visit {}", artClinical.getVisitDate());
 			Long clinicalStageId = artClinical.getClinicalStageId();
-			if (clinicalStageId != null) {
+			if (clinicalStageId != null && clinicalStageId > 0) {
 				ApplicationCodesetDTO clinicalStage = applicationCodesetService.getApplicationCodeset(clinicalStageId);
 				patientLineListDto.setLastClinicStage(clinicalStage.getDisplay());
 			}
@@ -245,9 +279,18 @@ public class PatientReportService {
 	
 	private void processAndSetBaseline(Optional<ARTClinical> artCommenceOptional, PatientLineListDto patientLineListDto) {
 		artCommenceOptional.ifPresent(artClinical -> {
-			ApplicationCodesetDTO clinicalStage = applicationCodesetService.getApplicationCodeset(artClinical.getWhoStagingId());
-			ApplicationCodesetDTO functionalStatus = applicationCodesetService.getApplicationCodeset(artClinical.getFunctionalStatusId());
-			Optional<Regimen> firstRegimen = regimenRepository.findById(artClinical.getRegimenId());
+			Long whoStagingId = artClinical.getWhoStagingId();
+			if (whoStagingId != null && whoStagingId > 0) {
+				ApplicationCodesetDTO clinicalStage = applicationCodesetService.getApplicationCodeset(whoStagingId);
+				patientLineListDto.setBaselineClinicStage(clinicalStage.getDisplay());
+			}
+			Long functionalStatusId = artClinical.getFunctionalStatusId();
+			if (functionalStatusId != null && functionalStatusId > 0)  {
+				ApplicationCodesetDTO functionalStatus = applicationCodesetService.getApplicationCodeset(functionalStatusId);
+				patientLineListDto.setBaselineFunctionalStatus(functionalStatus.getDisplay());
+			}
+			long regimenId = artClinical.getRegimenId();
+			Optional<Regimen> firstRegimen = regimenRepository.findById(regimenId);
 			firstRegimen.ifPresent(regimen -> {
 				String regimenLine = regimen.getRegimenType().getDescription();
 				String regimenName = regimen.getDescription();
@@ -264,11 +307,34 @@ public class PatientReportService {
 			patientLineListDto.setDiastolicBP(vitalSign.getDiastolic());
 			patientLineListDto.setSystolicBP(vitalSign.getSystolic());
 			patientLineListDto.setArtStartDate(artClinical.getVisitDate());
-			patientLineListDto.setBaselineClinicStage(clinicalStage.getDisplay());
-			patientLineListDto.setBaselineFunctionalStatus(functionalStatus.getDisplay());
+			
 		});
 	}
+	//current viral load
 	
+	private  void  processAndSetVl(PatientLineListDto patientLineListDto, Long personId) {
+		boolean labExist = moduleService.exist("Lab");
+		if (labExist) {
+			Log.info(" in lab info {}", labExist);
+			LocalDateTime start = LocalDateTime.of(1984, 1, 1,0,0);
+			
+			Optional<ViralLoadRadetDto> viralLoadDetails =
+					hIVEacRepository.getPatientCurrentViralLoadDetails(personId, start, LocalDateTime.now());
+			viralLoadDetails.ifPresent(currentViralLoad -> {
+				Log.info("current viral load indication {}", currentViralLoad.getIndicationId() + " : result :=> " + currentViralLoad.getResult());
+				String viralLoadIndication =
+						applicationCodesetService.getApplicationCodeset(currentViralLoad.getIndicationId()).getDisplay();
+				patientLineListDto.setVlIndication(viralLoadIndication);
+				if (currentViralLoad.getDateSampleCollected() != null) {
+					patientLineListDto.setDateOfSampleCollection(currentViralLoad.getDateSampleCollected());
+				}
+				if (currentViralLoad.getResultDate() != null) {
+					patientLineListDto.setDateCurrentVl(currentViralLoad.getResultDate());
+				}
+				patientLineListDto.setCurrentVl(Double.valueOf(currentViralLoad.getResult()));
+			});
+		}
+	}
 	
 	public List<PatientLineListDto> getPatientData(Long facility) {
 		return getPatientLineList(facility);

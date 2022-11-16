@@ -85,7 +85,7 @@ const PharmacyReport = (props) => {
     const handleSubmit = (e) => {        
         e.preventDefault();
         setLoading(true)
-        axios.get(`${baseUrl}reporting/pharmacy?facilityId=${objValues.organisationUnitId}`,
+        axios.get(`${baseUrl}reporting/pharmacy/${objValues.organisationUnitId}`,
            { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
           
           )

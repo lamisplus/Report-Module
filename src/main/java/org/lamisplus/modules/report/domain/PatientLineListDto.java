@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
 @Data
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class PatientLineListDto {
     private Long facilityId;
+    private String datimId;
     private String facilityName;
     private String state;
     private String lga;
@@ -64,6 +66,12 @@ public class PatientLineListDto {
     private String lastClinicStage;
     private LocalDate  dateOfLastClinic;
     private LocalDate  dateOfNextClinic;
+    
+    //vl
+    private LocalDateTime dateOfSampleCollection;
+    private  Double currentVl;
+    private LocalDateTime dateCurrentVl;
+    private  String vlIndication;
 
 //            "Adherence",
 //            "Waist Circumference(cm)",

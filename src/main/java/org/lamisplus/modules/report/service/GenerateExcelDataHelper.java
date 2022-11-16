@@ -3,6 +3,7 @@ package org.lamisplus.modules.report.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.NonNull;
 
+import org.audit4j.core.util.Log;
 import org.lamisplus.modules.hiv.domain.entity.ArtPharmacy;
 import org.lamisplus.modules.hiv.domain.entity.Regimen;
 import org.lamisplus.modules.hiv.repositories.RegimenRepository;
@@ -21,6 +22,7 @@ public class GenerateExcelDataHelper {
 			Map<Integer, String> map = new HashMap<>();
 			int index = 0;
 			map.put(index++, getStringValue(String.valueOf(patient.getFacilityId())));
+			map.put(index++, getStringValue(patient.getDatimId()));
 			map.put(index++, patient.getFacilityName());
 			map.put(index++, patient.getLga());
 			map.put(index++, patient.getState());
@@ -73,13 +75,14 @@ public class GenerateExcelDataHelper {
 			map.put(index++, patient.getLastClinicStage());
 			map.put(index++, getStringValue(String.valueOf(patient.getDateOfLastClinic())));
 			map.put(index++, getStringValue(String.valueOf(patient.getDateOfNextClinic())));
-			map.put(index++, "");
-			map.put(index++, "");
-			map.put(index++, "");
-			map.put(index++, "");
+			map.put(index++, getStringValue(String.valueOf(patient.getDateOfSampleCollection())));
+			map.put(index++, getStringValue(String.valueOf(patient.getCurrentVl())));
+			map.put(index++, getStringValue(String.valueOf(patient.getDateCurrentVl())));
+			map.put(index++, getStringValue(String.valueOf(patient.getVlIndication())));
 			map.put(index, "");
 			result.add(map);
 		}
+		Log.info("result: " + result.size());
 		return result;
 	}
 	
@@ -163,7 +166,7 @@ public class GenerateExcelDataHelper {
 			map.put(index++, dto.getState());
 			map.put(index++, dto.getFacilityName());
 			map.put(index++, dto.getHospitalNum());
-			map.put(index++, dto.getName());
+			map.put(index++, getStringValue(dto.getName()));
 			map.put(index++, getStringValue(String.valueOf(dto.getDateBirth())));
 			map.put(index++, getStringValue(String.valueOf(dto.getAge())));
 			map.put(index++, dto.getSex());
