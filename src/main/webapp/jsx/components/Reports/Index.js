@@ -98,46 +98,7 @@ const Reports = (props) => {
                                 
                             {/* <Label color='teal'>5</Label> */}
                             </Menu.Item>
-                            <Menu.Item
-                                name='spam'
-                                active={activeItem === 'devolve'}
-                                onClick={()=>handleItemClick('devolve')}
-                                style={{backgroundColor:activeItem === 'devolve' ? '#000': ""}}
-                            >
-                            {/* <Label>4</Label> */}
-                            <span style={{color:'#fff'}}>DEVOLVE REPORT</span>
-                           
-                            </Menu.Item>
-                            <Menu.Item
-                                name='spam'
-                                active={activeItem === 'prep'}
-                                onClick={()=>handleItemClick('prep')}
-                                style={{backgroundColor:activeItem === 'prep' ? '#000': ""}}
-                            >
-                            {/* <Label>2</Label> */}
-                            <span style={{color:'#fff'}}>PREP REPORT</span>
                             
-                            </Menu.Item>
-                            <Menu.Item
-                                name='inbox'
-                                active={activeItem === 'ict'}
-                                onClick={()=>handleItemClick('ict')}
-                                style={{backgroundColor:activeItem === 'ict' ? '#000': ""}}
-                            >               
-                                <span style={{color:'#fff'}}>ICT TRACKING</span>
-                               
-                            {/* <Label color='teal'>5</Label> */}
-                            </Menu.Item>
-                            <Menu.Item
-                                name='inbox'
-                                active={activeItem === 'art'}
-                                onClick={()=>handleItemClick('art')}
-                                style={{backgroundColor:activeItem === 'art' ? '#000': ""}}
-                            >               
-                                <span style={{color:'#fff'}}>ART SUMMARY REPORT</span>
-                               
-                                {/* <Label color='teal'>3</Label> */}
-                            </Menu.Item>
                         </Menu>
                         </div>
                         <div className="col-md-9 float-end" style={{ backgroundColor:"#fff"}}>

@@ -93,7 +93,7 @@ const BiometricReport = (props) => {
           )
               .then(response => {
                 setLoading(false)
-                const fileName ="Radet"
+                const fileName ="Biometric-Report"
                 const responseData = response.data
                 let blob = new Blob([responseData], {type: "application/octet-stream"});
                 FileSaver.saveAs(blob, `${fileName}.xlsx`);
