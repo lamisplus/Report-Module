@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class BiometricReportDto {
 	private Long facilityId;
+	private String datimId;
 	private String facilityName;
 	private String state;
 	private String lga;
@@ -26,6 +27,6 @@ public class BiometricReportDto {
 	private String address;
 	private String name;
 	private LocalDate enrollDate;
-	private int fingers;
+	private Long fingers;
 	private String valid;
 }

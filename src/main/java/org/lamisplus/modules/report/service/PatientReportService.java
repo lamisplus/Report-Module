@@ -75,8 +75,8 @@ public class PatientReportService {
 	private PatientLineListDto getPatientLineListDto(HivEnrollment hivEnrollment) {
 		Long facilityId = hivEnrollment.getFacilityId();
 		OrganisationUnit facility = organisationUnitService.getOrganizationUnit(facilityId);
-		String datim_id = facility.getOrganisationUnitIdentifiers()
-				.stream()
+		String datimId = facility.getOrganisationUnitIdentifiers()
+				.parallelStream()
 				.filter(identifier -> identifier.getName().equalsIgnoreCase("DATIM_ID"))
 				.map(OrganisationUnitIdentifier::getCode)
 				.findFirst().orElse("");
@@ -158,7 +158,7 @@ public class PatientReportService {
 		PatientLineListDto patientLineListDto = PatientLineListDto
 				.builder()
 				.facilityId(facilityId)
-				.datimId(datim_id)
+				.datimId(datimId)
 				.facilityName(facility.getName())
 				.surname(person.getSurname())
 				.otherName(person.getFirstName())
@@ -187,7 +187,7 @@ public class PatientReportService {
 		processAndSetCurrentVitalSignInfo(person, patientLineListDto);
 		processAndSetPharmacyDetails(person, currentDate, patientLineListDto);
 		processAndSetCurrentClinicalVisit(person, patientLineListDto);
-		processAndSetVl(patientLineListDto, person.getId());
+		//processAndSetVl(patientLineListDto, person.getId());
 		return patientLineListDto;
 	}
 	
@@ -198,7 +198,7 @@ public class PatientReportService {
 				.sorted(Comparator.comparing(ARTClinical::getId).reversed())
 				.findFirst();
 		lastClinicVisit.ifPresent(artClinical -> {
-			LOG.info("current clinic visit {}", artClinical.getVisitDate());
+			//LOG.info("current clinic visit {}", artClinical.getVisitDate());
 			Long clinicalStageId = artClinical.getClinicalStageId();
 			if (clinicalStageId != null && clinicalStageId > 0) {
 				ApplicationCodesetDTO clinicalStage = applicationCodesetService.getApplicationCodeset(clinicalStageId);
@@ -229,15 +229,15 @@ public class PatientReportService {
 			Set<Regimen> regimens = currentRefill1.getRegimens();
 			regimens.forEach(regimen -> setCurrentRegimen(patientLineListDto, regimen));
 			patientLineListDto.setCurrentStatus("Active");
-			LOG.info("current date {}", currentDate);
-			LOG.info("next appointment date {}", nextAppointment);
+			//LOG.info("current date {}", currentDate);
+			//LOG.info("next appointment date {}", nextAppointment);
 			if (nextAppointment.isBefore(currentDate)) {
 				///
 				long days = ChronoUnit.DAYS.between(nextAppointment, currentDate);
 				if (days >= 29) {
 					patientLineListDto.setCurrentStatus("IIT");
 				}
-				LOG.info("number of days after appointment {}", days);
+				//LOG.info("number of days after appointment {}", days);
 			}
 			
 		});
@@ -294,8 +294,8 @@ public class PatientReportService {
 			firstRegimen.ifPresent(regimen -> {
 				String regimenLine = regimen.getRegimenType().getDescription();
 				String regimenName = regimen.getDescription();
-				LOG.info("regimenLine {}", regimenLine);
-				LOG.info("regimenName {}", regimenName);
+				//LOG.info("regimenLine {}", regimenLine);
+				//LOG.info("regimenName {}", regimenName);
 				patientLineListDto.setFirstRegimenLine(regimenLine);
 				patientLineListDto.setFirstRegimen(regimenName);
 			});

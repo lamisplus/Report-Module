@@ -89,10 +89,10 @@ public class GenerateExcelDataHelper {
 	
 	public static List<Map<Integer, String>> fillRadetDataMapper(@NonNull Set<RadetDto> radetDtoSet) {
 		List<Map<Integer, String>> result = new ArrayList<>();
+		int index = 0;
 		for (RadetDto patient : radetDtoSet) {
 			Map<Integer, String> map = new HashMap<>();
-			int index = 0;
-			map.put(index++, getStringValue(String.valueOf(index++)));
+			map.put(index++, String.valueOf(index++));
 			map.put(index++, patient.getFacilityName());
 			map.put(index++, patient.getLga());
 			map.put(index++, patient.getState());
@@ -157,14 +157,15 @@ public class GenerateExcelDataHelper {
 	}
 	
 	public static List<Map<Integer, String>> fillBiometricDataMapper(@NonNull List<BiometricReportDto> biometrics) {
-		
 		List<Map<Integer, String>> result = new ArrayList<>();
+		int sn = 1;
 		for (BiometricReportDto dto : biometrics) {
 			Map<Integer, String> map = new HashMap<>();
 			int index = 0;
-			map.put(index++, getStringValue(String.valueOf(index++)));
+			map.put(index++, String.valueOf(sn));
 			map.put(index++, dto.getState());
 			map.put(index++, dto.getFacilityName());
+			map.put(index++, dto.getDatimId());
 			map.put(index++, dto.getHospitalNum());
 			map.put(index++, getStringValue(dto.getName()));
 			map.put(index++, getStringValue(String.valueOf(dto.getDateBirth())));
@@ -175,6 +176,7 @@ public class GenerateExcelDataHelper {
 			map.put(index++, getStringValue(String.valueOf(dto.getFingers())));
 			map.put(index, dto.getValid());
 			result.add(map);
+			sn++;
 		}
 		return result;
 	}
@@ -186,8 +188,9 @@ public class GenerateExcelDataHelper {
 	
 	public static List<Map<Integer, String>> fillPharmacyDataMapper(
 			@NonNull List<ArtPharmacy> pharmacies,
-			String facility, RegimenRepository repository) {
+			String facility, String datimId, RegimenRepository repository) {
 		List<Map<Integer, String>> result = new ArrayList<>();
+		int sn = 1;
 		for (ArtPharmacy pharmacy : pharmacies) {
 			StringBuilder regimenReceived = new StringBuilder();
 			StringBuilder type = new StringBuilder();
@@ -197,9 +200,10 @@ public class GenerateExcelDataHelper {
 			setRegimen(repository, regimenReceived, type, qty, extra, regimens);
 			Map<Integer, String> map = new HashMap<>();
 			int index = 0;
-			map.put(index++, String.valueOf(index++));
+			map.put(index++, String.valueOf(sn));
 			map.put(index++, String.valueOf(pharmacy.getFacilityId()));
 			map.put(index++, facility);
+			map.put(index++, datimId);
 			map.put(index++, pharmacy.getPerson().getUuid());
 			map.put(index++, pharmacy.getPerson().getHospitalNumber());
 			map.put(index++, String.valueOf(pharmacy.getVisitDate()));
@@ -210,6 +214,7 @@ public class GenerateExcelDataHelper {
 			map.put(index++, String.valueOf(pharmacy.getNextAppointment()));
 			map.put(index, pharmacy.getDsdModel());
 			result.add(map);
+			sn++;
 		}
 		return result;
 	}

@@ -35,26 +35,35 @@ public class ExcelService {
 		font.setBold(true);
 		font.setFontHeight(15);
 		style.setFont(font);
-		
 		for (int i = 0; i < headers.size(); i++) {
 			createCell(row, i, headers.get(i), style);
 		}
 	}
 	
-	private void createCell(Row row, int columnCount, Object value, CellStyle style) {
+	private int createCell(Row row, int columnCount, Object value, CellStyle style) {
 		Cell cell = row.createCell(columnCount);
 		if (value instanceof Integer) {
 			cell.setCellValue((Integer) value);
+			cell.setCellStyle(style);
+			return 0;
 		} else if (value instanceof Long) {
 			cell.setCellValue((Long) value);
+			cell.setCellStyle(style);
+			return 1;
 		} else if (value instanceof Boolean) {
 			cell.setCellValue((Boolean) value);
+			cell.setCellStyle(style);
+			return 2;
 		} else if(value instanceof LocalDate){
 			cell.setCellValue((LocalDate) value);
+			cell.setCellStyle(style);
+			return 3;
 		}else {
 		    cell.setCellValue((String) value);
+			cell.setCellStyle(style);
+			return 4;
 		}
-		cell.setCellStyle(style);
+		
 	}
 	
 	private void write(List<Map<Integer, String>> listData) {
