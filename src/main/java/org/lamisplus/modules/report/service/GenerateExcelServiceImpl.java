@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
+import org.lamisplus.modules.hiv.domain.dto.PharmacyReport;
 import org.lamisplus.modules.hiv.domain.entity.ArtPharmacy;
 import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
 import org.lamisplus.modules.hiv.repositories.RegimenRepository;
@@ -14,12 +15,11 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 
 @Slf4j
 @AllArgsConstructor
@@ -34,7 +34,6 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	
 	private final ArtPharmacyRepository artPharmacyRepository;
 	
-	private final RegimenRepository regimenRepository;
 	
 	private final BiometricReportService biometricReportService;
 	
@@ -48,7 +47,6 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			List<PatientLineListDto> data = patientReportService.getPatientLineList(facilityId);
 			LOG.info("fullData 1: " + data.size());
 			List<Map<Integer, String>> fullData = GenerateExcelDataHelper.fillPatientLineListDataMapper(data);
-			System.out.println("fullData 2: " + fullData.size());
 			return excelService.generate(Constants.PATIENT_LINE_LIST, fullData, Constants.PATIENT_LINE_LIST_HEADER);
 		} catch (Exception e) {
 			LOG.error("Error Occurred when generating PATIENT LINE LIST!!!");
@@ -77,16 +75,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	public ByteArrayOutputStream generatePharmacyReport(Long facilityId) {
 		LOG.info("generating Pharmacy");
 		try {
-			String facilityName = getFacilityName(facilityId);
-			String datimId = getDatimId(facilityId);
-			List<ArtPharmacy> pharmacies = artPharmacyRepository.findAll()
-					.stream()
-					.filter(artPharmacy -> artPharmacy.getFacilityId().equals(facilityId))
-					.collect(Collectors.toList());
-			LOG.info("Pharmacy data {}", pharmacies);
-			
-			List<Map<Integer, String>> data = GenerateExcelDataHelper.fillPharmacyDataMapper(pharmacies, facilityName,datimId, regimenRepository);
-			LOG.info("Pharmacy final data {}", data);
+			List<PharmacyReport> pharmacies = artPharmacyRepository.getArtPharmacyReport(facilityId);
+			LOG.info("Pharmacy data {}", pharmacies.size());
+			List<Map<Integer, String>> data = GenerateExcelDataHelper.fillPharmacyDataMapper(pharmacies);
 			return excelService.generate(Constants.PHARMACY_SHEET, data, Constants.PHARMACY_HEADER);
 		} catch (Exception e) {
 			LOG.info("Error Occurred when generating Pharmacy");

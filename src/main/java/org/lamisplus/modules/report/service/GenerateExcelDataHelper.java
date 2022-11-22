@@ -1,12 +1,9 @@
 package org.lamisplus.modules.report.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.NonNull;
 
 import org.audit4j.core.util.Log;
-import org.lamisplus.modules.hiv.domain.entity.ArtPharmacy;
-import org.lamisplus.modules.hiv.domain.entity.Regimen;
-import org.lamisplus.modules.hiv.repositories.RegimenRepository;
+import org.lamisplus.modules.hiv.domain.dto.PharmacyReport;
 import org.lamisplus.modules.report.domain.BiometricReportDto;
 import org.lamisplus.modules.report.domain.PatientLineListDto;
 import org.lamisplus.modules.report.domain.RadetDto;
@@ -187,31 +184,24 @@ public class GenerateExcelDataHelper {
 	
 	
 	public static List<Map<Integer, String>> fillPharmacyDataMapper(
-			@NonNull List<ArtPharmacy> pharmacies,
-			String facility, String datimId, RegimenRepository repository) {
+			@NonNull List<PharmacyReport> pharmacies) {
 		List<Map<Integer, String>> result = new ArrayList<>();
 		int sn = 1;
-		for (ArtPharmacy pharmacy : pharmacies) {
-			StringBuilder regimenReceived = new StringBuilder();
-			StringBuilder type = new StringBuilder();
-			StringBuilder qty = new StringBuilder();
-			JsonNode extra = pharmacy.getExtra();
-			String regimens = "regimens";
-			setRegimen(repository, regimenReceived, type, qty, extra, regimens);
+		for (PharmacyReport pharmacy : pharmacies) {
 			Map<Integer, String> map = new HashMap<>();
 			int index = 0;
 			map.put(index++, String.valueOf(sn));
-			map.put(index++, String.valueOf(pharmacy.getFacilityId()));
-			map.put(index++, facility);
-			map.put(index++, datimId);
-			map.put(index++, pharmacy.getPerson().getUuid());
-			map.put(index++, pharmacy.getPerson().getHospitalNumber());
-			map.put(index++, String.valueOf(pharmacy.getVisitDate()));
-			map.put(index++, type.toString());
-			map.put(index++, regimenReceived.toString());
-			map.put(index++, qty.toString());
-			map.put(index++, pharmacy.getMmdType());
-			map.put(index++, String.valueOf(pharmacy.getNextAppointment()));
+			map.put(index++, getStringValue(String.valueOf(pharmacy.getFacilityId())));
+			map.put(index++, getStringValue(String.valueOf(pharmacy.getFacilityName())));
+			map.put(index++, getStringValue(String.valueOf(pharmacy.getDatimId())));
+			map.put(index++, getStringValue(String.valueOf(pharmacy.getPatientId())));
+			map.put(index++, getStringValue(String.valueOf(pharmacy.getHospitalNum())));
+			map.put(index++, getStringValue(String.valueOf(pharmacy.getDateVisit())));
+			map.put(index++, getStringValue(String.valueOf(pharmacy.getRegimenLine())));
+			map.put(index++, getStringValue(String.valueOf(pharmacy.getRegimens())));
+			map.put(index++, getStringValue(String.valueOf(pharmacy.getRefillPeriod())));
+			map.put(index++, getStringValue(String.valueOf(pharmacy.getMmdType())));
+			map.put(index++, getStringValue(String.valueOf(pharmacy.getNextAppointment())));
 			map.put(index, pharmacy.getDsdModel());
 			result.add(map);
 			sn++;
@@ -219,34 +209,6 @@ public class GenerateExcelDataHelper {
 		return result;
 	}
 	
-	private static void setRegimen(
-			RegimenRepository repository,
-			StringBuilder regimenReceived,
-			StringBuilder type,
-			StringBuilder qty,
-			JsonNode extra, String regimens) {
-		if (extra.hasNonNull(regimens)) {
-			JsonNode jsonNode = extra.get(regimens);
-			for (JsonNode regimen : jsonNode) {
-				if (regimen.hasNonNull("regimenId")) {
-					JsonNode regimenId = regimen.get("regimenId");
-					JsonNode dispenseQuantity = regimen.get("dispense");
-					long id = regimenId.asLong();
-					long refillQty = dispenseQuantity.asLong();
-					qty.append(refillQty + ",");
-					Optional<Regimen> optionalRegimen = repository.findById(id);
-					optionalRegimen.ifPresent(regimen1 -> {
-						String description = regimen1.getDescription();
-						String regimenType = regimen1.getRegimenType().getDescription();
-						regimenReceived.append(description + ",");
-						type.append(regimenType + ",");
-						
-					});
-				}
-				
-			}
-		}
-	}
 	
 	
 }
