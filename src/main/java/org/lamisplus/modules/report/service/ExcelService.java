@@ -1,39 +1,40 @@
 package org.lamisplus.modules.report.service;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.audit4j.core.util.Log;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.time.LocalDate;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class ExcelService {
 	
-	private XSSFWorkbook workbook;
-	private XSSFSheet sheet;
+	private SXSSFWorkbook workbook;
+	
+	
+	private Sheet sheet;
 	
 	
 	
 	public ExcelService() {
-		this.workbook = new XSSFWorkbook();
+		this.workbook = new SXSSFWorkbook(1000);
 	}
 	
 	private void writeHeader(String sheetName, List<String> headers) {
 		sheet = workbook.createSheet(sheetName);
 		Row row = sheet.createRow(0);
 		CellStyle style = workbook.createCellStyle();
-		XSSFFont font = workbook.createFont();
+		Font font  = workbook.createFont();
 		font.setBold(true);
-		font.setFontHeight(15);
+		font.setFontHeightInPoints((short) 12);
+		font.setBold(true);
+		font.setColor(HSSFColor.HSSFColorPredefined.BLACK.getIndex());
 		style.setFont(font);
 		for (int i = 0; i < headers.size(); i++) {
 			createCell(row, i, headers.get(i), style);
@@ -69,17 +70,17 @@ public class ExcelService {
 	private void write(List<Map<Integer, String>> listData) {
 		int rowCount = 1;
 		CellStyle style = workbook.createCellStyle();
-		XSSFFont font = workbook.createFont();
-		font.setFontHeight(14);
+		Font font = workbook.createFont();
+		font.setFontHeightInPoints((short) 11);
 		style.setFont(font);
 		
 		for (Map<Integer, String> map : listData) {
 			Row row = sheet.createRow(rowCount++);
 			int columnCount = 0;
-			for (Integer key : map.keySet()) {
+			for (Iterator<Integer> iterator = map.keySet().iterator(); iterator.hasNext(); ) {
+				Integer key = iterator.next();
 				createCell(row, columnCount++, map.get(key), style);
 			}
-			sheet.autoSizeColumn(columnCount);
 		}
 	}
 	
@@ -87,21 +88,21 @@ public class ExcelService {
 			String sheetName,
 			List<Map<Integer, String>> listData,
 			List<String> headers)  {
+		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		try {
 			writeHeader(sheetName, headers);
 			write(listData);
-			ByteArrayOutputStream bao = new ByteArrayOutputStream();
-			workbook.write(bao);
 			Log.info("last row {}", workbook.getSheet(sheetName).getLastRowNum());
-			FileOutputStream fileOut = new FileOutputStream("runtime/" + sheetName + ".xlsx");
-			workbook.write(fileOut);
-			workbook.close();
-			bao.close();
+			workbook.write(bao);
+			//FileOutputStream fileOut = new FileOutputStream("runtime/" + sheetName + ".xlsx");
+			//workbook.write(fileOut);
+			//workbook.close();
+			//bao.close();
 			return bao;
 		}catch (Exception e){
 			e.printStackTrace();
 		}
-		return null;
+		return bao;
 	}
 	
 }
