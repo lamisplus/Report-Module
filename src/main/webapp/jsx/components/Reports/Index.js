@@ -11,7 +11,8 @@ import PatientLineList from './PatientLineList';
 import Appointment from './Appointment'
 import Radet from './Radet'
 import BiometricReport from './BiometricReport'
-import PharmacyReport from './PharmacyReport'
+import PharmacyReport from './PharmacyReport';
+import LaboratoryReport from './LaboratoryReport';
 
 const useStyles = makeStyles((theme) => ({
 
@@ -98,7 +99,16 @@ const Reports = (props) => {
                                 
                             {/* <Label color='teal'>5</Label> */}
                             </Menu.Item>
-                            
+                            <Menu.Item
+                                name='inbox'
+                                active={activeItem === 'pharmacy-report'}
+                                onClick={()=>handleItemClick('pharmacy-report')}
+                                style={{backgroundColor:activeItem === 'pharmacy-report' ? '#000': ""}}
+                            >               
+                                <span style={{color:'#fff'}}>LABORATORY REPORT</span>
+                                
+                            {/* <Label color='teal'>5</Label> */}
+                            </Menu.Item>
                         </Menu>
                         </div>
                         <div className="col-md-9 float-end" style={{ backgroundColor:"#fff"}}>
@@ -107,6 +117,7 @@ const Reports = (props) => {
                         {activeItem==='radet' && (<Radet handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}     
                         {activeItem==='biometric' && (<BiometricReport handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
                         {activeItem==='pharmacy-report' && (<PharmacyReport  handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
+                        {activeItem==='laboratory-report' && (<LaboratoryReport  handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
                         {/* {activeItem==='others' && (<Others handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)} */}
                             
                         </div>
