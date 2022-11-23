@@ -74,6 +74,14 @@ public class PatientReportController {
 		messagingTemplate.convertAndSend("/topic/pharmacy", "end");
 	}
 	
+	@GetMapping("/laboratory/{facilityId}")
+	public void generateLab(HttpServletResponse response, @PathVariable("facilityId") Long facility) throws IOException {
+		messagingTemplate.convertAndSend("/topic/laboratory", "start");
+		ByteArrayOutputStream baos = generateExcelService.generateLabReport(facility);
+		setStream(baos, response);
+		messagingTemplate.convertAndSend("/topic/pharmacy", "end");
+	}
+	
 	@GetMapping("/biometric")
 	public void generateBiometric(HttpServletResponse response,
 	                              @RequestParam("facilityId") Long facility,

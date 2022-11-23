@@ -11,5 +11,6 @@ public interface GenerateExcelService {
  ByteArrayOutputStream generateRadet(Long facilityId, LocalDate start, LocalDate end);
  ByteArrayOutputStream generatePharmacyReport(Long facilityId) throws IOException;
  ByteArrayOutputStream generateBiometricReport(Long facilityId,  LocalDate start, LocalDate end) throws IOException;
+ ByteArrayOutputStream generateLabReport(Long facilityId) throws IOException;
  String getFacilityName(Long facilityId);
 }

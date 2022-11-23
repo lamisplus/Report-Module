@@ -187,7 +187,7 @@ public class PatientReportService {
 		processAndSetCurrentVitalSignInfo(person, patientLineListDto);
 		processAndSetPharmacyDetails(person, currentDate, patientLineListDto);
 		processAndSetCurrentClinicalVisit(person, patientLineListDto);
-		//processAndSetVl(patientLineListDto, person.getId());
+		processAndSetVl(patientLineListDto, person.getId());
 		return patientLineListDto;
 	}
 	
@@ -215,7 +215,6 @@ public class PatientReportService {
 				.sorted(Comparator.comparing(ArtPharmacy::getVisitDate))
 				.sorted(Comparator.comparing(ArtPharmacy::getId).reversed())
 				.findFirst();
-		
 		currentRefill.ifPresent(currentRefill1 -> {
 			LocalDate nextAppointment = currentRefill1.getNextAppointment();
 			patientLineListDto.setDateOfNextRefill(nextAppointment);

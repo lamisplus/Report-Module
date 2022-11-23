@@ -159,6 +159,7 @@ public class Constants {
 	
 	public static final String PHARMACY_SHEET = "pharmacy-report";
 	public static final String BIOMETRIC_SHEET_SHEET = "biometric-report";
+	public static final String LAB_SHEET_NAME = "laboratory-report";
 	public static final List<String> PHARMACY_HEADER =
 			Arrays.asList(
 					"S/No",
@@ -190,5 +191,19 @@ public class Constants {
 					"Enrollment Date (yyyy-mm-dd)",
 					"Number of Fingers Captured",
 					"Fingers Valid"
+			);
+	
+	public static final List<String> LAB_HEADER =
+			Arrays.asList(
+					"S/No",
+					"Facility Id",
+					"DATIM Id",
+					"Facility Name",
+					"Patient Id",
+					"Hospital Num",
+					"Test",
+					"Date Sample Collected (yyyy-mm-dd)",
+					"Result",
+					"Date  Result Received  (yyyy-mm-dd)"
 			);
 }

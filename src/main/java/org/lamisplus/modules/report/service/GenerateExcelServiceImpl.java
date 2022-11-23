@@ -4,9 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
+import org.lamisplus.modules.hiv.domain.dto.LabReport;
 import org.lamisplus.modules.hiv.domain.dto.PharmacyReport;
 import org.lamisplus.modules.hiv.domain.entity.ArtPharmacy;
 import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
+import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 import org.lamisplus.modules.hiv.repositories.RegimenRepository;
 import org.lamisplus.modules.report.domain.BiometricReportDto;
 import org.lamisplus.modules.report.domain.PatientLineListDto;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +41,8 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	private final BiometricReportService biometricReportService;
 	
 	private  final  ExcelService  excelService;
+	
+	private  final  HIVEacRepository hivEacRepository;
 	
 	
 	@Override
@@ -99,6 +104,22 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			LOG.info("Error Occurred when generating biometric data", e);
 		}
 		LOG.info("End generate biometric report");
+		return null;
+	}
+	
+	@Override
+	public ByteArrayOutputStream generateLabReport(Long facilityId) throws IOException {
+		LOG.info("generating Lab report");
+		try {
+			List<LabReport> labReports = hivEacRepository.getLabReports(facilityId);
+			LOG.info("Lab data {}", labReports.size());
+			List<Map<Integer, String>> data = GenerateExcelDataHelper.fillLabDataMapper(labReports);
+			return excelService.generate(Constants.LAB_SHEET_NAME, data, Constants.LAB_HEADER);
+		} catch (Exception e) {
+			LOG.info("Error Occurred when generating Lab report");
+			e.printStackTrace();
+		}
+		LOG.info("End generate Lab report");
 		return null;
 	}
 	

@@ -3,6 +3,7 @@ package org.lamisplus.modules.report.service;
 import lombok.NonNull;
 
 import org.audit4j.core.util.Log;
+import org.lamisplus.modules.hiv.domain.dto.LabReport;
 import org.lamisplus.modules.hiv.domain.dto.PharmacyReport;
 import org.lamisplus.modules.report.domain.BiometricReportDto;
 import org.lamisplus.modules.report.domain.PatientLineListDto;
@@ -208,6 +209,31 @@ public class GenerateExcelDataHelper {
 		}
 		return result;
 	}
+	
+	
+	public static List<Map<Integer, String>> fillLabDataMapper(
+			@NonNull List<LabReport> labReports) {
+		List<Map<Integer, String>> result = new ArrayList<>();
+		int sn = 1;
+		for (LabReport labReport : labReports) {
+			Map<Integer, String> map = new HashMap<>();
+			int index = 0;
+			map.put(index++, String.valueOf(sn));
+			map.put(index++, getStringValue(String.valueOf(labReport.getFacilityId())));
+			map.put(index++, getStringValue(String.valueOf(labReport.getFacility())));
+			map.put(index++, getStringValue(String.valueOf(labReport.getDatimId())));
+			map.put(index++, getStringValue(String.valueOf(labReport.getPatientId())));
+			map.put(index++, getStringValue(String.valueOf(labReport.getHospitalNum())));
+			map.put(index++, getStringValue(String.valueOf(labReport.getTest())));
+			map.put(index++, getStringValue(String.valueOf(labReport.getSampleCollectionDate())));
+			map.put(index++, getStringValue(String.valueOf(labReport.getResult())));
+			map.put(index, getStringValue(String.valueOf(labReport.getDateReported())));
+			result.add(map);
+			sn++;
+		}
+		return result;
+	}
+	
 	
 	
 	
