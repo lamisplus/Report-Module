@@ -101,9 +101,9 @@ const Reports = (props) => {
                             </Menu.Item>
                             <Menu.Item
                                 name='inbox'
-                                active={activeItem === 'pharmacy-report'}
-                                onClick={()=>handleItemClick('pharmacy-report')}
-                                style={{backgroundColor:activeItem === 'pharmacy-report' ? '#000': ""}}
+                                active={activeItem === 'laboratory-report'}
+                                onClick={()=>handleItemClick('laboratory-report')}
+                                style={{backgroundColor:activeItem === 'laboratory-report' ? '#000': ""}}
                             >               
                                 <span style={{color:'#fff'}}>LABORATORY REPORT</span>
                                 
