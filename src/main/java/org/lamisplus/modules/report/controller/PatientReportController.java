@@ -19,6 +19,7 @@ import java.io.OutputStream;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @RestController
@@ -95,7 +96,7 @@ public class PatientReportController {
 	}
 	
 	@GetMapping("/patient-line-list")
-	public ResponseEntity<List<PatientLineListDto>> patientLineList(@RequestParam("facilityId") Long facility) {
+	public ResponseEntity<List<PatientLineListDto>> patientLineList(@RequestParam("facilityId") Long facility) throws ExecutionException, InterruptedException {
 		return ResponseEntity.ok(patientReportService.getPatientData(facility));
 	}
 	

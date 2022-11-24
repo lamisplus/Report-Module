@@ -17,14 +17,11 @@ public class ExcelService {
 	
 	private SXSSFWorkbook workbook;
 	
-	
 	private Sheet sheet;
 	
 	
 	
-	public ExcelService() {
-		this.workbook = new SXSSFWorkbook(1000);
-	}
+	
 	
 	private void writeHeader(String sheetName, List<String> headers) {
 		sheet = workbook.createSheet(sheetName);
@@ -90,6 +87,7 @@ public class ExcelService {
 			List<String> headers)  {
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		try {
+			this.workbook = new SXSSFWorkbook(1000);
 			writeHeader(sheetName, headers);
 			write(listData);
 			Log.info("last row {}", workbook.getSheet(sheetName).getLastRowNum());
@@ -98,7 +96,7 @@ public class ExcelService {
 			//workbook.write(fileOut);
 			//workbook.close();
 			//bao.close();
-			return bao;
+			//return bao;
 		}catch (Exception e){
 			e.printStackTrace();
 		}

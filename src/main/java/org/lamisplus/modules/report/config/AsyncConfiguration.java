@@ -29,9 +29,9 @@ public class AsyncConfiguration implements AsyncConfigurer, SchedulingConfigurer
     public Executor getAsyncExecutor() {
         LOG.info ("Creating Async Task Executor {}", "Async Task Executor");
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(3);
-        executor.setMaxPoolSize(3);
-        executor.setQueueCapacity(3);
+        executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(100);
         return new ExceptionHandlingAsyncTaskExecutor(executor);
     }
 

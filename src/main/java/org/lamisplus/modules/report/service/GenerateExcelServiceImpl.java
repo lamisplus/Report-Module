@@ -6,10 +6,9 @@ import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
 import org.lamisplus.modules.hiv.domain.dto.LabReport;
 import org.lamisplus.modules.hiv.domain.dto.PharmacyReport;
-import org.lamisplus.modules.hiv.domain.entity.ArtPharmacy;
 import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
 import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
-import org.lamisplus.modules.hiv.repositories.RegimenRepository;
+
 import org.lamisplus.modules.report.domain.BiometricReportDto;
 import org.lamisplus.modules.report.domain.PatientLineListDto;
 import org.lamisplus.modules.report.domain.RadetDto;
@@ -22,6 +21,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Slf4j
@@ -40,9 +42,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	
 	private final BiometricReportService biometricReportService;
 	
-	private  final  ExcelService  excelService;
+	private final ExcelService excelService;
 	
-	private  final  HIVEacRepository hivEacRepository;
+	private final HIVEacRepository hivEacRepository;
 	
 	
 	@Override
@@ -93,7 +95,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	}
 	
 	@Override
-	public ByteArrayOutputStream generateBiometricReport(Long facilityId, LocalDate start, LocalDate end){
+	public ByteArrayOutputStream generateBiometricReport(Long facilityId, LocalDate start, LocalDate end) {
 		try {
 			LOG.info("start to generate biometric report");
 			List<BiometricReportDto> biometricReportDtoList = biometricReportService.getBiometricReportDtoList(facilityId, start, end);
@@ -130,7 +132,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 				.filter(identifier -> identifier.getName().equalsIgnoreCase("DATIM_ID"))
 				.map(OrganisationUnitIdentifier::getCode)
 				.findFirst().orElse("");
-}
+	}
 	
 	@Override
 	public String getFacilityName(Long facilityId) {
