@@ -5,12 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
 import org.lamisplus.modules.hiv.domain.dto.LabReport;
+import org.lamisplus.modules.hiv.domain.dto.PatientLineDto;
 import org.lamisplus.modules.hiv.domain.dto.PharmacyReport;
 import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
 import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 
 import org.lamisplus.modules.report.domain.BiometricReportDto;
-import org.lamisplus.modules.report.domain.PatientLineListDto;
 import org.lamisplus.modules.report.domain.RadetDto;
 import org.springframework.stereotype.Service;
 
@@ -21,9 +21,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 
 
 @Slf4j
@@ -51,9 +49,10 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	public ByteArrayOutputStream generatePatientLine(HttpServletResponse response, Long facilityId) {
 		LOG.info("Start generating patient line list for facility: " + getFacilityName(facilityId));
 		try {
-			List<PatientLineListDto> data = patientReportService.getPatientLineList(facilityId);
-			LOG.info("fullData 1: " + data.size());
+			List<PatientLineDto> data = patientReportService.getPatientLine(facilityId);
+			LOG.info("fullData 1: " + data);
 			List<Map<Integer, String>> fullData = GenerateExcelDataHelper.fillPatientLineListDataMapper(data);
+			LOG.info("fullData 2: " + data.size());
 			return excelService.generate(Constants.PATIENT_LINE_LIST, fullData, Constants.PATIENT_LINE_LIST_HEADER);
 		} catch (Exception e) {
 			LOG.error("Error Occurred when generating PATIENT LINE LIST!!!");
@@ -68,6 +67,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("Start generating patient Radet for facility:" + getFacilityName(facilityId));
 		try {
 			Set<RadetDto> radetData = radetService.getRadetDtos(facilityId, start, end, radetService.getRadetEligibles());
+			LOG.error("Radet Size: {}", radetData.size());
 			List<Map<Integer, String>> data = GenerateExcelDataHelper.fillRadetDataMapper(radetData);
 			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
 		} catch (Exception e) {

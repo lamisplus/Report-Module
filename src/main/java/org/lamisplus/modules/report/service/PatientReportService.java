@@ -10,6 +10,7 @@ import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.module.ModuleService;
 import org.lamisplus.modules.base.service.ApplicationCodesetService;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
+import org.lamisplus.modules.hiv.domain.dto.PatientLineDto;
 import org.lamisplus.modules.hiv.domain.dto.ViralLoadRadetDto;
 import org.lamisplus.modules.hiv.domain.entity.ARTClinical;
 import org.lamisplus.modules.hiv.domain.entity.ArtPharmacy;
@@ -26,8 +27,6 @@ import org.springframework.stereotype.Service;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Service
@@ -65,28 +64,30 @@ public class PatientReportService {
 		
 	}
 	
+	public List<PatientLineDto> getPatientLine(Long facilityId) {
+		System.out.println("start: fetching records from db: ");
+		List<PatientLineDto> patientLineDtoList = hIVEacRepository.getPatientLineByFacilityId(facilityId);
+		System.out.println("Total size:  " + patientLineDtoList.size());
+		return patientLineDtoList;
+	}
+	
 	
 	private PatientLineListDto getPatientLineListDto(HivEnrollment hivEnrollment) {
-		ExecutorService executorService = Executors.newFixedThreadPool(4);
 		PatientLineListDto patientLineListDto = new PatientLineListDto();
 		Long facilityId = hivEnrollment.getFacilityId();
 		patientLineListDto.setFacilityId(facilityId);
 		OrganisationUnit facility = organisationUnitService.getOrganizationUnit(facilityId);
 		patientLineListDto.setFacilityName(facility.getName());
-		executorService.submit(() -> processAndSetDatimId(facility, patientLineListDto));
+		 processAndSetDatimId(facility, patientLineListDto);
 		Long lgaIdOfTheFacility = facility.getParentOrganisationUnitId();
-		executorService.submit(() -> processAndSetFacilityLgaAndState(patientLineListDto, lgaIdOfTheFacility));
-		executorService.submit(() -> processAndSetBiodata(hivEnrollment, patientLineListDto));
+		processAndSetFacilityLgaAndState(patientLineListDto, lgaIdOfTheFacility);
+		processAndSetBiodata(hivEnrollment, patientLineListDto);
 		Person person = hivEnrollment.getPerson();
-		executorService.submit(() -> processAndSetBaseline(patientLineListDto, person));
-		executorService.submit(() -> processAndSetCurrentVitalSignInfo(person, patientLineListDto));
-		executorService.submit(() -> processAndSetPharmacyDetails(person, LocalDate.now(), patientLineListDto));
-		executorService.submit(() -> processAndSetCurrentClinicalVisit(person, patientLineListDto));
-		executorService.submit(() -> processAndSetVl(patientLineListDto, person.getId()));
-		executorService.shutdown();
-		while (!executorService.isTerminated()) {
-		
-		}
+		processAndSetBaseline(patientLineListDto, person);
+		processAndSetCurrentVitalSignInfo(person, patientLineListDto);
+		processAndSetPharmacyDetails(person, LocalDate.now(), patientLineListDto);
+	    processAndSetCurrentClinicalVisit(person, patientLineListDto);
+		processAndSetVl(patientLineListDto, person.getId());
 		return patientLineListDto;
 	}
 	
@@ -178,9 +179,11 @@ public class PatientReportService {
 			phone.append(phoneValue);
 			patientLineListDto.setPhone(phone.toString());
 		}
-		String firstChar = addressDetails.substring(0, 1).toUpperCase();
-		String finalAddress = firstChar + addressDetails.substring(1).toLowerCase();
-		patientLineListDto.setAddress(finalAddress);
+		if(addressDetails.length() > 2){
+			String firstChar = addressDetails.substring(0, 1).toUpperCase();
+			String finalAddress = firstChar + addressDetails.substring(1).toLowerCase();
+			patientLineListDto.setAddress(finalAddress);
+		}
 		patientLineListDto.setArchived(person.getArchived() != 0);
 		Long statusAtRegistrationId = hivEnrollment.getStatusAtRegistrationId();
 		StringBuilder statusAtRegistration = new StringBuilder();
@@ -352,5 +355,7 @@ public class PatientReportService {
 	public List<PatientLineListDto> getPatientData(Long facility) {
 		return getPatientLineList(facility);
 	}
+	
+	
 }
 

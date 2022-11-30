@@ -69,6 +69,7 @@ public class RadetService {
 	public Set<RadetDto> getRadetDtos(Long facilityId, LocalDate start, LocalDate end, Set<Person> radetPatients) {
 		return artPharmacyRepository.findAll()
 				.stream()
+				.parallel()
 				.filter(artPharmacy -> radetPatients.contains(artPharmacy.getPerson()))
 				.filter(artPharmacy -> artPharmacy.getVisitDate().equals(start)
 						|| artPharmacy.getVisitDate().equals(end)
@@ -79,162 +80,170 @@ public class RadetService {
 	}
 	
 	private RadetDto buildRadetDto(Long facilityId, ArtPharmacy artPharmacy, LocalDate start, LocalDate end) {
-		
-		OrganisationUnit facility = organisationUnitService.getOrganizationUnit(facilityId);
-		String facilityName = facility.getName();
-		Long lgaIdOfTheFacility = facility.getParentOrganisationUnitId();
-		OrganisationUnit lgaOrgUnitOfFacility = organisationUnitService.getOrganizationUnit(lgaIdOfTheFacility);
-		Long stateId = lgaOrgUnitOfFacility.getParentOrganisationUnitId();
-		OrganisationUnit state = organisationUnitService.getOrganizationUnit(stateId);
 		RadetDto radetDto = new RadetDto();
-		radetDto.setState(state.getName());
-		radetDto.setLga(lgaOrgUnitOfFacility.getName());
-		radetDto.setFacilityName(facilityName);
-		Person person = artPharmacy.getPerson();
-		int years = Period.between(person.getDateOfBirth(), LocalDate.now()).getYears();
-		radetDto.setDateBirth(Date.valueOf(person.getDateOfBirth()));
-		radetDto.setAge(years);
-		radetDto.setSex(person.getSex());
-		radetDto.setPatientId(person.getUuid());
-		radetDto.setHospitalNum(person.getHospitalNumber());
-		//current status
-		StatusDto currentStatus = hivStatusTrackerService.getPersonCurrentHIVStatusByPersonId(person.getId(), start, end);
-		radetDto.setCurrentARTStatus(currentStatus.getStatus());
-		radetDto.setDateOfCurrentARTStatus(currentStatus.getStatusDate());
-		
-		//previous
-		
-		LocalDate startOfPreviousQtr = start.minusDays(90);
-		StatusDto previousStatus = hivStatusTrackerService.getPersonCurrentHIVStatusByPersonId(person.getId(), startOfPreviousQtr, start);
-		radetDto.setPreviousARTStatus(previousStatus.getStatus());
-		radetDto.setConfirmedDateOfPreviousARTStatus(previousStatus.getStatusDate());
-		
-		//enrollment
-		Optional<HivEnrollment> enrollment =
-				hivEnrollmentRepository.getHivEnrollmentByPersonAndArchived(person, 0);
-		enrollment.ifPresent(e -> {
-			radetDto.setUniqueID(e.getUniqueId());
-			Long enrollmentSettingId = e.getEnrollmentSettingId();
-			String enrollmentSetting = applicationCodesetService.getApplicationCodeset(enrollmentSettingId).getDisplay();
-			radetDto.setArtEnrollmentSetting(enrollmentSetting);
-		});
-		
-		
-		//art commence
-		Optional<ARTClinical> artCommencement =
-				artClinicalRepository.findByPersonAndIsCommencementIsTrueAndArchived(person, 0);
-		artCommencement.ifPresent(c -> {
-			radetDto.setArtStartDate(c.getVisitDate());
-			long regimenId = c.getRegimenId();
-			Optional<Regimen> regimen = getRegimen(regimenId);
-			regimen.ifPresent(r ->
-			{
-				radetDto.setRegimenAtStart(r.getDescription());
-				radetDto.setRegimenLineAtStart(r.getRegimenType().getDescription());
-			});
-		});
-		
-		// current vital sign
-		Optional<VitalSign> currentVitalSign = vitalSignRepository.getVitalSignByPersonAndArchived(person, 0)
-				.stream()
-				.sorted(Comparator.comparing(VitalSign::getCaptureDate))
-				.sorted(Comparator.comparing(VitalSign::getId).reversed())
-				.filter(vitalSign -> {
-					LocalDateTime captureDate = vitalSign.getCaptureDate();
-					return captureDate.isAfter(start.atStartOfDay()) && captureDate.isBefore(end.atStartOfDay());
-				})
-				.findFirst();
-		currentVitalSign.ifPresent(v -> radetDto.setCurrentWeight(v.getBodyWeight()));
-		
-		
-		//current pharmacy
-		Optional<ArtPharmacy> currentPharmacyVisit = artPharmacyRepository.getArtPharmaciesByPersonAndArchived(person, 0)
-				.stream()
-				.sorted(Comparator.comparing(ArtPharmacy::getVisitDate))
-				.sorted(Comparator.comparing(ArtPharmacy::getId).reversed())
-				.filter(cPharmacy -> {
-					LocalDateTime visitDate = cPharmacy.getVisitDate().atStartOfDay();
-					return visitDate.isAfter(start.atStartOfDay()) && visitDate.isBefore(end.atStartOfDay());
-				})
-				.findFirst();
-		
-		currentPharmacyVisit.ifPresent(p -> {
-			radetDto.setMonthOfArvRefills(0);
-			Integer refillPeriod = artPharmacyRepository.sumRefillPeriodsByPersonAndDateRange
-					(person.getUuid(), start.plusDays(1), end.minusDays(1));
-			if (refillPeriod != null  &&  refillPeriod > 0) {
-				radetDto.setMonthOfArvRefills(refillPeriod / 30);
-			}
-			radetDto.setLastPickupDate(p.getVisitDate());
-			Set<Regimen> regimens = p.getRegimens();
-			regimens.forEach(regimen -> setCurrentRegimen(radetDto, regimen, p.getVisitDate()));
-		});
-		
-		//current eac
-		Optional<HIVEac> currentHivEac = hIVEacRepository.getAllByPersonAndArchived(person, 0)
-				.stream()
-				.sorted(Comparator.comparing(HIVEac::getDateOfLastViralLoad))
-				.sorted(Comparator.comparing(HIVEac::getId).reversed())
-				.filter(cEac -> {
-					LocalDateTime visitDate = cEac.getDateOfLastViralLoad().atStartOfDay();
-					return visitDate.isAfter(start.atStartOfDay()) && visitDate.isBefore(end.atStartOfDay());
-				})
-				.findFirst();
-		currentHivEac.ifPresent(eac -> {
-			List<HIVEacSession> eacSessions = hIVEacSessionRepository.getHIVEacSesByEac(eac);
-			radetDto.setNumberOfEACSessionsCompleted(eacSessions.size());
-			if (!eacSessions.isEmpty()) {
-				LocalDate eacCommenceDate = eacSessions.get(0).getFollowUpDate();
-				radetDto.setDateOfCommencementOfEAC(eacCommenceDate);
-				if (eacSessions.size() > 1) {
-					HIVEacSession hivEacSession = eacSessions.get(1);
-					if (hivEacSession != null) {
-						radetDto.setDateOf3rdEACCompletion(hivEacSession.getFollowUpDate());
-					}
-				}
-				if (eacSessions.size() > 2) {
-					HIVEacSession extHivEacSession = eacSessions.get(2);
-					if (extHivEacSession != null) {
-						radetDto.setDateOfExtendedEACCompletion(extHivEacSession.getFollowUpDate());
-					}
-				}
-			}
+		try {
+			OrganisationUnit facility = organisationUnitService.getOrganizationUnit(facilityId);
+			String facilityName = facility.getName();
+			Long lgaIdOfTheFacility = facility.getParentOrganisationUnitId();
+			OrganisationUnit lgaOrgUnitOfFacility = organisationUnitService.getOrganizationUnit(lgaIdOfTheFacility);
+			Long stateId = lgaOrgUnitOfFacility.getParentOrganisationUnitId();
+			OrganisationUnit state = organisationUnitService.getOrganizationUnit(stateId);
+			radetDto.setState(state.getName());
+			radetDto.setLga(lgaOrgUnitOfFacility.getName());
+			radetDto.setFacilityName(facilityName);
+			Person person = artPharmacy.getPerson();
+			int years = Period.between(person.getDateOfBirth(), LocalDate.now()).getYears();
+			radetDto.setDateBirth(Date.valueOf(person.getDateOfBirth()));
+			radetDto.setAge(years);
+			radetDto.setSex(person.getSex());
+			radetDto.setPatientId(person.getUuid());
+			radetDto.setHospitalNum(person.getHospitalNumber());
+			//current status
+			StatusDto currentStatus = hivStatusTrackerService.getPersonCurrentHIVStatusByPersonId(person.getId(), start, end);
+			radetDto.setCurrentARTStatus(currentStatus.getStatus());
+			radetDto.setDateOfCurrentARTStatus(currentStatus.getStatusDate());
 			
-		});
-		//current viral load
-		boolean labExist = moduleService.exist("Lab");
-		if (labExist) {
-			Log.info(" in lab info {}", labExist);
-			Optional<ViralLoadRadetDto> viralLoadDetails =
-					hIVEacRepository.getPatientCurrentViralLoadDetails(person.getId(), start.plusDays(1).atStartOfDay(), end.minusDays(1).atStartOfDay());
-			viralLoadDetails.ifPresent(currentViralLoad -> {
-				Log.info("current viral load indication {}", currentViralLoad.getIndicationId() + " : ressult :=> " + currentViralLoad.getResult());
-				String viralLoadIndication =
-						applicationCodesetService.getApplicationCodeset(currentViralLoad.getIndicationId()).getDisplay();
-				radetDto.setViralLoadIndication(viralLoadIndication);
-				if(currentViralLoad.getDateSampleCollected() != null){
-					radetDto.setDateOfViralLoadSampleCollection(currentViralLoad.getDateSampleCollected().toLocalDate());
-				}
-				if(currentViralLoad.getResultDate() != null){
-					radetDto.setDateOfCurrentViralLoad(currentViralLoad.getResultDate().toLocalDate());
-				}
-				radetDto.setCurrentViralLoad(currentViralLoad.getResult());
+			//previous
+			
+			LocalDate startOfPreviousQtr = start.minusDays(90);
+			StatusDto previousStatus = hivStatusTrackerService.getPersonCurrentHIVStatusByPersonId(person.getId(), startOfPreviousQtr, start);
+			radetDto.setPreviousARTStatus(previousStatus.getStatus());
+			radetDto.setConfirmedDateOfPreviousARTStatus(previousStatus.getStatusDate());
+			
+			//enrollment
+			Optional<HivEnrollment> enrollment =
+					hivEnrollmentRepository.getHivEnrollmentByPersonAndArchived(person, 0);
+			enrollment.ifPresent(e -> {
+				radetDto.setUniqueID(e.getUniqueId());
+				Long enrollmentSettingId = e.getEnrollmentSettingId();
+				String enrollmentSetting = applicationCodesetService.getApplicationCodeset(enrollmentSettingId).getDisplay();
+				radetDto.setArtEnrollmentSetting(enrollmentSetting);
 			});
-		}
-		//current biometrics
-		boolean bioExist = moduleService.exist("Bio");
-		Log.info(" out side biometric info {}", bioExist);
-		if (bioExist) {
-			Log.info(" in biometric info {}", bioExist);
-			List<BiometricRadetDto> biometricFingers =
-					hIVEacRepository.getPatientBiometricInfo(person.getUuid(), start.plusDays(1), end.minusDays(1));
-			if (!biometricFingers.isEmpty()) {
-				Log.info(" number capture {}", biometricFingers.size());
-				BiometricRadetDto biometricRadetDto = biometricFingers.get(0);
-				Log.info(" number capture date:  {}", biometricRadetDto.getDateCaptured());
-				radetDto.setDateBiometricsEnrolled(biometricRadetDto.getDateCaptured());
-				radetDto.setValidBiometricsEnrolled("YES");
+			
+			
+			//art commence
+			Optional<ARTClinical> artCommencement =
+					artClinicalRepository.findByPersonAndIsCommencementIsTrueAndArchived(person, 0);
+			artCommencement.ifPresent(c -> {
+				radetDto.setArtStartDate(c.getVisitDate());
+				long regimenId = c.getRegimenId();
+				Optional<Regimen> regimen = getRegimen(regimenId);
+				regimen.ifPresent(r ->
+				{
+					radetDto.setRegimenAtStart(r.getDescription());
+					radetDto.setRegimenLineAtStart(r.getRegimenType().getDescription());
+				});
+			});
+			
+			// current vital sign
+			Optional<VitalSign> currentVitalSign = vitalSignRepository.getVitalSignByPersonAndArchived(person, 0)
+					.stream()
+					.sorted(Comparator.comparing(VitalSign::getCaptureDate))
+					.sorted(Comparator.comparing(VitalSign::getId).reversed())
+					.filter(vitalSign -> {
+						LocalDateTime captureDate = vitalSign.getCaptureDate();
+						return captureDate.isAfter(start.atStartOfDay()) && captureDate.isBefore(end.atStartOfDay());
+					})
+					.findFirst();
+			currentVitalSign.ifPresent(v -> radetDto.setCurrentWeight(v.getBodyWeight()));
+			
+			
+			//current pharmacy
+			Optional<ArtPharmacy> currentPharmacyVisit = artPharmacyRepository.getArtPharmaciesByPersonAndArchived(person, 0)
+					.stream()
+					.sorted(Comparator.comparing(ArtPharmacy::getVisitDate))
+					.sorted(Comparator.comparing(ArtPharmacy::getId).reversed())
+					.filter(cPharmacy -> {
+						LocalDateTime visitDate = cPharmacy.getVisitDate().atStartOfDay();
+						return visitDate.isAfter(start.atStartOfDay()) && visitDate.isBefore(end.atStartOfDay());
+					})
+					.findFirst();
+			
+			currentPharmacyVisit.ifPresent(p -> {
+				radetDto.setMonthOfArvRefills(0);
+				Integer refillPeriod = artPharmacyRepository.sumRefillPeriodsByPersonAndDateRange
+						(person.getUuid(), start.plusDays(1), end.minusDays(1));
+				if (refillPeriod != null && refillPeriod > 0) {
+					radetDto.setMonthOfArvRefills(refillPeriod / 30);
+				}
+				radetDto.setLastPickupDate(p.getVisitDate());
+				Set<Regimen> regimens = p.getRegimens();
+				regimens.forEach(regimen -> setCurrentRegimen(radetDto, regimen, p.getVisitDate()));
+			});
+			
+			//current eac
+			Optional<HIVEac> currentHivEac = hIVEacRepository.getAllByPersonAndArchived(person, 0)
+					.stream()
+					.sorted(Comparator.comparing(HIVEac::getDateOfLastViralLoad))
+					.sorted(Comparator.comparing(HIVEac::getId).reversed())
+					.filter(cEac -> {
+						LocalDate viralLoadDate = cEac.getDateOfLastViralLoad();
+						if (viralLoadDate != null) {
+							LocalDateTime visitDate = cEac.getDateOfLastViralLoad().atStartOfDay();
+							return visitDate.isAfter(start.atStartOfDay()) && visitDate.isBefore(end.atStartOfDay());
+						}
+						return false;
+					})
+					.findFirst();
+			currentHivEac.ifPresent(eac -> {
+				List<HIVEacSession> eacSessions = hIVEacSessionRepository.getHIVEacSesByEac(eac);
+				radetDto.setNumberOfEACSessionsCompleted(eacSessions.size());
+				if (!eacSessions.isEmpty()) {
+					LocalDate eacCommenceDate = eacSessions.get(0).getFollowUpDate();
+					radetDto.setDateOfCommencementOfEAC(eacCommenceDate);
+					if (eacSessions.size() > 1) {
+						HIVEacSession hivEacSession = eacSessions.get(1);
+						if (hivEacSession != null) {
+							radetDto.setDateOf3rdEACCompletion(hivEacSession.getFollowUpDate());
+						}
+					}
+					if (eacSessions.size() > 2) {
+						HIVEacSession extHivEacSession = eacSessions.get(2);
+						if (extHivEacSession != null) {
+							radetDto.setDateOfExtendedEACCompletion(extHivEacSession.getFollowUpDate());
+						}
+					}
+				}
+				
+			});
+			//current viral load
+			boolean labExist = moduleService.exist("Lab");
+			if (labExist) {
+				//Log.info(" in lab info {}", labExist);
+				Optional<ViralLoadRadetDto> viralLoadDetails =
+						hIVEacRepository.getPatientCurrentViralLoadDetails(person.getId(), start.plusDays(1).atStartOfDay(), end.minusDays(1).atStartOfDay());
+				viralLoadDetails.ifPresent(currentViralLoad -> {
+					//Log.info("current viral load indication {}", currentViralLoad.getIndicationId() + " : ressult :=> " + currentViralLoad.getResult());
+					String viralLoadIndication =
+							applicationCodesetService.getApplicationCodeset(currentViralLoad.getIndicationId()).getDisplay();
+					radetDto.setViralLoadIndication(viralLoadIndication);
+					if (currentViralLoad.getDateSampleCollected() != null) {
+						radetDto.setDateOfViralLoadSampleCollection(currentViralLoad.getDateSampleCollected().toLocalDate());
+					}
+					if (currentViralLoad.getResultDate() != null) {
+						radetDto.setDateOfCurrentViralLoad(currentViralLoad.getResultDate().toLocalDate());
+					}
+					radetDto.setCurrentViralLoad(currentViralLoad.getResult());
+				});
 			}
+			//current biometrics
+			boolean bioExist = moduleService.exist("Bio");
+			//Log.info(" out side biometric info {}", bioExist);
+			if (bioExist) {
+				//Log.info(" in biometric info {}", bioExist);
+				List<BiometricRadetDto> biometricFingers =
+						hIVEacRepository.getPatientBiometricInfo(person.getUuid(), start.plusDays(1), end.minusDays(1));
+				if (!biometricFingers.isEmpty()) {
+					Log.info(" number capture {}", biometricFingers.size());
+					BiometricRadetDto biometricRadetDto = biometricFingers.get(0);
+					Log.info(" number capture date:  {}", biometricRadetDto.getDateCaptured());
+					radetDto.setDateBiometricsEnrolled(biometricRadetDto.getDateCaptured());
+					radetDto.setValidBiometricsEnrolled("YES");
+				}
+			}
+			return radetDto;
+		}catch (Exception e) {
+		  e.printStackTrace();
 		}
 		return radetDto;
 	}
@@ -253,6 +262,8 @@ public class RadetService {
 		}
 		if (description.contains("IPT")) {
 			radetDto.setIptStartDate(visitDate);
+			 LocalDate date = visitDate.plusDays(90).plusDays(28);
+			 boolean isltf = date.isAfter(LocalDate.now());
 			radetDto.setIptType(regimen.getDescription());
 		}
 		

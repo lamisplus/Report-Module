@@ -15,7 +15,6 @@ public class Constants {
 	
 	// headers
 	public static final List<String> PATIENT_LINE_LIST_HEADER = Arrays.asList(
-			"Facility Id",
 			"Datim Id",
 			"Facility Name",
 			"LGA",
@@ -92,6 +91,7 @@ public class Constants {
 			"Case-manager"
 	);
 	
+	// [10 * 59] = 590  just using a simple thread pool
 	public static final List<String> RADET_HEADER =
 			Arrays.asList(
 					"S/No.",
@@ -163,9 +163,8 @@ public class Constants {
 	public static final List<String> PHARMACY_HEADER =
 			Arrays.asList(
 					"S/No",
-					"Facility Id",
-					"DATIM Id",
 					"Facility Name",
+					"DATIM Id",
 					"Patient Id",
 					"Hospital Num",
 					"Date Visit(yyyy-mm-dd)",
@@ -197,8 +196,8 @@ public class Constants {
 			Arrays.asList(
 					"S/No",
 					"Facility Id",
-					"DATIM Id",
 					"Facility Name",
+					"DATIM Id",
 					"Patient Id",
 					"Hospital Num",
 					"Test",

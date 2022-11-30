@@ -34,7 +34,6 @@ public class PatientLineListDto {
     private String address;
     private String phone;
     private Boolean archived;
-
     private String careEntryPoint;
     private LocalDate dateOfConfirmedHIVTest;
     private LocalDate dateOfRegistration;
@@ -61,13 +60,11 @@ public class PatientLineListDto {
     private LocalDate dateOfLastRefill;
     private Integer lastRefillDuration;
     private LocalDate dateOfNextRefill;
-    private LocalDate  dateDevolved;
+    private LocalDate dateDevolved;
     private String dmocType;
     private String lastClinicStage;
     private LocalDate  dateOfLastClinic;
     private LocalDate  dateOfNextClinic;
-    
-    //vl
     private LocalDateTime dateOfSampleCollection;
     private  Double currentVl;
     private LocalDateTime dateCurrentVl;

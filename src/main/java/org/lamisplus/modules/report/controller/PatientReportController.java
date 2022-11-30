@@ -61,9 +61,13 @@ public class PatientReportController {
 			@RequestParam("facilityId") Long facility,
 			@RequestParam("startDate") LocalDate start,
 			@RequestParam("endDate") LocalDate end) throws IOException {
+		
 		messagingTemplate.convertAndSend("/topic/radet", "start");
+		
 		ByteArrayOutputStream baos = generateExcelService.generateRadet(facility, start, end);
+		
 		setStream(baos, response);
+		
 		messagingTemplate.convertAndSend("/topic/radet", "end");
 	}
 	
