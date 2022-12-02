@@ -7,6 +7,7 @@ import org.lamisplus.modules.base.service.OrganisationUnitService;
 import org.lamisplus.modules.hiv.domain.dto.LabReport;
 import org.lamisplus.modules.hiv.domain.dto.PatientLineDto;
 import org.lamisplus.modules.hiv.domain.dto.PharmacyReport;
+import org.lamisplus.modules.hiv.domain.dto.RadetReportDto;
 import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
 import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 
@@ -66,9 +67,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	public ByteArrayOutputStream generateRadet(Long facilityId, LocalDate start, LocalDate end) {
 		LOG.info("Start generating patient Radet for facility:" + getFacilityName(facilityId));
 		try {
-			Set<RadetDto> radetData = radetService.getRadetDtos(facilityId, start, end, radetService.getRadetEligibles());
-			LOG.error("Radet Size: {}", radetData.size());
-			List<Map<Integer, String>> data = GenerateExcelDataHelper.fillRadetDataMapper(radetData);
+			List<RadetReportDto> radetDtos = radetService.getRadetDtos(facilityId, start, end);
+			LOG.error("Radet Size: {}", radetDtos.size());
+			List<Map<Integer, String>> data = GenerateExcelDataHelper.fillRadetDataMapper(radetDtos);
 			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
 		} catch (Exception e) {
 			LOG.error("Error Occurred when generating RADET !!!");

@@ -6,8 +6,9 @@ import org.audit4j.core.util.Log;
 import org.lamisplus.modules.hiv.domain.dto.LabReport;
 import org.lamisplus.modules.hiv.domain.dto.PatientLineDto;
 import org.lamisplus.modules.hiv.domain.dto.PharmacyReport;
+import org.lamisplus.modules.hiv.domain.dto.RadetReportDto;
 import org.lamisplus.modules.report.domain.BiometricReportDto;
-import org.lamisplus.modules.report.domain.RadetDto;
+
 
 
 import java.util.*;
@@ -20,7 +21,6 @@ public class GenerateExcelDataHelper {
 			if (patient != null) {
 				Map<Integer, String> map = new HashMap<>();
 				int index = 0;
-				//map.put(index++, getStringValue(String.valueOf(patient.getFacilityId())));
 				map.put(index++, getStringValue(String.valueOf(patient.getDatimId())));
 				map.put(index++, getStringValue(String.valueOf(patient.getFacilityName())));
 				map.put(index++, getStringValue(String.valueOf(patient.getLga())));
@@ -90,70 +90,99 @@ public class GenerateExcelDataHelper {
 	}
 	
 	
-	public static List<Map<Integer, String>> fillRadetDataMapper(@NonNull Set<RadetDto> radetDtoSet) {
+	public static List<Map<Integer, String>> fillRadetDataMapper(@NonNull List<RadetReportDto> radetReportDtoList) {
 			List<Map<Integer, String>> result = new ArrayList<>();
 			int sn = 1;
-			for (RadetDto patient : radetDtoSet) {
+			for (RadetReportDto radetReportDto : radetReportDtoList) {
 				Map<Integer, String> map = new HashMap<>();
 				int index = 0;
 				map.put(index++, String.valueOf(sn));
-				map.put(index++, patient.getFacilityName());
-				map.put(index++, patient.getLga());
-				map.put(index++, patient.getState());
-				map.put(index++, patient.getPatientId());
-				map.put(index++, patient.getHospitalNum());
-				map.put(index++, patient.getUniqueID());
-				map.put(index++, getStringValue(String.valueOf(patient.getDateBirth())));
-				map.put(index++, getStringValue(String.valueOf(patient.getAge())));
-				map.put(index++, patient.getSex());
-				map.put(index++, getStringValue(String.valueOf(patient.getArtStartDate())));
-				map.put(index++, getStringValue(String.valueOf(patient.getCurrentWeight())));
-				map.put(index++, getStringValue(String.valueOf(patient.getLastPickupDate())));
-				map.put(index++, getStringValue(String.valueOf(patient.getMonthOfArvRefills())));
-				map.put(index++, getStringValue(String.valueOf(patient.getIptStartDate())));
-				map.put(index++, patient.getIptType());
-				map.put(index++, getStringValue(String.valueOf(patient.getIptCompletedDate())));
-				map.put(index++, patient.getRegimenLineAtStart());
-				map.put(index++, patient.getRegimenAtStart());
-				map.put(index++, patient.getCurrentRegimenLine());
-				map.put(index++, patient.getCurrentRegimen());
-				map.put(index++, getStringValue(String.valueOf(patient.getDateOfRegimenSwitch())));
-				map.put(index++, patient.getPregnancyStatus());
-				map.put(index++, getStringValue(String.valueOf(patient.getDateOfFullDisclosure())));
-				map.put(index++, getStringValue(String.valueOf(patient.getDateEnrolledOnOTZ())));
-				map.put(index++, getStringValue(String.valueOf(patient.getNumberOfSupportGroup())));
-				map.put(index++, getStringValue(String.valueOf(patient.getNumberOfOTZModulesCompleted())));
-				map.put(index++, getStringValue(String.valueOf(patient.getDateOfViralLoadSampleCollection())));
-				map.put(index++, String.valueOf(patient.getCurrentViralLoad()));
-				map.put(index++, String.valueOf(patient.getDateOfCurrentViralLoad()));
-				map.put(index++, patient.getViralLoadIndication());
-				map.put(index++, getStringValue(String.valueOf(patient.getVlResultAfterVLSampleCollection())));
-				map.put(index++, getStringValue(String.valueOf(patient.getDateOfVLResultAfterVLSampleCollection())));
-				map.put(index++, patient.getPreviousARTStatus());
-				map.put(index++, getStringValue(String.valueOf(patient.getConfirmedDateOfPreviousARTStatus())));
-				map.put(index++, getStringValue(String.valueOf(patient.getCurrentARTStatus())));
-				map.put(index++, getStringValue(String.valueOf(patient.getDateOfCurrentARTStatus())));
-				map.put(index++, patient.getCauseOfDead());
-				map.put(index++, patient.getVACauseOfDead());
-				map.put(index++, patient.getNewFacility());
-				map.put(index++, patient.getArtEnrollmentSetting());
-				map.put(index++, getStringValue(String.valueOf(patient.getDateCommencedDMOC())));
-				map.put(index++, patient.getTypeOfDMOC());
-				map.put(index++, getStringValue(String.valueOf(patient.getDateOfReturnOfDMOC())));
-				map.put(index++, getStringValue(String.valueOf(patient.getDateOfCommencementOfEAC())));
-				map.put(index++, getStringValue(String.valueOf(patient.getNumberOfEACSessionsCompleted())));
-				map.put(index++, getStringValue(String.valueOf(patient.getDateOf3rdEACCompletion())));
-				map.put(index++, getStringValue(String.valueOf(patient.getDateOfExtendedEACCompletion())));
-				map.put(index++, getStringValue(String.valueOf(patient.getDateOfRepeatViralLoad())));
-				map.put(index++, getStringValue(String.valueOf(patient.getDateOfCervicalCancerScreening())));
-				map.put(index++, patient.getCervicalCancerScreeningType());
-				map.put(index++, patient.getCervicalCancerScreeningMethod());
-				map.put(index++, patient.getResultOfCervicalCancerScreening());
-				map.put(index++, getStringValue(String.valueOf(patient.getDateOfPrecancerousLesionsTreatment())));
-				map.put(index++, getStringValue(String.valueOf(patient.getDateReturnedToFacility())));
-				map.put(index++, patient.getPrecancerousLesionsTreatmentMethods());
-				map.put(index++, getStringValue(String.valueOf(patient.getDateBiometricsEnrolled())));
-				map.put(index++, patient.getValidBiometricsEnrolled());
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getState())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getLga())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getFacilityName())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getDatimId())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getPersonUuid())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getHospitalNumber())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getGender())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getTargetGroup())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getCurrentWeight())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getPregnancyStatus())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getDateOfBirth())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getAge())));
+				
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getArtStartDate())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getLastPickupDate())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getMonthsOfARVRefill())));
+				
+				
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getRegimenLineAtStart())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getRegimenAtStart())));
+				map.put(index++,"");
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getCurrentARTRegimen())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getCurrentRegimenLine())));
+				
+				
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getCurrentClinicalStage())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getDateOfLastCd4Count())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getLastCd4Count())));
+				//vl
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getDateOfViralLoadSampleCollection())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getCurrentViralLoad())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getDateOfCurrentViralLoad())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getViralLoadIndication())));
+				//status
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getCurrentStatus())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getDateOfCurrentStatus())));
+				//previous status
+				map.put(index++, "");
+				map.put(index++, "");
+				
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getEnrollmentSetting())));
+				//TB
+				map.put(index++,"");
+				map.put(index++,"");
+				map.put(index++,"");
+				map.put(index++,"");
+				map.put(index++,"");
+				map.put(index++,"");
+				map.put(index++,"");
+				map.put(index++,"");
+				map.put(index++,"");
+				map.put(index++,"");
+				map.put(index++,"");
+				//TPT
+				map.put(index++,"");
+				map.put(index++,"");
+				map.put(index++,"");
+				map.put(index++,"");
+				
+				//EAC
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getDateOfCommencementOfEAC())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getNumberOfEACSessionCompleted())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getDateOfLastEACSessionCompleted())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getDateOfExtendEACCompletion())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getDateOfRepeatViralLoadEACSampleCollection())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getRepeatViralLoadResult())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getDateOfRepeatViralLoadResult())));
+				
+				//DSD MOdel
+				map.put(index++,"");
+				map.put(index++,"");
+				map.put(index++, "");
+				//chronic care
+				map.put(index++, "");
+				map.put(index++, "");
+				//cervicalCancerScreeningType
+				map.put(index++, "");
+				map.put(index++, "");
+				map.put(index++, "");
+				map.put(index++, "");
+				//Precancerous
+				map.put(index++,"");
+				map.put(index++,"");
+				//biometrics
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getDateBiometricsEnrolled())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getNumberOfFingersCaptured())));
 				map.put(index, "");
 				result.add(map);
 				sn++;
