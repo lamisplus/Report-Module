@@ -139,9 +139,9 @@ public class GenerateExcelDataHelper {
 				
 				map.put(index++, getStringValue(String.valueOf(radetReportDto.getEnrollmentSetting())));
 				//TB
-				map.put(index++,"");
-				map.put(index++,"");
-				map.put(index++,"");
+				map.put(index++,getStringValue(String.valueOf(radetReportDto.getTbStatus())));
+				map.put(index++,getStringValue(String.valueOf(radetReportDto.getDateOfTbScreened())));
+				map.put(index++,getStringValue(String.valueOf(radetReportDto.getTbStatus())));
 				map.put(index++,"");
 				map.put(index++,"");
 				map.put(index++,"");
