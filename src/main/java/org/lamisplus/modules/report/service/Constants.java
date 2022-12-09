@@ -15,10 +15,10 @@ public class Constants {
 	
 	// headers
 	public static final List<String> PATIENT_LINE_LIST_HEADER = Arrays.asList(
-			"Datim Id",
-			"Facility Name",
-			"LGA",
 			"State",
+			"LGA",
+			"Facility Name",
+			"Datim Id",
 			"Patient Id",
 			"Hospital Num",
 			"Unique ID",
@@ -37,11 +37,11 @@ public class Constants {
 			"Archived",
 			"Care Entry Point",
 			"Date of Confirmed HIV Test (yyyy-mm-dd)",
-			"Date Registration (yyyy-mm-dd)",
+			"Date of Registration(yyyy-mm-dd)",
 			"Status at Registration",
 			"ART Start Date (yyyy-mm-dd)",
 			"Baseline CD4",
-			"Baseline CDP",
+			"Baseline CD4p",
 			"Systolic BP",
 			"Diastolic BP",
 			"Baseline Weight (kg)",

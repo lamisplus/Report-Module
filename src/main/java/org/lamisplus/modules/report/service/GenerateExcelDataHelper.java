@@ -21,13 +21,15 @@ public class GenerateExcelDataHelper {
 			if (patient != null) {
 				Map<Integer, String> map = new HashMap<>();
 				int index = 0;
-				map.put(index++, getStringValue(String.valueOf(patient.getDatimId())));
-				map.put(index++, getStringValue(String.valueOf(patient.getFacilityName())));
-				map.put(index++, getStringValue(String.valueOf(patient.getLga())));
+				String vlDate = (patient.getDateOfLastViralLoad() == null)
+						? " ":patient.getDateOfLastViralLoad().toLocalDate().toString();
 				map.put(index++, getStringValue(String.valueOf(patient.getState())));
+				map.put(index++, getStringValue(String.valueOf(patient.getLga())));
+				map.put(index++, getStringValue(String.valueOf(patient.getFacilityName())));
+				map.put(index++, getStringValue(String.valueOf(patient.getDatimId())));
 				map.put(index++, getStringValue(String.valueOf(patient.getPersonUuid())));
 				map.put(index++, getStringValue(String.valueOf(patient.getHospitalNumber())));
-				map.put(index++, getStringValue(String.valueOf(patient.getHospitalNumber())));
+				map.put(index++, getStringValue(String.valueOf(patient.getUniqueId())));
 				map.put(index++, getStringValue(String.valueOf(patient.getSurname())));
 				map.put(index++, getStringValue(String.valueOf(patient.getFirstName())));
 				map.put(index++, getStringValue(String.valueOf(patient.getDateOfBirth())));
@@ -36,8 +38,8 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(patient.getMaritalStatus())));
 				map.put(index++, getStringValue(String.valueOf(patient.getEducation())));
 				map.put(index++, getStringValue(String.valueOf(patient.getOccupation())));
-				map.put(index++, getStringValue(String.valueOf(patient.getStateOfResidence())));
-				map.put(index++, getStringValue(String.valueOf(patient.getLgaOfResidence())));
+				map.put(index++, getStringValue(String.valueOf(patient.getResidentialState())));
+				map.put(index++, getStringValue(String.valueOf(patient.getResidentialLga())));
 				map.put(index++, getStringValue(String.valueOf(patient.getAddress())));
 				map.put(index++, getStringValue(String.valueOf(patient.getPhone())));
 				map.put(index++, getStringValue(String.valueOf(patient.getArchived())));
@@ -55,12 +57,12 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(patient.getBaselineClinicStage())));
 				map.put(index++, getStringValue(String.valueOf(patient.getBaselineFunctionalStatus())));
 				map.put(index++, getStringValue(String.valueOf(patient.getCurrentStatus())));
-				map.put(index++, getStringValue(String.valueOf(patient.getDateCurrentStatus())));
+				map.put(index++, getStringValue(String.valueOf(patient.getDateOfCurrentStatus())));
 				map.put(index++, getStringValue(String.valueOf(patient.getCurrentWeight())));
 				map.put(index++, getStringValue(String.valueOf(patient.getCurrentHeight())));
 				map.put(index++, getStringValue(String.valueOf(patient.getCurrentSystolicBP())));
 				map.put(index++, getStringValue(String.valueOf(patient.getCurrentDiastolicBP())));
-				map.put(index++, "");
+				map.put(index++, getStringValue(String.valueOf(patient.getAdherenceLevel())));
 				map.put(index++, getStringValue(String.valueOf(patient.getFirstRegimenLine())));
 				map.put(index++, getStringValue(String.valueOf(patient.getFirstRegimen())));
 				
@@ -71,15 +73,15 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(patient.getLastRefillDuration())));
 				map.put(index++, getStringValue(String.valueOf(patient.getDateOfNextRefill())));
 				map.put(index++, getStringValue(String.valueOf(patient.getDmocType())));
-				;
+				
 				map.put(index++, getStringValue(String.valueOf(patient.getDateDevolved())));
 				map.put(index++, getStringValue(String.valueOf(patient.getLastClinicStage())));
-				;
+				
 				map.put(index++, getStringValue(String.valueOf(patient.getDateOfLastClinic())));
 				map.put(index++, getStringValue(String.valueOf(patient.getDateOfNextClinic())));
 				map.put(index++, getStringValue(String.valueOf(patient.getDateOfSampleCollected())));
 				map.put(index++, getStringValue(String.valueOf(patient.getLastViralLoad())));
-				map.put(index++, getStringValue(String.valueOf(patient.getDateOfLastViralLoad())));
+				map.put(index++, getStringValue(vlDate));
 				map.put(index++, getStringValue(String.valueOf(patient.getViralLoadType())));
 				map.put(index, "");
 				result.add(map);
