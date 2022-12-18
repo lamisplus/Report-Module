@@ -12,7 +12,6 @@ import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
 import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 
 import org.lamisplus.modules.report.domain.BiometricReportDto;
-import org.lamisplus.modules.report.domain.RadetDto;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
@@ -21,7 +20,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
 
 
 
@@ -45,6 +44,8 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	
 	private final HIVEacRepository hivEacRepository;
 	
+	private final GenerateExcelDataHelper excelDataHelper;
+	
 	
 	@Override
 	public ByteArrayOutputStream generatePatientLine(HttpServletResponse response, Long facilityId) {
@@ -52,7 +53,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		try {
 			List<PatientLineDto> data = patientReportService.getPatientLine(facilityId);
 			LOG.info("fullData 1: " + data);
-			List<Map<Integer, String>> fullData = GenerateExcelDataHelper.fillPatientLineListDataMapper(data);
+			List<Map<Integer, Object>> fullData = GenerateExcelDataHelper.fillPatientLineListDataMapper(data);
 			LOG.info("fullData 2: " + data.size());
 			return excelService.generate(Constants.PATIENT_LINE_LIST, fullData, Constants.PATIENT_LINE_LIST_HEADER);
 		} catch (Exception e) {
@@ -69,7 +70,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		try {
 			List<RadetReportDto> radetDtos = radetService.getRadetDtos(facilityId, start, end);
 			LOG.error("Radet Size: {}", radetDtos.size());
-			List<Map<Integer, String>> data = GenerateExcelDataHelper.fillRadetDataMapper(radetDtos);
+			List<Map<Integer, Object>> data = excelDataHelper.fillRadetDataMapper(radetDtos,end);
 			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
 		} catch (Exception e) {
 			LOG.error("Error Occurred when generating RADET !!!");
@@ -85,7 +86,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		try {
 			List<PharmacyReport> pharmacies = artPharmacyRepository.getArtPharmacyReport(facilityId);
 			LOG.info("Pharmacy data {}", pharmacies.size());
-			List<Map<Integer, String>> data = GenerateExcelDataHelper.fillPharmacyDataMapper(pharmacies);
+			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillPharmacyDataMapper(pharmacies);
 			return excelService.generate(Constants.PHARMACY_SHEET, data, Constants.PHARMACY_HEADER);
 		} catch (Exception e) {
 			LOG.info("Error Occurred when generating Pharmacy");
@@ -100,7 +101,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		try {
 			LOG.info("start to generate biometric report");
 			List<BiometricReportDto> biometricReportDtoList = biometricReportService.getBiometricReportDtoList(facilityId, start, end);
-			List<Map<Integer, String>> biometricData = GenerateExcelDataHelper.fillBiometricDataMapper(biometricReportDtoList);
+			List<Map<Integer, Object>> biometricData = GenerateExcelDataHelper.fillBiometricDataMapper(biometricReportDtoList);
 			LOG.info("biometric report size {}", biometricData.size());
 			return excelService.generate(Constants.BIOMETRIC_SHEET_SHEET, biometricData, Constants.BIOMETRIC_HEADER);
 		} catch (Exception e) {
@@ -116,7 +117,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		try {
 			List<LabReport> labReports = hivEacRepository.getLabReports(facilityId);
 			LOG.info("Lab data {}", labReports.size());
-			List<Map<Integer, String>> data = GenerateExcelDataHelper.fillLabDataMapper(labReports);
+			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillLabDataMapper(labReports);
 			return excelService.generate(Constants.LAB_SHEET_NAME, data, Constants.LAB_HEADER);
 		} catch (Exception e) {
 			LOG.info("Error Occurred when generating Lab report");

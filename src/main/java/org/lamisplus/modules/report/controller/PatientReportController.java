@@ -3,11 +3,9 @@ package org.lamisplus.modules.report.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.report.domain.AppointmentReportDto;
+import org.lamisplus.modules.report.domain.HIVStatusDisplay;
 import org.lamisplus.modules.report.domain.PatientLineListDto;
-import org.lamisplus.modules.report.service.AppointmentReportService;
-import org.lamisplus.modules.report.service.Constants;
-import org.lamisplus.modules.report.service.GenerateExcelService;
-import org.lamisplus.modules.report.service.PatientReportService;
+import org.lamisplus.modules.report.service.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +15,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -36,6 +34,7 @@ public class PatientReportController {
 	
 	private final GenerateExcelService generateExcelService;
 	
+	private final StatusManagementService statusManagementService;
 	
 	@PostMapping("/patient-line-list")
 	public void patientLineList(HttpServletResponse response, @RequestParam("facilityId") Long facility) throws IOException {
@@ -145,4 +144,18 @@ public class PatientReportController {
 		outputStream.close();
 		response.flushBuffer();
 	}
+	
+	@GetMapping("/client-status-summary")
+	public ResponseEntity<List<HIVStatusDisplay>> getClientStatusHistory(
+			@RequestParam("personUuid") String personUuid,
+			@RequestParam("endDate") LocalDate startingDate) {
+		List<HIVStatusDisplay> result = new ArrayList<>();
+		statusManagementService.getClientStatusSummary(personUuid, startingDate,result);
+		List<HIVStatusDisplay> sorted = result.stream()
+						.filter(Objects::nonNull)
+						.sorted(Comparator.comparing(HIVStatusDisplay::getQuarterEndDate).reversed())
+						.collect(Collectors.toList());
+		return ResponseEntity.ok(sorted);
+	}
+	
 }

@@ -96,7 +96,11 @@ const PatientLineList = (props) => {
                 const fileName ="Radet"
                 const responseData = response.data
                 let blob = new Blob([responseData], {type: "application/octet-stream"});
-                FileSaver.saveAs(blob, `${fileName}.xlsx`);
+                const options = {
+                      type: "arraybuffer",
+                      password: "mypassword"
+                  };
+                FileSaver.saveAs(blob, `${fileName}.xlsx`, options);
                 toast.success(" Report generated successful");
                   //props.setActiveContent('recent-history')
 
