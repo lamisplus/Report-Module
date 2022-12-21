@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -196,8 +196,10 @@ public class StatusManagementService {
 		Quarter currentQuarter = getCurrentQuarter(startDate);
 		if (clientPreviousInternalQuarterStatus == null) {
 			HIVInterQuarterStatus clientCurrentInternalQuarterStatus = getClientCurrentInternalQuarterStatus(personUuid,startDate);
-			statusSummary.push(new HIVStatusDisplay(clientCurrentInternalQuarterStatus.getDate(),
-					clientCurrentInternalQuarterStatus.getDescription(),currentQuarter.getEnd()));
+			if(clientCurrentInternalQuarterStatus != null) {
+				statusSummary.push(new HIVStatusDisplay(clientCurrentInternalQuarterStatus.getDate(),
+						clientCurrentInternalQuarterStatus.getDescription(), currentQuarter.getEnd()));
+			}
 			return statusSummary;
 		}
 		Quarter previousQuarter = getPreviousQuarter(startDate);
