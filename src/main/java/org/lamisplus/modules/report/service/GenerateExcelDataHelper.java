@@ -115,6 +115,12 @@ public class GenerateExcelDataHelper {
 					currentStatus = currentAndPreviousClientStatus.pop();
 					
 				}
+				LocalDate iptCompletionDate = radetReportDto.getIptCompletionDate();
+				if (iptCompletionDate!= null) {
+					if(iptCompletionDate.isAfter(endDate)){
+						iptCompletionDate = null;
+					}
+				}
 				int index = 0;
 				map.put(index++,getStringValue(String.valueOf(sn)));
 				map.put(index++, radetReportDto.getState());
@@ -181,9 +187,9 @@ public class GenerateExcelDataHelper {
 				map.put(index++,null);
 				map.put(index++,null);
 				//TPT
-				map.put(index++,null);
-				map.put(index++,null);
-				map.put(index++,null);
+				map.put(index++, radetReportDto.getDateOfIptStart());
+				map.put(index++, radetReportDto.getIptType());
+				map.put(index++, iptCompletionDate);
 				map.put(index++,null);
 				
 				//EAC

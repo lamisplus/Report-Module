@@ -215,7 +215,6 @@ public class StatusManagementService {
 	public Deque<HIVStatusDisplay> getCurrentAndPreviousClientStatus(String personUuid, LocalDate startDate){
 		 Deque<HIVStatusDisplay> result = new ArrayDeque<>();
 		return getClientStatusSummaryLimitTwo(personUuid, startDate,result);
-		
 	}
 	
 }
