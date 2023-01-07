@@ -208,10 +208,10 @@ public class GenerateExcelDataHelper {
 				map.put(index++, null);
 				map.put(index++, null);
 				//cervicalCancerScreeningType
-				map.put(index++, null);
-				map.put(index++, null);
-				map.put(index++, null);
-				map.put(index++, null);
+				map.put(index++, radetReportDto.getDateOfCervicalCancerScreening());
+				map.put(index++, radetReportDto.getCervicalCancerScreeningType());
+				map.put(index++, radetReportDto.getCervicalCancerScreeningMethod());
+				map.put(index++, radetReportDto.getResultOfCervicalCancerScreening());
 				//Precancerous
 				map.put(index++,null);
 				map.put(index++,null);
