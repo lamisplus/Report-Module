@@ -5,9 +5,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.audit4j.core.util.Log;
 import org.lamisplus.modules.hiv.domain.dto.*;
+import org.lamisplus.modules.hiv.service.StatusManagementService;
 import org.lamisplus.modules.report.domain.BiometricReportDto;
-import org.lamisplus.modules.report.domain.HIVStatusDisplay;
-import org.lamisplus.modules.report.domain.Quarter;
 import org.springframework.stereotype.Component;
 
 
@@ -19,7 +18,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class GenerateExcelDataHelper {
 	
-	private  final  StatusManagementService statusManagementService;
+	private  final StatusManagementService statusManagementService;
 	
 	public static List<Map<Integer, Object>> fillPatientLineListDataMapper(@NonNull List<PatientLineDto> listFinalResult) {
 		List<Map<Integer, Object>> result = new ArrayList<>();

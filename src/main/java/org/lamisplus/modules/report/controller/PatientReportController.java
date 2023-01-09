@@ -2,8 +2,10 @@ package org.lamisplus.modules.report.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.lamisplus.modules.hiv.domain.dto.HIVStatusDisplay;
+import org.lamisplus.modules.hiv.service.StatusManagementService;
 import org.lamisplus.modules.report.domain.AppointmentReportDto;
-import org.lamisplus.modules.report.domain.HIVStatusDisplay;
+
 import org.lamisplus.modules.report.domain.PatientLineListDto;
 import org.lamisplus.modules.report.service.*;
 import org.springframework.http.ResponseEntity;
