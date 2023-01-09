@@ -5,9 +5,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.audit4j.core.util.Log;
 import org.lamisplus.modules.hiv.domain.dto.*;
+import org.lamisplus.modules.hiv.service.StatusManagementService;
 import org.lamisplus.modules.report.domain.BiometricReportDto;
-import org.lamisplus.modules.report.domain.HIVStatusDisplay;
-import org.lamisplus.modules.report.domain.Quarter;
 import org.springframework.stereotype.Component;
 
 
@@ -19,7 +18,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class GenerateExcelDataHelper {
 	
-	private  final  StatusManagementService statusManagementService;
+	private  final StatusManagementService statusManagementService;
 	
 	public static List<Map<Integer, Object>> fillPatientLineListDataMapper(@NonNull List<PatientLineDto> listFinalResult) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
@@ -115,6 +114,12 @@ public class GenerateExcelDataHelper {
 					currentStatus = currentAndPreviousClientStatus.pop();
 					
 				}
+				LocalDate iptCompletionDate = radetReportDto.getIptCompletionDate();
+				if (iptCompletionDate!= null) {
+					if(iptCompletionDate.isAfter(endDate)){
+						iptCompletionDate = null;
+					}
+				}
 				int index = 0;
 				map.put(index++,getStringValue(String.valueOf(sn)));
 				map.put(index++, radetReportDto.getState());
@@ -181,9 +186,9 @@ public class GenerateExcelDataHelper {
 				map.put(index++,null);
 				map.put(index++,null);
 				//TPT
-				map.put(index++,null);
-				map.put(index++,null);
-				map.put(index++,null);
+				map.put(index++, radetReportDto.getDateOfIptStart());
+				map.put(index++, radetReportDto.getIptType());
+				map.put(index++, iptCompletionDate);
 				map.put(index++,null);
 				
 				//EAC
@@ -202,10 +207,10 @@ public class GenerateExcelDataHelper {
 				map.put(index++, null);
 				map.put(index++, null);
 				//cervicalCancerScreeningType
-				map.put(index++, null);
-				map.put(index++, null);
-				map.put(index++, null);
-				map.put(index++, null);
+				map.put(index++, radetReportDto.getDateOfCervicalCancerScreening());
+				map.put(index++, radetReportDto.getCervicalCancerScreeningType());
+				map.put(index++, radetReportDto.getCervicalCancerScreeningMethod());
+				map.put(index++, radetReportDto.getResultOfCervicalCancerScreening());
 				//Precancerous
 				map.put(index++,null);
 				map.put(index++,null);
