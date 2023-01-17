@@ -49,7 +49,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(patient.getPhone())));
 				map.put(index++, getStringValue(String.valueOf(patient.getArchived())));
 				map.put(index++, getStringValue(String.valueOf(patient.getCareEntryPoint())));
-				map.put(index++, (patient.getDateOfConfirmedHIVTest()));
+			 map.put(index++, (patient.getDateOfConfirmedHIVTest()));
 				map.put(index++,patient.getDateOfRegistration());
 				map.put(index++, getStringValue(String.valueOf(patient.getStatusAtRegistration())));
 				map.put(index++, patient.getArtStartDate());
@@ -115,7 +115,7 @@ public class GenerateExcelDataHelper {
 					
 				}
 				LocalDate iptCompletionDate = radetReportDto.getIptCompletionDate();
-				if (iptCompletionDate!= null) {
+				if (iptCompletionDate != null) {
 					if(iptCompletionDate.isAfter(endDate)){
 						iptCompletionDate = null;
 					}
@@ -128,11 +128,19 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getDatimId());
 				map.put(index++, personUuid);
 				map.put(index++, radetReportDto.getHospitalNumber());
+				//ovc
+				map.put(index++, radetReportDto.getHouseholdNumber());
+				map.put(index++,  radetReportDto.getOvcNumber());
+				
 				map.put(index++, radetReportDto.getGender());
 				map.put(index++, radetReportDto.getTargetGroup());
 				map.put(index++, getStringValue(String.valueOf(radetReportDto.getCurrentWeight())));
 				map.put(index++, radetReportDto.getPregnancyStatus());
 				map.put(index++, radetReportDto.getDateOfBirth());
+				//OVC
+				map.put(index++, null);
+				map.put(index++, null);
+				
 				map.put(index++, getStringValue(String.valueOf(radetReportDto.getAge())));
 				
 				map.put(index++,radetReportDto.getArtStartDate());
