@@ -53,14 +53,13 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-
 const PatientLineList = (props) => {
     const classes = useStyles();
     const [loading, setLoading] = useState(false)
     const [facilities, setFacilities] = useState([]);
     const [objValues, setObjValues]=useState({       
         organisationUnitId:"",
-        startDate:"",
+        startDate:"1980-01-01",
         endDate:""
     })
     useEffect(() => {
@@ -81,45 +80,55 @@ const PatientLineList = (props) => {
         });
     
     }
+
     const handleInputChange = e => {
+        //1980-01-01
+
         setObjValues ({...objValues,  [e.target.name]: e.target.value});
     }
+
+    const handleValueChange = () => {
+        let currentDate = new Date().toISOString().split('T')[0]
+
+        setObjValues ({...objValues,  startDate: currentDate, endDate: currentDate});
+    }
+
     const handleSubmit = (e) => {        
         e.preventDefault();
         setLoading(true)
-        axios.get(`${baseUrl}reporting/radet?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
-           { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
-          
-          )
-              .then(response => {
-                setLoading(false)
-                const fileName ="Radet"
-                const responseData = response.data
-                let blob = new Blob([responseData], {type: "application/octet-stream"});
-                const options = {
-                      type: "arraybuffer",
-                      password: "mypassword"
-                  };
-                FileSaver.saveAs(blob, `${fileName}.xlsx`, options);
-                toast.success(" Report generated successful");
-                  //props.setActiveContent('recent-history')
+        console.log(objValues);
 
-              })
-              .catch(error => {
-                setLoading(false)
-                if(error.response && error.response.data){
-                    let errorMessage = error.response.data.apierror && error.response.data.apierror.message!=="" ? error.response.data.apierror.message :  "Something went wrong, please try again";
-                    toast.error(errorMessage);
-                  }
-                  else{
-                    toast.error("Something went wrong. Please try again...");
-                  }
-              });
+//        axios.get(`${baseUrl}reporting/radet?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
+//           { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
+//
+//          )
+//              .then(response => {
+//                setLoading(false)
+//                const fileName ="Radet"
+//                const responseData = response.data
+//                let blob = new Blob([responseData], {type: "application/octet-stream"});
+//                const options = {
+//                      type: "arraybuffer",
+//                      password: "mypassword"
+//                  };
+//                FileSaver.saveAs(blob, `${fileName}.xlsx`, options);
+//                toast.success(" Report generated successful");
+//                  //props.setActiveContent('recent-history')
+//
+//              })
+//              .catch(error => {
+//                setLoading(false)
+//                if(error.response && error.response.data){
+//                    let errorMessage = error.response.data.apierror && error.response.data.apierror.message!=="" ? error.response.data.apierror.message :  "Something went wrong, please try again";
+//                    toast.error(errorMessage);
+//                  }
+//                  else{
+//                    toast.error("Something went wrong. Please try again...");
+//                  }
+//              });
             
 
     }
-    
-    
 
     return (
         <>
@@ -133,7 +142,7 @@ const PatientLineList = (props) => {
                         <div className="row">
                         <div className="form-group  col-md-6">
                                 <FormGroup>
-                                    <Label>Start Date*</Label>
+                                    <Label>From *</Label>
                                     <input
                                         type="date"
                                         className="form-control"
@@ -148,7 +157,7 @@ const PatientLineList = (props) => {
                             </div>
                             <div className="form-group  col-md-6">
                                 <FormGroup>
-                                    <Label>End Date*</Label>
+                                    <Label>To *</Label>
                                     <input
                                         type="date"
                                         className="form-control"
@@ -159,8 +168,14 @@ const PatientLineList = (props) => {
                                         onChange={handleInputChange}
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
                                     />
-                                     
-                                    
+                                </FormGroup>
+                            </div>
+                            <div className="form-group  col-md-6">
+                                 <FormGroup check>
+                                  <Label check>
+                                    <Input type="checkbox" onChange={handleValueChange}/>
+                                     {' '} &nbsp;&nbsp;<span> As at Today.</span>
+                                  </Label>
                                 </FormGroup>
                             </div>
                             <div className="form-group  col-md-6">
