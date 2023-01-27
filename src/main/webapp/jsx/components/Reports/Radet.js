@@ -57,6 +57,7 @@ const PatientLineList = (props) => {
     const classes = useStyles();
     const [loading, setLoading] = useState(false)
     const [facilities, setFacilities] = useState([]);
+    const [status, setStatus] = useState(true);
     const [objValues, setObjValues]=useState({       
         organisationUnitId:"",
         startDate:"1980-01-01",
@@ -88,9 +89,16 @@ const PatientLineList = (props) => {
     }
 
     const handleValueChange = () => {
+        setStatus(!status)
+
         let currentDate = new Date().toISOString().split('T')[0]
 
-        setObjValues ({...objValues,  startDate: currentDate, endDate: currentDate});
+        if (status === true) {
+          setObjValues ({...objValues,  startDate: currentDate, endDate: currentDate});
+        } else {
+          setObjValues ({...objValues,  startDate: "1980-01-01", endDate: currentDate});
+        }
+
     }
 
     const handleSubmit = (e) => {        
