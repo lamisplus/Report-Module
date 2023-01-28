@@ -54,6 +54,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PatientLineList = (props) => {
+    let currentDate = new Date().toISOString().split('T')[0]
     const classes = useStyles();
     const [loading, setLoading] = useState(false)
     const [facilities, setFacilities] = useState([]);
@@ -61,7 +62,7 @@ const PatientLineList = (props) => {
     const [objValues, setObjValues]=useState({       
         organisationUnitId:"",
         startDate:"1980-01-01",
-        endDate:""
+        endDate: currentDate
     })
     useEffect(() => {
         Facilities()
@@ -90,8 +91,6 @@ const PatientLineList = (props) => {
 
     const handleValueChange = () => {
         setStatus(!status)
-
-        let currentDate = new Date().toISOString().split('T')[0]
 
         if (status === true) {
           setObjValues ({...objValues,  startDate: currentDate, endDate: currentDate});
@@ -156,6 +155,8 @@ const PatientLineList = (props) => {
                                         className="form-control"
                                         name="startDate"
                                         id="startDate"
+                                        min={"1980-01-01"}
+                                        max={currentDate}
                                         value={objValues.startDate}
                                         onChange={handleInputChange}
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
@@ -171,7 +172,9 @@ const PatientLineList = (props) => {
                                         className="form-control"
                                         name="endDate"
                                         id="endDate"
-                                        min={objValues.startDate}
+                                        min={"1980-01-01"}
+                                        max={currentDate}
+                                        //min={objValues.startDate}
                                         value={objValues.endDate}
                                         onChange={handleInputChange}
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
