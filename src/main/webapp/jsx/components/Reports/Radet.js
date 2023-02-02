@@ -53,15 +53,16 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-
 const PatientLineList = (props) => {
+    let currentDate = new Date().toISOString().split('T')[0]
     const classes = useStyles();
     const [loading, setLoading] = useState(false)
     const [facilities, setFacilities] = useState([]);
+    const [status, setStatus] = useState(true);
     const [objValues, setObjValues]=useState({       
         organisationUnitId:"",
-        startDate:"",
-        endDate:""
+        startDate:"1980-01-01",
+        endDate: currentDate
     })
     useEffect(() => {
         Facilities()
@@ -81,45 +82,60 @@ const PatientLineList = (props) => {
         });
     
     }
+
     const handleInputChange = e => {
+        //1980-01-01
+
         setObjValues ({...objValues,  [e.target.name]: e.target.value});
     }
+
+    const handleValueChange = () => {
+        setStatus(!status)
+
+        if (status === true) {
+          setObjValues ({...objValues,  startDate: currentDate, endDate: currentDate});
+        } else {
+          setObjValues ({...objValues,  startDate: "1980-01-01", endDate: currentDate});
+        }
+
+    }
+
     const handleSubmit = (e) => {        
         e.preventDefault();
         setLoading(true)
-        axios.get(`${baseUrl}reporting/radet?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
-           { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
-          
-          )
-              .then(response => {
-                setLoading(false)
-                const fileName ="Radet"
-                const responseData = response.data
-                let blob = new Blob([responseData], {type: "application/octet-stream"});
-                const options = {
-                      type: "arraybuffer",
-                      password: "mypassword"
-                  };
-                FileSaver.saveAs(blob, `${fileName}.xlsx`, options);
-                toast.success(" Report generated successful");
-                  //props.setActiveContent('recent-history')
+        console.log(objValues);
 
-              })
-              .catch(error => {
-                setLoading(false)
-                if(error.response && error.response.data){
-                    let errorMessage = error.response.data.apierror && error.response.data.apierror.message!=="" ? error.response.data.apierror.message :  "Something went wrong, please try again";
-                    toast.error(errorMessage);
-                  }
-                  else{
-                    toast.error("Something went wrong. Please try again...");
-                  }
-              });
+//        axios.get(`${baseUrl}reporting/radet?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
+//           { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
+//
+//          )
+//              .then(response => {
+//                setLoading(false)
+//                const fileName ="Radet"
+//                const responseData = response.data
+//                let blob = new Blob([responseData], {type: "application/octet-stream"});
+//                const options = {
+//                      type: "arraybuffer",
+//                      password: "mypassword"
+//                  };
+//                FileSaver.saveAs(blob, `${fileName}.xlsx`, options);
+//                toast.success(" Report generated successful");
+//                  //props.setActiveContent('recent-history')
+//
+//              })
+//              .catch(error => {
+//                setLoading(false)
+//                if(error.response && error.response.data){
+//                    let errorMessage = error.response.data.apierror && error.response.data.apierror.message!=="" ? error.response.data.apierror.message :  "Something went wrong, please try again";
+//                    toast.error(errorMessage);
+//                  }
+//                  else{
+//                    toast.error("Something went wrong. Please try again...");
+//                  }
+//              });
             
 
     }
-    
-    
 
     return (
         <>
@@ -133,12 +149,14 @@ const PatientLineList = (props) => {
                         <div className="row">
                         <div className="form-group  col-md-6">
                                 <FormGroup>
-                                    <Label>Start Date*</Label>
+                                    <Label>From *</Label>
                                     <input
                                         type="date"
                                         className="form-control"
                                         name="startDate"
                                         id="startDate"
+                                        min={"1980-01-01"}
+                                        max={currentDate}
                                         value={objValues.startDate}
                                         onChange={handleInputChange}
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
@@ -148,19 +166,27 @@ const PatientLineList = (props) => {
                             </div>
                             <div className="form-group  col-md-6">
                                 <FormGroup>
-                                    <Label>End Date*</Label>
+                                    <Label>To *</Label>
                                     <input
                                         type="date"
                                         className="form-control"
                                         name="endDate"
                                         id="endDate"
-                                        min={objValues.startDate}
+                                        min={"1980-01-01"}
+                                        max={currentDate}
+                                        //min={objValues.startDate}
                                         value={objValues.endDate}
                                         onChange={handleInputChange}
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
                                     />
-                                     
-                                    
+                                </FormGroup>
+                            </div>
+                            <div className="form-group  col-md-6">
+                                 <FormGroup check>
+                                  <Label check>
+                                    <Input type="checkbox" onChange={handleValueChange}/>
+                                     {' '} &nbsp;&nbsp;<span> As at Today.</span>
+                                  </Label>
                                 </FormGroup>
                             </div>
                             <div className="form-group  col-md-6">
