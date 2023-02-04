@@ -12,6 +12,7 @@ import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
 import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 
 import org.lamisplus.modules.report.domain.BiometricReportDto;
+import org.lamisplus.modules.report.domain.HtsReportDto;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
@@ -36,6 +37,8 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	private final OrganisationUnitService organisationUnitService;
 	
 	private final ArtPharmacyRepository artPharmacyRepository;
+
+	private final HtsReportService htsReportService;
 	
 	
 	private final BiometricReportService biometricReportService;
@@ -139,6 +142,22 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	@Override
 	public String getFacilityName(Long facilityId) {
 		return organisationUnitService.getOrganizationUnit(facilityId).getName();
+	}
+
+	@Override
+	public ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, LocalDate end) {
+		LOG.info("Start generating hts for facility:" + getFacilityName(facilityId));
+		try {
+			List<HtsReportDto> htsReport = htsReportService.getHtsReport(facilityId, start, end);
+			LOG.error("Hts Size: {}", htsReport.size());
+			List<Map<Integer, Object>> data = excelDataHelper.fillHtsDataMapper(htsReport);
+			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
+		} catch (Exception e) {
+			LOG.error("Error Occurred when generating RADET !!!");
+			e.printStackTrace();
+		}
+		LOG.info("End generate patient Radet");
+		return null;
 	}
 	
 	
