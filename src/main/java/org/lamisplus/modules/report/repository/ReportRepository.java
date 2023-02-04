@@ -100,8 +100,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "      \t\t\tFROM patient_person p,\n" +
             "jsonb_array_elements(p.address-> 'address') with ordinality l(address_object)) as result\n" +
             "\t\t\t\t  ) r ON r.id=pp.id\n" +
-            "LEFT JOIN base_organisation_unit res_state ON res_state.id=r.stateid::BIGINT\n" +
-            "LEFT JOIN base_organisation_unit res_lga ON res_lga.id=r.lgaid::BIGINT\n" +
+            "LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)\n" +
+            "LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)\n" +
             "LEFT JOIN base_organisation_unit facility ON facility.id=hc.facility_id\n" +
             "LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=hc.facility_id\n" +
             "WHERE hc.archived=?1 AND hc.facility_id=?2 AND hc.date_visit >=?3 AND hc.date_visit < ?4",
