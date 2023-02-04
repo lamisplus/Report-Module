@@ -47,7 +47,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "hc.num_children AS numberOfChildren,\n" +
             "hc.num_wives AS numberOfWives,\n" +
             "(CASE WHEN hc.index_client IS true THEN 'Yes' ELSE 'No' END) indexClient,\n" +
-            "(CASE WHEN hc.index_client IS true THEN 'Yes' ELSE 'No' END) indexClient,\n" +
             "hc.prep_offered AS prepOffered,\n" +
             "hc.prep_accepted AS prepAccepted,\n" +
             "(CASE WHEN hc.previously_tested IS true THEN 'Yes' ELSE 'No' END) AS previouslyTested, \n" +
@@ -104,7 +103,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)\n" +
             "LEFT JOIN base_organisation_unit facility ON facility.id=hc.facility_id\n" +
             "LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=hc.facility_id\n" +
-            "WHERE hc.archived=?1 AND hc.facility_id=?2 AND hc.date_visit >=?3 AND hc.date_visit < ?4",
-            nativeQuery = true)
+            "WHERE hc.archived=?1 AND hc.facility_id=?2 AND hc.date_visit >=?3 AND hc.date_visit < ?4", nativeQuery = true)
     List<HtsReportDto> getHtsReport(Integer archived, Long facilityId, LocalDate from, LocalDate to);
 }
