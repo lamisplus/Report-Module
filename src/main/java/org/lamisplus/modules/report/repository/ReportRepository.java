@@ -94,7 +94,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "LEFT JOIN base_application_codeset modality_code ON modality_code.code = hrs.modality\n" +
             "LEFT JOIN patient_person pp ON pp.uuid=hc.person_uuid\n" +
             "LEFT JOIN (\n" +
-            "\t\t\t\t  SELECT * FROM (SELECT p.id, REPLACE(REPLACE(REPLACE(address_object->>'line'::text, '\"', ''), ']', ''), '[', '') AS address, \n" +
+            "\t\t\t\t  SELECT * FROM (SELECT p.id, REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '\"', ''), ']', ''), '[', '') AS address, \n" +
             "\t\t\t\tCASE WHEN address_object->>'stateId'  ~ '^\\d+(\\.\\d+)?$' THEN address_object->>'stateId' ELSE null END  AS stateId,\n" +
             "\t\t\t\tCASE WHEN address_object->>'district'  ~ '^\\d+(\\.\\d+)?$' THEN address_object->>'district' ELSE null END  AS lgaId\n" +
             "      \t\t\tFROM patient_person p,\n" +
