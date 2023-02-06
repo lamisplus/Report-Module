@@ -12,6 +12,8 @@ public class Constants {
 	// Sheet name
 	public static final String PATIENT_LINE_LIST = "patient_line__list";
 	public static final String RADET_SHEET = "radet";
+
+	public static final String HTS_SHEET = "hts";
 	
 	// headers
 	public static final List<String> PATIENT_LINE_LIST_HEADER = Arrays.asList(
