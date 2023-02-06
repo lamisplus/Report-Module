@@ -151,12 +151,12 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			List<HtsReportDto> htsReport = htsReportService.getHtsReport(facilityId, start, end);
 			LOG.error("Hts Size: {}", htsReport.size());
 			List<Map<Integer, Object>> data = excelDataHelper.fillHtsDataMapper(htsReport);
-			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
+			return excelService.generate(Constants.HTS_SHEET, data, Constants.HTS_HEADER);
 		} catch (Exception e) {
-			LOG.error("Error Occurred when generating RADET !!!");
+			LOG.error("Error Occurred when generating HTS !!!");
 			e.printStackTrace();
 		}
-		LOG.info("End generate patient Radet");
+		LOG.info("End generate patient HTS");
 		return null;
 	}
 	
