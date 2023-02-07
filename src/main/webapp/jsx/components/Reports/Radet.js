@@ -12,7 +12,6 @@ import { toast} from "react-toastify";
 import FileSaver from "file-saver";
 import { Message, Icon } from 'semantic-ui-react'
 
-
 const useStyles = makeStyles((theme) => ({
     card: {
         margin: theme.spacing(20),
@@ -61,8 +60,8 @@ const PatientLineList = (props) => {
     const [status, setStatus] = useState(true);
     const [objValues, setObjValues]=useState({       
         organisationUnitId:"",
-        startDate:"1980-01-01",
-        endDate: currentDate
+        startDate:"",
+        endDate: ""
     })
     useEffect(() => {
         Facilities()
@@ -93,7 +92,7 @@ const PatientLineList = (props) => {
         setStatus(!status)
 
         if (status === true) {
-          setObjValues ({...objValues,  startDate: currentDate, endDate: currentDate});
+          setObjValues ({...objValues,  startDate: "1980-01-01", endDate: currentDate});
         } else {
           setObjValues ({...objValues,  startDate: "1980-01-01", endDate: currentDate});
         }
@@ -105,36 +104,34 @@ const PatientLineList = (props) => {
         setLoading(true)
         console.log(objValues);
 
-//        axios.get(`${baseUrl}reporting/radet?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
-//           { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
-//
-//          )
-//              .then(response => {
-//                setLoading(false)
-//                const fileName ="Radet"
-//                const responseData = response.data
-//                let blob = new Blob([responseData], {type: "application/octet-stream"});
-//                const options = {
-//                      type: "arraybuffer",
-//                      password: "mypassword"
-//                  };
-//                FileSaver.saveAs(blob, `${fileName}.xlsx`, options);
-//                toast.success(" Report generated successful");
-//                  //props.setActiveContent('recent-history')
-//
-//              })
-//              .catch(error => {
-//                setLoading(false)
-//                if(error.response && error.response.data){
-//                    let errorMessage = error.response.data.apierror && error.response.data.apierror.message!=="" ? error.response.data.apierror.message :  "Something went wrong, please try again";
-//                    toast.error(errorMessage);
-//                  }
-//                  else{
-//                    toast.error("Something went wrong. Please try again...");
-//                  }
-//              });
-            
+        axios.get(`${baseUrl}reporting/radet?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
+           { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
 
+          )
+          .then(response => {
+            setLoading(false)
+            const fileName ="Radet"
+            const responseData = response.data
+            let blob = new Blob([responseData], {type: "application/octet-stream"});
+            const options = {
+                  type: "arraybuffer",
+                  password: "mypassword"
+              };
+            FileSaver.saveAs(blob, `${fileName}.xlsx`, options);
+            toast.success(" Report generated successful");
+              //props.setActiveContent('recent-history')
+
+          })
+          .catch(error => {
+            setLoading(false)
+            if(error.response && error.response.data){
+                let errorMessage = error.response.data.apierror && error.response.data.apierror.message!=="" ? error.response.data.apierror.message :  "Something went wrong, please try again";
+                toast.error(errorMessage);
+              }
+              else{
+                toast.error("Something went wrong. Please try again...");
+              }
+          });
     }
 
     return (
