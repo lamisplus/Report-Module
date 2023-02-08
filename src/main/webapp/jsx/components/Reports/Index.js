@@ -86,7 +86,7 @@ const Reports = (props) => {
                                 onClick={()=>handleItemClick('pharmacy-report')}
                                 style={{backgroundColor:activeItem === 'pharmacy-report' ? '#000': ""}}
                             >               
-                                <span style={{color:'#fff'}}>PHARMACY REPORT</span>
+                                <span style={{color:'#fff'}}>PHARMACY DATA</span>
                                 
                             {/* <Label color='teal'>5</Label> */}
                             </Menu.Item>
@@ -96,7 +96,7 @@ const Reports = (props) => {
                                 onClick={()=>handleItemClick('biometric')}
                                 style={{backgroundColor:activeItem === 'biometric' ? '#000': ""}}
                             >               
-                                <span style={{color:'#fff'}}>BIOMETRIC REPORT</span>
+                                <span style={{color:'#fff'}}>BIOMETRIC DATA</span>
                                 
                             {/* <Label color='teal'>5</Label> */}
                             </Menu.Item>
@@ -106,7 +106,7 @@ const Reports = (props) => {
                                 onClick={()=>handleItemClick('laboratory-report')}
                                 style={{backgroundColor:activeItem === 'laboratory-report' ? '#000': ""}}
                             >               
-                                <span style={{color:'#fff'}}>LABORATORY REPORT</span>
+                                <span style={{color:'#fff'}}>LABORATORY DATA</span>
                                 
                             {/* <Label color='teal'>5</Label> */}
                             </Menu.Item>
