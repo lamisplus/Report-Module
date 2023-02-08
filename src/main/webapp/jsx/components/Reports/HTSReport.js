@@ -104,7 +104,7 @@ const HTSReport = (props) => {
         setLoading(true)
         console.log(objValues);
 
-        axios.get(`${baseUrl}hts-reporting?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
+        axios.post(`${baseUrl}hts-reporting?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
            { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
 
           )
