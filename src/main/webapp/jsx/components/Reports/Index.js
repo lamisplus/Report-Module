@@ -13,6 +13,7 @@ import Radet from './Radet'
 import BiometricReport from './BiometricReport'
 import PharmacyReport from './PharmacyReport';
 import LaboratoryReport from './LaboratoryReport';
+import HTSReport from './HTSReport';
 
 const useStyles = makeStyles((theme) => ({
 
@@ -109,6 +110,16 @@ const Reports = (props) => {
                                 
                             {/* <Label color='teal'>5</Label> */}
                             </Menu.Item>
+                            <Menu.Item
+                                name='inbox'
+                                active={activeItem === 'hts-report'}
+                                onClick={()=>handleItemClick('hts-report')}
+                                style={{backgroundColor:activeItem === 'hts-report' ? '#000': ""}}
+                            >
+                                <span style={{color:'#fff'}}>HTS REPORT</span>
+
+                            {/* <Label color='teal'>5</Label> */}
+                            </Menu.Item>
                         </Menu>
                         </div>
                         <div className="col-md-9 float-end" style={{ backgroundColor:"#fff"}}>
@@ -118,6 +129,7 @@ const Reports = (props) => {
                         {activeItem==='biometric' && (<BiometricReport handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
                         {activeItem==='pharmacy-report' && (<PharmacyReport  handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
                         {activeItem==='laboratory-report' && (<LaboratoryReport  handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
+                        {activeItem==='hts-report' && (<HTSReport  handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
                         {/* {activeItem==='others' && (<Others handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)} */}
                             
                         </div>

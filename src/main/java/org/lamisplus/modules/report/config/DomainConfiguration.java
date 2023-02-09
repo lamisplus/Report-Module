@@ -20,7 +20,7 @@ import javax.sql.DataSource;
 @Configuration
 @EnableJpaRepositories(
         transactionManagerRef = "reportTransactionManger",
-        basePackages = "org.lamisplus.modules.report.repositories"
+        basePackages = "org.lamisplus.modules.report.repository"
 
 )
 @EnableTransactionManagement

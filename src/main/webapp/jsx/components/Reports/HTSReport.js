@@ -52,13 +52,13 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const PatientLineList = (props) => {
+const HTSReport = (props) => {
     let currentDate = new Date().toISOString().split('T')[0]
     const classes = useStyles();
     const [loading, setLoading] = useState(false)
     const [facilities, setFacilities] = useState([]);
     const [status, setStatus] = useState(true);
-    const [objValues, setObjValues]=useState({       
+    const [objValues, setObjValues]=useState({
         organisationUnitId:"",
         startDate:"",
         endDate: ""
@@ -79,7 +79,7 @@ const PatientLineList = (props) => {
         .catch((error) => {
         //console.log(error);
         });
-    
+
     }
 
     const handleInputChange = e => {
@@ -99,30 +99,22 @@ const PatientLineList = (props) => {
 
     }
 
-    const handleSubmit = (e) => {        
+    const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true)
-      
         console.log(objValues);
 
-        axios.get(`${baseUrl}reporting/radet?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
+        axios.post(`${baseUrl}hts-reporting?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
            { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
 
           )
           .then(response => {
             setLoading(false)
-            const fileName ="Radet"
+            const fileName ="HTS"
             const responseData = response.data
             let blob = new Blob([responseData], {type: "application/octet-stream"});
-//            const options = {
-//                  type: "arraybuffer",
-//                  password: "mypassword"
-//              };
-
             FileSaver.saveAs(blob, `${fileName}.xlsx`);
-            toast.success("Radet Report generated successful");
-              //props.setActiveContent('recent-history')
-
+            toast.success("HTS Report generated successfully");
           })
           .catch(error => {
             setLoading(false)
@@ -138,11 +130,11 @@ const PatientLineList = (props) => {
 
     return (
         <>
-            
+
             <Card >
                 <CardBody>
-    
-                <h2 style={{color:'#000'}}>RADET REPORT</h2>
+
+                <h2 style={{color:'#000'}}>HTS REPORT</h2>
                 <br/>
                     <form >
                         <div className="row">
@@ -160,7 +152,7 @@ const PatientLineList = (props) => {
                                         onChange={handleInputChange}
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
                                     />
-                                    
+
                                 </FormGroup>
                             </div>
                             <div className="form-group  col-md-6">
@@ -206,7 +198,7 @@ const PatientLineList = (props) => {
                                             </option>
                                         ))}
                                     </select>
-                                    
+
                                 </FormGroup>
                             </div>
 
@@ -230,9 +222,9 @@ const PatientLineList = (props) => {
                     </form>
 
                 </CardBody>
-            </Card>                                 
+            </Card>
         </>
     );
 };
 
-export default PatientLineList
+export default HTSReport

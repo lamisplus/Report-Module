@@ -13,4 +13,5 @@ public interface GenerateExcelService {
  ByteArrayOutputStream generateBiometricReport(Long facilityId,  LocalDate start, LocalDate end) throws IOException;
  ByteArrayOutputStream generateLabReport(Long facilityId) throws IOException;
  String getFacilityName(Long facilityId);
+ ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, LocalDate end);
 }

@@ -12,6 +12,8 @@ public class Constants {
 	// Sheet name
 	public static final String PATIENT_LINE_LIST = "patient_line__list";
 	public static final String RADET_SHEET = "radet";
+
+	public static final String HTS_SHEET = "hts";
 	
 	// headers
 	public static final List<String> PATIENT_LINE_LIST_HEADER = Arrays.asList(
@@ -218,5 +220,62 @@ public class Constants {
 					"Date Sample Collected (yyyy-mm-dd)",
 					"Result",
 					"Date  Result Received  (yyyy-mm-dd)"
+			);
+
+
+	public static final List<String> HTS_HEADER =
+			Arrays.asList(
+					"S/No",
+					"Facility Id (Datim)",
+					"facility",
+					"client Code",
+					"First Name",
+					"surname",
+					"Other Names",
+					"Sex",
+					"Target Group",
+					"Age",
+					"Date Of Birth (yyyy-mm-dd)",
+					"Phone Number",
+					"Marital Status",
+					"Client Address",
+					"LGA of Residence",
+					"State Of Residence",
+					"Education",
+					"Occupation",
+					"Date of Visit (yyyy-mm-dd)",
+					"First Time Visit",
+					"Number of wives",
+					"Number of Children",
+					"Index Client",
+					"Previously Tested",
+					"Referred From",
+					"Testing Setting",
+					"Counseling Type",
+					"Pregnancy Status",
+					"Breastfeeding",
+					"Index Type",
+					"If Recency Testing Opt In",
+					"Recency Id",
+					"Recency Test Type",
+					"Recency Test Date (yyyy-mm-dd)",
+					"Recency Interpretation",
+					"Final Recency Result",
+					"Viral Load Result Classification",
+					"Viral Load Confirmation Date (yyyy-mm-dd)",
+					"Assessment Code",
+					"Modality",
+					"Syphilis Test Result",
+					"Hepatitis B Result",
+					"Hepatitis C Result",
+					"CD4 Type",
+					"CD4 Test Result",
+					"HIV Test Result",
+					"Final HIV Test Result",
+					"Date Of HIV Testing (yyyy-mm-dd)",
+					"Prep Offered",
+					"Prep Accepted",
+					"HTS Latitude",
+					"HTS Longitude"
 			);
 }
