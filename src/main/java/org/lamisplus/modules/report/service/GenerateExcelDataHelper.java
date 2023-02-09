@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.audit4j.core.util.Log;
 import org.lamisplus.modules.hiv.domain.dto.*;
+import org.lamisplus.modules.hiv.repositories.HIVStatusTrackerRepository;
 import org.lamisplus.modules.hiv.service.StatusManagementService;
 import org.lamisplus.modules.report.domain.BiometricReportDto;
 import org.lamisplus.modules.report.domain.HtsReportDto;
@@ -20,6 +21,8 @@ import java.util.*;
 public class GenerateExcelDataHelper {
 	
 	private  final StatusManagementService statusManagementService;
+	
+	private final HIVStatusTrackerRepository statusTrackerRepository;
 	
 	public static List<Map<Integer, Object>> fillPatientLineListDataMapper(@NonNull List<PatientLineDto> listFinalResult) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
@@ -138,11 +141,9 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(radetReportDto.getCurrentWeight())));
 				map.put(index++, radetReportDto.getPregnancyStatus());
 				map.put(index++, radetReportDto.getDateOfBirth());
-				//OVC
-				map.put(index++, null);
-				map.put(index++, null);
 				
 				map.put(index++, getStringValue(String.valueOf(radetReportDto.getAge())));
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getCareEntry())));
 				
 				map.put(index++,radetReportDto.getArtStartDate());
 				map.put(index++, radetReportDto.getLastPickupDate());
@@ -170,6 +171,13 @@ public class GenerateExcelDataHelper {
 					map.put(index++, currentStatus.getDate());
 				}else {
 					map.put(index++, null);
+					map.put(index++, null);
+				}
+				if(currentStatus != null && currentStatus.getDescription().contains("DIED")){
+					String causeOfDeath =
+							statusTrackerRepository.getCauseOfDeathByPersonUuid(radetReportDto.getPersonUuid());
+					map.put(index++, causeOfDeath);
+				}else {
 					map.put(index++, null);
 				}
 				//previous status

@@ -13,6 +13,7 @@ import Radet from './Radet'
 import BiometricReport from './BiometricReport'
 import PharmacyReport from './PharmacyReport';
 import LaboratoryReport from './LaboratoryReport';
+import HTSReport from './HTSReport';
 
 const useStyles = makeStyles((theme) => ({
 
@@ -55,7 +56,7 @@ const Reports = (props) => {
                                 onClick={()=>handleItemClick('radet')}
                                 style={{backgroundColor:activeItem === 'radet' ? '#000': ""}}
                             >               
-                                <span style={{color:'#fff'}}> RADET REPORT</span>
+                                <span style={{color:'#fff'}}> RADET </span>
                                 
                             </Menu.Item>
                             
@@ -66,7 +67,7 @@ const Reports = (props) => {
                                 style={{backgroundColor:activeItem === 'appointment' ? '#000': ""}}
                             >
                             {/* <Label>4</Label> */}
-                            <span style={{color:'#fff'}}>APPOINTMENT REPORT</span>
+                            <span style={{color:'#fff'}}>APPOINTMENT </span>
                             
                             </Menu.Item>
                             <Menu.Item
@@ -85,7 +86,7 @@ const Reports = (props) => {
                                 onClick={()=>handleItemClick('pharmacy-report')}
                                 style={{backgroundColor:activeItem === 'pharmacy-report' ? '#000': ""}}
                             >               
-                                <span style={{color:'#fff'}}>PHARMACY REPORT</span>
+                                <span style={{color:'#fff'}}>PHARMACY DATA</span>
                                 
                             {/* <Label color='teal'>5</Label> */}
                             </Menu.Item>
@@ -95,7 +96,7 @@ const Reports = (props) => {
                                 onClick={()=>handleItemClick('biometric')}
                                 style={{backgroundColor:activeItem === 'biometric' ? '#000': ""}}
                             >               
-                                <span style={{color:'#fff'}}>BIOMETRIC REPORT</span>
+                                <span style={{color:'#fff'}}>BIOMETRIC DATA</span>
                                 
                             {/* <Label color='teal'>5</Label> */}
                             </Menu.Item>
@@ -105,8 +106,18 @@ const Reports = (props) => {
                                 onClick={()=>handleItemClick('laboratory-report')}
                                 style={{backgroundColor:activeItem === 'laboratory-report' ? '#000': ""}}
                             >               
-                                <span style={{color:'#fff'}}>LABORATORY REPORT</span>
+                                <span style={{color:'#fff'}}>LABORATORY DATA</span>
                                 
+                            {/* <Label color='teal'>5</Label> */}
+                            </Menu.Item>
+                            <Menu.Item
+                                name='inbox'
+                                active={activeItem === 'hts-report'}
+                                onClick={()=>handleItemClick('hts-report')}
+                                style={{backgroundColor:activeItem === 'hts-report' ? '#000': ""}}
+                            >
+                                <span style={{color:'#fff'}}>HTS REPORT</span>
+
                             {/* <Label color='teal'>5</Label> */}
                             </Menu.Item>
                         </Menu>
@@ -118,6 +129,7 @@ const Reports = (props) => {
                         {activeItem==='biometric' && (<BiometricReport handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
                         {activeItem==='pharmacy-report' && (<PharmacyReport  handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
                         {activeItem==='laboratory-report' && (<LaboratoryReport  handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
+                        {activeItem==='hts-report' && (<HTSReport  handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)}
                         {/* {activeItem==='others' && (<Others handleItemClick={handleItemClick} setCompleted={setCompleted} completed={completed}/>)} */}
                             
                         </div>

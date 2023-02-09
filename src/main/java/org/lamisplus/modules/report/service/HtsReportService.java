@@ -12,6 +12,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Service
 public class HtsReportService {
     private final ReportRepository reportRepository;
 
