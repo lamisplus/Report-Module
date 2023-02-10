@@ -104,8 +104,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)\n" +
             "LEFT JOIN base_organisation_unit facility ON facility.id=hc.facility_id\n" +
             "LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=hc.facility_id\n" +
-            "            WHERE hc.archived=0 AND hc.facility_id=CAST(?1 AS BIGINT) " +
-            "AND hc.date_visit >= CAST(?2 AS DATE) AND hc.date_visit < CAST(?3 AS DATE)", nativeQuery = true)
+            "            WHERE hc.archived=0 AND hc.facility_id=?1 " +
+            "AND hc.date_visit >= ?2 AND hc.date_visit < ?3", nativeQuery = true)
     List<HtsReportDto> getHtsReport(Long facilityId, LocalDate start, LocalDate end);
 
 
