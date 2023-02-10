@@ -12,11 +12,14 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Service
 public class HtsReportService {
     private final ReportRepository reportRepository;
 
     public List<HtsReportDto> getHtsReport(Long facilityId, LocalDate start, LocalDate end){
-        return reportRepository.getHtsReport(0, facilityId, start, end);
+        //System.out.println("start - " + start + " end - " + end);
+        //System.out.println("facility id - " + facilityId);
+        return reportRepository.getHtsReport();
+        //System.out.println("hts report size - " + hts.size());
+        //return hts;
     }
 }

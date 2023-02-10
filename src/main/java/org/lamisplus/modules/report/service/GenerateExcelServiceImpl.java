@@ -159,7 +159,5 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("End generate patient HTS");
 		return null;
 	}
-	
-	
 }
 
