@@ -38,13 +38,13 @@ public class HtsReportController {
 							@RequestParam("startDate") LocalDate start,
 							@RequestParam("endDate") LocalDate end) throws IOException {
 
-		messagingTemplate.convertAndSend("/topic/hts", "start");
+		//messagingTemplate.convertAndSend("/topic/hts", "start");
 
 		ByteArrayOutputStream baos = generateExcelService.generateHts(facility, start, end);
 
 		setStream(baos, response);
 
-		messagingTemplate.convertAndSend("/topic/hts", "end");
+		//messagingTemplate.convertAndSend("/topic/hts", "end");
 	}
 
 	private void setStream(ByteArrayOutputStream baos, HttpServletResponse response) throws IOException {

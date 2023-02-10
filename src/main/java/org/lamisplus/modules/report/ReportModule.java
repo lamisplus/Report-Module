@@ -15,9 +15,11 @@ public class ReportModule extends AcrossModule {
 	public ReportModule() {
 		super ();
 		addApplicationContextConfigurer (new ComponentScanConfigurer (
-				getClass ().getPackage ().getName () + ".repositories",
+				getClass ().getPackage ().getName () + ".repository",
 				getClass ().getPackage ().getName () + ".service",
-				getClass ().getPackage ().getName () + ".controller"
+				getClass ().getPackage ().getName () + ".controller",
+				getClass ().getPackage ().getName () + ".domain",
+				getClass ().getPackage ().getName () + ".config"
 		));
 	}
 
