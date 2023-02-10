@@ -329,7 +329,7 @@
 							<arguments>install</arguments>
 						</configuration>
 					</execution>-->
-					<!--<execution>
+					<execution>
                         <id>npm run build</id>
                         <goals>
                             <goal>npm</goal>
@@ -337,7 +337,25 @@
                         <configuration>
                             <arguments>run build</arguments>
                         </configuration>
-                    </execution>-->
+                    </execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>generate-resources</phase>
+						<configuration>
+							<target>
+								<copy todir="${project.build.directory}/classes/views/static/report">
+									<fileset dir="${project.basedir}/build"/>
+								</copy>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
