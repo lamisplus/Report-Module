@@ -16,10 +16,6 @@ public class HtsReportService {
     private final ReportRepository reportRepository;
 
     public List<HtsReportDto> getHtsReport(Long facilityId, LocalDate start, LocalDate end){
-        //System.out.println("start - " + start + " end - " + end);
-        //System.out.println("facility id - " + facilityId);
-        return reportRepository.getHtsReport();
-        //System.out.println("hts report size - " + hts.size());
-        //return hts;
+        return reportRepository.getHtsReport(facilityId, start, end);
     }
 }
