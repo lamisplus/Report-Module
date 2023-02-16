@@ -13,12 +13,14 @@ import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 
 import org.lamisplus.modules.report.domain.BiometricReportDto;
 import org.lamisplus.modules.report.domain.HtsReportDto;
+import org.lamisplus.modules.report.domain.PrepReportDto;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +41,8 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	private final ArtPharmacyRepository artPharmacyRepository;
 
 	private final HtsReportService htsReportService;
+
+	private final PrepReportService prepReportService;
 	
 	
 	private final BiometricReportService biometricReportService;
@@ -152,6 +156,22 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			LOG.error("Hts Size: {}", htsReport.size());
 			List<Map<Integer, Object>> data = excelDataHelper.fillHtsDataMapper(htsReport);
 			return excelService.generate(Constants.HTS_SHEET, data, Constants.HTS_HEADER);
+		} catch (Exception e) {
+			LOG.error("Error Occurred when generating HTS !!!");
+			e.printStackTrace();
+		}
+		LOG.info("End generate patient HTS");
+		return null;
+	}
+
+	@Override
+	public ByteArrayOutputStream generatePrep(Long facilityId, LocalDate start, LocalDate end) {
+		LOG.info("Start generating prep for facility:" + getFacilityName(facilityId));
+		try {
+			List<PrepReportDto> prepReport = prepReportService.getPrepReport(facilityId, start, end);
+			LOG.error("Prep Size: {}", prepReport.size());
+			List<Map<Integer, Object>> data = excelDataHelper.fillPrepDataMapper(prepReport);
+			return excelService.generate(Constants.PREP_SHEET, data, Constants.PrEP_HEADER);
 		} catch (Exception e) {
 			LOG.error("Error Occurred when generating HTS !!!");
 			e.printStackTrace();

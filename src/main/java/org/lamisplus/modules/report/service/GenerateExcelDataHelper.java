@@ -9,6 +9,7 @@ import org.lamisplus.modules.hiv.repositories.HIVStatusTrackerRepository;
 import org.lamisplus.modules.hiv.service.StatusManagementService;
 import org.lamisplus.modules.report.domain.BiometricReportDto;
 import org.lamisplus.modules.report.domain.HtsReportDto;
+import org.lamisplus.modules.report.domain.PrepReportDto;
 import org.springframework.stereotype.Component;
 
 
@@ -243,13 +244,13 @@ public class GenerateExcelDataHelper {
 
 	public  List<Map<Integer, Object>> fillHtsDataMapper(@NonNull List<HtsReportDto> htsReportDtos) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
+		int sn = 1;
 		for (HtsReportDto htsReportDto : htsReportDtos) {
 			if (htsReportDto != null) {
 				Map<Integer, Object> map = new HashMap<>();
 				int index = 0;
-				int sn = 1;
 
-				map.put(index++, ++sn);
+				map.put(index++, String.valueOf(sn));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getDatimCode())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getFacility())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getClientCode())));
@@ -320,6 +321,67 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getHtsLongitude())));
 
 				result.add(map);
+				sn++;
+			}
+		}
+		Log.info("result: " + result.size());
+		return result;
+	}
+
+
+	public  List<Map<Integer, Object>> fillPrepDataMapper(@NonNull List<PrepReportDto> prepReportDtos) {
+		List<Map<Integer, Object>> result = new ArrayList<>();
+		int sn = 1;
+		for (PrepReportDto prepReportDto : prepReportDtos) {
+			if (prepReportDto != null) {
+				Map<Integer, Object> map = new HashMap<>();
+				int index = 0;
+
+				map.put(index++, String.valueOf(sn));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getDatimId())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getFacilityName())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getHospitalNumber())));
+
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getFirstName())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getSurname())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getOtherName())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getSex())));
+				//map.put(index++, getStringValue(String.valueOf(prepReportDto.getTargetGroup())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getAge())));
+				map.put(index++,prepReportDto.getDateOfBirth());
+
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getPhone())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getMaritalStatus())));
+
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getAddress())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getResidentialLga())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getResidentialState())));
+
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getEducation())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getOccupation())));
+
+				map.put(index++, prepReportDto.getDateOfRegistration());
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaseLineRegimen())));
+
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineSystolicBp())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineDiastolicBp())));
+
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineWeight())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineHeight())));
+
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getHIVStatusAtPrepInitiation())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getIndicationForPrep())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentRegimen())));
+				map.put(index++, prepReportDto.getDateOfLastPickup());
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentSystolicBp())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentDiastolicBp())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentWeight())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentHeight())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentHIVStatus())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getPregnancyStatus())));
+
+				result.add(map);
+				sn++;
 			}
 		}
 		Log.info("result: " + result.size());
