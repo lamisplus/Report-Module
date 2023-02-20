@@ -13,12 +13,14 @@ import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 
 import org.lamisplus.modules.report.domain.BiometricReportDto;
 import org.lamisplus.modules.report.domain.HtsReportDto;
+import org.lamisplus.modules.report.domain.PrepReportDto;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +41,8 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	private final ArtPharmacyRepository artPharmacyRepository;
 
 	private final HtsReportService htsReportService;
+
+	private final PrepReportService prepReportService;
 	
 	
 	private final BiometricReportService biometricReportService;
@@ -69,10 +73,10 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	
 	@Override
 	public ByteArrayOutputStream generateRadet(Long facilityId, LocalDate start, LocalDate end) {
-		LOG.info("Start generating patient Radet for facility:" + getFacilityName(facilityId));
+		LOG.info("Start generating patient RADET for facility:" + getFacilityName(facilityId));
 		try {
 			List<RadetReportDto> radetDtos = radetService.getRadetDtos(facilityId, start, end);
-			LOG.error("Radet Size: {}", radetDtos.size());
+			LOG.error("RADET Size: {}", radetDtos.size());
 			List<Map<Integer, Object>> data = excelDataHelper.fillRadetDataMapper(radetDtos,end);
 			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
 		} catch (Exception e) {
@@ -159,7 +163,21 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("End generate patient HTS");
 		return null;
 	}
-	
-	
+
+	@Override
+	public ByteArrayOutputStream generatePrep(Long facilityId, LocalDate start, LocalDate end) {
+		LOG.info("Start generating prep for facility:" + getFacilityName(facilityId));
+		try {
+			List<PrepReportDto> prepReport = prepReportService.getPrepReport(facilityId, start, end);
+			LOG.error("Prep Size: {}", prepReport.size());
+			List<Map<Integer, Object>> data = excelDataHelper.fillPrepDataMapper(prepReport);
+			return excelService.generate(Constants.PREP_SHEET, data, Constants.PrEP_HEADER);
+		} catch (Exception e) {
+			LOG.error("Error Occurred when generating HTS !!!");
+			e.printStackTrace();
+		}
+		LOG.info("End generate patient HTS");
+		return null;
+	}
 }
 

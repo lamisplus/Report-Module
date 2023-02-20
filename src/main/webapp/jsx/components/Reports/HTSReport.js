@@ -102,12 +102,11 @@ const HTSReport = (props) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true)
-        console.log(objValues);
+        console.log(token);
 
-        axios.post(`${baseUrl}hts-reporting?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
-           { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
-
-          )
+        axios.post(`${baseUrl}hts-reporting?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,objValues.organisationUnitId,
+            { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
+        )
           .then(response => {
             setLoading(false)
             const fileName ="HTS"

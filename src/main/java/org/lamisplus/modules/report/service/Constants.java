@@ -14,6 +14,8 @@ public class Constants {
 	public static final String RADET_SHEET = "radet";
 
 	public static final String HTS_SHEET = "hts";
+
+	public static final String PREP_SHEET = "prep";
 	
 	// headers
 	public static final List<String> PATIENT_LINE_LIST_HEADER = Arrays.asList(
@@ -110,9 +112,10 @@ public class Constants {
 					"Current Weight (kg)",
 					"Pregnancy Status",
 					"Date Birth (yyyy-mm-dd)",
-					"OVC Enrollment Date (yyyy-mm-dd)",
-					"Services Provided (Enter one line per service)",
+					//"OVC Enrollment Date (yyyy-mm-dd)",
+					//"Services Provided (Enter one line per service)",
 					"Age",
+					"Care Entry Point",
 					"ART Start Date (yyyy-mm-dd)",
 					"Last Pickup Date (yyyy-mm-dd)",
 					"Months of ARV Refill",
@@ -130,6 +133,7 @@ public class Constants {
 					"Viral Load Indication",
 					"Current ART Status",
 					"Date of Current ART Status",
+					"Cause of Death",
 					"Previous ART Status",
 					"Confirmed Date of Previous ART Status",
 					"ART Enrollment Setting",
@@ -225,10 +229,10 @@ public class Constants {
 			Arrays.asList(
 					"S/No",
 					"Facility Id (Datim)",
-					"facility",
-					"client Code",
+					"Facility",
+					"Client Code",
 					"First Name",
-					"surname",
+					"Surname",
 					"Other Names",
 					"Sex",
 					"Target Group",
@@ -275,5 +279,44 @@ public class Constants {
 					"Prep Accepted",
 					"HTS Latitude",
 					"HTS Longitude"
+			);
+
+
+	public static final List<String> PrEP_HEADER =
+			Arrays.asList(
+					"S/No",
+					"Facility Id (Datim)",
+					"Facility Name",
+					"Hospital Number",
+					"First Name",
+					"Surname",
+					"Other Names",
+					"Sex",
+					//"Target Group",
+					"Age",
+					"Date Of Birth (yyyy-mm-dd)",
+					"Phone Number",
+					"Marital Status",
+					"Client Address",
+					"LGA of Residence",
+					"State Of Residence",
+					"Education",
+					"Occupation",
+					"Date Of Registration (yyyy-mm-dd)",
+					"Baseline Regimen",
+					"Baseline Systolic bp",
+					"Baseline Diastolic bp",
+					"Baseline Weight (kg)",
+					"Baseline Height (cm)",
+					"HIV status at PrEP Initiation",
+					"Indication for PrEP",
+					"Current Regimen",
+					"Date Of Last Pickup (yyyy-mm-dd)",
+					"Current Systolic bp",
+					"Current Diastolic bp",
+					"Current Weight (kg)",
+					"Current Height (cm)",
+					"Current HIV Status",
+					"Pregnancy Status"
 			);
 }

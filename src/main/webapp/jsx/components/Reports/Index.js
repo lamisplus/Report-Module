@@ -56,7 +56,7 @@ const Reports = (props) => {
                                 onClick={()=>handleItemClick('radet')}
                                 style={{backgroundColor:activeItem === 'radet' ? '#000': ""}}
                             >               
-                                <span style={{color:'#fff'}}> RADET REPORT</span>
+                                <span style={{color:'#fff'}}> RADET </span>
                                 
                             </Menu.Item>
                             
@@ -67,7 +67,7 @@ const Reports = (props) => {
                                 style={{backgroundColor:activeItem === 'appointment' ? '#000': ""}}
                             >
                             {/* <Label>4</Label> */}
-                            <span style={{color:'#fff'}}>APPOINTMENT REPORT</span>
+                            <span style={{color:'#fff'}}>APPOINTMENT </span>
                             
                             </Menu.Item>
                             <Menu.Item
