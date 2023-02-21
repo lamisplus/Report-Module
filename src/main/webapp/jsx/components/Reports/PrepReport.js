@@ -52,13 +52,13 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const PatientLineList = (props) => {
+const PrepReport = (props) => {
     let currentDate = new Date().toISOString().split('T')[0]
     const classes = useStyles();
     const [loading, setLoading] = useState(false)
     const [facilities, setFacilities] = useState([]);
     const [status, setStatus] = useState(true);
-    const [objValues, setObjValues]=useState({       
+    const [objValues, setObjValues]=useState({
         organisationUnitId:"",
         organisationUnitName:"",
         startDate:"",
@@ -74,18 +74,16 @@ const PatientLineList = (props) => {
             { headers: {"Authorization" : `Bearer ${token}`} }
         )
         .then((response) => {
-        console.log(response.data);
+            console.log(response.data);
             setFacilities(response.data.applicationUserOrganisationUnits);
         })
         .catch((error) => {
         //console.log(error);
         });
-    
     }
 
     const handleInputChange = e => {
         //1980-01-01
-
         setObjValues ({...objValues,  [e.target.name]: e.target.value, organisationUnitName: e.target.innerText});
     }
 
@@ -100,30 +98,22 @@ const PatientLineList = (props) => {
 
     }
 
-    const handleSubmit = (e) => {        
+    const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true)
-      
-        console.log(objValues);
+        //console.log(token);
 
-        axios.get(`${baseUrl}reporting/radet?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
-           { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
-
-          )
+        axios.post(`${baseUrl}prep-reporting?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,objValues.organisationUnitId,
+            { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
+        )
           .then(response => {
             setLoading(false)
-            const fileName = `${objValues.organisationUnitName} Radet ${currentDate}`
+            const fileName =`${objValues.organisationUnitName} Prep ${currentDate}`
             const responseData = response.data
             let blob = new Blob([responseData], {type: "application/octet-stream"});
-//            const options = {
-//                  type: "arraybuffer",
-//                  password: "mypassword"
-//              };
 
             FileSaver.saveAs(blob, `${fileName}.xlsx`);
-            toast.success("Radet Report generated successful");
-              //props.setActiveContent('recent-history')
-
+            toast.success("Prep Report generated successfully");
           })
           .catch(error => {
             setLoading(false)
@@ -139,11 +129,11 @@ const PatientLineList = (props) => {
 
     return (
         <>
-            
+
             <Card >
                 <CardBody>
-    
-                <h2 style={{color:'#000'}}>RADET REPORT</h2>
+
+                <h2 style={{color:'#000'}}>Prep REPORT</h2>
                 <br/>
                     <form >
                         <div className="row">
@@ -161,7 +151,7 @@ const PatientLineList = (props) => {
                                         onChange={handleInputChange}
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
                                     />
-                                    
+
                                 </FormGroup>
                             </div>
                             <div className="form-group  col-md-6">
@@ -207,7 +197,7 @@ const PatientLineList = (props) => {
                                             </option>
                                         ))}
                                     </select>
-                                    
+
                                 </FormGroup>
                             </div>
 
@@ -231,9 +221,9 @@ const PatientLineList = (props) => {
                     </form>
 
                 </CardBody>
-            </Card>                                 
+            </Card>
         </>
     );
 };
 
-export default PatientLineList
+export default PrepReport
