@@ -55,11 +55,13 @@ const useStyles = makeStyles((theme) => ({
 
 
 const PharmacyReport = (props) => {
+    let currentDate = new Date().toISOString().split('T')[0]
     const classes = useStyles();
     const [loading, setLoading] = useState(false)
     const [facilities, setFacilities] = useState([]);
     const [objValues, setObjValues]=useState({       
-        organisationUnitId:""
+        organisationUnitId:"",
+        organisationUnitName:""
     })
     useEffect(() => {
         Facilities()
@@ -80,7 +82,7 @@ const PharmacyReport = (props) => {
     
     }
     const handleInputChange = e => {
-        setObjValues ({...objValues,  [e.target.name]: e.target.value});
+        setObjValues ({...objValues,  [e.target.name]: e.target.value, organisationUnitName: e.target.innerText});
     }
     const handleSubmit = (e) => {        
         e.preventDefault();
@@ -91,7 +93,7 @@ const PharmacyReport = (props) => {
           )
               .then(response => {
                 setLoading(false)
-                const fileName ="Pharmacy"
+                const fileName = `${objValues.organisationUnitName} Pharmacy ${currentDate}`
                 const responseData = response.data
                 let blob = new Blob([responseData], {type: "application/octet-stream"});
                 FileSaver.saveAs(blob, `${fileName}.xlsx`);

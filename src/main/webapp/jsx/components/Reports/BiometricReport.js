@@ -55,11 +55,13 @@ const useStyles = makeStyles((theme) => ({
 
 
 const BiometricReport = (props) => {
+    let currentDate = new Date().toISOString().split('T')[0]
     const classes = useStyles();
     const [loading, setLoading] = useState(false)
     const [facilities, setFacilities] = useState([]);
     const [objValues, setObjValues]=useState({       
         organisationUnitId:"",
+        organisationUnitName:"",
         startDate:"",
         endDate:""
     })
@@ -82,9 +84,9 @@ const BiometricReport = (props) => {
     
     }
     const handleInputChange = e => {
-        setObjValues ({...objValues,  [e.target.name]: e.target.value});
+        setObjValues ({...objValues,  [e.target.name]: e.target.value, organisationUnitName: e.target.innerText});
     }
-    const handleSubmit = (e) => {        
+    const handleSubmit = (e) => {      
         e.preventDefault();
         setLoading(true)
         axios.get(`${baseUrl}reporting/biometric?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
@@ -93,7 +95,7 @@ const BiometricReport = (props) => {
           )
               .then(response => {
                 setLoading(false)
-                const fileName ="Biometric-Report"
+                const fileName = `${objValues.organisationUnitName} Biometric-Report ${currentDate}`
                 const responseData = response.data
                 let blob = new Blob([responseData], {type: "application/octet-stream"});
                 FileSaver.saveAs(blob, `${fileName}.xlsx`);
