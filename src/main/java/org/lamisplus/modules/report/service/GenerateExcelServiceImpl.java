@@ -14,6 +14,7 @@ import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 import org.lamisplus.modules.report.domain.BiometricReportDto;
 import org.lamisplus.modules.report.domain.HtsReportDto;
 import org.lamisplus.modules.report.domain.PrepReportDto;
+import org.lamisplus.modules.report.domain.RADETDTOProjection;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
@@ -75,7 +76,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	public ByteArrayOutputStream generateRadet(Long facilityId, LocalDate start, LocalDate end) {
 		LOG.info("Start generating patient RADET for facility:" + getFacilityName(facilityId));
 		try {
-			List<RadetReportDto> radetDtos = radetService.getRadetDtos(facilityId, start, end);
+			List<RADETDTOProjection> radetDtos = radetService.getRadetDtos(facilityId, start, end);
 			LOG.error("RADET Size: {}", radetDtos.size());
 			List<Map<Integer, Object>> data = excelDataHelper.fillRadetDataMapper(radetDtos,end);
 			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
