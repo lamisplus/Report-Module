@@ -112,7 +112,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " baseline_pc.diastolic AS baselineDiastolicBP,   " +
             " baseline_pc.weight AS baselinetWeight,   " +
             " baseline_pc.height AS baselineHeight,   " +
-            " REPLACE(baseline_hiv_status.display, 'HIV ', '') AS HIVStatusAtPrEPInitiation,   " +
+            "  (CASE WHEN baseline_hiv_status.display IS NULL AND base_eli_test.base_eli_hiv_result IS NOT NULL " +
+            " THEN base_eli_test.base_eli_hiv_result ELSE " +
+            " REPLACE(baseline_hiv_status.display, 'HIV ', '') END) AS HIVStatusAtPrEPInitiation," +
             " (CASE WHEN prepe.extra->>'onDemandIndication' IS NOT NULL THEN prepe.extra->>'onDemandIndication'   " +
             "             WHEN riskt.display IS NOT NULL THEN riskt.display ELSE NULL END) AS indicationForPrEP,   " +
             " current_reg.regimen AS currentRegimen,   " +
@@ -121,17 +123,27 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " current_pc.diastolic AS currentDiastolicBP,   " +
             " current_pc.weight AS currentWeight,   " +
             " current_pc.height AS currentHeight,   " +
-            " REPLACE(current_hiv_status.display, 'HIV ', '') AS currentHivStatus,   " +
+            "(CASE WHEN current_hiv_status.display IS NULL AND eli_hiv_result IS NOT NULL THEN eli_hiv_result  " +
+            "ELSE REPLACE(current_hiv_status.display, 'HIV ', '') END) AS currentHivStatus,   " +
             " (CASE WHEN current_pc.pregnant IS NOT NULL AND current_pc.pregnant='true' THEN 'Pregnant'   " +
             " ELSE 'Not Pregnant' END) AS pregnancyStatus   " +
             " FROM patient_person p   " +
             " INNER JOIN (   " +
-            " SELECT * FROM (SELECT * FROM (SELECT p.id, REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '\"', ''), ']', ''), '[', '') AS address,    " +
+            " SELECT * FROM (SELECT p.id, REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '\"', ''), ']', ''), '[', '') AS address,    " +
             "              CASE WHEN address_object->>'stateId'  ~ '^\\d+(\\.\\d+)?$' THEN address_object->>'stateId' ELSE null END  AS stateId,   " +
             "              CASE WHEN address_object->>'district'  ~ '^\\d+(\\.\\d+)?$' THEN address_object->>'district' ELSE null END  AS lgaId   " +
             "      FROM patient_person p,   " +
             "            jsonb_array_elements(p.address-> 'address') with ordinality l(address_object)) as result   " +
             " ) r ON r.id=p.id   " +
+            "LEFT JOIN (SELECT pe.drug_use_history->>'hivTestResultAtvisit' AS eli_hiv_result, max.visit_date, max.person_uuid FROM prep_eligibility pe " +
+            " INNER JOIN (SELECT DISTINCT MAX(visit_date)visit_date, person_uuid FROM prep_eligibility " +
+            " GROUP BY person_uuid)max ON max.visit_date=pe.visit_date  " +
+            " AND max.person_uuid=pe.person_uuid)eli_test ON eli_test.person_uuid=p.uuid " +
+            "LEFT JOIN (SELECT pe.drug_use_history->>'hivTestResultAtvisit' AS base_eli_hiv_result, min.visit_date, min.person_uuid " +
+            " FROM prep_eligibility pe " +
+            " INNER JOIN (SELECT DISTINCT MIN(visit_date)visit_date, person_uuid FROM prep_eligibility " +
+            " GROUP BY person_uuid)min ON min.visit_date=pe.visit_date " +
+            " AND min.person_uuid=pe.person_uuid)base_eli_test ON base_eli_test.person_uuid=p.uuid" +
             " INNER JOIN base_organisation_unit facility ON facility.id=facility_id   " +
             " INNER JOIN base_organisation_unit facility_lga ON facility_lga.id=facility.parent_organisation_unit_id   " +
             " INNER JOIN base_organisation_unit facility_state ON facility_state.id=facility_lga.parent_organisation_unit_id   " +
