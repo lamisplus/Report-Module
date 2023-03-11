@@ -66,7 +66,6 @@ const PatientLineList = (props) => {
         setLoading(true)
         axios.post(`${baseUrl}reporting/patient-line-list?facilityId=${objValues.organisationUnitId}`,objValues.organisationUnitId,
            { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
-          
           )
               .then(response => {
                 setLoading(false)
