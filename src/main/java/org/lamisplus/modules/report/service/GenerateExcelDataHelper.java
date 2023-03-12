@@ -10,6 +10,7 @@ import org.lamisplus.modules.hiv.service.StatusManagementService;
 import org.lamisplus.modules.report.domain.BiometricReportDto;
 import org.lamisplus.modules.report.domain.HtsReportDto;
 import org.lamisplus.modules.report.domain.PrepReportDto;
+import org.lamisplus.modules.report.domain.RADETDTOProjection;
 import org.springframework.stereotype.Component;
 
 
@@ -21,9 +22,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class GenerateExcelDataHelper {
 	
-	private  final StatusManagementService statusManagementService;
-	
-	private final HIVStatusTrackerRepository statusTrackerRepository;
 	
 	public static List<Map<Integer, Object>> fillPatientLineListDataMapper(@NonNull List<PatientLineDto> listFinalResult) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
@@ -102,23 +100,23 @@ public class GenerateExcelDataHelper {
 	}
 	
 	
-	public  List<Map<Integer, Object>> fillRadetDataMapper(@NonNull List<RadetReportDto> reportDtos, LocalDate endDate) {
+	public  List<Map<Integer, Object>> fillRadetDataMapper(@NonNull List<RADETDTOProjection> reportDtos, LocalDate endDate) {
 			List<Map<Integer, Object>> result = new ArrayList<>();
 			int sn = 1;
-			for (RadetReportDto radetReportDto : reportDtos) {
+			for (RADETDTOProjection radetReportDto : reportDtos) {
 				Map<Integer, Object> map = new HashMap<>();
 				String personUuid = radetReportDto.getPersonUuid();
-				HIVStatusDisplay currentStatus =  null;
-				HIVStatusDisplay previousStatus = null;
-				Deque<HIVStatusDisplay> currentAndPreviousClientStatus =
-						statusManagementService.getCurrentAndPreviousClientStatus(personUuid, endDate);
-				if(currentAndPreviousClientStatus.size() > 1){
-					currentStatus = currentAndPreviousClientStatus.pop();
-					previousStatus = currentAndPreviousClientStatus.pop();
-				}else if (currentAndPreviousClientStatus.size() == 1) {
-					currentStatus = currentAndPreviousClientStatus.pop();
-					
-				}
+//				HIVStatusDisplay currentStatus =  null;
+//				HIVStatusDisplay previousStatus = null;
+//				Deque<HIVStatusDisplay> currentAndPreviousClientStatus =
+//						statusManagementService.getCurrentAndPreviousClientStatus(personUuid, endDate);
+//				if(currentAndPreviousClientStatus.size() > 1){
+//					currentStatus = currentAndPreviousClientStatus.pop();
+//					previousStatus = currentAndPreviousClientStatus.pop();
+//				}else if (currentAndPreviousClientStatus.size() == 1) {
+//					currentStatus = currentAndPreviousClientStatus.pop();
+//
+//				}
 				LocalDate iptCompletionDate = radetReportDto.getIptCompletionDate();
 				if (iptCompletionDate != null) {
 					if(iptCompletionDate.isAfter(endDate)){
@@ -167,28 +165,15 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getDateOfCurrentViralLoad());
 				map.put(index++, radetReportDto.getViralLoadIndication());
 				//current status
-				if(currentStatus != null) {
-					map.put(index++, currentStatus.getDescription());
-					map.put(index++, currentStatus.getDate());
-				}else {
-					map.put(index++, null);
-					map.put(index++, null);
-				}
-				if(currentStatus != null && currentStatus.getDescription().contains("DIED")){
-					String causeOfDeath =
-							statusTrackerRepository.getCauseOfDeathByPersonUuid(radetReportDto.getPersonUuid());
-					map.put(index++, causeOfDeath);
-				}else {
-					map.put(index++, null);
-				}
+				map.put(index++, radetReportDto.getCurrentStatus());
+				map.put(index++, radetReportDto.getCurrentStatusDate());
+				map.put(index++, radetReportDto.getCauseOfDeath());
+				
 				//previous status
-				if(previousStatus != null) {
-					map.put(index++, previousStatus.getDescription());
-					map.put(index++, previousStatus.getDate());
-				}else {
-					map.put(index++, null);
-					map.put(index++, null);
-				}
+				
+				map.put(index++, radetReportDto.getPreviousStatus());
+				map.put(index++, radetReportDto.getPreviousStatusDate());
+				
 				
 				map.put(index++, radetReportDto.getEnrollmentSetting());
 				//TB
