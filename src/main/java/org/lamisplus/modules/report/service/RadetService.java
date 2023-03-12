@@ -3,6 +3,8 @@ package org.lamisplus.modules.report.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.lamisplus.modules.hiv.domain.dto.RadetReportDto;
+import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 import org.lamisplus.modules.report.domain.RADETDTOProjection;
 import org.lamisplus.modules.report.repository.ReportRepository;
 import org.springframework.stereotype.Service;
@@ -16,7 +18,7 @@ import java.util.*;
 public class RadetService {
 	
 	private final ReportRepository repository;
-	
+
 	
 	
 	

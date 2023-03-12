@@ -5,8 +5,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.audit4j.core.util.Log;
 import org.lamisplus.modules.hiv.domain.dto.*;
-import org.lamisplus.modules.hiv.repositories.HIVStatusTrackerRepository;
-import org.lamisplus.modules.hiv.service.StatusManagementService;
 import org.lamisplus.modules.report.domain.BiometricReportDto;
 import org.lamisplus.modules.report.domain.HtsReportDto;
 import org.lamisplus.modules.report.domain.PrepReportDto;
@@ -52,7 +50,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(patient.getPhone())));
 				map.put(index++, getStringValue(String.valueOf(patient.getArchived())));
 				map.put(index++, getStringValue(String.valueOf(patient.getCareEntryPoint())));
-			 map.put(index++, (patient.getDateOfConfirmedHIVTest()));
+			    map.put(index++, (patient.getDateOfConfirmedHIVTest()));
 				map.put(index++,patient.getDateOfRegistration());
 				map.put(index++, getStringValue(String.valueOf(patient.getStatusAtRegistration())));
 				map.put(index++, patient.getArtStartDate());
