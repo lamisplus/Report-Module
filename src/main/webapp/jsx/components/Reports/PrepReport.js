@@ -12,7 +12,6 @@ import { toast} from "react-toastify";
 import FileSaver from "file-saver";
 import { Message, Icon } from 'semantic-ui-react'
 
-
 const useStyles = makeStyles((theme) => ({
     card: {
         margin: theme.spacing(20),
@@ -53,15 +52,17 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-
-const PharmacyReport = (props) => {
+const PrepReport = (props) => {
     let currentDate = new Date().toISOString().split('T')[0]
     const classes = useStyles();
     const [loading, setLoading] = useState(false)
     const [facilities, setFacilities] = useState([]);
-    const [objValues, setObjValues]=useState({       
+    const [status, setStatus] = useState(true);
+    const [objValues, setObjValues]=useState({
         organisationUnitId:"",
-        organisationUnitName:""
+        organisationUnitName:"",
+        startDate:"",
+        endDate: ""
     })
     useEffect(() => {
         Facilities()
@@ -73,61 +74,111 @@ const PharmacyReport = (props) => {
             { headers: {"Authorization" : `Bearer ${token}`} }
         )
         .then((response) => {
-            //console.log(response.data);
+            console.log(response.data);
             setFacilities(response.data.applicationUserOrganisationUnits);
         })
         .catch((error) => {
         //console.log(error);
         });
-    
     }
+
     const handleInputChange = e => {
+        //1980-01-01
         setObjValues ({...objValues,  [e.target.name]: e.target.value, organisationUnitName: e.target.innerText});
     }
-    const handleSubmit = (e) => {        
-        e.preventDefault();
-        setLoading(true)
-        axios.get(`${baseUrl}reporting/pharmacy/${objValues.organisationUnitId}`,
-           { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
-          
-          )
-              .then(response => {
-                setLoading(false)
-                const fileName = `${objValues.organisationUnitName} Pharmacy ${currentDate}`
-                const responseData = response.data
-                let blob = new Blob([responseData], {type: "application/octet-stream"});
-                FileSaver.saveAs(blob, `${fileName}.xlsx`);
-                  //toast.success(" Save successful");
-                  //props.setActiveContent('recent-history')
 
-              })
-              .catch(error => {
-                setLoading(false)
-                if(error.response && error.response.data){
-                    let errorMessage = error.response.data.apierror && error.response.data.apierror.message!=="" ? error.response.data.apierror.message :  "Something went wrong, please try again";
-                    toast.error(errorMessage);
-                  }
-                  else{
-                    toast.error("Something went wrong. Please try again...");
-                  }
-              });
-            
+    const handleValueChange = () => {
+        setStatus(!status)
+
+        if (status === true) {
+          setObjValues ({...objValues,  startDate: "1980-01-01", endDate: currentDate});
+        } else {
+          setObjValues ({...objValues,  startDate: "", endDate: currentDate});
+        }
 
     }
-    
-    
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setLoading(true)
+        //console.log(token);
+
+        axios.post(`${baseUrl}prep-reporting?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,objValues.organisationUnitId,
+            { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
+        )
+          .then(response => {
+            setLoading(false)
+            const fileName =`${objValues.organisationUnitName} Prep ${currentDate}`
+            const responseData = response.data
+            let blob = new Blob([responseData], {type: "application/octet-stream"});
+
+            FileSaver.saveAs(blob, `${fileName}.xlsx`);
+            toast.success("Prep Report generated successfully");
+          })
+          .catch(error => {
+            setLoading(false)
+            if(error.response && error.response.data){
+                let errorMessage = error.response.data.apierror && error.response.data.apierror.message!=="" ? error.response.data.apierror.message :  "Something went wrong, please try again";
+                toast.error(errorMessage);
+              }
+              else{
+                toast.error("Something went wrong. Please try again...");
+              }
+          });
+    }
 
     return (
         <>
-            
+
             <Card >
                 <CardBody>
-    
-                <h2 style={{color:'#000'}}>PHARMACY REPORT</h2>
+
+                <h2 style={{color:'#000'}}>Prep REPORT</h2>
                 <br/>
                     <form >
                         <div className="row">
-                        
+                        <div className="form-group  col-md-6">
+                                <FormGroup>
+                                    <Label>From *</Label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        name="startDate"
+                                        id="startDate"
+                                        min={"1980-01-01"}
+                                        max={currentDate}
+                                        value={objValues.startDate}
+                                        onChange={handleInputChange}
+                                        style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
+                                    />
+
+                                </FormGroup>
+                            </div>
+                            <div className="form-group  col-md-6">
+                                <FormGroup>
+                                    <Label>To *</Label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        name="endDate"
+                                        id="endDate"
+                                        min={"1980-01-01"}
+                                        max={currentDate}
+                                        //min={objValues.startDate}
+                                        value={objValues.endDate}
+                                        onChange={handleInputChange}
+                                        style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
+                                    />
+                                </FormGroup>
+                            </div>
+                            <div className="form-group  col-md-6">
+                                 <FormGroup check>
+                                  <Label check>
+                                    <Input type="checkbox" onChange={handleValueChange}/>
+                                     {' '} &nbsp;&nbsp;<span> As at Today.</span>
+                                  </Label>
+                                </FormGroup>
+                            </div>
                             <div className="form-group  col-md-6">
                                 <FormGroup>
                                     <Label>Facility*</Label>
@@ -146,7 +197,7 @@ const PharmacyReport = (props) => {
                                             </option>
                                         ))}
                                     </select>
-                                    
+
                                 </FormGroup>
                             </div>
 
@@ -170,9 +221,9 @@ const PharmacyReport = (props) => {
                     </form>
 
                 </CardBody>
-            </Card>                                 
+            </Card>
         </>
     );
 };
 
-export default PharmacyReport
+export default PrepReport
