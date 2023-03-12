@@ -16,14 +16,17 @@ import java.util.*;
 public class RadetService {
 	
 	private final ReportRepository repository;
+	private final QuarterService quarterService;
 	
 	
 	
 	
 	@NotNull
 	public List<RADETDTOProjection> getRadetDtos(Long facilityId, LocalDate start, LocalDate end) {
+		LocalDate previousQuarterEnd = quarterService.getPreviousQuarter(end).getEnd();
+		LocalDate previousPreviousQuarterEnd = quarterService.getPreviousQuarter(previousQuarterEnd).getEnd();
 		System.out.println("facilityId:" + facilityId +" "  +start + " " + end);
-		return repository.getRadetData(facilityId,start,end);
+		return repository.getRadetData(facilityId,start,end, previousQuarterEnd, previousPreviousQuarterEnd);
 	}
 	
 	
