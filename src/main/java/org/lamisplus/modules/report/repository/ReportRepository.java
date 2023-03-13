@@ -258,7 +258,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " LEFT JOIN base_application_codeset tbs ON tbs.id = CAST(hac.tb_status AS INTEGER)     " +
             " WHERE     " +
             " hac.archived = 0     " +
-            " AND hac.is_commencement = TRUE     " +
+//            " AND hac.is_commencement = TRUE     " +
             " AND he.archived = 0     " +
             " AND he.facility_id = ?1     " +
             " ),   " +
