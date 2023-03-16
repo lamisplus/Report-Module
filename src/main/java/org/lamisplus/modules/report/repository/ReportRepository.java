@@ -212,7 +212,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " AND h.facility_id = ?1     " +
             " AND hac.is_commencement = TRUE     " +
             " AND hac.visit_date >= ?2     " +
-            " AND hac.visit_date <  ?3     " +
+            " AND hac.visit_date < ?3     " +
             " ),     " +
             "current_clinical AS (     " +
             " SELECT     " +
@@ -398,70 +398,29 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " AND lr.test_id = lt.id     " +
             " WHERE     " +
             " lo.archived = 0     " +
-            " AND lo.order_date <=  ?3     " +
+            " AND lo.order_date <= ?3     " +
             " AND lo.facility_id = ?1     " +
             " ),  " +
-            "      " +
             "pharmacy_details_regimen AS (     " +
-            " SELECT     " +
-            " DISTINCT ON (hartp.person_uuid) hartp.person_uuid AS person_uuid40,     " +
-            " r.visit_date AS lastPickupDate,     " +
-            " hartp.next_appointment AS nextPickupDate,     " +
-            " CAST(hartp.refill_period / 30 AS INTEGER) AS monthsOfARVRefill,     " +
-            " r.description AS currentARTRegimen,     " +
-            " r.regimen_name AS currentRegimenLine     " +
-            " FROM     " +
-            " hiv_art_pharmacy hartp     " +
-            " LEFT JOIN (     " +
-            " SELECT     " +
-            " DISTINCT r.*     " +
-            " FROM     " +
-            " (     " +
-            " SELECT     " +
-            " h.person_uuid,     " +
-            " h.visit_date,     " +
-            " CAST(pharmacy_object ->> 'regimenName' AS VARCHAR) AS regimen_name,     " +
-            " hrt.description     " +
-            " FROM     " +
-            " hiv_art_pharmacy h,     " +
-            " jsonb_array_elements(h.extra -> 'regimens') WITH ORDINALITY p(pharmacy_object)     " +
-            " LEFT JOIN hiv_regimen hr ON hr.description = CAST(pharmacy_object ->> 'regimenName' AS VARCHAR)     " +
-            " LEFT JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id     " +
-            " WHERE     " +
-            " hrt.id IN (1,2,3,4,14)     " +
-            " AND h.archived = 0     " +
-            " AND visit_date >= ?2     " +
-            " AND visit_date <  ?3     " +
-            " ) r     " +
-            " INNER JOIN (     " +
-            " SELECT     " +
-            " DISTINCT hap.person_uuid,     " +
-            " MAX(visit_date) AS MAXDATE     " +
-            " FROM     " +
-            " hiv_art_pharmacy hap     " +
-            " INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid     " +
-            " AND h.archived = 0     " +
-            " WHERE     " +
-            " hap.archived = 0     " +
-            " AND visit_date >= ?2     " +
-            " AND visit_date <  ?3     " +
-            " GROUP BY     " +
-            " hap.person_uuid     " +
-            " ORDER BY     " +
-            " MAXDATE ASC     " +
-            " ) MAX ON MAX.MAXDATE = r.visit_date     " +
-            " AND r.person_uuid = MAX.person_uuid     " +
-            " ) r ON r.visit_date = hartp.visit_date     " +
-            " AND r.person_uuid = hartp.person_uuid     " +
-            " INNER JOIN hiv_enrollment he ON he.person_uuid = r.person_uuid     " +
-            " WHERE     " +
-            " he.archived = 0     " +
-            " AND hartp.archived = 0     " +
-            " AND hartp.facility_id = ?1     " +
-            " ORDER BY     " +
-            " hartp.person_uuid ASC     " +
-            " ),  " +
-            "      " +
+            "SELECT  * from (\n" +
+            "SELECT p.person_uuid as person_uuid40, p.visit_date as lastPickupDate,\n" +
+            "\tr.description as currentARTRegimen, rt.description as currentRegimenLine,\n" +
+            "\tp.next_appointment as nextPickupDate,\n" +
+            "\tCAST(p.refill_period / 30  AS INTEGER) AS monthsOfARVRefill, \n" +
+            "ROW_NUMBER() OVER (PARTITION BY p.person_uuid ORDER BY p.visit_date DESC) as rnk  \n" +
+            "from public.hiv_art_pharmacy p\n" +
+            "INNER JOIN public.hiv_art_pharmacy_regimens pr\n" +
+            "ON pr.art_pharmacy_id = p.id\n" +
+            "INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id\n" +
+            "INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
+            "WHERE r.regimen_type_id in (1,2,3,4,14)\n" +
+            "AND  p.archived = 0\n" +
+            "AND  p.facility_id = ?1\n" +
+            "AND  p.visit_date >= ?2\n" +
+            "AND  p.visit_date  < ?3\n" +
+            ") as pr\n" +
+            "WHERE pr.rnk = 1\n"+
+            " ), " +
             "eac AS (     " +
             " SELECT     " +
             " DISTINCT ON (he.person_uuid) he.person_uuid AS person_uuid50,     " +
@@ -1048,13 +1007,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " SELECT     " +
             " (     " +
             " CASE     " +
-            " WHEN hp.visit_date  + hp.refill_period +  INTERVAL '28 day' <  ?3 THEN 'IIT'     " +
+            " WHEN hp.visit_date  + hp.refill_period +  INTERVAL '29 day' < ?3 THEN 'IIT'     " +
             " ELSE 'ACTIVE'     " +
             " END     " +
             " ) status,     " +
             " (     " +
             " CASE     " +
-            " WHEN hp.visit_date +  hp.refill_period +  INTERVAL '28 day' <  ?3 THEN hp.visit_date +  hp.refill_period +  INTERVAL '28 day'     " +
+            " WHEN hp.visit_date +  hp.refill_period +  INTERVAL '29 day' < ?3 THEN hp.visit_date +  hp.refill_period +  INTERVAL '29 day'     " +
             " ELSE hp.visit_date     " +
             " END     " +
             " ) AS visit_date,     " +
@@ -1080,7 +1039,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " AND MAX.person_uuid = hp.person_uuid     " +
             " WHERE     " +
             " hp.archived = 0     " +
-            " AND hp.visit_date <  ?3    " +
+            " AND hp.visit_date <   ?3    " +
             " ) pharmacy     " +
             " LEFT JOIN (     " +
             " SELECT     " +
@@ -1098,7 +1057,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " hiv_status_tracker     " +
             " WHERE     " +
             " archived = 0     " +
-            " AND status_date <=  ?3     " +
+            " AND status_date <  ?3     " +
             " GROUP BY     " +
             " person_id     " +
             " ) status ON status.person_id = hst.person_id     " +
@@ -1115,7 +1074,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " GROUP BY     " +
             " person_id     " +
             " )     " +
-            " AND hst.status_date <=  ?3    " +
+            " AND hst.status_date <  ?3    " +
             " ) stat ON stat.person_id = pharmacy.person_uuid     " +
             " )     " +
             "SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,     " +
@@ -1150,7 +1109,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " ELSE REPLACE(pre.status, '_', ' ')     " +
             " END     " +
             " ) AS previousStatus,     " +
-            "( CAST(     " +
+            "CAST((     " +
             " CASE     " +
             " WHEN prepre.status ILIKE '%DEATH%' THEN prepre.status_date     " +
             " WHEN prepre.status ILIKE '%OUT%' THEN prepre.status_date     " +
@@ -1165,7 +1124,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " AND pre.status ILIKE '%ACTIVE%' THEN pre.status_date     " +
             "  ELSE pre.status_date     " +
             " END     " +
-            " ) AS DATE )AS previousStatusDate,     " +
+            " ) AS DATE)AS previousStatusDate,     " +
             " (     " +
             " CASE     " +
             " WHEN prepre.status ILIKE '%DEATH%' THEN 'DEATH'     " +
@@ -1185,7 +1144,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " ELSE REPLACE(ct.status, '_', ' ')     " +
             " END     " +
             " ) AS currentStatus,     " +
-            " (CAST (     " +
+            " CAST((     " +
             " CASE     " +
             " WHEN prepre.status ILIKE '%DEATH%' THEN prepre.status_date     " +
             " WHEN prepre.status ILIKE '%OUT%' THEN prepre.status_date     " +
@@ -1201,7 +1160,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " AND ct.status ILIKE '%ACTIVE%' THEN ct.status_date     " +
             " ELSE ct.status_date     " +
             " END     " +
-            " ) AS DATE)AS currentStatusDate     " +
+            " )AS DATE) AS currentStatusDate     " +
             " FROM     " +
             " bio_data bd     " +
             " LEFT JOIN pharmacy_details_regimen pdr ON pdr.person_uuid40 = bd.personUuid     " +
