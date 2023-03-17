@@ -263,92 +263,31 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " AND he.facility_id = ?1     " +
             " ),   " +
             "      " +
-            "laboratory_details_viral_load AS (     " +
-            " SELECT     " +
-            " DISTINCT ON (lo.patient_uuid) lo.patient_uuid AS person_uuid20,     " +
-            " bac_viral_load.display viralLoadIndication,     " +
-            " ls.date_sample_collected AS dateOfViralLoadSampleCollection,     " +
-            " (     " +
-            " CASE     " +
-            " WHEN lr.result_reported = '0'     " +
-            " OR lr.result_reported = '00' THEN NULL     " +
-            " WHEN lr.result_reported ILIKE '%<%'     " +
-            " OR lr.result_reported ILIKE '%>%' THEN REPLACE(REPLACE(lr.result_reported, '<', ''), '>', '')     " +
-            " ELSE lr.result_reported     " +
-            " END     " +
-            " ) AS currentViralLoad,     " +
-            " lr.date_result_reported AS dateOfCurrentViralLoad     " +
-            " FROM     " +
-            " (     " +
-            " SELECT     " +
-            " *     " +
-            " FROM     " +
-            " (     " +
-            " SELECT     " +
-            " lo.*,     " +
-            " ROW_NUMBER () OVER (     " +
-            " PARTITION BY lo.patient_id     " +
-            " ORDER BY     " +
-            " order_date DESC     " +
-            " )     " +
-            " FROM     " +
-            " laboratory_order lo     " +
-            " ) l     " +
-            " WHERE     " +
-            " l.row_number = 1     " +
-            " AND l.archived = 0     " +
-            " ) lo     " +
-            " INNER JOIN laboratory_test lt ON lt.lab_order_id = lo.id     " +
-            " AND lt.archived = 0     " +
-            " LEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id = lt.viral_load_indication     " +
-            " INNER JOIN laboratory_labtest ll ON ll.id = lt.lab_test_id     " +
-            " AND ll.lab_test_name = 'Viral Load'     " +
-            " LEFT JOIN (     " +
-            " SELECT     " +
-            " *     " +
-            " FROM     " +
-            " (     " +
-            " SELECT     " +
-            " lr.*,     " +
-            " ROW_NUMBER () OVER (     " +
-            " PARTITION BY lr.patient_uuid     " +
-            " ORDER BY     " +
-            " date_result_received DESC     " +
-            " )     " +
-            " FROM     " +
-            " laboratory_result lr     " +
-            " ) l     " +
-            " WHERE     " +
-            " l.row_number = 1     " +
-            " AND l.archived = 0     " +
-            " ) lr ON lr.patient_uuid = lo.patient_uuid     " +
-            " AND lr.test_id = lt.id     " +
-            " LEFT JOIN (     " +
-            " SELECT     " +
-            " *     " +
-            " FROM     " +
-            " (     " +
-            " SELECT     " +
-            " ls.*,     " +
-            " ROW_NUMBER () OVER (     " +
-            " PARTITION BY ls.patient_uuid     " +
-            " ORDER BY     " +
-            " date_sample_collected DESC     " +
-            " )     " +
-            " FROM     " +
-            " laboratory_sample ls     " +
-            " ) l     " +
-            " WHERE     " +
-            " l.row_number = 1     " +
-            " AND l.archived = 0     " +
-            " ) ls ON ls.patient_uuid = lo.patient_uuid     " +
-            " AND lr.test_id = lt.id     " +
-            " WHERE     " +
-            " lo.archived = 0     " +
-            " AND lo.order_date <=  ?3     " +
-            " AND lo.facility_id = ?1     " +
-            " ),    " +
-            "      " +
+             "sample_collection_date AS (SELECT sample.date_sample_collected as DateOfViralLoadSampleCollection, patient_uuid as person_uuid120  FROM (\n" +
+            "\t SELECT lt.viral_load_indication, sm.facility_id,sm.date_sample_collected, sm.patient_uuid, sm.archived, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_sample_collected DESC) as rnkk \n" +
+            "\t FROM public.laboratory_sample  sm\n" +
+            "\t INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
+            "\t )as sample\n" +
+            " WHERE sample.rnkk = 1\n" +
+            " AND sample.archived = 0\n" +
+            " AND date_sample_collected <= '2023-03-14' \n" +
+            " AND sample.facility_id = 1740),\n" +
+            "\n" +
+            "current_vl_result AS (SELECT * FROM (\n" +
+            "\t SELECT  sm.patient_uuid as person_uuid130 , sm.facility_id, sm.archived, acode.display as viralLoadIndication, sm.result_reported as currentViralLoad,sm.date_result_reported as dateOfCurrentViralLoad, \n" +
+            "\t ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rnk2 \n" +
+            "\t FROM public.laboratory_result  sm\n" +
+            "\t INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
+            "\t INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication \n" +
+            "\t WHERE lt.lab_test_id = 16\n" +
+            "\t AND sm. date_result_reported IS NOT NULL\n" +
+            "\t )as vl_result \n" +
+            "WHERE vl_result.rnk2 = 1\n" +
+            "AND  vl_result .archived = 0\n" +
+            "AND  vl_result.dateOfCurrentViralLoad <= '2023-03-13'\n" +
+            "AND  vl_result.facility_id = 1740\n" +
+            "AND  vl_result.person_uuid130 = 'cc3bd6e1-5070-41f3-8bee-493931fae784'\t\t\t\t  \n" +
+            "),\n"+
             "laboratory_details_cd4 AS (     " +
             " SELECT     " +
             " DISTINCT ON (lo.patient_uuid) lo.patient_uuid AS person_uuid30,     " +
@@ -407,7 +346,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "\tr.description as currentARTRegimen, rt.description as currentRegimenLine,\n" +
             "\tp.next_appointment as nextPickupDate,\n" +
             "\tCAST(p.refill_period / 30  AS INTEGER) AS monthsOfARVRefill, \n" +
-            "ROW_NUMBER() OVER (PARTITION BY p.person_uuid ORDER BY p.visit_date DESC) as rnk  \n" +
+            "ROW_NUMBER() OVER (PARTITION BY p.person_uuid ORDER BY p.visit_date DESC) as rnk3  \n" +
             "from public.hiv_art_pharmacy p\n" +
             "INNER JOIN public.hiv_art_pharmacy_regimens pr\n" +
             "ON pr.art_pharmacy_id = p.id\n" +
@@ -419,7 +358,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "AND  p.visit_date >= ?2\n" +
             "AND  p.visit_date  < ?3\n" +
             ") as pr\n" +
-            "WHERE pr.rnk = 1\n"+
+            "WHERE pr.rnk3 = 1\n"+
             " ), " +
             "eac AS (     " +
             " SELECT     " +
@@ -1078,12 +1017,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " ) stat ON stat.person_id = pharmacy.person_uuid     " +
             " )     " +
             "SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,     " +
-            " bd.*,     " +
-            " ldvl.*,     " +
-            " ldc.*,     " +
+            "bd.*," +
+            "scd.*," +
+            "cvlr.*," +
+            "ldc.*,     " +
             " pdr.*,     " +
             " b.*,     " +
-            " c.*,     " +
+            "c.*,     " +
             " e.*,     " +
             " ca.dateOfCurrentRegimen,     " +
             " ca.person_uuid70,     " +
@@ -1165,7 +1105,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " bio_data bd     " +
             " LEFT JOIN pharmacy_details_regimen pdr ON pdr.person_uuid40 = bd.personUuid     " +
             " LEFT JOIN current_clinical c ON c.person_uuid10 = bd.personUuid     " +
-            " LEFT JOIN laboratory_details_viral_load ldvl ON ldvl.person_uuid20 = bd.personUuid     " +
+            "LEFT JOIN sample_collection_date scd ON scd.person_uuid120 = bd.personUuid  "+
+            "LEFT JOIN current_vl_result  cvlr ON cvlr.person_uuid130 = bd.personUuid "+
             " LEFT JOIN laboratory_details_cd4 ldc ON ldc.person_uuid30 = bd.personUuid     " +
             " LEFT JOIN eac e ON e.person_uuid50 = bd.personUuid     " +
             " LEFT JOIN biometric b ON b.person_uuid60 = bd.personUuid     " +
@@ -1179,3 +1120,4 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             nativeQuery = true)
     List<RADETDTOProjection> getRadetData(Long facilityId, LocalDate start, LocalDate end, LocalDate previous, LocalDate previousPrevious);
 }
+
