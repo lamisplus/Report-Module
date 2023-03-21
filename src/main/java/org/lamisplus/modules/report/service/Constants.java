@@ -277,6 +277,8 @@ public class Constants {
 					"Date Of HIV Testing (yyyy-mm-dd)",
 					"Prep Offered",
 					"Prep Accepted",
+					"Number of condoms given",
+					"Number of lubricant given",
 					"HTS Latitude",
 					"HTS Longitude"
 			);
