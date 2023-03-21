@@ -153,7 +153,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getCurrentARTRegimen());
 				map.put(index++, radetReportDto.getCurrentRegimenLine());
 				
-				
+				//cd4
 				map.put(index++, radetReportDto.getCurrentClinicalStage());
 				map.put(index++, radetReportDto.getDateOfLastCd4Count());
 				map.put(index++,radetReportDto.getLastCd4Count());
@@ -162,6 +162,9 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getCurrentViralLoad());
 				map.put(index++, radetReportDto.getDateOfCurrentViralLoad());
 				map.put(index++, radetReportDto.getViralLoadIndication());
+				map.put(index++, radetReportDto.getVlEligibilityStatus());
+				map.put(index++, radetReportDto.getDateOfVlEligibilityStatus());
+				
 				//current status
 				map.put(index++, radetReportDto.getCurrentStatus());
 				map.put(index++, radetReportDto.getCurrentStatusDate());

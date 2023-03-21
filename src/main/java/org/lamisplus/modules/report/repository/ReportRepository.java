@@ -270,8 +270,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "\t )as sample\n" +
             " WHERE sample.rnkk = 1\n" +
             " AND sample.archived = 0\n" +
-            " AND date_sample_collected <= '2023-03-14' \n" +
-            " AND sample.facility_id = 1740),\n" +
+            " AND date_sample_collected <= ?3 \n" +
+            " AND sample.facility_id = ?1 ),\n" +
             "\n" +
             "current_vl_result AS (SELECT * FROM (\n" +
             "\t SELECT  sm.patient_uuid as person_uuid130 , sm.facility_id, sm.archived, acode.display as viralLoadIndication, sm.result_reported as currentViralLoad,sm.date_result_reported as dateOfCurrentViralLoad, \n" +
@@ -283,10 +283,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "\t AND sm. date_result_reported IS NOT NULL\n" +
             "\t )as vl_result \n" +
             "WHERE vl_result.rnk2 = 1\n" +
-            "AND  vl_result .archived = 0\n" +
-            "AND  vl_result.dateOfCurrentViralLoad <= '2023-03-13'\n" +
-            "AND  vl_result.facility_id = 1740\n" +
-            "AND  vl_result.person_uuid130 = 'cc3bd6e1-5070-41f3-8bee-493931fae784'\t\t\t\t  \n" +
+            "AND  vl_result.archived = 0\n" +
+            "AND  vl_result.dateOfCurrentViralLoad <= ?3 \n" +
+            "AND  vl_result.facility_id = ?1\n" +
             "),\n"+
             "laboratory_details_cd4 AS (     " +
             " SELECT     " +
@@ -326,10 +325,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " lr.*,     " +
             " ROW_NUMBER () OVER (     " +
             " PARTITION BY lr.patient_uuid     " +
-            " ORDER BY date_result_received DESC     " +
+            " ORDER BY date_result_reported DESC     " +
             " )     " +
             " FROM     " +
             " laboratory_result lr     " +
+            "WHERE lr.date_result_reported IS NOT NULL\\n\" +  " +
             " ) l     " +
             " WHERE     " +
             " l.row_number = 1     " +

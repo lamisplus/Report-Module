@@ -109,4 +109,7 @@ public interface RADETDTOProjection {
 	String getCareEntry();
 	
 	String getCauseOfDeath();
+	
+	 boolean getVlEligibilityStatus();
+	 LocalDate getDateOfVlEligibilityStatus();
 }

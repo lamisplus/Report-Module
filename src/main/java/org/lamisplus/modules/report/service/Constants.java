@@ -131,6 +131,8 @@ public class Constants {
 					"Current Viral Load (c/ml)",
 					"Date of Current Viral Load (yyyy-mm-dd)",
 					"Viral Load Indication",
+					"Viral Load Eligibility Status",
+					"Date of Viral Load Eligibility Status",
 					"Current ART Status",
 					"Date of Current ART Status",
 					"Cause of Death",
