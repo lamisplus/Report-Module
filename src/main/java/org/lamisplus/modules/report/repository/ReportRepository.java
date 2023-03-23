@@ -276,7 +276,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "            AND sample.facility_id = ?1 ),\n" +
             "\n" +
             "            current_vl_result AS (SELECT * FROM (\n" +
-            "             SELECT  sm.patient_uuid as person_uuid130 , sm.facility_id, sm.archived, acode.display as viralLoadIndication, sm.result_reported as currentViralLoad,sm.date_result_reported as dateOfCurrentViralLoad,\n" +
+            "             SELECT  sm.patient_uuid as person_uuid130 , sm.facility_id, sm.archived, acode.display as viralLoadIndication, sm.result_reported  as currentViralLoad,CAST(sm.date_result_reported as DATE) as dateOfCurrentViralLoad,\n" +
             "             ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rnk2\n" +
             "             FROM public.laboratory_result  sm\n" +
             "             INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
