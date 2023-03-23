@@ -49,12 +49,12 @@ public interface RADETDTOProjection {
 	
 	String getCurrentViralLoad();
 	
-	LocalDateTime getDateOfCurrentViralLoad();
+	LocalDate getDateOfCurrentViralLoad();
 	
 	//cd4
 	String getLastCd4Count();
 	
-	LocalDateTime getDateOfLastCd4Count();
+	LocalDate getDateOfLastCd4Count();
 	
 	//Refill
 	String getCurrentRegimenLine();
