@@ -60,6 +60,7 @@ const HTSReport = (props) => {
     const [status, setStatus] = useState(true);
     const [objValues, setObjValues]=useState({
         organisationUnitId:"",
+        organisationUnitName:"",
         startDate:"",
         endDate: ""
     })
@@ -83,9 +84,7 @@ const HTSReport = (props) => {
     }
 
     const handleInputChange = e => {
-        //1980-01-01
-
-        setObjValues ({...objValues,  [e.target.name]: e.target.value});
+        setObjValues ({...objValues,  [e.target.name]: e.target.value, organisationUnitName: e.target.innerText});
     }
 
     const handleValueChange = () => {
@@ -109,9 +108,10 @@ const HTSReport = (props) => {
         )
           .then(response => {
             setLoading(false)
-            const fileName ="HTS"
+            const fileName = `${objValues.organisationUnitName} HTS ${currentDate}`
             const responseData = response.data
             let blob = new Blob([responseData], {type: "application/octet-stream"});
+
             FileSaver.saveAs(blob, `${fileName}.xlsx`);
             toast.success("HTS Report generated successfully");
           })

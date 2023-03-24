@@ -60,6 +60,7 @@ const PatientLineList = (props) => {
     const [status, setStatus] = useState(true);
     const [objValues, setObjValues]=useState({       
         organisationUnitId:"",
+        organisationUnitName:"",
         startDate:"",
         endDate: ""
     })
@@ -85,7 +86,7 @@ const PatientLineList = (props) => {
     const handleInputChange = e => {
         //1980-01-01
 
-        setObjValues ({...objValues,  [e.target.name]: e.target.value});
+        setObjValues ({...objValues,  [e.target.name]: e.target.value, organisationUnitName: e.target.innerText});
     }
 
     const handleValueChange = () => {
@@ -111,7 +112,7 @@ const PatientLineList = (props) => {
           )
           .then(response => {
             setLoading(false)
-            const fileName ="Radet"
+            const fileName = `${objValues.organisationUnitName} Radet ${currentDate}`
             const responseData = response.data
             let blob = new Blob([responseData], {type: "application/octet-stream"});
 //            const options = {

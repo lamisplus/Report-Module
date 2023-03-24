@@ -57,4 +57,7 @@ public interface HtsReportDto {
     public String getPrepAccepted();
     public String getHtsLatitude();
     public String getHtsLongitude();
+
+    public Integer getNumberOfCondomsGiven();
+    public Integer getNumberOfLubricantsGiven();
 }

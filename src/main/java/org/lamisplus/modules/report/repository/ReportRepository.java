@@ -40,7 +40,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "   hc.others->>'latitude' AS HTSLatitude, " +
             "   hc.others->>'longitude' AS HTSLongitude,   " +
             "   (CASE WHEN hc.person_uuid IS NULL THEN hc.extra->>'client_address' ELSE r.address END) AS clientAddress, " +
-            "   hc.date_visit AS dateVisited, " +
+            "   hc.date_visit AS dateVisit, " +
             "   (CASE WHEN hc.first_time_visit IS true THEN 'Yes' ELSE 'No' END) firstTimeVisit, " +
             "   hc.num_children AS numberOfChildren, " +
             "hc.num_wives AS numberOfWives, " +
@@ -76,7 +76,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "(CASE WHEN hc.test1->>'result' ILIKE 'Yes' THEN 'Positive' ELSE 'Negative' END)AS hivTestResult, " +
             "hc.hiv_test_result AS finalHIVTestResult, " +
             "(CASE WHEN LENGTH(hc.test1->>'date') > 0 THEN CAST(hc.test1->>'date' AS DATE)  " +
-            "ELSE NULL END)dateOfHIVTesting " +
+            "ELSE NULL END)dateOfHIVTesting, " +
+            "CAST(post_test_counseling->>'condomProvidedToClientCount' AS INTEGER) AS numberOfCondomsGiven, " +
+            "CAST(post_test_counseling->>'lubricantProvidedToClientCount' AS INTEGER) AS numberOfLubricantsGiven " +
             "FROM hts_client hc " +
             "LEFT JOIN base_application_codeset tg ON tg.code = hc.target_group " +
             "LEFT JOIN base_application_codeset rf ON rf.id = hc.referred_from " +
