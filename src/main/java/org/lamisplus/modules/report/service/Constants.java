@@ -207,6 +207,7 @@ public class Constants {
 					"Age",
 					"Sex",
 					"Address",
+					"Phone Number",
 					"Enrollment Date (yyyy-mm-dd)",
 					"Number of Fingers Captured",
 					"Fingers Valid"

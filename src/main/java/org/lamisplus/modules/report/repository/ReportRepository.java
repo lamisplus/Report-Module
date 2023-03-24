@@ -295,7 +295,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "\t\t\tFROM public.hiv_art_clinical\n" +
             "\t\t\tWHERE cd_4 IS  NOT null\n" +
             "\t\t\tAND cd_4 > 0\n" +
-            "\t\t\tAND visit_date <= ?3\n" +
+            "\t\t\tAND visit_date < ?3\n" +
             "\t\t\tAND facility_id = ?1) cccd\n" +
             "\t\t\tWHERE cccd.rnk = 1\n" +
             "\t\t\t),\n" +
