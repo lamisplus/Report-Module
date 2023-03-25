@@ -102,7 +102,7 @@ END AS dateOfTbScreened
             AND sample.facility_id = ?1 ),
 
             current_vl_result AS (SELECT * FROM (
-             SELECT  sm.patient_uuid as person_uuid130 , sm.facility_id, sm.archived, acode.display as viralLoadIndication, sm.result_reported as currentViralLoad,sm.date_result_reported as dateOfCurrentViralLoad,
+             SELECT  sm.patient_uuid as person_uuid130 , sm.facility_id, sm.archived, acode.display as viralLoadIndication, sm.result_reported as currentViralLoad,CAST(sm.date_result_reported AS DATE) as dateOfCurrentViralLoad,
              ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rnk2
              FROM public.laboratory_result  sm
              INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id
@@ -909,6 +909,11 @@ SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,
     cvlr.dateofcurrentviralload IS NULL
     AND CAST(bd.artstartdate AS DATE) + 181 < ?3 THEN TRUE
 
+    WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) IS NULL
+    AND scd.dateofviralloadsamplecollection IS NOT NULL AND
+    cvlr.dateofcurrentviralload IS NULL
+    AND CAST(bd.artstartdate AS DATE) + 91 < ?3 THEN TRUE
+
 
     WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) < 1000
     AND( scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload
@@ -965,6 +970,12 @@ SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,
     cvlr.dateofcurrentviralload IS NULL
     AND CAST(bd.artstartdate AS DATE) + 181 < ?3 THEN
     CAST(bd.artstartdate AS DATE) + 181
+
+    WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) IS NULL
+    AND scd.dateofviralloadsamplecollection IS NOT NULL AND
+    cvlr.dateofcurrentviralload IS NULL
+    AND CAST(bd.artstartdate AS DATE) + 91 < ?3 THEN
+    CAST(bd.artstartdate AS DATE) + 91
 
     WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) < 1000
     AND( scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload

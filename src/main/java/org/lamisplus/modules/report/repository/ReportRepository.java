@@ -278,7 +278,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "            AND sample.facility_id = ?1 ),\n" +
             "\n" +
             "            current_vl_result AS (SELECT * FROM (\n" +
-            "             SELECT  sm.patient_uuid as person_uuid130 , sm.facility_id, sm.archived, acode.display as viralLoadIndication, sm.result_reported as currentViralLoad, CAST(sm.date_result_reported AS DATE ) as dateOfCurrentViralLoad,\n" +
+            "             SELECT  sm.patient_uuid as person_uuid130 , sm.facility_id, sm.archived, acode.display as viralLoadIndication, sm.result_reported as currentViralLoad,CAST(sm.date_result_reported AS DATE) as dateOfCurrentViralLoad,\n" +
             "             ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rnk2\n" +
             "             FROM public.laboratory_result  sm\n" +
             "             INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
@@ -1085,6 +1085,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    cvlr.dateofcurrentviralload IS NULL\n" +
             "    AND CAST(bd.artstartdate AS DATE) + 181 < ?3 THEN TRUE\n" +
             "\n" +
+            "    WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) IS NULL\n" +
+            "    AND scd.dateofviralloadsamplecollection IS NOT NULL AND\n" +
+            "    cvlr.dateofcurrentviralload IS NULL\n" +
+            "    AND CAST(bd.artstartdate AS DATE) + 91 < ?3 THEN TRUE\n" +
+            "\n" +
             "\n" +
             "    WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) < 1000\n" +
             "    AND( scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload\n" +
@@ -1141,6 +1146,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    cvlr.dateofcurrentviralload IS NULL\n" +
             "    AND CAST(bd.artstartdate AS DATE) + 181 < ?3 THEN\n" +
             "    CAST(bd.artstartdate AS DATE) + 181\n" +
+            "\n" +
+            "    WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) IS NULL\n" +
+            "    AND scd.dateofviralloadsamplecollection IS NOT NULL AND\n" +
+            "    cvlr.dateofcurrentviralload IS NULL\n" +
+            "    AND CAST(bd.artstartdate AS DATE) + 91 < ?3 THEN\n" +
+            "    CAST(scd.dateofviralloadsamplecollection AS DATE) + 91\n" +
             "\n" +
             "    WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) < 1000\n" +
             "    AND( scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload\n" +
