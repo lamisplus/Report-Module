@@ -75,10 +75,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "hc.cd4->>'cd4SemiQuantitative' AS CD4TestResult, " +
             "(CASE WHEN hc.test1->>'result' ILIKE 'Yes' THEN 'Positive' ELSE 'Negative' END)AS hivTestResult, " +
             "hc.hiv_test_result AS finalHIVTestResult, " +
-            "(CASE WHEN LENGTH(hc.test1->>'date') > 0 THEN CAST(hc.test1->>'date' AS DATE)  " +
+            "(CASE WHEN LENGTH(hc.test1->>'date') > 0 THEN CAST(hc.test1->>'date' AS DATE) " +
+            "WHEN hc.date_visit IS NOT NULL THEN hc.date_visit  " +
             "ELSE NULL END)dateOfHIVTesting, " +
-            "CAST(post_test_counseling->>'condomProvidedToClientCount' AS INTEGER) AS numberOfCondomsGiven, " +
-            "CAST(post_test_counseling->>'lubricantProvidedToClientCount' AS INTEGER) AS numberOfLubricantsGiven " +
+            "CAST(post_test_counseling->>'condomProvidedToClientCount' AS VARCHAR) AS numberOfCondomsGiven, " +
+            "CAST(post_test_counseling->>'lubricantProvidedToClientCount' AS VARCHAR) AS numberOfLubricantsGiven " +
             "FROM hts_client hc " +
             "LEFT JOIN base_application_codeset tg ON tg.code = hc.target_group " +
             "LEFT JOIN base_application_codeset rf ON rf.id = hc.referred_from " +
