@@ -1088,7 +1088,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) IS NULL\n" +
             "    AND scd.dateofviralloadsamplecollection IS NOT NULL AND\n" +
             "    cvlr.dateofcurrentviralload IS NULL\n" +
-            "    AND CAST(bd.artstartdate AS DATE) + 91 < ?3 THEN TRUE\n" +
+            "    AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 THEN TRUE\n" +
             "\n" +
             "\n" +
             "    WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) < 1000\n" +
