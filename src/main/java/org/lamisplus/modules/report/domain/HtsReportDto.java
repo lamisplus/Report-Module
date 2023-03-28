@@ -58,6 +58,6 @@ public interface HtsReportDto {
     public String getHtsLatitude();
     public String getHtsLongitude();
 
-    public Integer getNumberOfCondomsGiven();
-    public Integer getNumberOfLubricantsGiven();
+    public String getNumberOfCondomsGiven();
+    public String getNumberOfLubricantsGiven();
 }
