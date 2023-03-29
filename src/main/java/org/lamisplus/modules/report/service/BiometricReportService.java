@@ -92,7 +92,7 @@ public class BiometricReportService {
 		biometricReportDto.setDatimId(datimId);
 		biometricReportDto.setState(state.getName());
 		biometricReportDto.setAddress(info.getAddress());
-		//biometricReportDto.setPhone(info.getPhone());
+		biometricReportDto.setPhone(info.getPhone());
 		biometricReportDto.setFacilityName(facility.getName());
 		biometricReportDto.setSex(info.getSex());
 		biometricReportDto.setHospitalNum(info.getHospitalNumber());

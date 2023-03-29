@@ -795,7 +795,7 @@ END AS dateOfTbScreened
 				SELECT patient_uuid FROM (
 					SELECT COUNT(ls.patient_uuid), ls.patient_uuid FROM laboratory_sample ls
 					INNER JOIN laboratory_test lt ON lt.id=ls.test_id AND lt.lab_test_id=16
-					WHERE ls.archived=0 AND ls.facility_id = ?1
+					WHERE ls.archived=0 AND ls.facility_id=?1
 					GROUP BY ls.patient_uuid
 				)t )
 				)
@@ -904,29 +904,29 @@ SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,
     AND bd.artstartdate + 181 < ?3) THEN TRUE
     WHEN (nvd.age <= 15 AND bd.artstartdate + 181 < ?3) THEN TRUE
 
-    WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) IS NULL
+    WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL
     AND scd.dateofviralloadsamplecollection IS NULL AND
     cvlr.dateofcurrentviralload IS NULL
     AND CAST(bd.artstartdate AS DATE) + 181 < ?3 THEN TRUE
 
-    WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) IS NULL
+    WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL
     AND scd.dateofviralloadsamplecollection IS NOT NULL AND
     cvlr.dateofcurrentviralload IS NULL
     AND CAST(bd.artstartdate AS DATE) + 91 < ?3 THEN TRUE
 
 
-    WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) < 1000
+    WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000
     AND( scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload
     OR  scd.dateofviralloadsamplecollection IS NULL )
     AND CAST(cvlr.dateofcurrentviralload AS DATE) + 181 < ?3 THEN TRUE
 
-    WHEN  CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) < 1000
+    WHEN  CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000
     AND (scd.dateofviralloadsamplecollection > cvlr.dateofcurrentviralload
     OR cvlr.dateofcurrentviralload IS NULL
     )
     AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 THEN TRUE
 
-    WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) > 1000
+    WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) > 1000
     AND ( scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload
     OR
     scd.dateofviralloadsamplecollection IS NULL
@@ -934,7 +934,7 @@ SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,
     AND CAST(cvlr.dateofcurrentviralload AS DATE) + 91 < ?3 THEN TRUE
 
     WHEN
-    CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) > 1000
+    CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) > 1000
     AND (scd.dateofviralloadsamplecollection > cvlr.dateofcurrentviralload
     OR cvlr.dateofcurrentviralload IS NULL)
     AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 THEN TRUE
@@ -942,7 +942,7 @@ SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,
     ELSE FALSE
     END
     ) AS vlEligibilityStatus,
-    CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) AS test,
+    CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) AS test,
 
     (
     CASE
@@ -965,19 +965,19 @@ SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,
     WHEN (nvd.age <= 15 AND bd.artstartdate + 181 < ?3)
     THEN CAST(bd.artstartdate + 181 AS DATE)
 
-    WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) IS NULL
+    WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL
     AND scd.dateofviralloadsamplecollection IS NULL AND
     cvlr.dateofcurrentviralload IS NULL
     AND CAST(bd.artstartdate AS DATE) + 181 < ?3 THEN
     CAST(bd.artstartdate AS DATE) + 181
 
-    WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) IS NULL
+    WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL
     AND scd.dateofviralloadsamplecollection IS NOT NULL AND
     cvlr.dateofcurrentviralload IS NULL
     AND CAST(bd.artstartdate AS DATE) + 91 < ?3 THEN
     CAST(bd.artstartdate AS DATE) + 91
 
-    WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) < 1000
+    WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000
     AND( scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload
     OR  scd.dateofviralloadsamplecollection IS NULL )
     AND CAST(cvlr.dateofcurrentviralload AS DATE) + 181 < ?3
@@ -985,14 +985,14 @@ SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,
 
 
 
-    WHEN  CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) < 1000
+    WHEN  CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000
     AND (scd.dateofviralloadsamplecollection > cvlr.dateofcurrentviralload
     OR cvlr.dateofcurrentviralload IS NULL
     )
     AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 THEN
     CAST(scd.dateofviralloadsamplecollection AS DATE) + 91
 
-    WHEN CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) > 1000
+    WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) > 1000
     AND ( scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload
     OR
     scd.dateofviralloadsamplecollection IS NULL
@@ -1001,7 +1001,7 @@ SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,
     CAST(cvlr.dateofcurrentviralload AS DATE) + 91
 
     WHEN
-    CAST(regexp_replace(cvlr.currentviralload, '[^0-9]+', '', 'g') AS INTEGER) > 1000
+    CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) > 1000
     AND (scd.dateofviralloadsamplecollection > cvlr.dateofcurrentviralload
     OR cvlr.dateofcurrentviralload IS NULL)
     AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 THEN
