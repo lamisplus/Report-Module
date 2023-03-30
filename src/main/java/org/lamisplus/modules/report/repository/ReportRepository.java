@@ -3,6 +3,7 @@ package org.lamisplus.modules.report.repository;
 import org.lamisplus.modules.report.domain.HtsReportDto;
 import org.lamisplus.modules.report.domain.PrepReportDto;
 import org.lamisplus.modules.report.domain.RADETDTOProjection;
+import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.domain.entity.Report;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -1261,8 +1262,14 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    body_weight AS currentWeight,\n" +
             "    tbs.display AS tbStatus,\n" +
             "    bac.display AS currentClinicalStage,\n" +
-            "    preg.display AS pregnancyStatus,\n" +
-            "    CASE\n" +
+            " (CASE \n" +
+            "WHEN hac.pregnancy_status = 'Not Pregnant' THEN hac.pregnancy_status \n" +
+            "WHEN hac.pregnancy_status = 'Pregnant' THEN hac.pregnancy_status \n" +
+            "WHEN hac.pregnancy_status = 'Breastfeeding' THEN hac.pregnancy_status \n" +
+            "WHEN hac.pregnancy_status = 'Post Partum' THEN hac.pregnancy_status \n" +
+            "WHEN preg.display IS NOT NULL THEN preg.display \n" +
+            "ELSE NULL END) AS pregnancyStatus,\n" +
+            "  CASE\n" +
             "    WHEN hac.tb_screen IS NOT NULL THEN hac.visit_date\n" +
             "    ELSE NULL\n" +
             "END AS dateOfTbScreened\n" +
@@ -2248,5 +2255,45 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    LEFT JOIN previous_previous prepre ON prepre.prePrePersonUuid = ct.cuPersonUuid\n" +
             "    LEFT JOIN naive_vl_data nvd ON nvd.nvl_person_uuid = bd.personUuid",  nativeQuery = true)
     List<RADETDTOProjection> getRadetData(Long facilityId, LocalDate start, LocalDate end, LocalDate previous, LocalDate previousPrevious);
+    
+   @Query(value = " SELECT\n" +
+           "        DISTINCT (p.uuid) AS patientId,\n" +
+           "                 p.hospital_number AS hospitalNumber,\n" +
+           "                 EXTRACT(\n" +
+           "                         YEAR\n" +
+           "                         FROM\n" +
+           "                         AGE(NOW(), date_of_birth)\n" +
+           "                     ) AS age,\n" +
+           "                 INITCAP(p.sex) AS gender,\n" +
+           "                 p.date_of_birth AS dateOfBirth,\n" +
+           "                 facility.name AS facilityName,\n" +
+           "                 facility_lga.name AS lga,\n" +
+           "                 facility_state.name AS state,\n" +
+           "                 boui.code AS datimId,\n" +
+           "\t\t\t\t tvs.*,\n" +
+           "\t\t\t\t tvs.body_weight as BodyWeight, \n" +
+           "\t\t\t\t hac.pregnancy_status as pregnancyStatus ,\n" +
+           "\t\t\t\t hac.next_appointment as nextAppointment ,\n" +
+           "\t\t\t\t hac.visit_date as visitDate,\n" +
+           "\t\t\t\t funStatus.display as funtionalStatus,\n" +
+           "\t\t\t\t clnicalStage.display as clinicalStage,\n" +
+           "\t\t\t\t tbStatus.display as tbStatus\n" +
+           "\t\t\t\t \n" +
+           "    FROM\n" +
+           "        patient_person p\n" +
+           "            INNER JOIN base_organisation_unit facility ON facility.id = facility_id\n" +
+           "            INNER JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id\n" +
+           "            INNER JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id\n" +
+           "            INNER JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id = facility_id\n" +
+           "            INNER JOIN hiv_art_clinical hac ON hac.person_uuid = p.uuid \n" +
+           "\t\t\tINNER JOIN base_application_codeset funStatus ON funStatus.id = hac.functional_status_id\n" +
+           "\t\t\tINNER JOIN base_application_codeset clnicalStage ON clnicalStage.id = hac.clinical_stage_id\n" +
+           "\t\t\tINNER JOIN base_application_codeset tbStatus ON tbStatus.id = CAST(regexp_replace(hac.tb_status, '[^0-9]+', '', 'g') AS INTEGER) \n" +
+           "\t\t\tINNER JOIN triage_vital_sign tvs ON tvs.uuid = hac.vital_sign_uuid\n" +
+           "            AND hac.archived = 0\n" +
+           "    WHERE\n" +
+           "            hac.archived = 0\n" +
+           "\t\t\tAND hac.facility_id =?1",nativeQuery = true)
+   List<ClinicDataDto> getClinicData(Long facilityId);
 }
 

@@ -48,7 +48,13 @@ WITH bio_data AS (
     body_weight AS currentWeight,
     tbs.display AS tbStatus,
     bac.display AS currentClinicalStage,
-    preg.display AS pregnancyStatus,
+    (CASE
+WHEN hac.pregnancy_status = 'Not Pregnant' THEN hac.pregnancy_status
+WHEN hac.pregnancy_status = 'Pregnant' THEN hac.pregnancy_status
+WHEN hac.pregnancy_status = 'Breastfeeding' THEN hac.pregnancy_status
+WHEN hac.pregnancy_status = 'Post Partum' THEN hac.pregnancy_status
+WHEN preg.display IS NOT NULL THEN hac.pregnancy_status
+ELSE NULL ) AS pregnancyStatus,
     CASE
     WHEN hac.tb_screen IS NOT NULL THEN hac.visit_date
     ELSE NULL

@@ -160,4 +160,13 @@ public class PatientReportController {
 		return ResponseEntity.ok(sorted);
 	}
 	
+	@GetMapping("/clinic-data/{facilityId}")
+	public void generateClinicData(HttpServletResponse response, @PathVariable("facilityId") Long facility) throws IOException {
+		messagingTemplate.convertAndSend("/topic/clinic-data", "start");
+		ByteArrayOutputStream baos = generateExcelService.generateClinicReport(facility);
+		setStream(baos, response);
+		messagingTemplate.convertAndSend("/topic/clinic-data", "end");
+	}
+	
+	
 }

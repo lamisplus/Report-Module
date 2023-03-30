@@ -1,5 +1,9 @@
 package org.lamisplus.modules.report.service;
 
+import javafx.stage.Stage;
+import org.lamisplus.modules.patient.domain.Patient;
+import org.lamisplus.modules.patient.domain.entity.Visit;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -324,4 +328,26 @@ public class Constants {
 					"Current HIV Status",
 					"Pregnancy Status"
 			);
+	
+	public static final List<String> CLINIC_HEADER =
+			Arrays.asList(
+					"S/n",
+					"Facility",
+					"Datim Id",
+					"Patient Id",
+					"Hospital Number",
+					"Date Visit",
+					"Clinic Stage",
+					"Function Status",
+					"TB Status",
+					"Body Weight (kg)",
+					"Height (cm)",
+					"BP (mmHg)",
+					"Systolic",
+					"Diastolic",
+					"Pregnant Status",
+					"Next Appointment"
+			);
+	
+	public static final String CLINIC_NAME = "clinic";
 }
