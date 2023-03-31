@@ -29,4 +29,5 @@ public class BiometricReportDto {
 	private LocalDate enrollDate;
 	private Long fingers;
 	private String valid;
+	private String phone;
 }

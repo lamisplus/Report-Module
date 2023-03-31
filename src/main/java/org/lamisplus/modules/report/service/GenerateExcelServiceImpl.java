@@ -15,6 +15,8 @@ import org.lamisplus.modules.report.domain.BiometricReportDto;
 import org.lamisplus.modules.report.domain.HtsReportDto;
 import org.lamisplus.modules.report.domain.PrepReportDto;
 import org.lamisplus.modules.report.domain.RADETDTOProjection;
+import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
+import org.lamisplus.modules.report.repository.ReportRepository;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +34,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Service
 public class GenerateExcelServiceImpl implements GenerateExcelService {
+	private final ReportRepository reportRepository;
 	
 	private final PatientReportService patientReportService;
 	
@@ -132,6 +135,22 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			e.printStackTrace();
 		}
 		LOG.info("End generate Lab report");
+		return null;
+	}
+	
+	@Override
+	public ByteArrayOutputStream generateClinicReport(Long facilityId) throws IOException {
+		LOG.info("generating Clinic report");
+		try {
+			List<ClinicDataDto> clinicData = reportRepository.getClinicData(facilityId);
+			LOG.info("Lab data {}", clinicData.size());
+			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillClinicDataMapper(clinicData);
+			return excelService.generate(Constants.CLINIC_NAME, data, Constants.CLINIC_HEADER);
+		} catch (Exception e) {
+			LOG.info("Error Occurred when generating Clinic  report");
+			e.printStackTrace();
+		}
+		LOG.info("End generate Clinic report");
 		return null;
 	}
 	

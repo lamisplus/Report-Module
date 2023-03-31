@@ -5,12 +5,11 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.audit4j.core.util.Log;
 import org.lamisplus.modules.hiv.domain.dto.*;
-import org.lamisplus.modules.hiv.repositories.HIVStatusTrackerRepository;
-import org.lamisplus.modules.hiv.service.StatusManagementService;
 import org.lamisplus.modules.report.domain.BiometricReportDto;
 import org.lamisplus.modules.report.domain.HtsReportDto;
 import org.lamisplus.modules.report.domain.PrepReportDto;
 import org.lamisplus.modules.report.domain.RADETDTOProjection;
+import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.springframework.stereotype.Component;
 
 
@@ -52,7 +51,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(patient.getPhone())));
 				map.put(index++, getStringValue(String.valueOf(patient.getArchived())));
 				map.put(index++, getStringValue(String.valueOf(patient.getCareEntryPoint())));
-			 map.put(index++, (patient.getDateOfConfirmedHIVTest()));
+			    map.put(index++, (patient.getDateOfConfirmedHIVTest()));
 				map.put(index++,patient.getDateOfRegistration());
 				map.put(index++, getStringValue(String.valueOf(patient.getStatusAtRegistration())));
 				map.put(index++, patient.getArtStartDate());
@@ -155,7 +154,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getCurrentARTRegimen());
 				map.put(index++, radetReportDto.getCurrentRegimenLine());
 				
-				
+				//cd4
 				map.put(index++, radetReportDto.getCurrentClinicalStage());
 				map.put(index++, radetReportDto.getDateOfLastCd4Count());
 				map.put(index++,radetReportDto.getLastCd4Count());
@@ -164,6 +163,9 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getCurrentViralLoad());
 				map.put(index++, radetReportDto.getDateOfCurrentViralLoad());
 				map.put(index++, radetReportDto.getViralLoadIndication());
+				map.put(index++, radetReportDto.getVlEligibilityStatus());
+				map.put(index++, radetReportDto.getDateOfVlEligibilityStatus());
+				
 				//current status
 				map.put(index++, radetReportDto.getCurrentStatus());
 				map.put(index++, radetReportDto.getCurrentStatusDate());
@@ -460,6 +462,7 @@ public class GenerateExcelDataHelper {
 			map.put(index++, getStringValue(String.valueOf(dto.getAge())));
 			map.put(index++, dto.getSex());
 			map.put(index++, dto.getAddress());
+			map.put(index++, dto.getPhone());
 			map.put(index++, dto.getEnrollDate());
 			map.put(index++, getStringValue(String.valueOf(dto.getFingers())));
 			map.put(index, dto.getValid());
@@ -473,6 +476,36 @@ public class GenerateExcelDataHelper {
 		return value.replace("null", "");
 	}
 	
+	public static List<Map<Integer, Object>> fillClinicDataMapper(
+			@NonNull List<ClinicDataDto> clinicDataDtos) {
+		List<Map<Integer, Object>> result = new ArrayList<>();
+		int sn = 1;
+		for (ClinicDataDto clinicDataDto : clinicDataDtos) {
+			Map<Integer, Object> map = new HashMap<>();
+			int index = 0;
+			map.put(index++, String.valueOf(sn));
+			map.put(index++, getStringValue(String.valueOf(clinicDataDto.getFacilityName())));
+			map.put(index++, getStringValue(String.valueOf(clinicDataDto.getDatimId())));
+			map.put(index++, getStringValue(String.valueOf(clinicDataDto.getPatientId())));
+			map.put(index++, getStringValue(String.valueOf(clinicDataDto.getHospitalNumber())));
+			map.put(index++, clinicDataDto.getVisitDate());
+			map.put(index++, getStringValue(String.valueOf(clinicDataDto.getClinicalStage())));
+			map.put(index++, getStringValue(String.valueOf(clinicDataDto.getFunctionalStatus())));
+			map.put(index++, getStringValue(String.valueOf(clinicDataDto.getTbStatus())));
+			map.put(index++, getStringValue(String.valueOf(clinicDataDto.getBodyWeight())));
+			map.put(index++, getStringValue(String.valueOf(clinicDataDto.getHeight())));
+			if( clinicDataDto.getSystolic() != null &&  clinicDataDto.getDiastolic() != null){
+				map.put(index++, getStringValue(clinicDataDto.getSystolic() + "/"+ clinicDataDto.getDiastolic()));
+			}
+			map.put(index++, getStringValue(String.valueOf(clinicDataDto.getSystolic())));
+			map.put(index++, getStringValue(String.valueOf(clinicDataDto.getDiastolic())));
+			map.put(index++,  getStringValue(clinicDataDto.getPregnancyStatus()));
+			map.put(index,    clinicDataDto.getNextAppointment());
+			result.add(map);
+			sn++;
+		}
+		return result;
+	}
 	
 	public static List<Map<Integer, Object>> fillPharmacyDataMapper(
 			@NonNull List<PharmacyReport> pharmacies) {
@@ -498,6 +531,9 @@ public class GenerateExcelDataHelper {
 		}
 		return result;
 	}
+	
+	
+	
 	
 	
 	public static List<Map<Integer, Object>> fillLabDataMapper(
