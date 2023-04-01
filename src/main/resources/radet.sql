@@ -49,12 +49,12 @@ WITH bio_data AS (
     tbs.display AS tbStatus,
     bac.display AS currentClinicalStage,
     (CASE
-WHEN hac.pregnancy_status = 'Not Pregnant' THEN hac.pregnancy_status
-WHEN hac.pregnancy_status = 'Pregnant' THEN hac.pregnancy_status
-WHEN hac.pregnancy_status = 'Breastfeeding' THEN hac.pregnancy_status
-WHEN hac.pregnancy_status = 'Post Partum' THEN hac.pregnancy_status
-WHEN preg.display IS NOT NULL THEN hac.pregnancy_status
-ELSE NULL ) AS pregnancyStatus,
+    WHEN hac.pregnancy_status = 'Not Pregnant' THEN hac.pregnancy_status
+    WHEN hac.pregnancy_status = 'Pregnant' THEN hac.pregnancy_status
+    WHEN hac.pregnancy_status = 'Breastfeeding' THEN hac.pregnancy_status
+    WHEN hac.pregnancy_status = 'Post Partum' THEN hac.pregnancy_status
+    WHEN preg.display IS NOT NULL THEN hac.pregnancy_status
+    ELSE NULL END ) AS pregnancyStatus,
     CASE
     WHEN hac.tb_screen IS NOT NULL THEN hac.visit_date
     ELSE NULL
@@ -96,7 +96,7 @@ END AS dateOfTbScreened
             AND he.facility_id = ?1
             ),
 
-             sample_collection_date AS (SELECT sample.date_sample_collected as DateOfViralLoadSampleCollection, patient_uuid as person_uuid120  FROM (
+             sample_collection_date AS (SELECT CAST(sample.date_sample_collected AS DATE) as DateOfViralLoadSampleCollection, patient_uuid as person_uuid120  FROM (
              SELECT lt.viral_load_indication, sm.facility_id,sm.date_sample_collected, sm.patient_uuid, sm.archived, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_sample_collected DESC) as rnkk
              FROM public.laboratory_sample  sm
              INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id
@@ -108,18 +108,18 @@ END AS dateOfTbScreened
             AND sample.facility_id = ?1 ),
 
             current_vl_result AS (SELECT * FROM (
-             SELECT  sm.patient_uuid as person_uuid130 , sm.facility_id, sm.archived, acode.display as viralLoadIndication, sm.result_reported as currentViralLoad,CAST(sm.date_result_reported AS DATE) as dateOfCurrentViralLoad,
-             ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rnk2
+             SELECT  sm.patient_uuid as person_uuid130 , sm.facility_id as vlFacility, sm.archived as vlArchived, acode.display as viralLoadIndication, sm.result_reported as currentViralLoad,CAST(sm.date_result_reported AS DATE) as dateOfCurrentViralLoad,
+             ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rank2
              FROM public.laboratory_result  sm
              INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id
              INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication
              WHERE lt.lab_test_id = 16
              AND sm. date_result_reported IS NOT NULL
              )as vl_result
-            WHERE vl_result.rnk2 = 1
-            AND  vl_result.archived = 0
+            WHERE vl_result.rank2 = 1
+            AND  vl_result.vlArchived = 0
             AND  vl_result.dateOfCurrentViralLoad <= ?3
-            AND  vl_result.facility_id = ?1
+            AND  vl_result.vlFacility = ?1
             ),
 
 			careCardCD4 AS (SELECT * FROM (SELECT visit_date, cd_4, person_uuid AS cccd4_person_uuid,
@@ -143,6 +143,34 @@ END AS dateOfTbScreened
 		AND  vl_result .archived = 0
 		AND  vl_result.dateOfCD4Lb <= ?3
 		) as ll),
+
+    tb_sample_collection AS (SELECT sample.lab_test_name AS tbDiagnosticTestType,sample.created_by,CAST(sample.date_sample_collected AS DATE) as dateOfTbSampleCollection, patient_uuid as personTbSample  FROM (
+             SELECT llt.lab_test_name,sm.created_by, lt.viral_load_indication, sm.facility_id,sm.date_sample_collected, sm.patient_uuid, sm.archived, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_sample_collected DESC) as rnkk
+             FROM public.laboratory_sample  sm
+             INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id
+	         INNER JOIN  laboratory_labtest llt on llt.id = lt.lab_test_id
+		     WHERE lt.lab_test_id IN (65,51,66,64)
+
+             )as sample
+            WHERE sample.rnkk = 1
+            AND sample.archived = 0
+            AND date_sample_collected <= ?3
+            AND sample.facility_id = ?1
+			),
+
+    current_tb_result AS (SELECT * FROM (
+             SELECT  sm.patient_uuid as personTbResult , sm.facility_id, sm.archived, sm.result_reported as tbDiagnosticResult,CAST(sm.date_result_reported AS DATE) as dateofTbDiagnosticResultReceived,
+             ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rnk2
+             FROM public.laboratory_result  sm
+             INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id
+             WHERE lt.lab_test_id IN (65,51,66,64)
+             AND sm. date_result_reported IS NOT NULL
+             )as vl_result
+            WHERE vl_result.rnk2 = 1
+            AND  vl_result.archived = 0
+            AND  vl_result.dateofTbDiagnosticResultReceived <= ?3
+            AND  vl_result.facility_id = ?1
+            ),
 
             pharmacy_details_regimen AS (
             SELECT  * from (
@@ -822,6 +850,8 @@ SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,
     ipt.iptType,
     cc.*,
     ov.*,
+    tbSample.*,
+    tbResult.*,
     ct.cause_of_death AS causeOfDeath,
     (
     CASE
@@ -1040,3 +1070,5 @@ FROM
     LEFT JOIN previous pre ON pre.prePersonUuid = ct.cuPersonUuid
     LEFT JOIN previous_previous prepre ON prepre.prePrePersonUuid = ct.cuPersonUuid
     LEFT JOIN naive_vl_data nvd ON nvd.nvl_person_uuid = bd.personUuid
+    LEFT JOIN tb_sample_collection tbSample ON tbSample.personTbSample = bd.personUuid
+    LEFT JOIN  current_tb_result tbResult ON tbResult.personTbResult = bd.personUuid

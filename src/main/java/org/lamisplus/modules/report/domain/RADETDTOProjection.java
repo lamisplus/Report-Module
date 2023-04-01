@@ -45,7 +45,7 @@ public interface RADETDTOProjection {
 	//vl
 	String getViralLoadIndication();
 	
-	LocalDateTime getDateOfViralLoadSampleCollection();
+	LocalDate getDateOfViralLoadSampleCollection();
 	
 	String getCurrentViralLoad();
 	
@@ -112,4 +112,10 @@ public interface RADETDTOProjection {
 	
 	 boolean getVlEligibilityStatus();
 	 LocalDate getDateOfVlEligibilityStatus();
+	
+	String  getTbDiagnosticTestType();
+	LocalDate getDateOfTbSampleCollection();
+	
+	String  getTbDiagnosticResult();
+	LocalDate getDateofTbDiagnosticResultReceived();
 }

@@ -14,6 +14,7 @@ import java.util.Calendar;
 public class QuarterService {
     public Quarter getPreviousQuarter(LocalDate endDate) {
         int value = endDate.getMonth().getValue();
+        //3
         if (value >= 10) {
             //q1
             return getQuarter(7, endDate.getYear(), "Q4");
@@ -56,6 +57,12 @@ public class QuarterService {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.MONTH, startMonth + 1);
         int lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        if(startMonth + 2 == 9 && lastDay == 31){
+            lastDay = 30;
+        }
+        if(startMonth + 2 == 6 && lastDay == 31){
+            lastDay = 30;
+        }
         LocalDate end = LocalDate.of(year, startMonth + 2, lastDay);
         return new Quarter(start, end, quarterName);
 
