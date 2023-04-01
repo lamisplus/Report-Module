@@ -26,6 +26,8 @@ public class RadetService {
 		LocalDate previousQuarterEnd = quarterService.getPreviousQuarter(end).getEnd();
 		LocalDate previousPreviousQuarterEnd = quarterService.getPreviousQuarter(previousQuarterEnd).getEnd();
 		System.out.println("facilityId: AMOS vl1 " + facilityId +" "  +start + " " + end.plusDays(1));
+		System.out.println("previous : "+previousQuarterEnd);
+		System.out.println("previousPreviousQuarterEnd : "+previousPreviousQuarterEnd);
 		return repository.getRadetData(facilityId, start, end.plusDays(1), previousQuarterEnd, previousPreviousQuarterEnd);
 	}
 	

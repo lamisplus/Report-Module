@@ -117,9 +117,13 @@ public class GenerateExcelDataHelper {
 //
 //				}
 				LocalDate iptCompletionDate = radetReportDto.getIptCompletionDate();
+				Boolean iptCompletionStatus = null;
 				if (iptCompletionDate != null) {
 					if(iptCompletionDate.isAfter(endDate)){
 						iptCompletionDate = null;
+						iptCompletionStatus = false;
+					}else {
+					   iptCompletionStatus = true;
 					}
 				}
 				int index = 0;
@@ -182,10 +186,12 @@ public class GenerateExcelDataHelper {
 				map.put(index++,radetReportDto.getTbStatus());
 				map.put(index++,radetReportDto.getDateOfTbScreened());
 				map.put(index++,radetReportDto.getTbStatus());
-				map.put(index++,null);
-				map.put(index++,null);
-				map.put(index++,null);
-				map.put(index++,null);
+				//tb lab
+				map.put(index++,radetReportDto.getDateOfTbSampleCollection());
+				map.put(index++,radetReportDto.getTbDiagnosticTestType());
+				map.put(index++,radetReportDto.getDateofTbDiagnosticResultReceived());
+				map.put(index++,radetReportDto.getTbDiagnosticResult());
+				// tb treatment
 				map.put(index++,null);
 				map.put(index++,null);
 				map.put(index++,null);
@@ -194,7 +200,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getDateOfIptStart());
 				map.put(index++, radetReportDto.getIptType());
 				map.put(index++, iptCompletionDate);
-				map.put(index++,null);
+				map.put(index++, iptCompletionStatus);
 				
 				//EAC
 				map.put(index++, radetReportDto.getDateOfCommencementOfEAC());
