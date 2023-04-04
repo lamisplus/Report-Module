@@ -117,13 +117,12 @@ public class GenerateExcelDataHelper {
 //
 //				}
 				LocalDate iptCompletionDate = radetReportDto.getIptCompletionDate();
-				Boolean iptCompletionStatus = null;
+				boolean iptCompletionStatus = false;
 				if (iptCompletionDate != null) {
+					iptCompletionStatus = true;
 					if(iptCompletionDate.isAfter(endDate)){
 						iptCompletionDate = null;
 						iptCompletionStatus = false;
-					}else {
-					   iptCompletionStatus = true;
 					}
 				}
 				int index = 0;
@@ -155,8 +154,8 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getRegimenLineAtStart());
 				map.put(index++, radetReportDto.getRegimenAtStart());
 				map.put(index++, radetReportDto.getDateOfCurrentRegimen());
-				map.put(index++, radetReportDto.getCurrentARTRegimen());
 				map.put(index++, radetReportDto.getCurrentRegimenLine());
+				map.put(index++, radetReportDto.getCurrentARTRegimen());
 				
 				//cd4
 				map.put(index++, radetReportDto.getCurrentClinicalStage());
@@ -200,8 +199,11 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getDateOfIptStart());
 				map.put(index++, radetReportDto.getIptType());
 				map.put(index++, iptCompletionDate);
-				map.put(index++, iptCompletionStatus);
-				
+				if(iptCompletionDate != null) {
+					map.put(index++, iptCompletionStatus);
+				}else {
+					map.put(index++, null);
+				}
 				//EAC
 				map.put(index++, radetReportDto.getDateOfCommencementOfEAC());
 				map.put(index++,getStringValue(String.valueOf(radetReportDto.getNumberOfEACSessionCompleted())));
@@ -211,9 +213,12 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getRepeatViralLoadResult());
 				map.put(index++, radetReportDto.getDateOfRepeatViralLoadResult());
 				//DSD MOdel
-				map.put(index++,null);
-				map.put(index++,null);
-				map.put(index++, null);
+				map.put(index++, radetReportDto.getDsdModel());
+				if(radetReportDto.getDsdModel() != null){
+					map.put(index++, radetReportDto.getDateOfCurrentRegimen());
+				}else {
+					map.put(index++, null);
+				}
 				//chronic care
 				map.put(index++, null);
 				map.put(index++, null);
@@ -315,7 +320,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfLubricantsGiven())));
 
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getHtsLatitude())));
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getHtsLongitude())));
+				map.put(index, getStringValue(String.valueOf(htsReportDto.getHtsLongitude())));
 
 				result.add(map);
 				sn++;
@@ -479,7 +484,7 @@ public class GenerateExcelDataHelper {
 	}
 	
 	private static String getStringValue(String value) {
-		return value.replace("null", "");
+			return value.replace("null", "");
 	}
 	
 	public static List<Map<Integer, Object>> fillClinicDataMapper(
@@ -501,11 +506,13 @@ public class GenerateExcelDataHelper {
 			map.put(index++, getStringValue(String.valueOf(clinicDataDto.getBodyWeight())));
 			map.put(index++, getStringValue(String.valueOf(clinicDataDto.getHeight())));
 			if( clinicDataDto.getSystolic() != null &&  clinicDataDto.getDiastolic() != null){
-				map.put(index++, getStringValue(clinicDataDto.getSystolic() + "/"+ clinicDataDto.getDiastolic()));
+				map.put(index++, clinicDataDto.getSystolic() + "/"+ clinicDataDto.getDiastolic());
+			}else {
+			    map.put(index++, null);
 			}
 			map.put(index++, getStringValue(String.valueOf(clinicDataDto.getSystolic())));
 			map.put(index++, getStringValue(String.valueOf(clinicDataDto.getDiastolic())));
-			map.put(index++,  getStringValue(clinicDataDto.getPregnancyStatus()));
+			map.put(index++,  getStringValue(String.valueOf(clinicDataDto.getPregnancyStatus())));
 			map.put(index,    clinicDataDto.getNextAppointment());
 			result.add(map);
 			sn++;

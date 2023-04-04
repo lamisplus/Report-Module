@@ -25,6 +25,8 @@ public interface ClinicDataDto {
 	Double getSystolic();
 	String getDiastolic();
 	String getPregnancyStatus();
+	
+	//pregnancyStatus
 	LocalDate getNextAppointment();
 	
 }

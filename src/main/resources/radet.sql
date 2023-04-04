@@ -42,7 +42,7 @@ WITH bio_data AS (
       AND hac.visit_date >= ?2
       AND hac.visit_date < ?3
 ),
-     current_clinical AS (
+    current_clinical AS (
          SELECT
              DISTINCT ON (tvs.person_uuid) tvs.person_uuid AS person_uuid10,
     body_weight AS currentWeight,
@@ -132,7 +132,7 @@ END AS dateOfTbScreened
 			WHERE cccd.rnk = 1
 			),
 
-		labCD4 AS (SELECT* FROM (SELECT * FROM (
+		   labCD4 AS (SELECT* FROM (SELECT * FROM (
 			 SELECT sm.patient_uuid AS cd4_person_uuid, sm.archived, sm.facility_id, sm.result_reported as cd4Lb,sm.date_result_reported as dateOfCD4Lb, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rnk
 			 FROM public.laboratory_result  sm
 			 INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id

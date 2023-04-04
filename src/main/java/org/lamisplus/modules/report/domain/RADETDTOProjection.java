@@ -61,7 +61,7 @@ public interface RADETDTOProjection {
 	
 	String getCurrentARTRegimen();
 	
-	Integer getMonthsOfARVRefill();
+	Double getMonthsOfARVRefill();
 	
 	LocalDate getLastPickupDate();
 	
@@ -117,5 +117,7 @@ public interface RADETDTOProjection {
 	LocalDate getDateOfTbSampleCollection();
 	
 	String  getTbDiagnosticResult();
+	
+	String getDsdModel();
 	LocalDate getDateofTbDiagnosticResultReceived();
 }

@@ -13,7 +13,7 @@
 
 	<groupId>org.lamisplus.modules</groupId>
 	<artifactId>report</artifactId>
-	<version>2.0.2.23.03</version>
+	<version>1.0.3.2023.04</version>
 	<packaging>jar</packaging>
 	<name>report-module</name>
 	<description>report-module</description>
@@ -329,15 +329,15 @@
 							<arguments>install</arguments>
 						</configuration>
 					</execution>-->
-<!--					<execution>-->
-<!--                        <id>npm run build</id>-->
-<!--                        <goals>-->
-<!--                            <goal>npm</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <arguments>run build</arguments>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
+					<execution>
+                        <id>npm run build</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run build</arguments>
+                        </configuration>
+                    </execution>
 				</executions>
 			</plugin>
 			<plugin>
