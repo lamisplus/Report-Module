@@ -1392,6 +1392,18 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
            "            AND  vl_result.facility_id = ?1\n" +
            "            ),\n" +
            "\n" +
+           "tbTreatment AS " +
+           "(SELECT * FROM (SELECT \n" +
+           "                    COALESCE(NULLIF(CAST(data->'tbIptScreening'->>'treatementType' AS text), ''), '') as tbTreatementType,\n" +
+           "                     NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'tbTreatmentStartDate', '') AS DATE), NULL)as tbTreatmentStartDate,\n" +
+           "                     CAST(data->'tbIptScreening'->>'treatmentOutcome' AS text) as tbTreatmentOutcome,\n" +
+           "                     NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'completionDate', '') AS DATE), NULL) as tbCompletionDate,\n" +
+           "                     person_uuid as tbTreatmentPersonUuid,\n" +
+           "                     ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY date_of_observation DESC)\n" +
+           "                      FROM public.hiv_observation WHERE type = 'Chronic Care'\n" +
+           "          AND facility_id = ?1 \n" +
+           "           ) tbTreatment WHERE row_number = 1 \n" +
+           "            AND tbTreatmentStartDate IS NOT NULL), "+
            "            pharmacy_details_regimen AS (\n" +
            "            SELECT  * from (\n" +
            "            SELECT p.person_uuid as person_uuid40, p.dsd_model_type as dsdModel, p.visit_date as lastPickupDate,\n" +
@@ -1672,6 +1684,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
            "            DISTINCT ON (hap.person_uuid) hap.person_uuid AS personUuid80,\n" +
            "            ipt_type.regimen_name AS iptType,\n" +
            "            hap.visit_date AS dateOfIptStart,\n" +
+           "           COALESCE(NULLIF(CAST(hap.ipt->>'completionStatus' AS text), ''), '') as iptCompletionStatus,\n" +
            "            (\n" +
            "            CASE\n" +
            "            WHEN MAX(CAST(complete.date_completed AS DATE)) > NOW() THEN NULL\n" +
@@ -1740,6 +1753,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
            "            GROUP BY\n" +
            "            hap.person_uuid,\n" +
            "            ipt_type.regimen_name,\n" +
+           "            hap.ipt,\n" +
            "            hap.visit_date\n" +
            "            ),\n" +
            "\n" +
@@ -2067,9 +2081,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
            "    ca.person_uuid70,\n" +
            "    ipt.dateOfIptStart,\n" +
            "    ipt.iptCompletionDate,\n" +
+           "    ipt.iptCompletionStatus,\n" +
            "    ipt.iptType,\n" +
            "    cc.*,\n" +
            "    ov.*,\n" +
+           "    tbTment.*,\n" +
            "    tbSample.*,\n" +
            "    tbResult.*,\n" +
            "    ct.cause_of_death AS causeOfDeath,\n" +
@@ -2291,6 +2307,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
            "    LEFT JOIN previous_previous prepre ON prepre.prePrePersonUuid = ct.cuPersonUuid\n" +
            "    LEFT JOIN naive_vl_data nvd ON nvd.nvl_person_uuid = bd.personUuid\n" +
            "    LEFT JOIN tb_sample_collection tbSample ON tbSample.personTbSample = bd.personUuid\n" +
+           "    LEFT JOIN  tbTreatment tbTment ON tbTment.tbTreatmentPersonUuid = bd.personUuid\n" +
            "    LEFT JOIN  current_tb_result tbResult ON tbResult.personTbResult = bd.personUuid",nativeQuery = true)
     List<RADETDTOProjection> getRadetData(Long facilityId, LocalDate start, LocalDate end, LocalDate previous, LocalDate previousPrevious);
     

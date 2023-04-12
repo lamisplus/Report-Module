@@ -120,4 +120,11 @@ public interface RADETDTOProjection {
 	
 	String getDsdModel();
 	LocalDate getDateofTbDiagnosticResultReceived();
+	
+	//TB Treatment
+	String  getTbTreatementType();
+	String  getTbTreatmentOutcome();
+	LocalDate getTbTreatmentStartDate();
+	LocalDate getTbCompletionDate();
+	String getIptCompletionStatus();
 }

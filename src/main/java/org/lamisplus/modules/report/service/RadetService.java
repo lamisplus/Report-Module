@@ -32,29 +32,29 @@ public class RadetService {
 		System.out.println("previousPreviousQuarterEnd : "+previousPreviousQuarterEnd);
 		List<RADETDTOProjection> radetData =
 				repository.getRadetData(facilityId, start, end.plusDays(1), previousQuarterEnd, previousPreviousQuarterEnd);
-		long txCurrent =
-				radetData.stream()
-						.filter(radetRow -> radetRow.getCurrentStatus().contains(ACTIVE))
-						.count();
-		
-		System.out.println("Total TX_CURR = " + txCurrent);
-		Map<String, Map<String, Map<String, Map<String, Long>>>> txCurr =
-				radetData.stream()
-				.filter(radetRow -> radetRow.getCurrentStatus().contains(ACTIVE))
-				.collect(Collectors.groupingBy(
-						RADETDTOProjection::getFacilityName,
-						Collectors.groupingBy(
-								RADETDTOProjection::getGender,
-								Collectors.groupingBy(
-										radetdtoProjection -> getAgeRange(radetdtoProjection.getAge()),
-										Collectors.groupingBy(
-												RADETDTOProjection::getCurrentStatus,
-												Collectors.counting()
-										)
-								)
-						)
-				));
-		System.out.println("TX_curr = " + txCurr);
+//		long txCurrent =
+//				radetData.stream()
+//						.filter(radetRow -> radetRow.getCurrentStatus().contains(ACTIVE))
+//						.count();
+//
+//		System.out.println("Total TX_CURR = " + txCurrent);
+//		Map<String, Map<String, Map<String, Map<String, Long>>>> txCurr =
+//				radetData.stream()
+//				.filter(radetRow -> radetRow.getCurrentStatus().contains(ACTIVE))
+//				.collect(Collectors.groupingBy(
+//						RADETDTOProjection::getFacilityName,
+//						Collectors.groupingBy(
+//								RADETDTOProjection::getGender,
+//								Collectors.groupingBy(
+//										radetdtoProjection -> getAgeRange(radetdtoProjection.getAge()),
+//										Collectors.groupingBy(
+//												RADETDTOProjection::getCurrentStatus,
+//												Collectors.counting()
+//										)
+//								)
+//						)
+//				));
+//		System.out.println("TX_curr = " + txCurr);
 		return radetData;
 	}
 	private static String getAgeRange(int age) {

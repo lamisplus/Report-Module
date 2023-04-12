@@ -116,15 +116,15 @@ public class GenerateExcelDataHelper {
 //					currentStatus = currentAndPreviousClientStatus.pop();
 //
 //				}
-				LocalDate iptCompletionDate = radetReportDto.getIptCompletionDate();
-				boolean iptCompletionStatus = false;
-				if (iptCompletionDate != null) {
-					iptCompletionStatus = true;
-					if(iptCompletionDate.isAfter(endDate)){
-						iptCompletionDate = null;
-						iptCompletionStatus = false;
-					}
-				}
+//				LocalDate iptCompletionDate = radetReportDto.getIptCompletionDate();
+//				boolean iptCompletionStatus = false;
+//				if (iptCompletionDate != null) {
+//					iptCompletionStatus = true;
+//					if(iptCompletionDate.isAfter(endDate)){
+//						iptCompletionDate = null;
+//						iptCompletionStatus = false;
+//					}
+//				}
 				int index = 0;
 				map.put(index++,getStringValue(String.valueOf(sn)));
 				map.put(index++, radetReportDto.getState());
@@ -190,20 +190,18 @@ public class GenerateExcelDataHelper {
 				map.put(index++,radetReportDto.getTbDiagnosticTestType());
 				map.put(index++,radetReportDto.getDateofTbDiagnosticResultReceived());
 				map.put(index++,radetReportDto.getTbDiagnosticResult());
-				// tb treatment
-				map.put(index++,null);
-				map.put(index++,null);
-				map.put(index++,null);
-				map.put(index++,null);
+				
+				map.put(index++, radetReportDto.getTbTreatmentStartDate());
+				map.put(index++, radetReportDto.getTbTreatementType());
+				map.put(index++, radetReportDto.getTbCompletionDate());
+				map.put(index++, radetReportDto.getTbTreatmentOutcome());
+				
 				//TPT
 				map.put(index++, radetReportDto.getDateOfIptStart());
 				map.put(index++, radetReportDto.getIptType());
-				map.put(index++, iptCompletionDate);
-				if(iptCompletionDate != null) {
-					map.put(index++, iptCompletionStatus);
-				}else {
-					map.put(index++, null);
-				}
+				map.put(index++, radetReportDto.getIptCompletionDate());
+				map.put(index++, radetReportDto.getIptCompletionStatus());
+				
 				//EAC
 				map.put(index++, radetReportDto.getDateOfCommencementOfEAC());
 				map.put(index++,getStringValue(String.valueOf(radetReportDto.getNumberOfEACSessionCompleted())));
@@ -213,6 +211,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getRepeatViralLoadResult());
 				map.put(index++, radetReportDto.getDateOfRepeatViralLoadResult());
 				//DSD MOdel
+				
 				map.put(index++, radetReportDto.getDsdModel());
 				if(radetReportDto.getDsdModel() != null){
 					map.put(index++, radetReportDto.getDateOfCurrentRegimen());
@@ -222,14 +221,18 @@ public class GenerateExcelDataHelper {
 				//chronic care
 				map.put(index++, null);
 				map.put(index++, null);
+				map.put(index++, null);
+				
 				//cervicalCancerScreeningType
 				map.put(index++, radetReportDto.getDateOfCervicalCancerScreening());
 				map.put(index++, radetReportDto.getCervicalCancerScreeningType());
 				map.put(index++, radetReportDto.getCervicalCancerScreeningMethod());
 				map.put(index++, radetReportDto.getResultOfCervicalCancerScreening());
+				
 				//Precancerous
 				map.put(index++,null);
 				map.put(index++,null);
+				
 				//biometrics
 				map.put(index++, radetReportDto.getDateBiometricsEnrolled());
 				map.put(index++, getStringValue(String.valueOf(radetReportDto.getNumberOfFingersCaptured())));

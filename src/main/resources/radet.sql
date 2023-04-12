@@ -192,6 +192,18 @@ END AS dateOfTbScreened
             ) as pr
             WHERE pr.rnk3 = 1
             ),
+            tbTreatment AS (
+             SELECT * FROM (SELECT
+                 COALESCE(NULLIF(CAST(data->'tbIptScreening'->>'treatementType' AS text), ''), '') as tbTreatementType,
+                CAST(data->'tbIptScreening'->>'tbTreatmentStartDate' AS DATE) as tbTreatmentStartDate,
+                CAST(data->'tbIptScreening'->>'treatmentOutcome' AS text) as tbTreatmentOutcome,
+                CAST(data->'tbIptScreening'->>'completionDate' AS DATE) as tbCompletionDate,
+                person_uuid as tbTreatmentPersonUuid,
+                ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY date_of_observation DESC)
+                FROM public.hiv_observation WHERE type = 'Chronic Care'
+			   AND facility_id = ?1
+               ) tbTreatment WHERE row_number = 1
+            ),
             eac AS (
             SELECT
             DISTINCT ON (he.person_uuid) he.person_uuid AS person_uuid50,
@@ -1072,3 +1084,4 @@ FROM
     LEFT JOIN naive_vl_data nvd ON nvd.nvl_person_uuid = bd.personUuid
     LEFT JOIN tb_sample_collection tbSample ON tbSample.personTbSample = bd.personUuid
     LEFT JOIN  current_tb_result tbResult ON tbResult.personTbResult = bd.personUuid
+    LEFT JOIN  tbTreatment tbTment ON tbTment.tbTreatmentPersonUuid = bd.personUuid
