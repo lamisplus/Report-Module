@@ -376,6 +376,13 @@ public class GenerateExcelDataHelper {
 
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getHIVStatusAtPrepInitiation())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getIndicationForPrep())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getRiskType())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getEntryPoint())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getFacilityReferredTo())));
+				map.put(index++, prepReportDto.getHivEnrollmentDate());
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentRegimenStart())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentPrepStatus())));
+				map.put(index++, prepReportDto.getCurrentPrepStatusDate());
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentRegimen())));
 				map.put(index++, prepReportDto.getDateOfLastPickup());
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentSystolicBp())));
