@@ -38,6 +38,7 @@ public class ExcelService {
 		font.setColor(HSSFColor.HSSFColorPredefined.BLACK.getIndex());
 		style.setFont(font);
 		for (int i = 0; i < headers.size(); i++) {
+			// O(N)T  || O(1)
 			createCell(row, i, headers.get(i), style);
 		}
 	}
@@ -99,7 +100,7 @@ public class ExcelService {
 		font.setFontHeightInPoints((short) 11);
 		style.setFont(font);
 		
-		for (Map<Integer, Object> map : listData) {
+		for (Map<Integer, Object> map : listData) { // you may be thinking O(n^2) but actually it is O(n)
 			Row row = sheet.createRow(rowCount++);
 			int columnCount = 0;
 			for (Iterator<Integer> iterator = map.keySet().iterator(); iterator.hasNext(); ) {

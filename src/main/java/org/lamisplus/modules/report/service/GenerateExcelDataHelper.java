@@ -39,7 +39,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(patient.getUniqueId())));
 				map.put(index++, getStringValue(String.valueOf(patient.getSurname())));
 				map.put(index++, getStringValue(String.valueOf(patient.getFirstName())));
-				map.put(index++,patient.getDateOfBirth());
+				map.put(index++, patient.getDateOfBirth());
 				map.put(index++, getStringValue(String.valueOf(patient.getAge())));
 				map.put(index++, getStringValue(String.valueOf(patient.getGender())));
 				map.put(index++, getStringValue(String.valueOf(patient.getMaritalStatus())));
@@ -94,7 +94,7 @@ public class GenerateExcelDataHelper {
 				result.add(map);
 			}
 		}
-		Log.info("result: " + result.size());
+		Log.info("result: " + result.size()); // going to be one
 		return result;
 	}
 	
@@ -240,6 +240,7 @@ public class GenerateExcelDataHelper {
 				result.add(map);
 				sn++;
 			}
+		Log.info("Container result: " + result.size());
 		return result;
 	}
 
@@ -276,7 +277,7 @@ public class GenerateExcelDataHelper {
 
 				map.put(index++, htsReportDto.getDateVisit());
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getFirstTimeVisit())));
-
+				
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfWives())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfChildren())));
 
