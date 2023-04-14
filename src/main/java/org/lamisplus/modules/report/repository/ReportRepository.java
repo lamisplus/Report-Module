@@ -122,6 +122,15 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " REPLACE(baseline_hiv_status.display, 'HIV ', '') END) AS HIVStatusAtPrEPInitiation," +
             " (CASE WHEN prepe.extra->>'onDemandIndication' IS NOT NULL THEN prepe.extra->>'onDemandIndication'   " +
             " WHEN riskt.display IS NOT NULL THEN riskt.display ELSE NULL END) AS indicationForPrEP,   " +
+            " prepe.risk_type AS riskType, " +
+            " prepe.hiv_testing_point AS entryPoint, " +
+            " prep_int.facility_referred_to AS facilityReferredTo, " +
+            " hiv_enroll.date_started AS hivEnrollmentDate, " +
+            " regimenStart.regimenStartDate AS currentRegimenStart, " +
+            " (CASE WHEN CURRENT_DATE - current_pc.encounter_date <= current_pc.duration THEN 'Active' " +
+            " WHEN prep_int.interruption_reason IS NOT NULL THEN prep_int.interruption_reason ELSE 'STOPPED' END) AS currentPrepStatus, " +
+            " (CASE WHEN CURRENT_DATE - current_pc.encounter_date <= current_pc.duration THEN current_pc.encounter_date " +
+            " ELSE prep_int.interruption_date END) AS currentPrepStatusDate, " +
             " current_reg.regimen AS currentRegimen,   " +
             " current_pc.encounter_date AS DateOfLastPickup,   " +
             " current_pc.systolic AS currentSystolicBP,   " +
@@ -161,8 +170,19 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "   INNER JOIN (SELECT DISTINCT MAX(encounter_date)encounter_date, person_uuid FROM prep_clinic   " +
             "   GROUP BY person_uuid)max ON max.encounter_date=pc.encounter_date    " +
             "   AND max.person_uuid=pc.person_uuid)current_pc ON current_pc.person_uuid=p.uuid   " +
+
+            " LEFT JOIN (SELECT DISTINCT pi.* FROM prep_interruption pi " +
+            " INNER JOIN (SELECT DISTINCT MAX(encounter_date) encounter_date, person_uuid FROM prep_interruption " +
+            " GROUP BY person_uuid)max ON " +
+            " max.person_uuid=pi.person_uuid)prep_int ON prep_int.person_uuid=p.uuid " +
+
+            " LEFT JOIN hiv_enrollment hiv_enroll ON hiv_enroll.person_uuid = p.uuid " +
+            " LEFT JOIN (SELECT MIN(encounter_date) regimenStartDate, person_uuid FROM prep_clinic GROUP BY (person_uuid, regime_id)) regimenStart " +
+            " ON regimenStart.person_uuid = p.uuid " +
+
             "   LEFT JOIN prep_regimen current_reg ON current_reg.id = current_pc.regimen_id   " +
             "   LEFT JOIN base_application_codeset current_hiv_status ON current_hiv_status.code = current_pc.hiv_test_result   " +
+            " LEFT JOIN base_application_codeset prep_it ON prep_it.code = prep_int.interruption_type " +
             "   INNER JOIN (SELECT pc.* FROM prep_clinic pc   " +
             "   INNER JOIN (SELECT DISTINCT MIN(encounter_date)encounter_date, person_uuid FROM prep_clinic   " +
             "   GROUP BY person_uuid)min ON min.encounter_date=pc.encounter_date    " +
