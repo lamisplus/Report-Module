@@ -28,6 +28,13 @@ public interface PrepReportDto {
     public String getBaselineHeight();
     public String getHIVStatusAtPrepInitiation();
     public String getIndicationForPrep();
+    public String getRiskType();
+    public String getEntryPoint();
+    public String getFacilityReferredTo();
+    public LocalDate getHivEnrollmentDate();
+    public String getCurrentRegimenStart();
+    public String getCurrentPrepStatus();
+    public LocalDate getCurrentPrepStatusDate();
     public String getCurrentRegimen();
     public String getDateOfLastPickup();
     public String getCurrentSystolicBp();
