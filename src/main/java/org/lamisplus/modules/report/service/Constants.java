@@ -295,7 +295,11 @@ public class Constants {
 			Arrays.asList(
 					"S/No",
 					"Facility Id (Datim)",
+					"State",
+					"LGA",
 					"Facility Name",
+					"Unique ID",
+					"Patient Identifier",
 					"Hospital Number",
 					"First Name",
 					"Surname",
@@ -321,11 +325,16 @@ public class Constants {
 					"Indication for PrEP",
 					"Risk Type",
 					"Entry Point",
-					"Facility Referred To",
-					"HIV Enrollment Date",
 					"Current Regimen Start",
 					"Current PrEP Status",
 					"current PrEP Status Date",
+					"Interruption Reason",
+					"Interruption Date",
+					"PrEP Commencement Date",
+					"Current Urinalysis Test Date",
+					"Current Urinalysis Result",
+					"Base Urinalysis Test Date",
+					"Base Urinalysis Result",
 					"Current Regimen",
 					"Date Of Last Pickup (yyyy-mm-dd)",
 					"Current Systolic bp",
@@ -333,7 +342,9 @@ public class Constants {
 					"Current Weight (kg)",
 					"Current Height (cm)",
 					"Current HIV Status",
-					"Pregnancy Status"
+					"Pregnancy Status",
+					"Facility Referred To",
+					"HIV Enrollment Date"
 			);
 	
 	public static final List<String> CLINIC_HEADER =

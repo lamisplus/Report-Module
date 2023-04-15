@@ -103,7 +103,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "WHERE hc.archived=0 AND hc.facility_id=?1 AND hc.date_visit >=?2 AND hc.date_visit < ?3", nativeQuery = true)
     List<HtsReportDto> getHtsReport(Long facilityId, LocalDate start, LocalDate end);
 
-    @Query(value = "SELECT DISTINCT ON (p.uuid)p.uuid AS person_uuid, p.id, p.uuid,p.hospital_number as hospitalNumber,    " +
+    @Query(value = "SELECT DISTINCT ON (p.uuid)p.uuid AS personUuid, p.id, p.uuid,p.hospital_number as hospitalNumber,    " +
             " p.surname, p.first_name as firstName,  " +
             " EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) as age,   " +
             " p.other_name as otherName, p.sex as gender, p.date_of_birth as dateOfBirth,    " +
@@ -123,14 +123,21 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " (CASE WHEN prepe.extra->>'onDemandIndication' IS NOT NULL THEN prepe.extra->>'onDemandIndication'   " +
             " WHEN riskt.display IS NOT NULL THEN riskt.display ELSE NULL END) AS indicationForPrEP,   " +
             " prepe.risk_type AS riskType, " +
+            " prepe.unique_id AS uniqueId, " +
             " prepe.hiv_testing_point AS entryPoint, " +
             " prep_int.facility_referred_to AS facilityReferredTo, " +
             " hiv_enroll.date_started AS hivEnrollmentDate, " +
             " regimenStart.regimenStartDate AS currentRegimenStart, " +
-            " (CASE WHEN CURRENT_DATE - current_pc.encounter_date <= current_pc.duration THEN 'Active' " +
-            " WHEN prep_int.interruption_reason IS NOT NULL THEN prep_int.interruption_reason ELSE 'STOPPED' END) AS currentPrepStatus, " +
-            " (CASE WHEN CURRENT_DATE - current_pc.encounter_date <= current_pc.duration THEN current_pc.encounter_date " +
-            " ELSE prep_int.interruption_date END) AS currentPrepStatusDate, " +
+            " (CASE WHEN CURRENT_DATE - current_pc.encounter_date <= current_pc.duration THEN 'Active' ELSE 'STOPPED' END ) AS currentPrepStatus, " +
+            " (CASE WHEN prep_int.interruption_reason IS NOT NULL THEN prep_int.interruption_reason ELSE '' END) AS interruptionReason, " +
+            " current_pc.encounter_date AS currentPrepStatusDate, " +
+            " prep_int.interruption_date AS interruptionDate, " +
+
+            " prepCommencement.encounter_date AS prepCommencementDate, " +
+            " CAST(maxUrinalysis.max_testDate AS date)AS currentUrinalysisTestDate, " +
+            " maxUrinalysis.max_result AS currentUrinalysisTestResult, " +
+            " CAST(minUrinalysis.min_testDate AS date) AS baseUrinalysisTestDate, " +
+            " minUrinalysis.min_result AS baseUrinalysisTestResult, " +
             " current_reg.regimen AS currentRegimen,   " +
             " current_pc.encounter_date AS DateOfLastPickup,   " +
             " current_pc.systolic AS currentSystolicBP,   " +
@@ -177,7 +184,14 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " max.person_uuid=pi.person_uuid)prep_int ON prep_int.person_uuid=p.uuid " +
 
             " LEFT JOIN hiv_enrollment hiv_enroll ON hiv_enroll.person_uuid = p.uuid " +
-            " LEFT JOIN (SELECT MIN(encounter_date) regimenStartDate, person_uuid FROM prep_clinic GROUP BY (person_uuid, regime_id)) regimenStart " +
+            " LEFT JOIN prep_clinic prepCommencement ON prepCommencement.person_uuid = p.uuid AND prepCommencement.is_commencement is true " +
+            " LEFT JOIN (SELECT urinalysis->>'testDate' AS max_testDate, urinalysis->>'result' max_result, person_uuid FROM prep_clinic  " +
+            "            WHERE CAST(urinalysis->>'testDate' AS date) = (SELECT CAST(MAX(urinalysis->>'testDate') AS date) FROM prep_clinic ) " +
+            ") maxUrinalysis On maxUrinalysis.person_uuid = p.uuid " +
+            " LEFT JOIN (SELECT urinalysis->>'testDate' AS min_testDate, urinalysis->>'result' min_result, person_uuid FROM prep_clinic " +
+            "WHERE CAST(urinalysis->>'testDate' AS date) = (SELECT CAST(MIN(urinalysis->>'testDate') AS date) FROM prep_clinic ) " +
+            ") minUrinalysis On minUrinalysis.person_uuid = p.uuid " +
+            " LEFT JOIN (SELECT MIN(encounter_date) regimenStartDate, person_uuid FROM prep_clinic GROUP BY (person_uuid, regimen_id)) regimenStart " +
             " ON regimenStart.person_uuid = p.uuid " +
 
             "   LEFT JOIN prep_regimen current_reg ON current_reg.id = current_pc.regimen_id   " +
