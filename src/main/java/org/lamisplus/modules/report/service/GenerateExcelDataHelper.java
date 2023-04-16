@@ -126,7 +126,7 @@ public class GenerateExcelDataHelper {
 //					}
 //				}
 				int index = 0;
-				map.put(index++,getStringValue(String.valueOf(sn)));
+				map.put(index++, getStringValue(String.valueOf(sn)));
 				map.put(index++, radetReportDto.getState());
 				map.put(index++, radetReportDto.getLga());
 				map.put(index++, radetReportDto.getFacilityName());
@@ -148,7 +148,7 @@ public class GenerateExcelDataHelper {
 				
 				map.put(index++,radetReportDto.getArtStartDate());
 				map.put(index++, radetReportDto.getLastPickupDate());
-				map.put(index++, getStringValue(String.valueOf(radetReportDto.getMonthsOfARVRefill())));
+				map.put(index++, radetReportDto.getMonthsOfARVRefill());
 				
 				
 				map.put(index++, radetReportDto.getRegimenLineAtStart());
@@ -163,6 +163,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++,radetReportDto.getLastCd4Count());
 				//vl
 				map.put(index++, radetReportDto.getDateOfViralLoadSampleCollection());
+				map.put(index++, radetReportDto.getDateOfCurrentViralLoadSample());
 				map.put(index++, radetReportDto.getCurrentViralLoad());
 				map.put(index++, radetReportDto.getDateOfCurrentViralLoad());
 				map.put(index++, radetReportDto.getViralLoadIndication());
@@ -182,7 +183,7 @@ public class GenerateExcelDataHelper {
 				
 				map.put(index++, radetReportDto.getEnrollmentSetting());
 				//TB
-				map.put(index++,radetReportDto.getTbStatus());
+				//map.put(index++,radetReportDto.getTbStatus());
 				map.put(index++,radetReportDto.getDateOfTbScreened());
 				map.put(index++,radetReportDto.getTbStatus());
 				//tb lab

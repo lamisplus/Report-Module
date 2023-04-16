@@ -3,7 +3,7 @@ package org.lamisplus.modules.report.service;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.audit4j.core.util.Log;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +27,7 @@ public class ExcelService {
 	
 	
 	
-	private void writeHeader(String sheetName, List<String> headers) {
+	private void writeHeader(String sheetName, List<String> headers ) {
 		sheet = workbook.createSheet(sheetName);
 		Row row = sheet.createRow(0);
 		CellStyle style = workbook.createCellStyle();
@@ -38,23 +38,42 @@ public class ExcelService {
 		font.setColor(HSSFColor.HSSFColorPredefined.BLACK.getIndex());
 		style.setFont(font);
 		for (int i = 0; i < headers.size(); i++) {
-			// O(N)T  || O(1)
-			createCell(row, i, headers.get(i), style);
+			// O(n)T  || O(1)
+			createCell(row, i, headers.get(i),style);
 		}
 	}
 	
-	private int createCell(Row row, int columnCount, Object value, CellStyle style) {
+	private int createCellHeader(Row row, int columnCount, String value){
+		Font font  = workbook.createFont();
+		font.setBold(true);
+		font.setFontHeightInPoints((short) 12);
+		font.setBold(true);
+		font.setColor(HSSFColor.HSSFColorPredefined.BLACK.getIndex());
+		CellStyle style = workbook.createCellStyle();
+		style.setFont(font);
 		Cell cell = row.createCell(columnCount);
+		cell.setCellValue(value);
+		cell.setCellStyle(style);
+		return 0;
+	}
+	
+	private int createCell(Row row, int columnCount, Object value, CellStyle style ) {
+		Cell cell = row.createCell(columnCount);
+		cell.setCellStyle(null);
 		if (value instanceof Integer) {
-			cell.setCellValue((Integer) value);
+			cell.setCellValue(((int) value));
+			formatTheCell(style, "0");
 			cell.setCellStyle(style);
 			return 0;
 		} else if (value instanceof Long) {
-			cell.setCellValue((Long) value);
+			cell.setCellValue((long) value);
+			formatTheCell(style, "0");
 			cell.setCellStyle(style);
 			return 1;
 		} else if(value instanceof Double){
-			cell.setCellValue((Double) value);
+			cell.setCellValue((double) value);
+			String customFormat = "#,##0";
+			formatTheCell(style, customFormat);
 			cell.setCellStyle(style);
 			return 2;
 		}else if (value instanceof Boolean) {
@@ -63,26 +82,22 @@ public class ExcelService {
 			return 3;
 		} else if(value instanceof Date){
 			cell.setCellValue(((Date) value).toLocalDate());
-			CreationHelper createHelper = workbook.getCreationHelper();
-			style.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-MM-dd"));
+			formatTheCell(style, "yyyy-MM-dd");
 			cell.setCellStyle(style);
 			return 4;
 		}else if(value instanceof LocalDate){
 			cell.setCellValue((LocalDate) value);
-			CreationHelper createHelper = workbook.getCreationHelper();
-			style.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-MM-dd"));
+			formatTheCell(style, "yyyy-MM-dd");
 			cell.setCellStyle(style);
 			return 5;
 		}else if(value instanceof LocalDateTime){
 			cell.setCellValue(((LocalDateTime) value).toLocalDate());
-			CreationHelper createHelper = workbook.getCreationHelper();
-			style.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-MM-dd"));
+			formatTheCell(style, "yyyy-MM-dd");
 			cell.setCellStyle(style);
 			return 6;
 		} else if(value instanceof Timestamp) {
 			cell.setCellValue(new Date(((Timestamp) value).getTime()));
-			CreationHelper createHelper = workbook.getCreationHelper();
-			style.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-MM-dd"));
+			formatTheCell(style, "yyyy-MM-dd");
 			cell.setCellStyle(style);
 			return 7;
 		}else {
@@ -91,6 +106,11 @@ public class ExcelService {
 			return 8;
 		}
 		
+	}
+	
+	private void formatTheCell(CellStyle style, String s) {
+		CreationHelper createHelper = workbook.getCreationHelper();
+		style.setDataFormat(createHelper.createDataFormat().getFormat(s));
 	}
 	
 	private void write(List<Map<Integer, Object>> listData) {

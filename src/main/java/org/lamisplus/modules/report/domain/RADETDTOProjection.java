@@ -50,6 +50,7 @@ public interface RADETDTOProjection {
 	String getCurrentViralLoad();
 	
 	LocalDate getDateOfCurrentViralLoad();
+	LocalDate getDateOfCurrentViralLoadSample();
 	
 	//cd4
 	String getLastCd4Count();
