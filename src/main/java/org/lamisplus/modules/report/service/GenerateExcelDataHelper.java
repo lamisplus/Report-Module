@@ -244,7 +244,7 @@ public class GenerateExcelDataHelper {
 		Log.info("Container result: " + result.size());
 		return result;
 	}
-
+	
 	public  List<Map<Integer, Object>> fillHtsDataMapper(@NonNull List<HtsReportDto> htsReportDtos) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		int sn = 1;
@@ -252,12 +252,14 @@ public class GenerateExcelDataHelper {
 			if (htsReportDto != null) {
 				Map<Integer, Object> map = new HashMap<>();
 				int index = 0;
-
+				
 				map.put(index++, String.valueOf(sn));
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getDatimCode())));
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getState())));
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getLga())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getFacility())));
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getDatimCode())));
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getPatientId())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getClientCode())));
-
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getFirstName())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getSurname())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getOtherName())));
@@ -265,68 +267,50 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getTargetGroup())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getAge())));
 				map.put(index++,htsReportDto.getDateOfBirth());
-
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getPhoneNumber())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getMaritalStatus())));
-
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getClientAddress())));
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getLgaOfResidence())));
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getStateOfResidence())));
-
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getEducation())));
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getOccupation())));
-
-				map.put(index++, htsReportDto.getDateVisit());
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getFirstTimeVisit())));
-				
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfWives())));
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfChildren())));
-
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getIndexClient())));
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getPreviouslyTested())));
-
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getReferredFrom())));
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getTestingSetting())));
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getCounselingType())));
-
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getPregnancyStatus())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getBreastFeeding())));
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getStateOfResidence())));
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getLgaOfResidence())));
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getClientAddress())));
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getEducation())));
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getOccupation())));
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfWives())));
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfChildren())));
+				map.put(index++, htsReportDto.getDateVisit());
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getFirstTimeVisit())));
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getIndexClient())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getIndexType())));
-
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getPreviouslyTested())));
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getReferredFrom())));
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getAssessmentCode())));
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getTestingSetting())));
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getModality())));
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getCounselingType())));
+				map.put(index++, htsReportDto.getDateOfHivTesting());
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getHivTestResult())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getIfRecencyTestingOptIn())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getRecencyId())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getRecencyTestType())));
-
 				map.put(index++, htsReportDto.getRecencyTestDate());
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getRecencyInterpretation())));
+				map.put(index++, htsReportDto.getViralLoadSampleCollectionDate());
+				map.put(index++, getStringValue(String.valueOf(htsReportDto.getViralLoadConfirmationResult())));
+				map.put(index++, htsReportDto.getViralLoadConfirmationDate());
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getFinalRecencyResult())));
-
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getViralLoadResultClassification())));
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getViralLoadConfirmationDate())));
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getAssessmentCode())));
-
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getModality())));
-
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getSyphilisTestResult())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getHepatitisBTestResult())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getHepatitisCTestResult())));
-
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getCd4Type())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getCd4TestResult())));
-
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getHivTestResult())));
-				map.put(index++, getStringValue(String.valueOf(htsReportDto.getFinalHivTestResult())));
-				map.put(index++, htsReportDto.getDateOfHivTesting());
-
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getPrepOffered())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getPrepAccepted())));
-
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfCondomsGiven())));
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfLubricantsGiven())));
-
 				map.put(index++, getStringValue(String.valueOf(htsReportDto.getHtsLatitude())));
 				map.put(index, getStringValue(String.valueOf(htsReportDto.getHtsLongitude())));
-
+				
 				result.add(map);
 				sn++;
 			}
