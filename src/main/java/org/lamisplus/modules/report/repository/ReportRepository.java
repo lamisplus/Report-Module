@@ -1378,7 +1378,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           AND sm.result_reported is NOT NULL\n" +
             "     )as vl_result\n" +
             "   WHERE vl_result.rank2 = 1\n" +
-            "     AND  vl_result.vlArchived = 0\n" +
+            "     AND (vl_result.vlArchived = 0 OR vl_result.vlArchived is null)\n" +
             "     AND  vl_result.dateOfCurrentViralLoad <= ?3\n" +
             "     AND  vl_result.vlFacility = ?1\n" +
             "     ), "+
