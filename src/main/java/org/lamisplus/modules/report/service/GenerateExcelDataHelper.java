@@ -318,8 +318,8 @@ public class GenerateExcelDataHelper {
 		Log.info("result: " + result.size());
 		return result;
 	}
-
-
+	
+	
 	public  List<Map<Integer, Object>> fillPrepDataMapper(@NonNull List<PrepReportDto> prepReportDtos) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		int sn = 1;
@@ -327,12 +327,16 @@ public class GenerateExcelDataHelper {
 			if (prepReportDto != null) {
 				Map<Integer, Object> map = new HashMap<>();
 				int index = 0;
-
+				
 				map.put(index++, String.valueOf(sn));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getDatimId())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getState())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getLga())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getFacilityName())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getUniqueId())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getPersonUuid())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getHospitalNumber())));
-
+				
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getFirstName())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getSurname())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getOtherName())));
@@ -340,28 +344,40 @@ public class GenerateExcelDataHelper {
 				//map.put(index++, getStringValue(String.valueOf(prepReportDto.getTargetGroup())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getAge())));
 				map.put(index++,prepReportDto.getDateOfBirth());
-
+				
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getPhone())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getMaritalStatus())));
-
+				
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getAddress())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getResidentialLga())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getResidentialState())));
-
+				
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getEducation())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getOccupation())));
-
+				
 				map.put(index++, prepReportDto.getDateOfRegistration());
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaseLineRegimen())));
-
-				map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineSystolicBp())));
-				map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineDiastolicBp())));
-
+				
+				map.put(index++, prepReportDto.getBaselineSystolicBp());
+				map.put(index++, prepReportDto.getBaselineDiastolicBp());
+				
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineWeight())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineHeight())));
-
+				
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getHIVStatusAtPrepInitiation())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getIndicationForPrep())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getRiskType())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getEntryPoint())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentRegimenStart())));
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentPrepStatus())));
+				map.put(index++, prepReportDto.getCurrentPrepStatusDate());
+				map.put(index++, prepReportDto.getInterruptionReason());
+				map.put(index++, prepReportDto.getInterruptionDate());
+				map.put(index++, prepReportDto.getPrepCommencementDate());
+				map.put(index++, prepReportDto.getCurrentUrinalysisTestDate());
+				map.put(index++, prepReportDto.getCurrentUrinalysisResult());
+				map.put(index++, prepReportDto.getBaseUrinalysisTestDate());
+				map.put(index++, prepReportDto.getBaseUrinalysisResult());
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentRegimen())));
 				map.put(index++, prepReportDto.getDateOfLastPickup());
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentSystolicBp())));
@@ -370,7 +386,9 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentHeight())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentHIVStatus())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getPregnancyStatus())));
-
+				map.put(index++, getStringValue(String.valueOf(prepReportDto.getFacilityReferredTo())));
+				map.put(index++, prepReportDto.getHivEnrollmentDate());
+				
 				result.add(map);
 				sn++;
 			}
