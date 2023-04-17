@@ -2,9 +2,14 @@ package org.lamisplus.modules.report.domain;
 
 import java.time.LocalDate;
 
+
 public interface PrepReportDto {
     public String getDatimId();
     public String getFacilityName();
+    public String getState();
+    public String getLga();
+    public String getUniqueId();
+    public String getPersonUuid();
     public String getHospitalNumber();
     public String getFirstName();
     public String getSurname();
@@ -21,13 +26,28 @@ public interface PrepReportDto {
     public String getOccupation();
     public LocalDate getDateOfRegistration();
     public String getBaseLineRegimen();
-
+    
     public Integer getBaselineSystolicBp();
     public Integer getBaselineDiastolicBp();
     public String getBaselineWeight();
     public String getBaselineHeight();
     public String getHIVStatusAtPrepInitiation();
     public String getIndicationForPrep();
+    public String getRiskType();
+    public String getEntryPoint();
+    public String getFacilityReferredTo();
+    public LocalDate getHivEnrollmentDate();
+    public String getCurrentRegimenStart();
+    public String getCurrentPrepStatus();
+    public LocalDate getCurrentPrepStatusDate();
+    public String interruptionReason();
+    public LocalDate interruptionDate();
+    public LocalDate prepCommencement();
+    public LocalDate currentUrinaryDate();
+    public String currentUrinaryResult();
+    public LocalDate baseUrinaryDate();
+    public String baseUrinaryResult();
+    
     public String getCurrentRegimen();
     public String getDateOfLastPickup();
     public String getCurrentSystolicBp();
@@ -36,4 +56,20 @@ public interface PrepReportDto {
     public String getCurrentHeight();
     public String getCurrentHIVStatus();
     public String getPregnancyStatus();
+    
+    public String getInterruptionReason();
+    
+    public LocalDate getInterruptionDate();
+    
+    public LocalDate getCurrentUrinalysisTestDate();
+    
+    public String getCurrentUrinalysisResult();
+    
+    public LocalDate getBaseUrinalysisTestDate();
+    
+    public String getBaseUrinalysisResult();
+    
+    public LocalDate getPrepCommencementDate();
+    
 }
+

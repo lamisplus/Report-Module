@@ -379,73 +379,7 @@ public class GenerateExcelDataHelper {
 		return result;
 	}
 
-//	private HIVStatusDisplay getCurrentClientStatus(String personUuid, Quarter currentQuarter) {
-//		return statusManagementService.getClientReportingStatus(personUuid, currentQuarter.getEnd());
-//	}
-	
-//	private  int calculatePreviousStatus(Map<Integer, Object> map, HIVStatusDisplay previousQuarterStatus,RadetReportDto radetReportDto,
-//	                                     EnrollmentStatus enrollmentStatus, int index) {
-//		if (previousQuarterStatus != null) {
-//			Quarter previousQuarter = statusManagementService
-//					.getPreviousQuarter(previousQuarterStatus.getDate().minusDays(10));
-//			HIVStatusDisplay previousQuarterStatus1 =
-//					statusManagementService.getClientPreviousInternalQuarterStatus(previousQuarter.getEnd(), radetReportDto.getPersonUuid());
-//			boolean isActiveRestart = previousQuarterStatus1 != null
-//					&& previousQuarterStatus1.getDescription() != null
-//					&& previousQuarterStatus1.getDescription().equalsIgnoreCase("IIT")
-//					&& previousQuarterStatus.getDescription().equalsIgnoreCase("ACTIVE");
-//			if (isActiveRestart) {
-//				map.put(index++, "ACTIVE-RESTART");
-//				map.put(index++, previousQuarterStatus.getDate());
-//				return index;
-//			}
-//			boolean isTransferIn = enrollmentStatus != null
-//					&& enrollmentStatus.getHivEnrollmentStatus() != null
-//					&& enrollmentStatus.getHivEnrollmentStatus().contains("In")
-//					&& previousQuarterStatus.getDescription().equalsIgnoreCase("ACTIVE");
-//			if (isTransferIn) {
-//			map.put(index++, "TRANSFER-IN");
-//				map.put(index++, previousQuarterStatus.getDate());
-//				return index;
-//			}
-//			map.put(index++, previousQuarterStatus.getDescription());
-//			map.put(index++, previousQuarterStatus.getDate());
-//			return index;
-//		}else {
-//			map.put(index++, radetReportDto.getCurrentStatus());
-//			map.put(index++, radetReportDto.getDateOfCurrentStatus());
-//			return index;
-//		}
-//	}
-//	private static int processAndSetCurrentStatus(
-//			RadetReportDto radetReportDto,
-//			Map<Integer, Object> map,
-//			HIVStatusDisplay previousQuarterStatus,
-//			EnrollmentStatus enrollmentStatus,
-//			int index) {
-//		boolean isRestart = previousQuarterStatus != null
-//				&& previousQuarterStatus.getDescription() != null
-//				&& previousQuarterStatus.getDescription().contains("IIT")
-//				&& radetReportDto.getCurrentStatus() != null
-//				&& radetReportDto.getCurrentStatus().contains("ACTIVE");
-//		if(isRestart){
-//			map.put(index++, "ACTIVE-RESTART");
-//			return index;
-//		}
-//		boolean isTransferIn =
-//				enrollmentStatus != null
-//				&& enrollmentStatus.getHivEnrollmentStatus() != null
-//				&& enrollmentStatus.getHivEnrollmentStatus().contains("In")
-//				&& radetReportDto.getCurrentStatus().equalsIgnoreCase("ACTIVE");
-//		if(isTransferIn){
-//			map.put(index++,"ACTIVE-TRANSFER-IN");
-//			return index;
-//
-//		}
-//		map.put(index++, radetReportDto.getCurrentStatus());
-//		return index;
-//	}
-//
+
 	public static List<Map<Integer, Object>> fillBiometricDataMapper(@NonNull List<BiometricReportDto> biometrics) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		int sn = 1;
