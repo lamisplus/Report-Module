@@ -316,6 +316,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "  INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
             "     WHERE lt.lab_test_id=16\n" +
             "       AND  lt.viral_load_indication !=719\n" +
+            "       AND date_sample_collected IS NOT null\n" +
             " )as sample\n" +
             "         WHERE sample.rnkk = 1\n" +
             "           AND (sample.archived is null OR sample.archived = 0)\n" +
