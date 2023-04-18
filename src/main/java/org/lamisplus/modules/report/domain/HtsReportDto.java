@@ -7,6 +7,9 @@ import java.time.LocalDate;
 public interface HtsReportDto {
     public String getDatimCode();
     public String getFacility();
+    public String getState();
+    public String getLga();
+    public String getPatientId();
     public String getClientCode();
     public String getFirstName();
     public String getSurname();
@@ -41,8 +44,13 @@ public interface HtsReportDto {
     public String getRecencyTestDate();
     public String getRecencyInterpretation();
     public String getFinalRecencyResult();
-    public String getViralLoadResultClassification();
-    public String getViralLoadConfirmationDate();
+
+    //added started
+    public LocalDate getViralLoadSampleCollectionDate();
+    public String getViralLoadConfirmationResult();
+    //End
+    public String getViralLoadResult();
+    public LocalDate getViralLoadConfirmationDate();
     public String getAssessmentCode();
     public String getModality();
     public String getSyphilisTestResult();
@@ -60,14 +68,4 @@ public interface HtsReportDto {
 
     public String getNumberOfCondomsGiven();
     public String getNumberOfLubricantsGiven();
-    
-    String getState();
-    
-    String getLga();
-    
-    String getPatientId();
-    
-    LocalDate getViralLoadSampleCollectionDate();
-    
-    String getViralLoadConfirmationResult();
 }
