@@ -68,14 +68,4 @@ public interface HtsReportDto {
 
     public String getNumberOfCondomsGiven();
     public String getNumberOfLubricantsGiven();
-    
-    String getState();
-    
-    String getLga();
-    
-    String getPatientId();
-    
-    LocalDate getViralLoadSampleCollectionDate();
-    
-    String getViralLoadConfirmationResult();
 }
