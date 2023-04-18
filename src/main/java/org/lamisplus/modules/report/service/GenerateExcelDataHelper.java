@@ -105,26 +105,6 @@ public class GenerateExcelDataHelper {
 			for (RADETDTOProjection radetReportDto : reportDtos) {
 				Map<Integer, Object> map = new HashMap<>();
 				String personUuid = radetReportDto.getPersonUuid();
-//				HIVStatusDisplay currentStatus =  null;
-//				HIVStatusDisplay previousStatus = null;
-//				Deque<HIVStatusDisplay> currentAndPreviousClientStatus =
-//						statusManagementService.getCurrentAndPreviousClientStatus(personUuid, endDate);
-//				if(currentAndPreviousClientStatus.size() > 1){
-//					currentStatus = currentAndPreviousClientStatus.pop();
-//					previousStatus = currentAndPreviousClientStatus.pop();
-//				}else if (currentAndPreviousClientStatus.size() == 1) {
-//					currentStatus = currentAndPreviousClientStatus.pop();
-//
-//				}
-//				LocalDate iptCompletionDate = radetReportDto.getIptCompletionDate();
-//				boolean iptCompletionStatus = false;
-//				if (iptCompletionDate != null) {
-//					iptCompletionStatus = true;
-//					if(iptCompletionDate.isAfter(endDate)){
-//						iptCompletionDate = null;
-//						iptCompletionStatus = false;
-//					}
-//				}
 				int index = 0;
 				map.put(index++, getStringValue(String.valueOf(sn)));
 				map.put(index++, radetReportDto.getState());
@@ -148,7 +128,7 @@ public class GenerateExcelDataHelper {
 				
 				map.put(index++,radetReportDto.getArtStartDate());
 				map.put(index++, radetReportDto.getLastPickupDate());
-				map.put(index++, radetReportDto.getMonthsOfARVRefill());
+				map.put(index++, getStringValue(String.valueOf(radetReportDto.getMonthsOfARVRefill())));
 				
 				
 				map.put(index++, radetReportDto.getRegimenLineAtStart());
