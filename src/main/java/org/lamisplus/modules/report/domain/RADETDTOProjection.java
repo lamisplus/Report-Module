@@ -50,6 +50,7 @@ public interface RADETDTOProjection {
 	String getCurrentViralLoad();
 	
 	LocalDate getDateOfCurrentViralLoad();
+	LocalDate getDateOfCurrentViralLoadSample();
 	
 	//cd4
 	String getLastCd4Count();
@@ -120,4 +121,11 @@ public interface RADETDTOProjection {
 	
 	String getDsdModel();
 	LocalDate getDateofTbDiagnosticResultReceived();
+	
+	//TB Treatment
+	String  getTbTreatementType();
+	String  getTbTreatmentOutcome();
+	LocalDate getTbTreatmentStartDate();
+	LocalDate getTbCompletionDate();
+	String getIptCompletionStatus();
 }

@@ -106,7 +106,7 @@ public class Constants {
 					"State",
 					"L.G.A",
 					"Facility Name",
-					"DatimId",
+					"Datim Id",
 					"Patient ID",
 					"Hospital Number",
 					"Household Unique No",
@@ -132,6 +132,7 @@ public class Constants {
 					"Date of Last CD4 Count",
 					"Last CD4 Count",
 					"Date of Viral Load Sample Collection (yyyy-mm-dd)",
+					"Date of Current ViralLoad Result Sample",
 					"Current Viral Load (c/ml)",
 					"Date of Current Viral Load (yyyy-mm-dd)",
 					"Viral Load Indication",
@@ -143,13 +144,13 @@ public class Constants {
 					"Previous ART Status",
 					"Confirmed Date of Previous ART Status",
 					"ART Enrollment Setting",
-					"TB status at Last Visit",
-					"Date of TB Screening (yyyy-mm-dd)",
-					"TB Screening Outcome",
-					"Date of TB Sample Collection (yyyy-mm-dd)",
-					"TB Diagnostic Test Type",
-					"Date of TB Diagnostic Result Received (yyyy-mm-dd)",
-					"TB Diagnostic Result",
+					//"TB status at Last Visit",
+					"Date of TB Screening at Last Visit (yyyy-mm-dd)",
+					"TB Screening Outcome at Last Visit",
+					"Date of TB Diagnostic Evaluation (yyyy-mm-dd)",
+					"TB Diagnostic Evaluation Type",
+					"Date of TB Diagnostic Evaluation Result Received (yyyy-mm-dd)",
+					"TB Diagnostic Evaluation Result",
 					"Date of Start of TB Treatment (yyyy-mm-dd)",
 					"TB Treatment Type (new, relapsed etc)",
 					"Date of Completion of TB Treatment (yyyy-mm-dd)",
@@ -292,7 +293,6 @@ public class Constants {
 					"HTS Latitude",
 					"HTS Longitude"
 			);
-
 
 	public static final List<String> PrEP_HEADER =
 			Arrays.asList(
