@@ -789,7 +789,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'DEATH'\n" +
             "        WHEN(\n" +
             "        stat.status_date > pharmacy.visit_date\n" +
-            "    AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%')\n" +
+            "    AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
             ")THEN stat.hiv_status\n" +
             "        ELSE pharmacy.status\n" +
             "        END\n" +
@@ -800,7 +800,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%'  THEN stat.status_date\n" +
             "        WHEN(\n" +
             "        stat.status_date > pharmacy.visit_date\n" +
-            "    AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%')\n" +
+            "    AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
             ") THEN stat.status_date\n" +
             "        ELSE pharmacy.visit_date\n" +
             "        END\n" +
@@ -875,7 +875,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'DEATH'\n" +
             "        WHEN(\n" +
             "        stat.status_date > pharmacy.visit_date\n" +
-            "    AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%')\n" +
+            "    AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%' OR stat.hiv_status ILIKE '%Invalid %')\n" +
             ")THEN stat.hiv_status\n" +
             "        ELSE pharmacy.status\n" +
             "        END\n" +
@@ -886,7 +886,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%'  THEN stat.status_date\n" +
             "        WHEN(\n" +
             "        stat.status_date > pharmacy.visit_date\n" +
-            "    AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%')\n" +
+            "    AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%' OR stat.hiv_status ILIKE '%Invalid %')\n" +
             ") THEN stat.status_date\n" +
             "        ELSE pharmacy.visit_date\n" +
             "        END\n" +
@@ -955,7 +955,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        (\n" +
             "CASE\n" +
             "    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'DEATH'\n" +
-            "    WHEN( stat.status_date > pharmacy.visit_date AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%'))\n" +
+            "    WHEN( stat.status_date > pharmacy.visit_date AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%' OR stat.hiv_status ILIKE '%Invalid %'))\n" +
             "        THEN stat.hiv_status\n" +
             "    ELSE pharmacy.status\n" +
             "    END\n" +
@@ -963,7 +963,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        (\n" +
             "CASE\n" +
             "    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%'  THEN stat.status_date\n" +
-            "    WHEN(stat.status_date > pharmacy.visit_date AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%')) THEN stat.status_date\n" +
+            "    WHEN(stat.status_date > pharmacy.visit_date AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%' OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.status_date\n" +
             "    ELSE pharmacy.visit_date\n" +
             "    END\n" +
             ") AS status_date,\n" +
@@ -973,13 +973,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         SELECT\n" +
             " (\n" +
             "     CASE\n" +
-            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '28 day' < '2023-04-14' THEN 'IIT'\n" +
+            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '28 day' < ?3 THEN 'IIT'\n" +
             "         ELSE 'ACTIVE'\n" +
             "         END\n" +
             "     ) status,\n" +
             " (\n" +
             "     CASE\n" +
-            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '28 day' < '2023-04-14' THEN hp.visit_date + hp.refill_period + INTERVAL '28 day'\n" +
+            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '28 day' < ?3 THEN hp.visit_date + hp.refill_period + INTERVAL '28 day'\n" +
             "         ELSE hp.visit_date\n" +
             "         END\n" +
             "     ) AS visit_date,\n" +
@@ -996,7 +996,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " AND h.archived = 0\n" +
             "     WHERE\n" +
             " hap.archived = 0\n" +
-            "       AND hap.visit_date <= '2023-04-14'\n" +
+            "       AND hap.visit_date <= ?3 \n" +
             "     GROUP BY\n" +
             "         hap.person_uuid\n" +
             "     ORDER BY\n" +
@@ -1004,7 +1004,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid\n" +
             "         WHERE\n" +
             "     hp.archived = 0\n" +
-            "           AND hp.visit_date <= '2023-04-14'\n" +
+            "           AND hp.visit_date <= ?3\n" +
             "     ) pharmacy\n" +
             "\n" +
             "         LEFT JOIN (\n" +
@@ -1017,11 +1017,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " (\n" +
             "     SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,\n" +
             "hiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
-            "        FROM hiv_status_tracker WHERE archived=0 AND status_date <= '2023-04-14' )s\n" +
+            "        FROM hiv_status_tracker WHERE archived=0 AND status_date <= ?3 )s\n" +
             "     WHERE s.row_number=1\n" +
             " ) hst\n" +
             "     INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
-            "         WHERE hst.status_date <= '2023-04-14'\n" +
+            "         WHERE hst.status_date <= ?3\n" +
             "     ) stat ON stat.person_id = pharmacy.person_uuid\n" +
             "     ),\n" +
             "\n" +
