@@ -1,12 +1,12 @@
 package org.lamisplus.modules.report.service;
 
-import javafx.stage.Stage;
-import org.lamisplus.modules.patient.domain.Patient;
-import org.lamisplus.modules.patient.domain.entity.Visit;
+
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
 
+@Service
 public class Constants {
 	
 	// EXTENSION

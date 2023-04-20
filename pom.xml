@@ -329,7 +329,7 @@
 							<arguments>install</arguments>
 						</configuration>
 					</execution>-->
-					<execution>
+					<!--<execution>
                         <id>npm run build</id>
                         <goals>
                             <goal>npm</goal>
@@ -337,7 +337,7 @@
                         <configuration>
                             <arguments>run build</arguments>
                         </configuration>
-                    </execution>
+                    </execution>-->
 				</executions>
 			</plugin>
 			<plugin>
