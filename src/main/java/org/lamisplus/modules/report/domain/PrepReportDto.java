@@ -33,20 +33,17 @@ public interface PrepReportDto {
     public String getBaselineHeight();
     public String getHIVStatusAtPrepInitiation();
     public String getIndicationForPrep();
-    public String getRiskType();
+/*    public String getRiskType();
     public String getEntryPoint();
     public String getFacilityReferredTo();
     public LocalDate getHivEnrollmentDate();
     public String getCurrentRegimenStart();
     public String getCurrentPrepStatus();
-    public LocalDate getCurrentPrepStatusDate();
-    public String interruptionReason();
-    public LocalDate interruptionDate();
-    public LocalDate prepCommencement();
-    public LocalDate currentUrinaryDate();
-    public String currentUrinaryResult();
-    public LocalDate baseUrinaryDate();
-    public String baseUrinaryResult();
+    public LocalDate getCurrentPrepStatusDate();*/
+    public LocalDate getCurrentUrinalysisDate();
+    public String getCurrentUrinalysis();
+    public LocalDate getBaseLineUrinalysisDate();
+    public String getBaseLineUrinalysis();
     
     public String getCurrentRegimen();
     public String getDateOfLastPickup();
@@ -56,20 +53,15 @@ public interface PrepReportDto {
     public String getCurrentHeight();
     public String getCurrentHIVStatus();
     public String getPregnancyStatus();
-    
-    public String getInterruptionReason();
-    
-    public LocalDate getInterruptionDate();
-    
-    public LocalDate getCurrentUrinalysisTestDate();
-    
-    public String getCurrentUrinalysisResult();
-    
-    public LocalDate getBaseUrinalysisTestDate();
-    
-    public String getBaseUrinalysisResult();
-    
+
     public LocalDate getPrepCommencementDate();
+    public String getCurrentStatus();
+
+    public String getBaseLineHepatitisB();
+    public String getBaseLineHepatitisC();
+    public String getInterruptionReason();
+    public LocalDate getInterruptionDate();
+    public String getBaseLineCreatinine();
     
 }
 
