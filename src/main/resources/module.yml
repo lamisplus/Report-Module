@@ -1,6 +1,6 @@
 basePackage: org.lamisplus.modules.report
 name: ReportModule
-dependencies: {PatientModule: 2.0.2, TriageModule: 2.0.1, LaboratoryModule: 2.0.2}
+dependencies: {PatientModule: 2.0.2, TriageModule: 2.0.1, LaboratoryModule: 2.0.3, HivModule: 2.1.1 }
 store: true
 menus:
   - icon: fa fa-bar-chart
