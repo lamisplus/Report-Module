@@ -163,7 +163,6 @@ public class GenerateExcelDataHelper {
 				
 				map.put(index++, radetReportDto.getEnrollmentSetting());
 				//TB
-				//map.put(index++,radetReportDto.getTbStatus());
 				map.put(index++,radetReportDto.getDateOfTbScreened());
 				map.put(index++,radetReportDto.getTbStatus());
 				//tb lab
@@ -191,16 +190,17 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getDateOfRepeatViralLoadEACSampleCollection());
 				map.put(index++, radetReportDto.getRepeatViralLoadResult());
 				map.put(index++, radetReportDto.getDateOfRepeatViralLoadResult());
-				//DSD MOdel
 				
+				//DSD MOdel
 				map.put(index++, radetReportDto.getDsdModel());
 				if(radetReportDto.getDsdModel() != null){
 					map.put(index++, radetReportDto.getDateOfCurrentRegimen());
 				}else {
 					map.put(index++, null);
 				}
-				//chronic care
 				map.put(index++, null);
+				
+				//chronic care
 				map.put(index++, null);
 				map.put(index++, null);
 				
@@ -209,10 +209,14 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getCervicalCancerScreeningType());
 				map.put(index++, radetReportDto.getCervicalCancerScreeningMethod());
 				map.put(index++, radetReportDto.getResultOfCervicalCancerScreening());
-				
 				//Precancerous
-				map.put(index++,null);
-				map.put(index++,null);
+				if(radetReportDto.getCervicalCancerTreatmentScreened() != null) {
+					map.put(index++, radetReportDto.getDateOfCervicalCancerScreening());
+				}else{
+					map.put(index++, null);
+				}
+				map.put(index++, radetReportDto.getCervicalCancerTreatmentScreened());
+				
 				
 				//biometrics
 				map.put(index++, radetReportDto.getDateBiometricsEnrolled());

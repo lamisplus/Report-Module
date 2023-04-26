@@ -750,6 +750,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "      ho.date_of_observation AS dateOfCervicalCancerScreening,\n" +
             "      cc_type.display AS cervicalCancerScreeningType,\n" +
             "      cc_method.display AS cervicalCancerScreeningMethod,\n" +
+            "      cc_trtm.display AS cervicalCancerTreatmentScreened,\n" +
             "      cc_result.display AS resultOfCervicalCancerScreening\n" +
             "         FROM\n" +
             " hiv_observation ho\n" +
@@ -770,6 +771,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     INNER JOIN base_application_codeset cc_type ON cc_type.code = CAST(ho.data ->> 'screenType' AS VARCHAR)\n" +
             "     INNER JOIN base_application_codeset cc_method ON cc_method.code = CAST(ho.data ->> 'screenMethod' AS VARCHAR)\n" +
             "     INNER JOIN base_application_codeset cc_result ON cc_result.code = CAST(ho.data ->> 'screeningResult' AS VARCHAR)\n" +
+            "      LEFT JOIN base_application_codeset cc_trtm   ON  cc_trtm.code = CAST(ho.data ->> 'screenTreatment' AS VARCHAR)\n" +
             "     ),\n" +
             "\n" +
             "     ovc AS (\n" +
