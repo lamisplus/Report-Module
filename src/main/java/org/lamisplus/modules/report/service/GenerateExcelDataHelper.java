@@ -345,16 +345,19 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentRegimen())));
 				map.put(index++, prepReportDto.getDateOfLastPickup());
 				map.put(index++, String.valueOf(prepReportDto.getCurrentStatus()));
+				map.put(index++, prepReportDto.getDateOfCurrentStatus());
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentSystolicBp())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentDiastolicBp())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentWeight())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentHeight())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentHIVStatus())));
+				map.put(index++, prepReportDto.getDateOfCurrentHIVStatus());
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentUrinalysis())));
 				map.put(index++, prepReportDto.getCurrentUrinalysisDate());
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getPregnancyStatus())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getInterruptionReason())));
 				map.put(index++, prepReportDto.getInterruptionDate());
+				map.put(index++, prepReportDto.getHivEnrollmentDate());
 
 				result.add(map);
 				sn++;

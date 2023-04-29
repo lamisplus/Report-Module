@@ -36,7 +36,7 @@ public interface PrepReportDto {
 /*    public String getRiskType();
     public String getEntryPoint();
     public String getFacilityReferredTo();
-    public LocalDate getHivEnrollmentDate();
+
     public String getCurrentRegimenStart();
     public String getCurrentPrepStatus();
     public LocalDate getCurrentPrepStatusDate();*/
@@ -57,11 +57,15 @@ public interface PrepReportDto {
     public LocalDate getPrepCommencementDate();
     public String getCurrentStatus();
 
+    public LocalDate getDateOfCurrentStatus();
+    public LocalDate getDateOfCurrentHIVStatus();
+
     public String getBaseLineHepatitisB();
     public String getBaseLineHepatitisC();
     public String getInterruptionReason();
     public LocalDate getInterruptionDate();
     public String getBaseLineCreatinine();
+    public LocalDate getHivEnrollmentDate();
     
 }
 

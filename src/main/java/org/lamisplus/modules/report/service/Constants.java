@@ -333,16 +333,19 @@ public class Constants {
 					"Current Regimen",
 					"Date Of Last Pickup (yyyy-mm-dd)",
 					"Current Status",
+					"Date Of Current Status (yyyy-mm-dd)",
 					"Current Systolic bp",
 					"Current Diastolic bp",
 					"Current Weight (kg)",
 					"Current Height (cm)",
 					"Current HIV Status",
+					"Date of Current HIV Status (yyyy-mm-dd)",
 					"Current Urinalysis",
 					"Date of Current Urinalysis",
 					"Pregnancy Status",
 					"Reasons for discontinuation/Stopped",
-					"Date of Discontinuation/Stopped"
+					"Date of Discontinuation/Stopped",
+					"Date Of HIV Enrollment (yyyy-mm-dd)"
 			);
 	
 	public static final List<String> CLINIC_HEADER =
