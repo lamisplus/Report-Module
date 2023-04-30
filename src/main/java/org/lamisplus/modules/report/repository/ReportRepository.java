@@ -283,10 +283,10 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     WHERE lt.lab_test_id=16\n" +
             "       AND  lt.viral_load_indication !=719\n" +
             "       AND date_sample_collected IS NOT null\n" +
+            "       AND date_sample_collected <= ?3\n" +
             " )as sample\n" +
             "         WHERE sample.rnkk = 1\n" +
             "           AND (sample.archived is null OR sample.archived = 0)\n" +
-            "           AND date_sample_collected <= ?3\n" +
             "           AND sample.facility_id = ?1 ),\n" +
             "current_vl_result AS (SELECT * FROM (\n" +
             "         SELECT CAST(ls.date_sample_collected AS DATE ) AS dateOfCurrentViralLoadSample, sm.patient_uuid as person_uuid130 , sm.facility_id as vlFacility, sm.archived as vlArchived, acode.display as viralLoadIndication, sm.result_reported as currentViralLoad,CAST(sm.date_result_reported AS DATE) as dateOfCurrentViralLoad,\n" +
@@ -298,11 +298,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         WHERE lt.lab_test_id = 16\n" +
             "           AND  lt.viral_load_indication !=719\n" +
             "           AND sm. date_result_reported IS NOT NULL\n" +
+            "           AND sm. date_result_reported <= ?3\n" +
             "           AND sm.result_reported is NOT NULL\n" +
             "     )as vl_result\n" +
             "   WHERE vl_result.rank2 = 1\n" +
             "     AND (vl_result.vlArchived = 0 OR vl_result.vlArchived is null)\n" +
-            "     AND  vl_result.dateOfCurrentViralLoad <= ?3\n" +
             "     AND  vl_result.vlFacility = ?1\n" +
             "     ), "+
             "     careCardCD4 AS (SELECT visit_date, coalesce(cast(cd_4 as varchar), cd4_semi_quantitative) as cd_4, person_uuid AS cccd4_person_uuid\n" +
@@ -791,7 +791,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'DEATH'\n" +
             "        WHEN(\n" +
             "        stat.status_date > pharmacy.visit_date\n" +
-            "    AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
+            "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
             ")THEN stat.hiv_status\n" +
             "        ELSE pharmacy.status\n" +
             "        END\n" +
@@ -802,7 +802,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%'  THEN stat.status_date\n" +
             "        WHEN(\n" +
             "        stat.status_date > pharmacy.visit_date\n" +
-            "    AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
+            "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
             ") THEN stat.status_date\n" +
             "        ELSE pharmacy.visit_date\n" +
             "        END\n" +
@@ -877,7 +877,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'DEATH'\n" +
             "        WHEN(\n" +
             "        stat.status_date > pharmacy.visit_date\n" +
-            "    AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%' OR stat.hiv_status ILIKE '%Invalid %')\n" +
+            "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %')\n" +
             ")THEN stat.hiv_status\n" +
             "        ELSE pharmacy.status\n" +
             "        END\n" +
@@ -888,7 +888,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%'  THEN stat.status_date\n" +
             "        WHEN(\n" +
             "        stat.status_date > pharmacy.visit_date\n" +
-            "    AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%' OR stat.hiv_status ILIKE '%Invalid %')\n" +
+            "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %')\n" +
             ") THEN stat.status_date\n" +
             "        ELSE pharmacy.visit_date\n" +
             "        END\n" +
@@ -957,7 +957,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        (\n" +
             "CASE\n" +
             "    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'DEATH'\n" +
-            "    WHEN( stat.status_date > pharmacy.visit_date AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%' OR stat.hiv_status ILIKE '%Invalid %'))\n" +
+            "    WHEN( stat.status_date > pharmacy.visit_date AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %'))\n" +
             "        THEN stat.hiv_status\n" +
             "    ELSE pharmacy.status\n" +
             "    END\n" +
@@ -965,7 +965,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        (\n" +
             "CASE\n" +
             "    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%'  THEN stat.status_date\n" +
-            "    WHEN(stat.status_date > pharmacy.visit_date AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%' OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.status_date\n" +
+            "    WHEN(stat.status_date > pharmacy.visit_date AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.status_date\n" +
             "    ELSE pharmacy.visit_date\n" +
             "    END\n" +
             ") AS status_date,\n" +
@@ -1077,12 +1077,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           (\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN 'DEATH'\n" +
-            "       WHEN prepre.status ILIKE '%OUT%' THEN 'TRANSFER OUT'\n" +
+            "       WHEN prepre.status ILIKE '%out%' THEN 'TRANSFER OUT'\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN 'DEATH'\n" +
-            "       WHEN pre.status ILIKE '%OUT%' THEN 'TRANSFER OUT'\n" +
+            "       WHEN pre.status ILIKE '%out%' THEN 'TRANSFER OUT'\n" +
             "       WHEN (\n" +
             "prepre.status ILIKE '%IIT%'\n" +
-            "        OR prepre.status ILIKE '%STOP%'\n" +
+            "        OR prepre.status ILIKE '%stop%'\n" +
             "    )\n" +
             "           AND (pre.status ILIKE '%ACTIVE%') THEN 'ACTIVE RESTART'\n" +
             "       WHEN prepre.status ILIKE '%ACTIVE%'\n" +
@@ -1093,12 +1093,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           CAST((\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN prepre.status_date\n" +
-            "       WHEN prepre.status ILIKE '%OUT%' THEN prepre.status_date\n" +
+            "       WHEN prepre.status ILIKE '%out%' THEN prepre.status_date\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN pre.status_date\n" +
-            "       WHEN pre.status ILIKE '%OUT%' THEN pre.status_date\n" +
+            "       WHEN pre.status ILIKE '%out%' THEN pre.status_date\n" +
             "       WHEN (\n" +
             "prepre.status ILIKE '%IIT%'\n" +
-            "        OR prepre.status ILIKE '%STOP%'\n" +
+            "        OR prepre.status ILIKE '%stop%'\n" +
             "    )\n" +
             "           AND (pre.status ILIKE '%ACTIVE%') THEN pre.status_date\n" +
             "       WHEN prepre.status ILIKE '%ACTIVE%'\n" +
@@ -1109,15 +1109,15 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           (\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN 'DEATH'\n" +
-            "       WHEN prepre.status ILIKE '%OUT%' THEN 'TRANSFER OUT'\n" +
+            "       WHEN prepre.status ILIKE '%out%' THEN 'TRANSFER OUT'\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN 'DEATH'\n" +
-            "       WHEN pre.status ILIKE '%OUT%' THEN 'TRANSFER OUT'\n" +
+            "       WHEN pre.status ILIKE '%out%' THEN 'TRANSFER OUT'\n" +
             "       WHEN ct.status ILIKE '%IIT%' THEN 'IIT'\n" +
-            "       WHEN ct.status ILIKE '%OUT%' THEN 'TRANSFER OUT'\n" +
+            "       WHEN ct.status ILIKE '%out%' THEN 'TRANSFER OUT'\n" +
             "       WHEN ct.status ILIKE '%DEATH%' THEN 'DEATH'\n" +
             "       WHEN (\n" +
             "pre.status ILIKE '%IIT%'\n" +
-            "        OR pre.status ILIKE '%STOP%'\n" +
+            "        OR pre.status ILIKE '%stop%'\n" +
             "    )\n" +
             "           AND (ct.status ILIKE '%ACTIVE%') THEN 'ACTIVE RESTART'\n" +
             "       WHEN pre.status ILIKE '%ACTIVE%'\n" +
@@ -1128,27 +1128,27 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           CAST((\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN prepre.status_date\n" +
-            "       WHEN prepre.status ILIKE '%OUT%' THEN prepre.status_date\n" +
+            "       WHEN prepre.status ILIKE '%out%' THEN prepre.status_date\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN pre.status_date\n" +
-            "       WHEN pre.status ILIKE '%OUT%' THEN pre.status_date\n" +
+            "       WHEN pre.status ILIKE '%out%' THEN pre.status_date\n" +
             "       WHEN ct.status ILIKE '%IIT%' THEN\n" +
             "           CASE\n" +
-            "   WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%OUT%' OR pre.status ILIKE '%STOP%') THEN pre.status_date\n" +
+            "   WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%out%' OR pre.status ILIKE '%stop%') THEN pre.status_date\n" +
             "   ELSE ct.status_date --check the pre to see the status and return date appropriate\n" +
             "   END\n" +
-            "       WHEN ct.status ILIKE '%STOP%' THEN\n" +
+            "       WHEN ct.status ILIKE '%stop%' THEN\n" +
             "           CASE\n" +
-            "   WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%OUT%' OR pre.status ILIKE '%IIT%') THEN pre.status_date\n" +
+            "   WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%out%' OR pre.status ILIKE '%IIT%') THEN pre.status_date\n" +
             "   ELSE ct.status_date --check the pre to see the status and return date appropriate\n" +
             "   END\n" +
-            "       WHEN ct.status ILIKE '%OUT%' THEN\n" +
+            "       WHEN ct.status ILIKE '%out%' THEN\n" +
             "           CASE\n" +
-            "   WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%STOP%' OR pre.status ILIKE '%IIT%') THEN pre.status_date\n" +
+            "   WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%stop%' OR pre.status ILIKE '%IIT%') THEN pre.status_date\n" +
             "   ELSE ct.status_date --check the pre to see the status and return date appropriate\n" +
             "   END\n" +
             "       WHEN (\n" +
             "pre.status ILIKE '%IIT%'\n" +
-            "        OR pre.status ILIKE '%STOP%'\n" +
+            "        OR pre.status ILIKE '%stop%'\n" +
             "    )\n" +
             "           AND (ct.status ILIKE '%ACTIVE%') THEN ct.status_date\n" +
             "       WHEN pre.status ILIKE '%ACTIVE%'\n" +
@@ -1159,13 +1159,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           (\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN FALSE\n" +
-            "       WHEN prepre.status ILIKE '%OUT%' THEN FALSE\n" +
+            "       WHEN prepre.status ILIKE '%out%' THEN FALSE\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN FALSE\n" +
-            "       WHEN pre.status ILIKE '%OUT%' THEN FALSE\n" +
+            "       WHEN pre.status ILIKE '%out%' THEN FALSE\n" +
             "       WHEN ct.status ILIKE '%IIT%' THEN FALSE\n" +
-            "       WHEN ct.status ILIKE '%OUT%' THEN FALSE\n" +
+            "       WHEN ct.status ILIKE '%out%' THEN FALSE\n" +
             "       WHEN ct.status ILIKE '%DEATH%' THEN FALSE\n" +
-            "       WHEN ct.status ILIKE '%STOP%' THEN FALSE\n" +
+            "       WHEN ct.status ILIKE '%stop%' THEN FALSE\n" +
             "       WHEN (nvd.age >= 15\n" +
             "           AND nvd.regimen ILIKE '%DTG%'\n" +
             "           AND bd.artstartdate + 91 < ?3) THEN TRUE\n" +
@@ -1217,13 +1217,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           (\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN NULL\n" +
-            "       WHEN prepre.status ILIKE '%OUT%' THEN NULL\n" +
+            "       WHEN prepre.status ILIKE '%out%' THEN NULL\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN NULL\n" +
-            "       WHEN pre.status ILIKE '%OUT%' THEN NULL\n" +
+            "       WHEN pre.status ILIKE '%out%' THEN NULL\n" +
             "       WHEN ct.status ILIKE '%IIT%' THEN NULL\n" +
-            "       WHEN ct.status ILIKE '%OUT%' THEN NULL\n" +
+            "       WHEN ct.status ILIKE '%out%' THEN NULL\n" +
             "       WHEN ct.status ILIKE '%DEATH%' THEN NULL\n" +
-            "       WHEN ct.status ILIKE '%STOP%' THEN NULL\n" +
+            "       WHEN ct.status ILIKE '%stop%' THEN NULL\n" +
             "       WHEN (nvd.age >= 15\n" +
             "           AND nvd.regimen ILIKE '%DTG%'\n" +
             "           AND bd.artstartdate + 91 < ?3)\n" +
