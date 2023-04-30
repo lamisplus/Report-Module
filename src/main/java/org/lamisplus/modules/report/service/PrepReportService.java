@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PrepReportService {
     private final ReportRepository reportRepository;
-
+    
     public List<PrepReportDto> getPrepReport(Long facilityId, LocalDate start, LocalDate end){
         return reportRepository.getPrepReport(facilityId, start, end);
     }
