@@ -65,7 +65,7 @@ public interface PrepReportDto {
     public LocalDate getInterruptionDate();
     public String getBaseLineCreatinine();
     public LocalDate getHivEnrollmentDate();
-    
+    String getTargetGroup();
     
 }
 

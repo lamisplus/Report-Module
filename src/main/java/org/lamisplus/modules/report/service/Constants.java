@@ -311,6 +311,7 @@ public class Constants {
 					"Sex",
 					"Age",
 					"Date Of Birth (yyyy-mm-dd)",
+					"Target Group",
 					"Phone Number",
 					"Marital Status",
 					"Client Address",

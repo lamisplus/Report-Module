@@ -27,34 +27,13 @@ public class RadetService {
 	public List<RADETDTOProjection> getRadetDtos(Long facilityId, LocalDate start, LocalDate end) {
 		LocalDate previousQuarterEnd = quarterService.getPreviousQuarter(end).getEnd();
 		LocalDate previousPreviousQuarterEnd = quarterService.getPreviousQuarter(previousQuarterEnd).getEnd();
-		System.out.println("facilityId: AMOS vl1 " + facilityId +" "  +start + " " + end.plusDays(1));
-		System.out.println("previous : "+previousQuarterEnd);
-		System.out.println("previousPreviousQuarterEnd : "+previousPreviousQuarterEnd);
+		LOG.info("facilityId: " + facilityId +" "  +start + " " + end.plusDays(1));
+		LOG.info("previous : "+previousQuarterEnd);
+		LOG.info("previousPreviousQuarterEnd : "+previousPreviousQuarterEnd);
+		LOG.info("Fetching RADET records...");
 		List<RADETDTOProjection> radetData =
 				repository.getRadetData(facilityId, start, end.plusDays(1), previousQuarterEnd, previousPreviousQuarterEnd);
-//		long txCurrent =
-//				radetData.stream()
-//						.filter(radetRow -> radetRow.getCurrentStatus().contains(ACTIVE))
-//						.count();
-//
-//		System.out.println("Total TX_CURR = " + txCurrent);
-//		Map<String, Map<String, Map<String, Map<String, Long>>>> txCurr =
-//				radetData.stream()
-//				.filter(radetRow -> radetRow.getCurrentStatus().contains(ACTIVE))
-//				.collect(Collectors.groupingBy(
-//						RADETDTOProjection::getFacilityName,
-//						Collectors.groupingBy(
-//								RADETDTOProjection::getGender,
-//								Collectors.groupingBy(
-//										radetdtoProjection -> getAgeRange(radetdtoProjection.getAge()),
-//										Collectors.groupingBy(
-//												RADETDTOProjection::getCurrentStatus,
-//												Collectors.counting()
-//										)
-//								)
-//						)
-//				));
-//		System.out.println("TX_curr = " + txCurr);
+		LOG.info("Done fetching RADET records total size : "+radetData.size());
 		return radetData;
 	}
 	private static String getAgeRange(int age) {
@@ -68,8 +47,5 @@ public class RadetService {
 			return "Above 30";
 		}
 	}
-	
-	
-	
 	
 }

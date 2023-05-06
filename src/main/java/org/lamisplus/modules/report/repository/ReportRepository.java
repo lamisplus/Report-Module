@@ -136,6 +136,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "            baseline_pc.diastolic AS baselineDiastolicBP,      " +
             "            baseline_pc.weight AS baselinetWeight,      " +
             "            baseline_pc.height AS baselineHeight,    " +
+            "            tg.display AS targetGroup,    " +
             "            baseline_pc.encounter_date AS prepCommencementDate,    " +
             "            baseline_pc.urinalysis->>'result' AS baseLineUrinalysis,   " +
             "            CAST(baseline_pc.urinalysis->>'testDate' AS DATE) AS baseLineUrinalysisDate,   " +
@@ -181,8 +182,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "               FROM patient_person p,      " +
             "                     jsonb_array_elements(p.address-> 'address') with ordinality l(address_object)) as result      " +
             "            ) r ON r.id=p.id " +
-            " INNER JOIN (SELECT MAX(date_started) date_started, person_uuid FROM prep_enrollment " +
-            "  GROUP BY person_uuid) penrol ON penrol.person_uuid=p.uuid " +
+            " INNER JOIN (SELECT MAX(date_started) date_started, person_uuid,target_group  FROM prep_enrollment " +
+            "  GROUP BY person_uuid,target_group) penrol ON penrol.person_uuid=p.uuid " +
             "            LEFT JOIN (SELECT pe.drug_use_history->>'hivTestResultAtvisit' AS eli_hiv_result, max.visit_date, max.person_uuid FROM prep_eligibility pe    " +
             "            INNER JOIN (SELECT DISTINCT MAX(visit_date)visit_date, person_uuid FROM prep_eligibility    " +
             "            GROUP BY person_uuid)max ON max.visit_date=pe.visit_date     " +
@@ -200,6 +201,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "            LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=facility_id      " +
             "            INNER JOIN prep_enrollment prepe ON prepe.person_uuid = p.uuid      " +
             "            LEFT JOIN base_application_codeset riskt ON riskt.code = prepe.risk_type      " +
+            "            LEFT JOIN base_application_codeset tg ON tg.code = penrol.target_group      " +
             "            LEFT JOIN (SELECT DISTINCT pc.* FROM prep_clinic pc      " +
             "            INNER JOIN (SELECT DISTINCT MAX(encounter_date)encounter_date, person_uuid FROM prep_clinic      " +
             "            GROUP BY person_uuid)max ON max.encounter_date=pc.encounter_date       " +
@@ -319,8 +321,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     LEFT JOIN base_application_codeset preg ON preg.code = hac.pregnancy_status\n" +
             "     LEFT JOIN base_application_codeset tbs ON tbs.id = CAST(hac.tb_status AS INTEGER)\n" +
             "         WHERE\n" +
-            "     hac.archived = 0\n" +
+            "           hac.archived = 0\n" +
             "           AND he.archived = 0\n" +
+            "           AND hac.visit_date < ?3 \n" +
             "           AND he.facility_id = ?1\n" +
             "     ),\n" +
             "\n" +
@@ -347,7 +350,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         WHERE lt.lab_test_id = 16\n" +
             "           AND  lt.viral_load_indication !=719\n" +
             "           AND sm. date_result_reported IS NOT NULL\n" +
-            "           AND sm. date_result_reported <= ?3\n" +
+            "           AND sm.date_result_reported <= ?3\n" +
             "           AND sm.result_reported is NOT NULL\n" +
             "     )as vl_result\n" +
             "   WHERE vl_result.rank2 = 1\n" +
@@ -367,7 +370,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "          SELECT sm.patient_uuid AS cd4_person_uuid,  sm.result_reported as cd4Lb,sm.date_result_reported as dateOfCD4Lb, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rnk\n" +
             "          FROM public.laboratory_result  sm\n" +
             "       INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
-            "          WHERE lt.lab_test_id = 1\n" +
+            "          WHERE lt.lab_test_id IN (1, 50) \n" +
             "AND sm. date_result_reported IS NOT NULL\n" +
             "AND sm.archived = 0\n" +
             "AND sm.facility_id = ?1\n" +
@@ -381,12 +384,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "FROM public.laboratory_sample  sm\n" +
             "         INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
             "         INNER JOIN  laboratory_labtest llt on llt.id = lt.lab_test_id\n" +
-            "WHERE lt.lab_test_id IN (65,51,66,64)\n" +
+            "WHERE lt.lab_test_id IN (65,51,66,64)\n"+
+            "        AND sm.archived = 0\n" +
+            "        AND sm. date_sample_collected <= ?3\n" +
+            "        AND sm.facility_id = ?1\n" +
             "        )as sample\n" +
             "      WHERE sample.rnkk = 1\n" +
-            "        AND sample.archived = 0\n" +
-            "        AND date_sample_collected <= ?3\n" +
-            "        AND sample.facility_id = ?1\n" +
             "     ),\n" +
             "\n" +
             "     current_tb_result AS (WITH tb_test as (SELECT personTbResult, dateofTbDiagnosticResultReceived,\n" +
@@ -766,7 +769,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     SELECT\n" +
             "         hap.person_uuid,\n" +
             "         hap.visit_date,\n" +
-            "         TO_DATE(hap.ipt ->> 'dateCompleted', 'YYYY-MM-DD') AS date_completed\n" +
+            "        TO_DATE(NULLIF(NULLIF(TRIM(hap.ipt->>'dateCompleted'), ''), 'null'), 'YYYY-MM-DD') AS date_completed\n" +
             "     FROM\n" +
             "         hiv_art_pharmacy hap\n" +
             " INNER JOIN (\n" +
@@ -839,7 +842,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    CASE\n" +
             "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'DEATH'\n" +
             "        WHEN(\n" +
-            "        stat.status_date > pharmacy.visit_date\n" +
+            "        stat.status_date > pharmacy.maxdate\n" +
             "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
             ")THEN stat.hiv_status\n" +
             "        ELSE pharmacy.status\n" +
@@ -850,7 +853,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    CASE\n" +
             "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%'  THEN stat.status_date\n" +
             "        WHEN(\n" +
-            "        stat.status_date > pharmacy.visit_date\n" +
+            "        stat.status_date > pharmacy.maxdate\n" +
             "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
             ") THEN stat.status_date\n" +
             "        ELSE pharmacy.visit_date\n" +
@@ -874,7 +877,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     ELSE hp.visit_date\n" +
             "     END\n" +
             " ) AS visit_date,\n" +
-            "         hp.person_uuid\n" +
+            "         hp.person_uuid, MAXDATE\n" +
             "     FROM\n" +
             "         hiv_art_pharmacy hp\n" +
             " INNER JOIN (\n" +
@@ -925,7 +928,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    CASE\n" +
             "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'DEATH'\n" +
             "        WHEN(\n" +
-            "        stat.status_date > pharmacy.visit_date\n" +
+            "        stat.status_date > pharmacy.maxdate\n" +
             "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %')\n" +
             ")THEN stat.hiv_status\n" +
             "        ELSE pharmacy.status\n" +
@@ -936,7 +939,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    CASE\n" +
             "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%'  THEN stat.status_date\n" +
             "        WHEN(\n" +
-            "        stat.status_date > pharmacy.visit_date\n" +
+            "        stat.status_date > pharmacy.maxdate\n" +
             "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %')\n" +
             ") THEN stat.status_date\n" +
             "        ELSE pharmacy.visit_date\n" +
@@ -960,7 +963,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     ELSE hp.visit_date\n" +
             "     END\n" +
             " ) AS visit_date,\n" +
-            "         hp.person_uuid\n" +
+            "         hp.person_uuid, MAXDATE\n" +
             "     FROM\n" +
             "         hiv_art_pharmacy hp\n" +
             " INNER JOIN (\n" +
@@ -1006,7 +1009,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        (\n" +
             "CASE\n" +
             "    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'DEATH'\n" +
-            "    WHEN( stat.status_date > pharmacy.visit_date AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %'))\n" +
+            "    WHEN( stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %'))\n" +
             "        THEN stat.hiv_status\n" +
             "    ELSE pharmacy.status\n" +
             "    END\n" +
@@ -1014,7 +1017,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        (\n" +
             "CASE\n" +
             "    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%'  THEN stat.status_date\n" +
-            "    WHEN(stat.status_date > pharmacy.visit_date AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.status_date\n" +
+            "    WHEN(stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.status_date\n" +
             "    ELSE pharmacy.visit_date\n" +
             "    END\n" +
             ") AS status_date,\n" +
@@ -1034,7 +1037,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         ELSE hp.visit_date\n" +
             "         END\n" +
             "     ) AS visit_date,\n" +
-            " hp.person_uuid\n" +
+            " hp.person_uuid, MAXDATE \n" +
             "         FROM\n" +
             " hiv_art_pharmacy hp\n" +
             "     INNER JOIN (\n" +
@@ -1047,7 +1050,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " AND h.archived = 0\n" +
             "     WHERE\n" +
             " hap.archived = 0\n" +
-            "       AND hap.visit_date <= ?3 \n" +
+            "       AND hap.visit_date < ?3 \n" +
             "     GROUP BY\n" +
             "         hap.person_uuid\n" +
             "     ORDER BY\n" +
@@ -1055,7 +1058,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid\n" +
             "         WHERE\n" +
             "     hp.archived = 0\n" +
-            "           AND hp.visit_date <= ?3\n" +
+            "           AND hp.visit_date < ?3\n" +
             "     ) pharmacy\n" +
             "\n" +
             "         LEFT JOIN (\n" +
@@ -1072,7 +1075,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     WHERE s.row_number=1\n" +
             " ) hst\n" +
             "     INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
-            "         WHERE hst.status_date <= ?3\n" +
+            "         WHERE hst.status_date < ?3\n" +
             "     ) stat ON stat.person_id = pharmacy.person_uuid\n" +
             "     ),\n" +
             "\n" +

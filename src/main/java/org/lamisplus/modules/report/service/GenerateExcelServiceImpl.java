@@ -7,7 +7,6 @@ import org.lamisplus.modules.base.service.OrganisationUnitService;
 import org.lamisplus.modules.hiv.domain.dto.LabReport;
 import org.lamisplus.modules.hiv.domain.dto.PatientLineDto;
 import org.lamisplus.modules.hiv.domain.dto.PharmacyReport;
-import org.lamisplus.modules.hiv.domain.dto.RadetReportDto;
 import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
 import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 
@@ -23,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -80,12 +78,12 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("Start generating patient RADET for facility:" + getFacilityName(facilityId));
 		try {
 			List<RADETDTOProjection> radetDtos = radetService.getRadetDtos(facilityId, start, end);
-			LOG.error("RADET Size: {}", radetDtos.size());
+			LOG.info("RADET Size {}", radetDtos.size());
 			List<Map<Integer, Object>> data = excelDataHelper.fillRadetDataMapper(radetDtos,end);
 			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
 		} catch (Exception e) {
-			LOG.error("Error Occurred when generating RADET !!!");
-			e.printStackTrace();
+			LOG.error("An error Occurred when generating RADET...");
+			LOG.error("Error message: " + e.getMessage());
 		}
 		LOG.info("End generate patient Radet");
 		return null;
