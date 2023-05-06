@@ -789,6 +789,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " ) complete ON complete.person_uuid = hap.person_uuid\n" +
             "         WHERE\n" +
             "     hap.archived = 0\n" +
+            "     AND hap.visit_date < ?3 \n" +
             "         GROUP BY\n" +
             " hap.person_uuid,\n" +
             " ipt_type.regimen_name,\n" +

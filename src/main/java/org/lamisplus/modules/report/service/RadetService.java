@@ -27,7 +27,7 @@ public class RadetService {
 	public List<RADETDTOProjection> getRadetDtos(Long facilityId, LocalDate start, LocalDate end) {
 		LocalDate previousQuarterEnd = quarterService.getPreviousQuarter(end).getEnd();
 		LocalDate previousPreviousQuarterEnd = quarterService.getPreviousQuarter(previousQuarterEnd).getEnd();
-		LOG.info("facilityId: " + facilityId +" "  +start + " " + end.plusDays(1));
+		LOG.info("facilityId: " + facilityId +" "  +start + "  to " + end.plusDays(1));
 		LOG.info("previous : "+previousQuarterEnd);
 		LOG.info("previousPreviousQuarterEnd : "+previousPreviousQuarterEnd);
 		LOG.info("Fetching RADET records...");

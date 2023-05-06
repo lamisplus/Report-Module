@@ -57,7 +57,7 @@ public class ExcelService {
 		font.setBold(true);
 		font.setFontHeightInPoints((short) 12);
 		font.setBold(true);
-		font.setColor(HSSFColor.HSSFColorPredefined.BLACK.getIndex());
+		font.setColor(HSSFColor.HSSFColorPredefined.DARK_GREEN.getIndex());
 		return font;
 	}
 	
@@ -108,10 +108,6 @@ public class ExcelService {
 		
 	}
 	
-	private static void getLongIntegerFormat(CellStyle style) {
-		short builtinFormat = (short) BuiltinFormats.getBuiltinFormat("#,##0");
-		style.setDataFormat(builtinFormat);
-	}
 	
 	private  void getDoubleFormat(CellStyle style) {
 		StringBuilder formatBuilder = new StringBuilder("#,##0");
@@ -132,7 +128,9 @@ public class ExcelService {
 		
 		CellStyle nonNumericStyle = getNonNumericStyle();
 		CellStyle numericStyle = workbook.createCellStyle();
-		numericStyle.setDataFormat((short) BuiltinFormats.getBuiltinFormat("#,##0"));
+		numericStyle.setDataFormat((short) BuiltinFormats.getBuiltinFormat("#,00"));
+		CellStyle doubleStyle = workbook.createCellStyle();
+		getDoubleFormat(doubleStyle);
 		
 		for (Map<Integer, Object> map : listData) { // you may be thinking O(n^2) but actually it is O(n)
 			Row row = sheet.createRow(rowCount++);
@@ -144,8 +142,7 @@ public class ExcelService {
 					if(value instanceof Integer || value instanceof Long){
 						createCell(row, columnCount++, value, numericStyle);
 					}else {
-						getDoubleFormat(numericStyle);
-						createCell(row, columnCount++, value, numericStyle);
+						createCell(row, columnCount++, value, doubleStyle);
 					}
 				} else {
 					createCell(row, columnCount++, value, nonNumericStyle);
@@ -159,7 +156,7 @@ public class ExcelService {
 		CellStyle nonNumericStyle = workbook.createCellStyle();
 		Font font = workbook.createFont();
 		nonNumericStyle.setFillForegroundColor(HSSFColor.HSSFColorPredefined.WHITE.getIndex());
-		nonNumericStyle.setFillBackgroundColor(HSSFColor.HSSFColorPredefined.DARK_GREEN.getIndex());
+		nonNumericStyle.setFillBackgroundColor(HSSFColor.HSSFColorPredefined.LIGHT_ORANGE.getIndex());
 		nonNumericStyle.setFillPattern(FillPatternType.FINE_DOTS);
 		nonNumericStyle.setFont(font);
 		return nonNumericStyle;

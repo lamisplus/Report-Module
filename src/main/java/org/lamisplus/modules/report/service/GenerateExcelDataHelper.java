@@ -105,11 +105,19 @@ public class GenerateExcelDataHelper {
 			List<Map<Integer, Object>> result = new ArrayList<>();
 			int sn = 1;
 			Log.info("converting RADET db records to excel ....");
+			String  patientId = null;
 			try {
 				for (RADETDTOProjection radetReportDto : reportDtos) {
 					Map<Integer, Object> map = new HashMap<>();
 					String personUuid = radetReportDto.getPersonUuid();
+					Double repeatVl = null;
+					Double currentVl = null;
+					patientId = personUuid;
 					int index = 0;
+					boolean isCurrentVlValid = isaNull(radetReportDto.getCurrentViralLoad());
+					currentVl = isCurrentVlValid ? Double.parseDouble(radetReportDto.getCurrentViralLoad()) : null;
+					boolean isRepeatValidNumber = isaNull(radetReportDto.getRepeatViralLoadResult());
+					repeatVl = isRepeatValidNumber ? Double.parseDouble(radetReportDto.getRepeatViralLoadResult()) : null;
 					map.put(index++, sn);
 					map.put(index++, radetReportDto.getState());
 					map.put(index++, radetReportDto.getLga());
@@ -123,11 +131,11 @@ public class GenerateExcelDataHelper {
 					
 					map.put(index++, radetReportDto.getGender());
 					map.put(index++, radetReportDto.getTargetGroup());
-					map.put(index++, getStringValue(String.valueOf(radetReportDto.getCurrentWeight())));
+					map.put(index++, radetReportDto.getCurrentWeight());
 					map.put(index++, radetReportDto.getPregnancyStatus());
 					map.put(index++, radetReportDto.getDateOfBirth());
 					
-					map.put(index++, getStringValue(String.valueOf(radetReportDto.getAge())));
+					map.put(index++, radetReportDto.getAge());
 					map.put(index++, getStringValue(String.valueOf(radetReportDto.getCareEntry())));
 					
 					map.put(index++, radetReportDto.getArtStartDate());
@@ -148,7 +156,7 @@ public class GenerateExcelDataHelper {
 					//vl
 					map.put(index++, radetReportDto.getDateOfViralLoadSampleCollection());
 					map.put(index++, radetReportDto.getDateOfCurrentViralLoadSample());
-					map.put(index++, radetReportDto.getCurrentViralLoad());
+					map.put(index++, currentVl);
 					map.put(index++, radetReportDto.getDateOfCurrentViralLoad());
 					map.put(index++, radetReportDto.getViralLoadIndication());
 					map.put(index++, radetReportDto.getVlEligibilityStatus());
@@ -188,11 +196,11 @@ public class GenerateExcelDataHelper {
 					
 					//EAC
 					map.put(index++, radetReportDto.getDateOfCommencementOfEAC());
-					map.put(index++, getStringValue(String.valueOf(radetReportDto.getNumberOfEACSessionCompleted())));
+					map.put(index++, radetReportDto.getNumberOfEACSessionCompleted());
 					map.put(index++, radetReportDto.getDateOfLastEACSessionCompleted());
 					map.put(index++, radetReportDto.getDateOfExtendEACCompletion());
 					map.put(index++, radetReportDto.getDateOfRepeatViralLoadEACSampleCollection());
-					map.put(index++, radetReportDto.getRepeatViralLoadResult());
+					map.put(index++, repeatVl);
 					map.put(index++, radetReportDto.getDateOfRepeatViralLoadResult());
 					
 					//DSD MOdel
@@ -224,7 +232,7 @@ public class GenerateExcelDataHelper {
 					
 					//biometrics
 					map.put(index++, radetReportDto.getDateBiometricsEnrolled());
-					map.put(index++, getStringValue(String.valueOf(radetReportDto.getNumberOfFingersCaptured())));
+					map.put(index++, radetReportDto.getNumberOfFingersCaptured());
 					map.put(index, null);
 					result.add(map);
 					sn++;
@@ -232,10 +240,17 @@ public class GenerateExcelDataHelper {
 				LOG.info("Done converting db records total size {}", result.size());
 				return result;
 			}catch (Exception e) {
-			    LOG.error("An error occurred when converting db records to excel");
-				LOG.error("The error message is: " + e.getMessage());
+			    LOG.error("An error occurred when converting db record to excel for patient id {}", patientId);
+				LOG.error("The error message is: " + e.getStackTrace().toString());
+				e.printStackTrace();
 			}
 			return result;
+	}
+	
+	private static boolean isaNull(String value) {
+		return value != null
+				&& !value.isEmpty()
+				&& ! value.equalsIgnoreCase("null");
 	}
 	
 	public  List<Map<Integer, Object>> fillHtsDataMapper(@NonNull List<HtsReportDto> htsReportDtos) {
