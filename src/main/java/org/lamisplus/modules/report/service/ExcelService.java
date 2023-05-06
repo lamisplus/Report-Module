@@ -65,21 +65,15 @@ public class ExcelService {
 		Cell cell = row.createCell(columnCount);
 		cell.setCellStyle(null);
 		if (value instanceof Integer) {
-			LOG.info("I am an Integer {}", value);
 			cell.setCellValue(((int) value));
-			getLongIntegerFormat(style);
 			cell.setCellStyle(style);
 			return 0;
 		} else if (value instanceof Long) {
-			LOG.info("I am an Long {}", value);
 			cell.setCellValue((long) value);
-			getLongIntegerFormat(style);
 			cell.setCellStyle(style);
 			return 1;
 		} else if(value instanceof Double){
-			LOG.info("I am an Double {}", value);
 			cell.setCellValue((double) value);
-			getDoubleFormat(style);
 			cell.setCellStyle(style);
 			return 2;
 		}else if (value instanceof Boolean) {
@@ -147,7 +141,12 @@ public class ExcelService {
 				Integer key = iterator.next();
 				Object value = map.get(key);
 				if (value instanceof Double || value instanceof Integer || value instanceof Long) {
-					createCell(row, columnCount++, value, numericStyle);
+					if(value instanceof Integer || value instanceof Long){
+						createCell(row, columnCount++, value, numericStyle);
+					}else {
+						getDoubleFormat(numericStyle);
+						createCell(row, columnCount++, value, numericStyle);
+					}
 				} else {
 					createCell(row, columnCount++, value, nonNumericStyle);
 				}
@@ -157,13 +156,13 @@ public class ExcelService {
 	
 	@NotNull
 	private CellStyle getNonNumericStyle() {
-		CellStyle nonNumbericStyle = workbook.createCellStyle();
+		CellStyle nonNumericStyle = workbook.createCellStyle();
 		Font font = workbook.createFont();
-		nonNumbericStyle.setFillForegroundColor(HSSFColor.HSSFColorPredefined.WHITE.getIndex());
-		nonNumbericStyle.setFillBackgroundColor(HSSFColor.HSSFColorPredefined.BLUE.getIndex());
-		nonNumbericStyle.setFillPattern(FillPatternType.FINE_DOTS);
-		nonNumbericStyle.setFont(font);
-		return nonNumbericStyle;
+		nonNumericStyle.setFillForegroundColor(HSSFColor.HSSFColorPredefined.WHITE.getIndex());
+		nonNumericStyle.setFillBackgroundColor(HSSFColor.HSSFColorPredefined.DARK_GREEN.getIndex());
+		nonNumericStyle.setFillPattern(FillPatternType.FINE_DOTS);
+		nonNumericStyle.setFont(font);
+		return nonNumericStyle;
 	}
 	
 	public ByteArrayOutputStream generate(
