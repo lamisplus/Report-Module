@@ -33,13 +33,12 @@ public interface PrepReportDto {
     public String getBaselineHeight();
     public String getHIVStatusAtPrepInitiation();
     public String getIndicationForPrep();
-/*    public String getRiskType();
-    public String getEntryPoint();
-    public String getFacilityReferredTo();
-
-    public String getCurrentRegimenStart();
-    public String getCurrentPrepStatus();
-    public LocalDate getCurrentPrepStatusDate();*/
+    /*    public String getRiskType();
+		public String getEntryPoint();
+		public String getFacilityReferredTo();
+		public String getCurrentRegimenStart();
+		public String getCurrentPrepStatus();
+		public LocalDate getCurrentPrepStatusDate();*/
     public LocalDate getCurrentUrinalysisDate();
     public String getCurrentUrinalysis();
     public LocalDate getBaseLineUrinalysisDate();
@@ -53,19 +52,20 @@ public interface PrepReportDto {
     public String getCurrentHeight();
     public String getCurrentHIVStatus();
     public String getPregnancyStatus();
-
+    
     public LocalDate getPrepCommencementDate();
     public String getCurrentStatus();
-
+    
     public LocalDate getDateOfCurrentStatus();
     public LocalDate getDateOfCurrentHIVStatus();
-
+    
     public String getBaseLineHepatitisB();
     public String getBaseLineHepatitisC();
     public String getInterruptionReason();
     public LocalDate getInterruptionDate();
     public String getBaseLineCreatinine();
     public LocalDate getHivEnrollmentDate();
+    String getTargetGroup();
     
 }
 

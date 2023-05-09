@@ -1,8 +1,11 @@
 package org.lamisplus.modules.report.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import liquibase.pro.packaged.O;
 import lombok.NonNull;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.audit4j.core.util.Log;
 import org.lamisplus.modules.hiv.domain.dto.*;
 import org.lamisplus.modules.report.domain.BiometricReportDto;
@@ -13,15 +16,18 @@ import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.springframework.stereotype.Component;
 
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDate;
 import java.util.*;
 
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class GenerateExcelDataHelper {
-	
-	
+	List<Object> errorObjects = new ArrayList<Object>();
 	public static List<Map<Integer, Object>> fillPatientLineListDataMapper(@NonNull List<PatientLineDto> listFinalResult) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		for (PatientLineDto patient : listFinalResult) {
@@ -101,133 +107,189 @@ public class GenerateExcelDataHelper {
 	
 	public  List<Map<Integer, Object>> fillRadetDataMapper(@NonNull List<RADETDTOProjection> reportDtos, LocalDate endDate) {
 			List<Map<Integer, Object>> result = new ArrayList<>();
+		     deleteErrorFile();
 			int sn = 1;
-			for (RADETDTOProjection radetReportDto : reportDtos) {
-				Map<Integer, Object> map = new HashMap<>();
-				String personUuid = radetReportDto.getPersonUuid();
-				int index = 0;
-				map.put(index++, getStringValue(String.valueOf(sn)));
-				map.put(index++, radetReportDto.getState());
-				map.put(index++, radetReportDto.getLga());
-				map.put(index++, radetReportDto.getFacilityName());
-				map.put(index++, radetReportDto.getDatimId());
-				map.put(index++, personUuid);
-				map.put(index++, radetReportDto.getHospitalNumber());
-				//ovc
-				map.put(index++, radetReportDto.getHouseholdNumber());
-				map.put(index++,  radetReportDto.getOvcNumber());
-				
-				map.put(index++, radetReportDto.getGender());
-				map.put(index++, radetReportDto.getTargetGroup());
-				map.put(index++, getStringValue(String.valueOf(radetReportDto.getCurrentWeight())));
-				map.put(index++, radetReportDto.getPregnancyStatus());
-				map.put(index++, radetReportDto.getDateOfBirth());
-				
-				map.put(index++, getStringValue(String.valueOf(radetReportDto.getAge())));
-				map.put(index++, getStringValue(String.valueOf(radetReportDto.getCareEntry())));
-				
-				map.put(index++,radetReportDto.getArtStartDate());
-				map.put(index++, radetReportDto.getLastPickupDate());
-				map.put(index++, getStringValue(String.valueOf(radetReportDto.getMonthsOfARVRefill())));
-				
-				
-				map.put(index++, radetReportDto.getRegimenLineAtStart());
-				map.put(index++, radetReportDto.getRegimenAtStart());
-				map.put(index++, radetReportDto.getDateOfCurrentRegimen());
-				map.put(index++, radetReportDto.getCurrentRegimenLine());
-				map.put(index++, radetReportDto.getCurrentARTRegimen());
-				
-				//cd4
-				map.put(index++, radetReportDto.getCurrentClinicalStage());
-				map.put(index++, radetReportDto.getDateOfLastCd4Count());
-				map.put(index++,radetReportDto.getLastCd4Count());
-				//vl
-				map.put(index++, radetReportDto.getDateOfViralLoadSampleCollection());
-				map.put(index++, radetReportDto.getDateOfCurrentViralLoadSample());
-				map.put(index++, radetReportDto.getCurrentViralLoad());
-				map.put(index++, radetReportDto.getDateOfCurrentViralLoad());
-				map.put(index++, radetReportDto.getViralLoadIndication());
-				map.put(index++, radetReportDto.getVlEligibilityStatus());
-				map.put(index++, radetReportDto.getDateOfVlEligibilityStatus());
-				
-				//current status
-				map.put(index++, radetReportDto.getCurrentStatus());
-				map.put(index++, radetReportDto.getCurrentStatusDate());
-				map.put(index++, radetReportDto.getCauseOfDeath());
-				
-				//previous status
-				
-				map.put(index++, radetReportDto.getPreviousStatus());
-				map.put(index++, radetReportDto.getPreviousStatusDate());
-				
-				
-				map.put(index++, radetReportDto.getEnrollmentSetting());
-				//TB
-				//map.put(index++,radetReportDto.getTbStatus());
-				map.put(index++,radetReportDto.getDateOfTbScreened());
-				map.put(index++,radetReportDto.getTbStatus());
-				//tb lab
-				map.put(index++,radetReportDto.getDateOfTbSampleCollection());
-				map.put(index++,radetReportDto.getTbDiagnosticTestType());
-				map.put(index++,radetReportDto.getDateofTbDiagnosticResultReceived());
-				map.put(index++,radetReportDto.getTbDiagnosticResult());
-				
-				map.put(index++, radetReportDto.getTbTreatmentStartDate());
-				map.put(index++, radetReportDto.getTbTreatementType());
-				map.put(index++, radetReportDto.getTbCompletionDate());
-				map.put(index++, radetReportDto.getTbTreatmentOutcome());
-				
-				//TPT
-				map.put(index++, radetReportDto.getDateOfIptStart());
-				map.put(index++, radetReportDto.getIptType());
-				map.put(index++, radetReportDto.getIptCompletionDate());
-				map.put(index++, radetReportDto.getIptCompletionStatus());
-				
-				//EAC
-				map.put(index++, radetReportDto.getDateOfCommencementOfEAC());
-				map.put(index++,getStringValue(String.valueOf(radetReportDto.getNumberOfEACSessionCompleted())));
-				map.put(index++, radetReportDto.getDateOfLastEACSessionCompleted());
-				map.put(index++, radetReportDto.getDateOfExtendEACCompletion());
-				map.put(index++, radetReportDto.getDateOfRepeatViralLoadEACSampleCollection());
-				map.put(index++, radetReportDto.getRepeatViralLoadResult());
-				map.put(index++, radetReportDto.getDateOfRepeatViralLoadResult());
-				//DSD MOdel
-				
-				map.put(index++, radetReportDto.getDsdModel());
-				if(radetReportDto.getDsdModel() != null){
-					map.put(index++, radetReportDto.getDateOfCurrentRegimen());
-				}else {
-					map.put(index++, null);
-				}
-				//chronic care
-				map.put(index++, null);
-				map.put(index++, null);
-				map.put(index++, null);
-				
-				//cervicalCancerScreeningType
-				map.put(index++, radetReportDto.getDateOfCervicalCancerScreening());
-				map.put(index++, radetReportDto.getCervicalCancerScreeningType());
-				map.put(index++, radetReportDto.getCervicalCancerScreeningMethod());
-				map.put(index++, radetReportDto.getResultOfCervicalCancerScreening());
-				
-				//Precancerous
-				map.put(index++,null);
-				map.put(index++,null);
-				
-				//biometrics
-				map.put(index++, radetReportDto.getDateBiometricsEnrolled());
-				map.put(index++, getStringValue(String.valueOf(radetReportDto.getNumberOfFingersCaptured())));
-				map.put(index, null);
-				result.add(map);
-				sn++;
+			Log.info("converting RADET db records to excel ....");
+		     RADETDTOProjection currentRecord = reportDtos.get(0);
+			 for (RADETDTOProjection radetReportDto : reportDtos) {
+				 try {
+					 currentRecord = radetReportDto;
+					 Map<Integer, Object> map = new HashMap<>();
+					 String personUuid = radetReportDto.getPersonUuid();
+					 Double repeatVl = null;
+					 Double currentVl = null;
+					 int index = 0;
+					 boolean isCurrentVlValid = isNotANull(radetReportDto.getCurrentViralLoad());
+					 currentVl = isCurrentVlValid ? Double.parseDouble(radetReportDto.getCurrentViralLoad()) : null;
+					 boolean isRepeatValidNumber = isNotANull(radetReportDto.getRepeatViralLoadResult());
+					 repeatVl = isRepeatValidNumber ? Double.parseDouble(radetReportDto.getRepeatViralLoadResult()) : null;
+					 map.put(index++, sn);
+					 map.put(index++, radetReportDto.getState());
+					 map.put(index++, radetReportDto.getLga());
+					 map.put(index++, radetReportDto.getFacilityName());
+					 map.put(index++, radetReportDto.getDatimId());
+					 map.put(index++, personUuid);
+					 map.put(index++, radetReportDto.getHospitalNumber());
+					 //ovc
+					 map.put(index++, radetReportDto.getHouseholdNumber());
+					 map.put(index++, radetReportDto.getOvcNumber());
+					
+					 map.put(index++, radetReportDto.getGender());
+					 map.put(index++, radetReportDto.getTargetGroup());
+					 map.put(index++, radetReportDto.getCurrentWeight());
+					 map.put(index++, radetReportDto.getPregnancyStatus());
+					 map.put(index++, radetReportDto.getDateOfBirth());
+					
+					 map.put(index++, radetReportDto.getAge());
+					 map.put(index++, getStringValue(String.valueOf(radetReportDto.getCareEntry())));
+					
+					 map.put(index++, radetReportDto.getArtStartDate());
+					 map.put(index++, radetReportDto.getLastPickupDate());
+					 map.put(index++, radetReportDto.getMonthsOfARVRefill());
+					
+					
+					 map.put(index++, radetReportDto.getRegimenLineAtStart());
+					 map.put(index++, radetReportDto.getRegimenAtStart());
+					 map.put(index++, radetReportDto.getDateOfCurrentRegimen());
+					 map.put(index++, radetReportDto.getCurrentRegimenLine());
+					 map.put(index++, radetReportDto.getCurrentARTRegimen());
+					
+					 //cd4
+					 map.put(index++, radetReportDto.getCurrentClinicalStage());
+					 map.put(index++, radetReportDto.getDateOfLastCd4Count());
+					 map.put(index++, radetReportDto.getLastCd4Count());
+					 //vl
+					 map.put(index++, radetReportDto.getDateOfViralLoadSampleCollection());
+					 map.put(index++, radetReportDto.getDateOfCurrentViralLoadSample());
+					 map.put(index++, currentVl);
+					 map.put(index++, radetReportDto.getDateOfCurrentViralLoad());
+					 map.put(index++, radetReportDto.getViralLoadIndication());
+					 map.put(index++, radetReportDto.getVlEligibilityStatus());
+					 map.put(index++, radetReportDto.getDateOfVlEligibilityStatus());
+					
+					 //current status
+					 map.put(index++, radetReportDto.getCurrentStatus());
+					 map.put(index++, radetReportDto.getCurrentStatusDate());
+					 map.put(index++, radetReportDto.getCauseOfDeath());
+					
+					 //previous status
+					
+					 map.put(index++, radetReportDto.getPreviousStatus());
+					 map.put(index++, radetReportDto.getPreviousStatusDate());
+					
+					
+					 map.put(index++, radetReportDto.getEnrollmentSetting());
+					 //TB
+					 map.put(index++, radetReportDto.getDateOfTbScreened());
+					 map.put(index++, radetReportDto.getTbStatus());
+					 //tb lab
+					 map.put(index++, radetReportDto.getDateOfTbSampleCollection());
+					 map.put(index++, radetReportDto.getTbDiagnosticTestType());
+					 map.put(index++, radetReportDto.getDateofTbDiagnosticResultReceived());
+					 map.put(index++, radetReportDto.getTbDiagnosticResult());
+					
+					 map.put(index++, radetReportDto.getTbTreatmentStartDate());
+					 map.put(index++, radetReportDto.getTbTreatementType());
+					 map.put(index++, radetReportDto.getTbCompletionDate());
+					 map.put(index++, radetReportDto.getTbTreatmentOutcome());
+					
+					 //TPT
+					 map.put(index++, radetReportDto.getDateOfIptStart());
+					 map.put(index++, radetReportDto.getIptType());
+					 map.put(index++, radetReportDto.getIptCompletionDate());
+					 map.put(index++, radetReportDto.getIptCompletionStatus());
+					
+					 //EAC
+					 map.put(index++, radetReportDto.getDateOfCommencementOfEAC());
+					 map.put(index++, radetReportDto.getNumberOfEACSessionCompleted());
+					 map.put(index++, radetReportDto.getDateOfLastEACSessionCompleted());
+					 map.put(index++, radetReportDto.getDateOfExtendEACCompletion());
+					 map.put(index++, radetReportDto.getDateOfRepeatViralLoadEACSampleCollection());
+					 map.put(index++, repeatVl);
+					 map.put(index++, radetReportDto.getDateOfRepeatViralLoadResult());
+					
+					 //DSD MOdel
+					 map.put(index++, radetReportDto.getDsdModel());
+					 if (radetReportDto.getDsdModel() != null) {
+						 map.put(index++, radetReportDto.getDateOfCurrentRegimen());
+					 } else {
+						 map.put(index++, null);
+					 }
+					 map.put(index++, null);
+					
+					 //chronic care
+					 map.put(index++, null);
+					 map.put(index++, null);
+					
+					 //cervicalCancerScreeningType
+					 map.put(index++, radetReportDto.getDateOfCervicalCancerScreening());
+					 map.put(index++, radetReportDto.getCervicalCancerScreeningType());
+					 map.put(index++, radetReportDto.getCervicalCancerScreeningMethod());
+					 map.put(index++, radetReportDto.getResultOfCervicalCancerScreening());
+					 //Precancerous
+					 if (radetReportDto.getCervicalCancerTreatmentScreened() != null) {
+						 map.put(index++, radetReportDto.getDateOfCervicalCancerScreening());
+					 } else {
+						 map.put(index++, null);
+					 }
+					 map.put(index++, radetReportDto.getCervicalCancerTreatmentScreened());
+					
+					
+					 //biometrics
+					 map.put(index++, radetReportDto.getDateBiometricsEnrolled());
+					 map.put(index++, radetReportDto.getNumberOfFingersCaptured());
+					 map.put(index, null);
+					 result.add(map);
+					 sn++;
+				 } catch (Exception e) {
+					 LOG.error("An error occurred when converting db record to excel for patient id {}", currentRecord.getPersonUuid());
+					 writeToErrorFile(currentRecord);
+					 LOG.error("The error message is: " + e.getMessage());
+				   }
+			 }
+			 LOG.info("Done converting db records total size "+ result.size());
+			return result;
+	}
+	
+	
+	private void writeToErrorFile(Object obj){
+		ObjectMapper objectMapper = new ObjectMapper();
+		File jsonFile = new File("radet_error.json");
+		try {
+			errorObjects.add(obj);
+			objectMapper.writeValue(jsonFile, errorObjects);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	private void deleteErrorFile(){
+		File file = new File("radet_error.json");
+		if(file.exists()) {
+			boolean deleted = file.delete();
+			if(deleted) {
+				LOG.info("radet_error deleted successfully");
+			} else {
+				LOG.info("radet_error to delete the file");
 			}
-		Log.info("Container result: " + result.size());
-		return result;
+		} else {
+			LOG.info("radet_error doesn't exist");
+		}
+	}
+	
+	
+	private static boolean isNotANull(String value) {
+		return value != null
+				&& !value.isEmpty()
+				&& !value.contains("-")
+				&& !value.contains("+")
+				&& ! value.equalsIgnoreCase("null");
 	}
 	
 	public  List<Map<Integer, Object>> fillHtsDataMapper(@NonNull List<HtsReportDto> htsReportDtos) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		int sn = 1;
+		Log.info("converting HTS db records to excel ....");
+		try {
 		for (HtsReportDto htsReportDto : htsReportDtos) {
 			if (htsReportDto != null) {
 				Map<Integer, Object> map = new HashMap<>();
@@ -295,19 +357,26 @@ public class GenerateExcelDataHelper {
 				sn++;
 			}
 		}
-		Log.info("result: " + result.size());
+		LOG.info("Done converting db records total size {}", result.size());
+		return result;
+		}catch (Exception e) {
+			LOG.error("An error occurred when converting db records to excel");
+			LOG.error("The error message is: " + e.getMessage());
+		}
 		return result;
 	}
-
-
+	
+	
 	public  List<Map<Integer, Object>> fillPrepDataMapper(@NonNull List<PrepReportDto> prepReportDtos) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		int sn = 1;
+		Log.info("converting PrEP db records to excel ....");
+		try {
 		for (PrepReportDto prepReportDto : prepReportDtos) {
 			if (prepReportDto != null) {
 				Map<Integer, Object> map = new HashMap<>();
 				int index = 0;
-
+				
 				map.put(index++, String.valueOf(sn));
 				map.put(index++, String.valueOf(prepReportDto.getState()));
 				map.put(index++, String.valueOf(prepReportDto.getLga()));
@@ -321,6 +390,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getSex())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getAge())));
 				map.put(index++,prepReportDto.getDateOfBirth());
+				map.put(index++,getStringValue(String.valueOf(prepReportDto.getTargetGroup())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getPhone())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getMaritalStatus())));
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getAddress())));
@@ -358,12 +428,17 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(prepReportDto.getInterruptionReason())));
 				map.put(index++, prepReportDto.getInterruptionDate());
 				map.put(index++, prepReportDto.getHivEnrollmentDate());
-
+				
 				result.add(map);
 				sn++;
 			}
 		}
-		Log.info("result: " + result.size());
+		LOG.info("Done converting db records total size {}", result.size());
+		return result;
+	}catch (Exception e) {
+		LOG.error("An error occurred when converting db records to excel");
+		LOG.error("The error message is: " + e.getMessage());
+	}
 		return result;
 	}
 
@@ -371,6 +446,8 @@ public class GenerateExcelDataHelper {
 	public static List<Map<Integer, Object>> fillBiometricDataMapper(@NonNull List<BiometricReportDto> biometrics) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		int sn = 1;
+		Log.info("converting Biometric db records to excel ....");
+		try {
 		for (BiometricReportDto dto : biometrics) {
 			Map<Integer, Object> map = new HashMap<>();
 			int index = 0;
@@ -391,6 +468,12 @@ public class GenerateExcelDataHelper {
 			result.add(map);
 			sn++;
 		}
+		LOG.info("Done converting db records total size {}", result.size());
+		return result;
+	}catch (Exception e) {
+		LOG.error("An error occurred when converting db records to excel");
+		LOG.error("The error message is: " + e.getMessage());
+		}
 		return result;
 	}
 	
@@ -402,6 +485,8 @@ public class GenerateExcelDataHelper {
 			@NonNull List<ClinicDataDto> clinicDataDtos) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		int sn = 1;
+		Log.info("converting Clinic db records to excel ....");
+		try {
 		for (ClinicDataDto clinicDataDto : clinicDataDtos) {
 			Map<Integer, Object> map = new HashMap<>();
 			int index = 0;
@@ -428,6 +513,12 @@ public class GenerateExcelDataHelper {
 			result.add(map);
 			sn++;
 		}
+		LOG.info("Done converting db records total size {}", result.size());
+		return result;
+		}catch (Exception e) {
+		LOG.error("An error occurred when converting db records to excel");
+		LOG.error("The error message is: " + e.getMessage());
+		}
 		return result;
 	}
 	
@@ -435,6 +526,8 @@ public class GenerateExcelDataHelper {
 			@NonNull List<PharmacyReport> pharmacies) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		int sn = 1;
+		Log.info("converting Pharmacy db records to excel ....");
+		try {
 		for (PharmacyReport pharmacy : pharmacies) {
 			Map<Integer, Object> map = new HashMap<>();
 			int index = 0;
@@ -453,6 +546,12 @@ public class GenerateExcelDataHelper {
 			result.add(map);
 			sn++;
 		}
+		LOG.info("Done converting db records total size {}", result.size());
+		return result;
+		}catch (Exception e) {
+		LOG.error("An error occurred when converting db records to excel");
+		LOG.error("The error message is: " + e.getMessage());
+		}
 		return result;
 	}
 	
@@ -464,6 +563,8 @@ public class GenerateExcelDataHelper {
 			@NonNull List<LabReport> labReports) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		int sn = 1;
+		Log.info("converting Laboratory db records to excel ....");
+		try {
 		for (LabReport labReport : labReports) {
 			Map<Integer, Object> map = new HashMap<>();
 			int index = 0;
@@ -479,6 +580,12 @@ public class GenerateExcelDataHelper {
 			map.put(index, labReport.getDateReported());
 			result.add(map);
 			sn++;
+		}
+		LOG.info("Done converting db records total size {}", result.size());
+		return result;
+		}catch (Exception e) {
+		LOG.error("An error occurred when converting db records to excel");
+		LOG.error("The error message is: " + e.getMessage());
 		}
 		return result;
 	}

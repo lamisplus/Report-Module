@@ -294,6 +294,8 @@ public class Constants {
 					"HTS Longitude"
 			);
 
+
+	
 	public static final List<String> PrEP_HEADER =
 			Arrays.asList(
 					"S/No",
@@ -309,6 +311,7 @@ public class Constants {
 					"Sex",
 					"Age",
 					"Date Of Birth (yyyy-mm-dd)",
+					"Target Group",
 					"Phone Number",
 					"Marital Status",
 					"Client Address",
@@ -347,6 +350,7 @@ public class Constants {
 					"Date of Discontinuation/Stopped",
 					"Date Of HIV Enrollment (yyyy-mm-dd)"
 			);
+	
 	
 	public static final List<String> CLINIC_HEADER =
 			Arrays.asList(

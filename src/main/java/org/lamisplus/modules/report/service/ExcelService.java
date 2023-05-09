@@ -1,10 +1,11 @@
 package org.lamisplus.modules.report.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.audit4j.core.util.Log;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class ExcelService {
 	
 	private SXSSFWorkbook workbook;
@@ -31,11 +33,7 @@ public class ExcelService {
 		sheet = workbook.createSheet(sheetName);
 		Row row = sheet.createRow(0);
 		CellStyle style = workbook.createCellStyle();
-		Font font  = workbook.createFont();
-		font.setBold(true);
-		font.setFontHeightInPoints((short) 12);
-		font.setBold(true);
-		font.setColor(HSSFColor.HSSFColorPredefined.BLACK.getIndex());
+		Font font = getFont();
 		style.setFont(font);
 		for (int i = 0; i < headers.size(); i++) {
 			// O(n)T  || O(1)
@@ -44,11 +42,7 @@ public class ExcelService {
 	}
 	
 	private int createCellHeader(Row row, int columnCount, String value){
-		Font font  = workbook.createFont();
-		font.setBold(true);
-		font.setFontHeightInPoints((short) 12);
-		font.setBold(true);
-		font.setColor(HSSFColor.HSSFColorPredefined.BLACK.getIndex());
+		Font font = getFont();
 		CellStyle style = workbook.createCellStyle();
 		style.setFont(font);
 		Cell cell = row.createCell(columnCount);
@@ -57,23 +51,29 @@ public class ExcelService {
 		return 0;
 	}
 	
+	@NotNull
+	private Font getFont() {
+		Font font  = workbook.createFont();
+		font.setBold(true);
+		font.setFontHeightInPoints((short) 12);
+		font.setBold(true);
+		font.setColor(HSSFColor.HSSFColorPredefined.DARK_GREEN.getIndex());
+		return font;
+	}
+	
 	private int createCell(Row row, int columnCount, Object value, CellStyle style ) {
 		Cell cell = row.createCell(columnCount);
 		cell.setCellStyle(null);
 		if (value instanceof Integer) {
 			cell.setCellValue(((int) value));
-			formatTheCell(style, "0");
 			cell.setCellStyle(style);
 			return 0;
 		} else if (value instanceof Long) {
 			cell.setCellValue((long) value);
-			formatTheCell(style, "0");
 			cell.setCellStyle(style);
 			return 1;
 		} else if(value instanceof Double){
 			cell.setCellValue((double) value);
-			String customFormat = "#,##0";
-			formatTheCell(style, customFormat);
 			cell.setCellStyle(style);
 			return 2;
 		}else if (value instanceof Boolean) {
@@ -108,6 +108,16 @@ public class ExcelService {
 		
 	}
 	
+	
+	private  void getDoubleFormat(CellStyle style) {
+		StringBuilder formatBuilder = new StringBuilder("#,##0");
+		formatBuilder.append(".");
+		for (int i = 0; i < 2; i++) {
+			formatBuilder.append("0");
+		}
+		String format = formatBuilder.toString();
+		style.setDataFormat(workbook.createDataFormat().getFormat(format));
+	}
 	private void formatTheCell(CellStyle style, String s) {
 		CreationHelper createHelper = workbook.getCreationHelper();
 		style.setDataFormat(createHelper.createDataFormat().getFormat(s));
@@ -115,19 +125,43 @@ public class ExcelService {
 	
 	private void write(List<Map<Integer, Object>> listData) {
 		int rowCount = 1;
-		CellStyle style = workbook.createCellStyle();
-		Font font = workbook.createFont();
-		font.setFontHeightInPoints((short) 11);
-		style.setFont(font);
+		CellStyle nonNumericStyle = getNonNumericStyle();
+		CellStyle numericStyle = workbook.createCellStyle();
+		numericStyle.setDataFormat((short) BuiltinFormats.getBuiltinFormat("#,00"));
+		numericStyle.setAlignment(HorizontalAlignment.LEFT);
+		CellStyle doubleStyle = workbook.createCellStyle();
+		getDoubleFormat(doubleStyle);
+		doubleStyle.setAlignment(HorizontalAlignment.LEFT);
 		
 		for (Map<Integer, Object> map : listData) { // you may be thinking O(n^2) but actually it is O(n)
 			Row row = sheet.createRow(rowCount++);
 			int columnCount = 0;
 			for (Iterator<Integer> iterator = map.keySet().iterator(); iterator.hasNext(); ) {
 				Integer key = iterator.next();
-				createCell(row, columnCount++, map.get(key), style);
+				Object value = map.get(key);
+				if (value instanceof Double || value instanceof Integer || value instanceof Long) {
+					if(value instanceof Integer || value instanceof Long){
+						createCell(row, columnCount++, value, numericStyle);
+					}else {
+						createCell(row, columnCount++, value, doubleStyle);
+					}
+				} else {
+					createCell(row, columnCount++, value, nonNumericStyle);
+				}
 			}
 		}
+	}
+	
+	@NotNull
+	private CellStyle getNonNumericStyle() {
+		CellStyle nonNumericStyle = workbook.createCellStyle();
+		Font font = workbook.createFont();
+		nonNumericStyle.setFillForegroundColor(HSSFColor.HSSFColorPredefined.WHITE.getIndex());
+		nonNumericStyle.setFillBackgroundColor(HSSFColor.HSSFColorPredefined.BLUE_GREY.getIndex());
+		nonNumericStyle.setAlignment(HorizontalAlignment.LEFT);
+		nonNumericStyle.setFillPattern(FillPatternType.FINE_DOTS);
+		nonNumericStyle.setFont(font);
+		return nonNumericStyle;
 	}
 	
 	public ByteArrayOutputStream generate(
