@@ -125,12 +125,13 @@ public class ExcelService {
 	
 	private void write(List<Map<Integer, Object>> listData) {
 		int rowCount = 1;
-		
 		CellStyle nonNumericStyle = getNonNumericStyle();
 		CellStyle numericStyle = workbook.createCellStyle();
 		numericStyle.setDataFormat((short) BuiltinFormats.getBuiltinFormat("#,00"));
+		numericStyle.setAlignment(HorizontalAlignment.LEFT);
 		CellStyle doubleStyle = workbook.createCellStyle();
 		getDoubleFormat(doubleStyle);
+		doubleStyle.setAlignment(HorizontalAlignment.LEFT);
 		
 		for (Map<Integer, Object> map : listData) { // you may be thinking O(n^2) but actually it is O(n)
 			Row row = sheet.createRow(rowCount++);
@@ -156,7 +157,8 @@ public class ExcelService {
 		CellStyle nonNumericStyle = workbook.createCellStyle();
 		Font font = workbook.createFont();
 		nonNumericStyle.setFillForegroundColor(HSSFColor.HSSFColorPredefined.WHITE.getIndex());
-		nonNumericStyle.setFillBackgroundColor(HSSFColor.HSSFColorPredefined.LIGHT_ORANGE.getIndex());
+		nonNumericStyle.setFillBackgroundColor(HSSFColor.HSSFColorPredefined.BLUE_GREY.getIndex());
+		nonNumericStyle.setAlignment(HorizontalAlignment.LEFT);
 		nonNumericStyle.setFillPattern(FillPatternType.FINE_DOTS);
 		nonNumericStyle.setFont(font);
 		return nonNumericStyle;

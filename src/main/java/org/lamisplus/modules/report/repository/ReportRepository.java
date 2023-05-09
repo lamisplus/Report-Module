@@ -578,6 +578,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " MIN(lr.date_result_reported) AS date_result_reported\n" +
             "         FROM\n" +
             " laboratory_result lr\n" +
+            "     INNER JOIN public.laboratory_test  lt on lr.test_id = lt.id\n" +
+            "     INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication"+
             "     INNER JOIN (\n" +
             "     SELECT\n" +
             "         *\n" +
@@ -596,12 +598,16 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         INNER JOIN hiv_eac_session hes ON hes.eac_id = he.uuid\n" +
             " WHERE\n" +
             "         he.status = 'COMPLETED'\n" +
+            "         AND hes.eac_session_date < ?3"+
             "   AND he.archived = 0\n" +
             "         ) e\n" +
             "     WHERE\n" +
             " e.row_number = 1\n" +
             " ) AS last_eac_complete ON last_eac_complete.person_uuid = lr.patient_uuid\n" +
             "     AND lr.date_result_reported > last_eac_complete.eac_session_date\n" +
+            "     AND lt.lab_test_id = 16\n" +
+            "     AND last_eac_complete.eac_session_date < ?3\n" +
+            "     AND  lt.viral_load_indication !=719"+
             "         GROUP BY\n" +
             " lr.patient_uuid\n" +
             "     ) r ON l.date_result_reported = r.date_result_reported\n" +
@@ -815,6 +821,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         hiv_observation\n" +
             "     WHERE\n" +
             " archived = 0\n" +
+            "AND date_of_observation < ?3"+
             "     GROUP BY\n" +
             "         person_uuid\n" +
             "     ORDER BY\n" +
@@ -868,13 +875,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     SELECT\n" +
             "         (\n" +
             " CASE\n" +
-            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '28 day' < ?5 THEN 'IIT'\n" +
+            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?5 THEN 'IIT'\n" +
             "     ELSE 'ACTIVE'\n" +
             "     END\n" +
             " ) status,\n" +
             "         (\n" +
             " CASE\n" +
-            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '28 day' < ?5  THEN hp.visit_date + hp.refill_period + INTERVAL '28 day'\n" +
+            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?5  THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
             "     ELSE hp.visit_date\n" +
             "     END\n" +
             " ) AS visit_date,\n" +
@@ -882,21 +889,18 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     FROM\n" +
             "         hiv_art_pharmacy hp\n" +
             " INNER JOIN (\n" +
-            " SELECT\n" +
-            "     DISTINCT hap.person_uuid,\n" +
-            "  MAX(visit_date) AS MAXDATE\n" +
-            " FROM\n" +
-            "     hiv_art_pharmacy hap\n" +
-            "         INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid\n" +
-            "         AND h.archived = 0\n" +
-            " WHERE\n" +
-            "         hap.archived = 0\n" +
-            "   AND hap.visit_date <= ?5\n" +
-            " GROUP BY\n" +
-            "     hap.person_uuid\n" +
-            " ORDER BY\n" +
-            "     MAXDATE ASC\n" +
-            "         ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid\n" +
+            "         SELECT hap.person_uuid, hap.visit_date AS  MAXDATE, ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
+            "           FROM public.hiv_art_pharmacy hap \n" +
+            "                    INNER JOIN public.hiv_art_pharmacy_regimens pr \n" +
+            "                    ON pr.art_pharmacy_id = hap.id \n" +
+            "            INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+            "            INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
+            "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
+            "            WHERE r.regimen_type_id in (1,2,3,4,14) \n" +
+            "            AND hap.archived = 0                \n" +
+            "            AND hap.visit_date < ?3\n" +
+            "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
+            "      AND MAX.rnkkk3 = 1"+
             "     WHERE\n" +
             " hp.archived = 0\n" +
             "       AND hp.visit_date <= ?5\n" +
@@ -954,13 +958,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     SELECT\n" +
             "         (\n" +
             " CASE\n" +
-            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '28 day' < ?4 THEN 'IIT'\n" +
+            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?4 THEN 'IIT'\n" +
             "     ELSE 'ACTIVE'\n" +
             "     END\n" +
             " ) status,\n" +
             "         (\n" +
             " CASE\n" +
-            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '28 day' <  ?4 THEN hp.visit_date + hp.refill_period + INTERVAL '28 day'\n" +
+            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' <  ?4 THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
             "     ELSE hp.visit_date\n" +
             "     END\n" +
             " ) AS visit_date,\n" +
@@ -968,21 +972,18 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     FROM\n" +
             "         hiv_art_pharmacy hp\n" +
             " INNER JOIN (\n" +
-            " SELECT\n" +
-            "     DISTINCT hap.person_uuid,\n" +
-            "  MAX(visit_date) AS MAXDATE\n" +
-            " FROM\n" +
-            "     hiv_art_pharmacy hap\n" +
-            "         INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid\n" +
-            "         AND h.archived = 0\n" +
-            " WHERE\n" +
-            "         hap.archived = 0\n" +
-            "   AND hap.visit_date <=  ?4\n" +
-            " GROUP BY\n" +
-            "     hap.person_uuid\n" +
-            " ORDER BY\n" +
-            "     MAXDATE ASC\n" +
-            "         ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid\n" +
+            "         SELECT hap.person_uuid, hap.visit_date AS  MAXDATE, ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
+            "           FROM public.hiv_art_pharmacy hap \n" +
+            "                    INNER JOIN public.hiv_art_pharmacy_regimens pr \n" +
+            "                    ON pr.art_pharmacy_id = hap.id \n" +
+            "            INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+            "            INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
+            "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
+            "            WHERE r.regimen_type_id in (1,2,3,4,14) \n" +
+            "            AND hap.archived = 0                \n" +
+            "            AND hap.visit_date < ?4\n" +
+            "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
+            "      AND MAX.rnkkk3 = 1"+
             "     WHERE\n" +
             " hp.archived = 0\n" +
             "       AND hp.visit_date <=  ?4\n" +
@@ -1028,13 +1029,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         SELECT\n" +
             " (\n" +
             "     CASE\n" +
-            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '28 day' < ?3 THEN 'IIT'\n" +
+            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?3 THEN 'IIT'\n" +
             "         ELSE 'ACTIVE'\n" +
             "         END\n" +
             "     ) status,\n" +
             " (\n" +
             "     CASE\n" +
-            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '28 day' < ?3 THEN hp.visit_date + hp.refill_period + INTERVAL '28 day'\n" +
+            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?3 THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
             "         ELSE hp.visit_date\n" +
             "         END\n" +
             "     ) AS visit_date,\n" +
@@ -1042,24 +1043,21 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         FROM\n" +
             " hiv_art_pharmacy hp\n" +
             "     INNER JOIN (\n" +
-            "     SELECT\n" +
-            "         DISTINCT hap.person_uuid,\n" +
-            "      MAX(visit_date) AS MAXDATE\n" +
-            "     FROM\n" +
-            "         hiv_art_pharmacy hap\n" +
-            " INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid\n" +
-            " AND h.archived = 0\n" +
+            "         SELECT hap.person_uuid, hap.visit_date AS  MAXDATE, ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
+            "           FROM public.hiv_art_pharmacy hap \n" +
+            "                    INNER JOIN public.hiv_art_pharmacy_regimens pr \n" +
+            "                    ON pr.art_pharmacy_id = hap.id \n" +
+            "            INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+            "            INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
+            "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
+            "            WHERE r.regimen_type_id in (1,2,3,4,14) \n" +
+            "            AND hap.archived = 0                \n" +
+            "            AND hap.visit_date < ?3\n" +
+            "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
+            "      AND MAX.rnkkk3 = 1"+
             "     WHERE\n" +
-            " hap.archived = 0\n" +
-            "       AND hap.visit_date < ?3 \n" +
-            "     GROUP BY\n" +
-            "         hap.person_uuid\n" +
-            "     ORDER BY\n" +
-            "         MAXDATE ASC\n" +
-            " ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid\n" +
-            "         WHERE\n" +
             "     hp.archived = 0\n" +
-            "           AND hp.visit_date < ?3\n" +
+            "     AND hp.visit_date < ?3\n" +
             "     ) pharmacy\n" +
             "\n" +
             "         LEFT JOIN (\n" +
