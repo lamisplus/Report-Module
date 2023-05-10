@@ -103,7 +103,10 @@ public interface RADETDTOProjection {
 	String getCervicalCancerScreeningType();
 	
 	String getCervicalCancerScreeningMethod();
+	String getCervicalCancerTreatmentScreened();
 	LocalDate getDateOfCervicalCancerScreening();
+	
+	
 	String getOvcNumber();
 	String  getHouseholdNumber();
 	

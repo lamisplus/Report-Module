@@ -1,12 +1,12 @@
 package org.lamisplus.modules.report.service;
 
-import javafx.stage.Stage;
-import org.lamisplus.modules.patient.domain.Patient;
-import org.lamisplus.modules.patient.domain.entity.Visit;
+
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
 
+@Service
 public class Constants {
 	
 	// EXTENSION
@@ -294,19 +294,24 @@ public class Constants {
 					"HTS Longitude"
 			);
 
+
+	
 	public static final List<String> PrEP_HEADER =
 			Arrays.asList(
 					"S/No",
+					"State",
+					"LGA",
 					"Facility Id (Datim)",
 					"Facility Name",
+					"Patient Id (uuid)",
 					"Hospital Number",
 					"First Name",
 					"Surname",
 					"Other Names",
 					"Sex",
-					//"Target Group",
 					"Age",
 					"Date Of Birth (yyyy-mm-dd)",
+					"Target Group",
 					"Phone Number",
 					"Marital Status",
 					"Client Address",
@@ -315,22 +320,37 @@ public class Constants {
 					"Education",
 					"Occupation",
 					"Date Of Registration (yyyy-mm-dd)",
+					"Date Of Commencement (yyyy-mm-dd)",
 					"Baseline Regimen",
 					"Baseline Systolic bp",
 					"Baseline Diastolic bp",
 					"Baseline Weight (kg)",
 					"Baseline Height (cm)",
+					"Baseline Creatinine Clearance (mL/min)",
+					"Baseline Hepatitis B Screening",
+					"Baseline Hepatitis C Screening",
+					"Baseline Urinalysis",
+					"Date of Baseline Urinalysis",
 					"HIV status at PrEP Initiation",
 					"Indication for PrEP",
 					"Current Regimen",
 					"Date Of Last Pickup (yyyy-mm-dd)",
+					"Current Status",
+					"Date Of Current Status (yyyy-mm-dd)",
 					"Current Systolic bp",
 					"Current Diastolic bp",
 					"Current Weight (kg)",
 					"Current Height (cm)",
 					"Current HIV Status",
-					"Pregnancy Status"
+					"Date of Current HIV Status (yyyy-mm-dd)",
+					"Current Urinalysis",
+					"Date of Current Urinalysis",
+					"Pregnancy Status",
+					"Reasons for discontinuation/Stopped",
+					"Date of Discontinuation/Stopped",
+					"Date Of HIV Enrollment (yyyy-mm-dd)"
 			);
+	
 	
 	public static final List<String> CLINIC_HEADER =
 			Arrays.asList(

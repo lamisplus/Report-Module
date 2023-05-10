@@ -14,213 +14,230 @@ import java.util.List;
 public interface ReportRepository extends JpaRepository<Report, Long> {
     
     
-    @Query(value = "SELECT hc.client_code AS clientCode,   " +
-            "            (CASE WHEN hc.person_uuid IS NULL THEN INITCAP(hc.extra->>'first_name') ELSE INITCAP(pp.first_name) END) AS firstName,   " +
-            "            (CASE WHEN hc.person_uuid IS NULL THEN INITCAP(hc.extra->>'surname') ELSE INITCAP(pp.surname) END) AS surname,   " +
-            "            (CASE WHEN hc.person_uuid IS NULL THEN INITCAP(hc.extra->>'middile_name') ELSE INITCAP(pp.other_name) END) AS otherName,   " +
-            "            (CASE WHEN hc.person_uuid IS NULL THEN INITCAP(hc.extra->>'gender') ELSE INITCAP(pp.sex) END) AS sex,   " +
-            " (CASE WHEN hc.person_uuid IS NULL THEN CAST(hc.extra->>'age' AS INTEGER)    " +
-            "            ELSE CAST(EXTRACT(YEAR from AGE(NOW(),  pp.date_of_birth)) AS INTEGER )   " +
-            "            END) AS age,   " +
-            "            (CASE WHEN hc.person_uuid IS NOT NULL THEN pp.date_of_birth   " +
-            "            WHEN hc.person_uuid IS NULL AND LENGTH(hc.extra->>'date_of_birth') > 0 THEN CAST(hc.extra->>'date_of_birth' AS DATE)    " +
-            "            ELSE NULL END) AS dateOfBirth,   " +
-            "             (CASE WHEN hc.person_uuid IS NULL THEN hc.extra->>'phone_number'   " +
-            "            ELSE pp.contact_point->'contactPoint'->0->'value'->>0 END) AS phoneNumber,   " +
-            "             (CASE WHEN hc.person_uuid IS NULL THEN hc.extra->>'marital_status'   " +
-            "            ELSE pp.marital_status->>'display' END) AS maritalStatus,   " +
-            "            (CASE WHEN hc.person_uuid IS NULL   " +
-            "            THEN hc.extra->>'lga_of_residence' ELSE res_lga.name END) AS LGAOfResidence,   " +
-            "            (CASE WHEN hc.person_uuid IS NULL    " +
-            "             THEN hc.extra->>'state_of_residence' ELSE res_state.name END) AS StateOfResidence,   " +
-            "             facility.name AS facility,   " +
-            "             state.name AS state,   " +
-            "             lga.name AS lga,   " +
-            "             pp.uuid AS patientId,   " +
-            "            pp.education->>'display' as education,    " +
-            "            pp.employment_status->>'display' as occupation,   " +
-            "            boui.code as datimCode,   " +
-            "            hc.others->>'latitude' AS HTSLatitude,   " +
-            "            hc.others->>'longitude' AS HTSLongitude,     " +
-            "            (CASE WHEN hc.person_uuid IS NULL THEN hc.extra->>'client_address' ELSE r.address END) AS clientAddress,   " +
-            "            hc.date_visit AS dateVisit,   " +
-            "            (CASE WHEN hc.first_time_visit IS true THEN 'Yes' ELSE 'No' END) firstTimeVisit,   " +
-            "            hc.num_children AS numberOfChildren,   " +
-            "            hc.num_wives AS numberOfWives,   " +
-            "            (CASE WHEN hc.index_client IS true THEN 'Yes' ELSE 'No' END) indexClient,   " +
-            "            hc.prep_offered AS prepOffered,   " +
-            "            hc.prep_accepted AS prepAccepted,   " +
-            "            (CASE WHEN hc.previously_tested IS true THEN 'Yes' ELSE 'No' END) AS previouslyTested,    " +
-            "            tg.display AS targetGroup,   " +
-            "            rf.display AS referredFrom,   " +
-            "            ts.display AS testingSetting,   " +
-            "            tc.display AS counselingType,   " +
-            "            preg.display AS pregnacyStatus,   " +
-            "            hc.breast_feeding AS breastFeeding,   " +
-            "            relation.display AS indexType,   " +
-            "            hc.recency->>'optOutRTRI' AS IfRecencyTestingOptIn,   " +
-            "            hc.recency->>'rencencyId' AS RecencyID,   " +
-            "            hc.recency->>'optOutRTRITestName' AS recencyTestType,   " +
-            "            (CASE WHEN hc.recency->>'optOutRTRITestDate' IS NOT NULL  " +
-            "  AND hc.recency->>'optOutRTRITestDate' != ''  " +
-            "  THEN hc.recency->>'optOutRTRITestDate' " +
-            "  WHEN hc.recency->>'sampleTestDate' IS NOT NULL  " +
-            "  AND hc.recency->>'sampleTestDate' != ''  " +
-            "  THEN hc.recency->>'sampleTestDate' ELSE NULL END) AS recencyTestDate,   " +
-            "            (CASE  " +
-            "   WHEN hc.recency->>'rencencyInterpretation' IS NOT NULL  " +
-            "   AND hc.recency->>'rencencyInterpretation' ILIKE '%Long%' THEN 'RTRI Longterm' " +
-            "   WHEN hc.recency->>'rencencyInterpretation' IS NOT NULL  " +
-            "   AND hc.recency->>'rencencyInterpretation' ILIKE '%Recent%' THEN 'RTRI Recent'  " +
-            "   ELSE hc.recency->>'rencencyInterpretation' END) AS recencyInterpretation,   " +
-            "            hc.recency->>'finalRecencyResult' AS finalRecencyResult,   " +
-            "            hc.recency->>'viralLoadResultClassification' AS viralLoadResult,  " +
-            "  CAST(hc.recency->>'sampleCollectedDate' AS DATE) AS viralLoadSampleCollectionDate, " +
-            "  hc.recency->>'viralLoadConfirmationResult' AS viralLoadConfirmationResult, " +
-            "  CAST(hc.recency->>'viralLoadConfirmationTestDate' AS DATE) AS viralLoadConfirmationDate,   " +
-            "            hc.risk_stratification_code AS Assessmentcode,   " +
-            "            modality_code.display AS modality,   " +
-            "            (CASE WHEN hc.syphilis_testing->>'syphilisTestResult' ILIKE 'Yes'    " +
-            "            THEN 'Reactive' ELSE 'Non-Reactive' END) As syphilisTestResult,   " +
-            "            (CASE WHEN hc.hepatitis_testing->>'hepatitisBTestResult' ILIKE 'Yes'    " +
-            "             THEN 'Positive' ELSE 'Negative' END) AS hepatitisBTestResult,   " +
-            "            (CASE WHEN hc.hepatitis_testing->>'hepatitisCTestResult' ILIKE 'Yes'    " +
-            "             THEN 'Positive' ELSE 'Negative' END) AS hepatitisCTestResult,   " +
-            "            hc.cd4->>'cd4Count' AS CD4Type,   " +
-            "            hc.cd4->>'cd4SemiQuantitative' AS CD4TestResult,   " +
-            "            (CASE WHEN hc.test1->>'result' ILIKE 'Yes' THEN 'Positive' ELSE 'Negative' END)AS hivTestResult,   " +
-            "            hc.hiv_test_result AS finalHIVTestResult,   " +
-            "            (CASE WHEN LENGTH(hc.test1->>'date') > 0 THEN CAST(hc.test1->>'date' AS DATE)   " +
-            "            WHEN hc.date_visit IS NOT NULL THEN hc.date_visit    " +
-            "            ELSE NULL END)dateOfHIVTesting,   " +
-            "            CAST(post_test_counseling->>'condomProvidedToClientCount' AS VARCHAR) AS numberOfCondomsGiven,   " +
-            "            CAST(post_test_counseling->>'lubricantProvidedToClientCount' AS VARCHAR) AS numberOfLubricantsGiven " +
-            "            FROM hts_client hc   " +
-            "            LEFT JOIN base_application_codeset tg ON tg.code = hc.target_group   " +
-            "            LEFT JOIN base_application_codeset rf ON rf.id = hc.referred_from   " +
-            "            LEFT JOIN base_application_codeset ts ON ts.code = hc.testing_setting   " +
-            "            LEFT JOIN base_application_codeset tc ON tc.id = hc.type_counseling   " +
-            "            LEFT JOIN base_application_codeset preg ON preg.id = hc.pregnant   " +
-            "            LEFT JOIN base_application_codeset relation ON relation.id = hc.relation_with_index_client   " +
-            "            LEFT JOIN hts_risk_stratification hrs ON hrs.code = hc.risk_stratification_code   " +
-            "            LEFT JOIN base_application_codeset modality_code ON modality_code.code = hrs.modality   " +
-            "            LEFT JOIN patient_person pp ON pp.uuid=hc.person_uuid   " +
-            "            LEFT JOIN (SELECT * FROM (SELECT p.id, REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '\\', ''), ']', ''), '[', '') AS address,    " +
-            "            CASE WHEN address_object->>'stateId'  ~ '^\\d(\\.\\d)?$' THEN address_object->>'stateId' ELSE null END  AS stateId,   " +
-            "            CASE WHEN address_object->>'district'  ~ '^\\d(\\.\\d)?$' THEN address_object->>'district' ELSE null END  AS lgaId   " +
-            "            FROM patient_person p,   " +
-            "            jsonb_array_elements(p.address-> 'address') with ordinality l(address_object)) as result ) r ON r.id=pp.id   " +
-            "            LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)   " +
-            "            LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)   " +
-            "            LEFT JOIN base_organisation_unit facility ON facility.id=hc.facility_id   " +
-            "            LEFT JOIN base_organisation_unit state ON state.id=facility.parent_organisation_unit_id   " +
-            "            LEFT JOIN base_organisation_unit lga ON lga.id=state.parent_organisation_unit_id   " +
-            "            LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=hc.facility_id   " +
+    @Query(value = "SELECT hc.client_code AS clientCode,      " +
+            " (CASE WHEN hc.person_uuid IS NULL THEN INITCAP(hc.extra->>'first_name') ELSE INITCAP(pp.first_name) END) AS firstName,      " +
+            " (CASE WHEN hc.person_uuid IS NULL THEN INITCAP(hc.extra->>'surname') ELSE INITCAP(pp.surname) END) AS surname,      " +
+            " (CASE WHEN hc.person_uuid IS NULL THEN INITCAP(hc.extra->>'middile_name') ELSE INITCAP(pp.other_name) END) AS otherName,      " +
+            " (CASE WHEN hc.person_uuid IS NULL THEN INITCAP(hc.extra->>'gender') ELSE INITCAP(pp.sex) END) AS sex,      " +
+            "             (CASE WHEN hc.person_uuid IS NULL THEN CAST(hc.extra->>'age' AS INTEGER)       " +
+            " ELSE CAST(EXTRACT(YEAR from AGE(NOW(),  pp.date_of_birth)) AS INTEGER )      " +
+            " END) AS age,      " +
+            " (CASE WHEN hc.person_uuid IS NOT NULL THEN pp.date_of_birth      " +
+            " WHEN hc.person_uuid IS NULL AND LENGTH(hc.extra->>'date_of_birth') > 0   " +
+            "             AND hc.extra->>'date_of_birth' != '' THEN CAST(NULLIF(hc.extra->>'date_of_birth', '') AS DATE)       " +
+            " ELSE NULL END) AS dateOfBirth,      " +
+            "  (CASE WHEN hc.person_uuid IS NULL THEN hc.extra->>'phone_number'      " +
+            " ELSE pp.contact_point->'contactPoint'->0->'value'->>0 END) AS phoneNumber,      " +
+            "  (CASE WHEN hc.person_uuid IS NULL THEN hc.extra->>'marital_status'      " +
+            " ELSE pp.marital_status->>'display' END) AS maritalStatus,      " +
+            " (CASE WHEN hc.person_uuid IS NULL      " +
+            " THEN hc.extra->>'lga_of_residence' ELSE res_lga.name END) AS LGAOfResidence,      " +
+            " (CASE WHEN hc.person_uuid IS NULL       " +
+            "  THEN hc.extra->>'state_of_residence' ELSE res_state.name END) AS StateOfResidence,      " +
+            "  facility.name AS facility,      " +
+            "  state.name AS state,      " +
+            "  lga.name AS lga,      " +
+            "  pp.uuid AS patientId,      " +
+            " pp.education->>'display' as education,       " +
+            " pp.employment_status->>'display' as occupation,      " +
+            " boui.code as datimCode,      " +
+            " hc.others->>'latitude' AS HTSLatitude,      " +
+            " hc.others->>'longitude' AS HTSLongitude,        " +
+            " (CASE WHEN hc.person_uuid IS NULL THEN hc.extra->>'client_address' ELSE r.address END) AS clientAddress,      " +
+            " hc.date_visit AS dateVisit,      " +
+            " (CASE WHEN hc.first_time_visit IS true THEN 'Yes' ELSE 'No' END) firstTimeVisit,      " +
+            " hc.num_children AS numberOfChildren,      " +
+            " hc.num_wives AS numberOfWives,      " +
+            " (CASE WHEN hc.index_client IS true THEN 'Yes' ELSE 'No' END) indexClient,      " +
+            " hc.prep_offered AS prepOffered,      " +
+            " hc.prep_accepted AS prepAccepted,      " +
+            " (CASE WHEN hc.previously_tested IS true THEN 'Yes' ELSE 'No' END) AS previouslyTested,       " +
+            " tg.display AS targetGroup,      " +
+            " rf.display AS referredFrom,      " +
+            " ts.display AS testingSetting,      " +
+            " tc.display AS counselingType,      " +
+            " preg.display AS pregnacyStatus,      " +
+            " hc.breast_feeding AS breastFeeding,      " +
+            " relation.display AS indexType,      " +
+            " hc.recency->>'optOutRTRI' AS IfRecencyTestingOptIn,      " +
+            " hc.recency->>'rencencyId' AS RecencyID,      " +
+            " hc.recency->>'optOutRTRITestName' AS recencyTestType,      " +
+            " (CASE WHEN hc.recency->>'optOutRTRITestDate' IS NOT NULL     " +
+            "              AND hc.recency->>'optOutRTRITestDate' != '' AND LENGTH(hc.recency->>'optOutRTRITestDate') > 0      " +
+            "              THEN CAST(NULLIF(hc.recency->>'optOutRTRITestDate', '') AS DATE)    " +
+            "              WHEN hc.recency->>'sampleTestDate' IS NOT NULL     " +
+            "              AND hc.recency->>'sampleTestDate' != '' AND LENGTH(hc.recency->>'sampleTestDate') > 0   " +
+            "              THEN CAST(NULLIF(hc.recency->>'sampleTestDate', '') AS DATE) ELSE NULL END) AS recencyTestDate,      " +
+            " (CASE     " +
+            "               WHEN hc.recency->>'rencencyInterpretation' IS NOT NULL     " +
+            "               AND hc.recency->>'rencencyInterpretation' ILIKE '%Long%' THEN 'RTRI Longterm'    " +
+            "               WHEN hc.recency->>'rencencyInterpretation' IS NOT NULL     " +
+            "               AND hc.recency->>'rencencyInterpretation' ILIKE '%Recent%' THEN 'RTRI Recent'     " +
+            "               ELSE hc.recency->>'rencencyInterpretation' END) AS recencyInterpretation,      " +
+            " hc.recency->>'finalRecencyResult' AS finalRecencyResult,      " +
+            " hc.recency->>'viralLoadResultClassification' AS viralLoadResult,     " +
+            "              CAST(NULLIF(hc.recency->>'sampleCollectedDate', '') AS DATE) AS viralLoadSampleCollectionDate,    " +
+            "              hc.recency->>'viralLoadConfirmationResult' AS viralLoadConfirmationResult,    " +
+            "              CAST(NULLIF(hc.recency->>'viralLoadConfirmationTestDate', '') AS DATE) AS viralLoadConfirmationDate,      " +
+            " hc.risk_stratification_code AS Assessmentcode,      " +
+            " modality_code.display AS modality,      " +
+            " (CASE WHEN hc.syphilis_testing->>'syphilisTestResult' ILIKE 'Yes'       " +
+            " THEN 'Reactive' ELSE 'Non-Reactive' END) As syphilisTestResult,      " +
+            " (CASE WHEN hc.hepatitis_testing->>'hepatitisBTestResult' ILIKE 'Yes'       " +
+            "  THEN 'Positive' ELSE 'Negative' END) AS hepatitisBTestResult,      " +
+            " (CASE WHEN hc.hepatitis_testing->>'hepatitisCTestResult' ILIKE 'Yes'       " +
+            "  THEN 'Positive' ELSE 'Negative' END) AS hepatitisCTestResult,      " +
+            " hc.cd4->>'cd4Count' AS CD4Type,      " +
+            " hc.cd4->>'cd4SemiQuantitative' AS CD4TestResult,      " +
+            " (CASE WHEN hc.test1->>'result' ILIKE 'Yes' THEN 'Positive' ELSE 'Negative' END)AS hivTestResult,      " +
+            " hc.hiv_test_result AS finalHIVTestResult,      " +
+            " (CASE WHEN LENGTH(hc.test1->>'date') > 0 AND hc.test1->>'date' !=''   " +
+            "             THEN CAST(NULLIF(hc.test1->>'date', '') AS DATE)      " +
+            " WHEN hc.date_visit IS NOT NULL THEN hc.date_visit       " +
+            " ELSE NULL END)dateOfHIVTesting,      " +
+            " CAST(post_test_counseling->>'condomProvidedToClientCount' AS VARCHAR) AS numberOfCondomsGiven,      " +
+            " CAST(post_test_counseling->>'lubricantProvidedToClientCount' AS VARCHAR) AS numberOfLubricantsGiven    " +
+            " FROM hts_client hc      " +
+            " LEFT JOIN base_application_codeset tg ON tg.code = hc.target_group      " +
+            " LEFT JOIN base_application_codeset rf ON rf.id = hc.referred_from      " +
+            " LEFT JOIN base_application_codeset ts ON ts.code = hc.testing_setting      " +
+            " LEFT JOIN base_application_codeset tc ON tc.id = hc.type_counseling      " +
+            " LEFT JOIN base_application_codeset preg ON preg.id = hc.pregnant      " +
+            " LEFT JOIN base_application_codeset relation ON relation.id = hc.relation_with_index_client      " +
+            " LEFT JOIN hts_risk_stratification hrs ON hrs.code = hc.risk_stratification_code      " +
+            " LEFT JOIN base_application_codeset modality_code ON modality_code.code = hrs.modality      " +
+            " LEFT JOIN patient_person pp ON pp.uuid=hc.person_uuid      " +
+            " LEFT JOIN (SELECT * FROM (SELECT p.id, REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '\\', ''), ']', ''), '[', '') AS address,       " +
+            " CASE WHEN address_object->>'stateId'  ~ '^\\d(\\.\\d)?$' THEN address_object->>'stateId' ELSE null END  AS stateId,      " +
+            " CASE WHEN address_object->>'district'  ~ '^\\d(\\.\\d)?$' THEN address_object->>'district' ELSE null END  AS lgaId      " +
+            " FROM patient_person p,      " +
+            " jsonb_array_elements(p.address-> 'address') with ordinality l(address_object)) as result ) r ON r.id=pp.id      " +
+            " LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)      " +
+            " LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)      " +
+            " LEFT JOIN base_organisation_unit facility ON facility.id=hc.facility_id      " +
+            " LEFT JOIN base_organisation_unit state ON state.id=facility.parent_organisation_unit_id      " +
+            " LEFT JOIN base_organisation_unit lga ON lga.id=state.parent_organisation_unit_id      " +
+            " LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=hc.facility_id   " +
             "WHERE hc.archived=0 AND hc.facility_id=?1 AND hc.date_visit >=?2 AND hc.date_visit < ?3", nativeQuery = true)
     List<HtsReportDto> getHtsReport(Long facilityId, LocalDate start, LocalDate end);
     
     
-    @Query(value = "SELECT DISTINCT ON (p.uuid)p.uuid AS personUuid, p.id, p.uuid,p.hospital_number as hospitalNumber,    " +
-            " p.surname, p.first_name as firstName,  " +
-            " EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) as age,   " +
-            " p.other_name as otherName, p.sex as gender, p.date_of_birth as dateOfBirth,    " +
-            " p.date_of_registration as dateOfRegistration, p.marital_status->>'display' as maritalStatus,    " +
-            " education->>'display' as education, p.employment_status->>'display' as occupation,    " +
-            " facility.name as facilityName, facility_lga.name as lga, facility_state.name as state,    " +
-            " boui.code as datimId, res_state.name as residentialState, res_lga.name as residentialLga,   " +
-            " r.address as address, p.contact_point->'contactPoint'->0->'value'->>0 AS phone,   " +
-            " baseline_reg.regimen AS baselineRegimen,   " +
-            " baseline_pc.systolic AS baselineSystolicBP,   " +
-            " baseline_pc.diastolic AS baselineDiastolicBP,   " +
-            " baseline_pc.weight AS baselinetWeight,   " +
-            " baseline_pc.height AS baselineHeight,   " +
-            "  (CASE WHEN baseline_hiv_status.display IS NULL AND base_eli_test.base_eli_hiv_result IS NOT NULL " +
-            " THEN base_eli_test.base_eli_hiv_result ELSE " +
-            " REPLACE(baseline_hiv_status.display, 'HIV ', '') END) AS HIVStatusAtPrEPInitiation," +
-            " (CASE WHEN prepe.extra->>'onDemandIndication' IS NOT NULL THEN prepe.extra->>'onDemandIndication'   " +
-            " WHEN riskt.display IS NOT NULL THEN riskt.display ELSE NULL END) AS indicationForPrEP,   " +
-            " prepe.risk_type AS riskType, " +
-            " prepe.unique_id AS uniqueId, " +
-            " prepe.hiv_testing_point AS entryPoint, " +
-            " prep_int.facility_referred_to AS facilityReferredTo, " +
-            " hiv_enroll.date_started AS hivEnrollmentDate, " +
-            " regimenStart.regimenStartDate AS currentRegimenStart, " +
-            " (CASE WHEN CURRENT_DATE - current_pc.encounter_date <= current_pc.duration THEN 'Active' ELSE 'STOPPED' END ) AS currentPrepStatus, " +
-            " (CASE WHEN prep_int.interruption_reason IS NOT NULL THEN prep_int.interruption_reason ELSE '' END) AS interruptionReason, " +
-            " current_pc.encounter_date AS currentPrepStatusDate, " +
-            " prep_int.interruption_date AS interruptionDate, " +
-            
-            " prepCommencement.encounter_date AS prepCommencementDate, " +
-            " CAST(maxUrinalysis.max_testDate AS date)AS currentUrinalysisTestDate, " +
-            " maxUrinalysis.max_result AS currentUrinalysisTestResult, " +
-            " CAST(minUrinalysis.min_testDate AS date) AS baseUrinalysisTestDate, " +
-            " minUrinalysis.min_result AS baseUrinalysisTestResult, " +
-            " current_reg.regimen AS currentRegimen,   " +
-            " current_pc.encounter_date AS DateOfLastPickup,   " +
-            " current_pc.systolic AS currentSystolicBP,   " +
-            " current_pc.diastolic AS currentDiastolicBP,   " +
-            " current_pc.weight AS currentWeight,   " +
-            " current_pc.height AS currentHeight,   " +
-            "(CASE WHEN current_hiv_status.display IS NULL AND eli_hiv_result IS NOT NULL THEN eli_hiv_result  " +
-            "ELSE REPLACE(current_hiv_status.display, 'HIV ', '') END) AS currentHivStatus,   " +
-            " (CASE WHEN current_pc.pregnant IS NOT NULL AND current_pc.pregnant='true' THEN 'Pregnant'   " +
-            " ELSE 'Not Pregnant' END) AS pregnancyStatus   " +
-            " FROM patient_person p   " +
-            " INNER JOIN (   " +
-            " SELECT * FROM (SELECT p.id, REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '\"', ''), ']', ''), '[', '') AS address,    " +
-            "  CASE WHEN address_object->>'stateId'  ~ '^\\d+(\\.\\d+)?$' THEN address_object->>'stateId' ELSE null END  AS stateId,   " +
-            "  CASE WHEN address_object->>'district'  ~ '^\\d+(\\.\\d+)?$' THEN address_object->>'district' ELSE null END  AS lgaId   " +
-            "      FROM patient_person p,   " +
-            "            jsonb_array_elements(p.address-> 'address') with ordinality l(address_object)) as result   " +
-            " ) r ON r.id=p.id   " +
-            "LEFT JOIN (SELECT pe.drug_use_history->>'hivTestResultAtvisit' AS eli_hiv_result, max.visit_date, max.person_uuid FROM prep_eligibility pe " +
-            " INNER JOIN (SELECT DISTINCT MAX(visit_date)visit_date, person_uuid FROM prep_eligibility " +
-            " GROUP BY person_uuid)max ON max.visit_date=pe.visit_date  " +
-            " AND max.person_uuid=pe.person_uuid)eli_test ON eli_test.person_uuid=p.uuid " +
-            "LEFT JOIN (SELECT pe.drug_use_history->>'hivTestResultAtvisit' AS base_eli_hiv_result, min.visit_date, min.person_uuid " +
-            " FROM prep_eligibility pe " +
-            " INNER JOIN (SELECT DISTINCT MIN(visit_date)visit_date, person_uuid FROM prep_eligibility " +
-            " GROUP BY person_uuid)min ON min.visit_date=pe.visit_date " +
-            " AND min.person_uuid=pe.person_uuid)base_eli_test ON base_eli_test.person_uuid=p.uuid" +
-            " INNER JOIN base_organisation_unit facility ON facility.id=facility_id   " +
-            " INNER JOIN base_organisation_unit facility_lga ON facility_lga.id=facility.parent_organisation_unit_id   " +
-            " INNER JOIN base_organisation_unit facility_state ON facility_state.id=facility_lga.parent_organisation_unit_id   " +
-            " LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)   " +
-            " LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)   " +
-            " INNER JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=facility_id   " +
-            " INNER JOIN prep_enrollment prepe ON prepe.person_uuid = p.uuid   " +
-            " LEFT JOIN base_application_codeset riskt ON riskt.code = prepe.risk_type   " +
-            " LEFT JOIN (SELECT DISTINCT pc.* FROM prep_clinic pc   " +
-            "   INNER JOIN (SELECT DISTINCT MAX(encounter_date)encounter_date, person_uuid FROM prep_clinic   " +
-            "   GROUP BY person_uuid)max ON max.encounter_date=pc.encounter_date    " +
-            "   AND max.person_uuid=pc.person_uuid)current_pc ON current_pc.person_uuid=p.uuid   " +
-            
-            " LEFT JOIN (SELECT DISTINCT pi.* FROM prep_interruption pi " +
-            " INNER JOIN (SELECT DISTINCT MAX(encounter_date) encounter_date, person_uuid FROM prep_interruption " +
-            " GROUP BY person_uuid)max ON " +
-            " max.person_uuid=pi.person_uuid)prep_int ON prep_int.person_uuid=p.uuid " +
-            
-            " LEFT JOIN hiv_enrollment hiv_enroll ON hiv_enroll.person_uuid = p.uuid " +
-            " LEFT JOIN prep_clinic prepCommencement ON prepCommencement.person_uuid = p.uuid AND prepCommencement.is_commencement is true " +
-            " LEFT JOIN (SELECT urinalysis->>'testDate' AS max_testDate, urinalysis->>'result' max_result, person_uuid FROM prep_clinic  " +
-            "            WHERE CAST(urinalysis->>'testDate' AS date) = (SELECT CAST(MAX(urinalysis->>'testDate') AS date) FROM prep_clinic ) " +
-            ") maxUrinalysis On maxUrinalysis.person_uuid = p.uuid " +
-            " LEFT JOIN (SELECT urinalysis->>'testDate' AS min_testDate, urinalysis->>'result' min_result, person_uuid FROM prep_clinic " +
-            "WHERE CAST(urinalysis->>'testDate' AS date) = (SELECT CAST(MIN(urinalysis->>'testDate') AS date) FROM prep_clinic ) " +
-            ") minUrinalysis On minUrinalysis.person_uuid = p.uuid " +
-            " LEFT JOIN (SELECT MIN(encounter_date) regimenStartDate, person_uuid FROM prep_clinic GROUP BY (person_uuid, regimen_id)) regimenStart " +
-            " ON regimenStart.person_uuid = p.uuid " +
-            
-            "   LEFT JOIN prep_regimen current_reg ON current_reg.id = current_pc.regimen_id   " +
-            "   LEFT JOIN base_application_codeset current_hiv_status ON current_hiv_status.code = current_pc.hiv_test_result   " +
-            " LEFT JOIN base_application_codeset prep_it ON prep_it.code = prep_int.interruption_type " +
-            "   INNER JOIN (SELECT pc.* FROM prep_clinic pc   " +
-            "   INNER JOIN (SELECT DISTINCT MIN(encounter_date)encounter_date, person_uuid FROM prep_clinic   " +
-            "   GROUP BY person_uuid)min ON min.encounter_date=pc.encounter_date    " +
-            "   AND min.person_uuid=pc.person_uuid)baseline_pc ON baseline_pc.person_uuid=p.uuid   " +
-            "   LEFT JOIN prep_regimen baseline_reg ON baseline_reg.id = baseline_pc.regimen_id   " +
-            "   LEFT JOIN base_application_codeset baseline_hiv_status ON baseline_hiv_status.code=baseline_pc.hiv_test_result   " +
-            " WHERE p.archived=0 AND p.facility_id=?1 AND p.date_of_registration >=?2 AND p.date_of_registration < ?3", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT ON (p.uuid)p.uuid AS PersonUuid, p.id, p.uuid,p.hospital_number as hospitalNumber,       " +
+            "            INITCAP(p.surname) AS surname, INITCAP(p.first_name) as firstName, he.date_started AS hivEnrollmentDate,    " +
+            "            EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) as age,      " +
+            "            p.other_name as otherName, p.sex as sex, p.date_of_birth as dateOfBirth,       " +
+            "            p.date_of_registration as dateOfRegistration, p.marital_status->>'display' as maritalStatus,       " +
+            "            education->>'display' as education, p.employment_status->>'display' as occupation,       " +
+            "            facility.name as facilityName, facility_lga.name as lga, facility_state.name as state,       " +
+            "            boui.code as datimId, res_state.name as residentialState, res_lga.name as residentialLga,      " +
+            "            r.address as address, p.contact_point->'contactPoint'->0->'value'->>0 AS phone,      " +
+            "            baseline_reg.regimen AS baselineRegimen,      " +
+            "            baseline_pc.systolic AS baselineSystolicBP,      " +
+            "            baseline_pc.diastolic AS baselineDiastolicBP,      " +
+            "            baseline_pc.weight AS baselinetWeight,      " +
+            "            baseline_pc.height AS baselineHeight,    " +
+            "            tg.display AS targetGroup,    " +
+            "            baseline_pc.encounter_date AS prepCommencementDate,    " +
+            "            baseline_pc.urinalysis->>'result' AS baseLineUrinalysis,   " +
+            "            CAST(baseline_pc.urinalysis->>'testDate' AS DATE) AS baseLineUrinalysisDate,   " +
+            "            (CASE WHEN baseline_pc.other_tests_done->>'name'='Creatinine'    " +
+            "            THEN baseline_pc.other_tests_done->>'result' ELSE NULL END) AS baseLineCreatinine,   " +
+            "            baseline_pc.hepatitis->>'result' AS baseLineHepatitisB,   " +
+            "            baseline_pc.hepatitis->>'result' AS baseLineHepatitisC,   " +
+            "            current_pi.reason_stopped AS InterruptionReason,   " +
+            "            current_pi.encounter_date AS InterruptionDate,   " +
+            "             (CASE WHEN baseline_hiv_status.display IS NULL AND base_eli_test.base_eli_hiv_result IS NOT NULL    " +
+            "            THEN base_eli_test.base_eli_hiv_result ELSE    " +
+            "            REPLACE(baseline_hiv_status.display, 'HIV ', '') END) AS HIVStatusAtPrEPInitiation,   " +
+            "            (CASE WHEN prepe.extra->>'onDemandIndication' IS NOT NULL THEN prepe.extra->>'onDemandIndication'      " +
+            "            WHEN riskt.display IS NOT NULL THEN riskt.display ELSE NULL END) AS indicationForPrEP,      " +
+            "            current_reg.regimen AS currentRegimen,      " +
+            "            current_pc.encounter_date AS DateOfLastPickup,      " +
+            "            current_pc.systolic AS currentSystolicBP,      " +
+            "            current_pc.diastolic AS currentDiastolicBP,      " +
+            "            current_pc.weight AS currentWeight,      " +
+            "            current_pc.height AS currentHeight,   " +
+            "            current_pc.urinalysis->>'result' AS currentUrinalysis,   " +
+            "            CAST(current_pc.urinalysis->>'testDate' AS DATE) AS currentUrinalysisDate,   " +
+            "            (CASE WHEN current_hiv_status.display IS NULL AND eli_hiv_result IS NOT NULL THEN eli_hiv_result " +
+            "  WHEN current_hiv_status.display IS NOT NULL THEN REPLACE(current_hiv_status.display, 'HIV ', '') " +
+            "            WHEN he.date_started IS NOT NULL THEN 'Positive' ELSE NULL    " +
+            "  END) AS currentHivStatus,      " +
+            "  current_pc.encounter_date AS DateOfCurrentHIVStatus, " +
+            "            (CASE WHEN current_pc.pregnant IS NOT NULL AND current_pc.pregnant='true' THEN 'Pregnant'      " +
+            "            ELSE 'Not Pregnant' END) AS pregnancyStatus, " +
+            " (CASE  " +
+            " WHEN prepi.interruption_date  > prepc.encounter_date THEN bac.display " +
+            "  WHEN prepc.status IS NOT NULL THEN prepc.status " +
+            " ELSE NULL END) AS CurrentStatus, " +
+            " (CASE  " +
+            " WHEN prepi.interruption_date  > prepc.encounter_date THEN prepi.interruption_date " +
+            "  WHEN prepc.status IS NOT NULL THEN (prepc.encounter_date  + COALESCE(prepc.duration, 0)) " +
+            " ELSE NULL END) AS DateOfCurrentStatus " +
+            "            FROM patient_person p      " +
+            "            INNER JOIN (      " +
+            "            SELECT * FROM (SELECT p.id, REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '\\', ''), ']', ''), '[', '') AS address,       " +
+            "             CASE WHEN address_object->>'stateId'  ~ '^\\d(\\.\\d)?$' THEN address_object->>'stateId' ELSE null END  AS stateId,      " +
+            "             CASE WHEN address_object->>'district'  ~ '^\\d(\\.\\d)?$' THEN address_object->>'district' ELSE null END  AS lgaId      " +
+            "               FROM patient_person p,      " +
+            "                     jsonb_array_elements(p.address-> 'address') with ordinality l(address_object)) as result      " +
+            "            ) r ON r.id=p.id " +
+            " INNER JOIN (SELECT MAX(date_started) date_started, person_uuid,target_group  FROM prep_enrollment " +
+            "  GROUP BY person_uuid,target_group) penrol ON penrol.person_uuid=p.uuid " +
+            "            LEFT JOIN (SELECT pe.drug_use_history->>'hivTestResultAtvisit' AS eli_hiv_result, max.visit_date, max.person_uuid FROM prep_eligibility pe    " +
+            "            INNER JOIN (SELECT DISTINCT MAX(visit_date)visit_date, person_uuid FROM prep_eligibility    " +
+            "            GROUP BY person_uuid)max ON max.visit_date=pe.visit_date     " +
+            "            AND max.person_uuid=pe.person_uuid)eli_test ON eli_test.person_uuid=p.uuid    " +
+            "            LEFT JOIN (SELECT pe.drug_use_history->>'hivTestResultAtvisit' AS base_eli_hiv_result, min.visit_date, min.person_uuid    " +
+            "            FROM prep_eligibility pe    " +
+            "            INNER JOIN (SELECT DISTINCT MIN(visit_date)visit_date, person_uuid FROM prep_eligibility    " +
+            "            GROUP BY person_uuid)min ON min.visit_date=pe.visit_date    " +
+            "            AND min.person_uuid=pe.person_uuid)base_eli_test ON base_eli_test.person_uuid=p.uuid   " +
+            "            LEFT JOIN base_organisation_unit facility ON facility.id=facility_id      " +
+            "            LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id=facility.parent_organisation_unit_id      " +
+            "            LEFT JOIN base_organisation_unit facility_state ON facility_state.id=facility_lga.parent_organisation_unit_id      " +
+            "            LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)      " +
+            "            LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)      " +
+            "            LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=facility_id      " +
+            "            INNER JOIN prep_enrollment prepe ON prepe.person_uuid = p.uuid      " +
+            "            LEFT JOIN base_application_codeset riskt ON riskt.code = prepe.risk_type      " +
+            "            LEFT JOIN base_application_codeset tg ON tg.code = penrol.target_group      " +
+            "            LEFT JOIN (SELECT DISTINCT pc.* FROM prep_clinic pc      " +
+            "            INNER JOIN (SELECT DISTINCT MAX(encounter_date)encounter_date, person_uuid FROM prep_clinic      " +
+            "            GROUP BY person_uuid)max ON max.encounter_date=pc.encounter_date       " +
+            "            AND max.person_uuid=pc.person_uuid)current_pc ON current_pc.person_uuid=p.uuid    " +
+            "              LEFT JOIN (SELECT DISTINCT pi.* FROM prep_interruption pi      " +
+            "            LEFT JOIN (SELECT DISTINCT MAX(encounter_date)encounter_date, person_uuid FROM prep_interruption      " +
+            "            GROUP BY person_uuid)max ON max.encounter_date=pi.encounter_date       " +
+            "            AND max.person_uuid=pi.person_uuid)current_pi ON current_pi.person_uuid=p.uuid    " +
+            "            LEFT JOIN prep_regimen current_reg ON current_reg.id = current_pc.regimen_id      " +
+            "            LEFT JOIN base_application_codeset current_hiv_status ON current_hiv_status.code = current_pc.hiv_test_result      " +
+            "            LEFT JOIN (SELECT pc.* FROM prep_clinic pc      " +
+            "            INNER JOIN (SELECT DISTINCT MIN(encounter_date)encounter_date, person_uuid FROM prep_clinic      " +
+            "            GROUP BY person_uuid)min ON min.encounter_date=pc.encounter_date       " +
+            "            AND min.person_uuid=pc.person_uuid)baseline_pc ON baseline_pc.person_uuid=p.uuid      " +
+            "            LEFT JOIN prep_regimen baseline_reg ON baseline_reg.id = baseline_pc.regimen_id      " +
+            "            LEFT JOIN base_application_codeset baseline_hiv_status ON baseline_hiv_status.code=baseline_pc.hiv_test_result " +
+            " LEFT JOIN hiv_enrollment he ON he.person_uuid = p.uuid " +
+            " LEFT JOIN (  " +
+            "            SELECT pi.id, pi.person_uuid, pi.interruption_date , pi.interruption_type   " +
+            "            FROM prep_interruption pi   " +
+            "            INNER JOIN (SELECT DISTINCT pi.person_uuid, MAX(pi.interruption_date)interruption_date   " +
+            "            FROM prep_interruption pi WHERE pi.archived=0   " +
+            "            GROUP BY pi.person_uuid)pit ON pit.interruption_date=pi.interruption_date   " +
+            "            AND pit.person_uuid=pi.person_uuid   " +
+            "            WHERE pi.archived=0   " +
+            "            GROUP BY pi.id, pi.person_uuid, pi.interruption_date, pi.interruption_type )prepi ON prepi.person_uuid=p.uuid " +
+            " LEFT JOIN (SELECT pc.person_uuid, MAX(pc.encounter_date) as encounter_date, pc.duration,  " +
+            "            (CASE WHEN (pc.encounter_date  + pc.duration) > CAST (NOW() AS DATE) THEN 'Active' " +
+            "            ELSE  'Defaulted' END) status FROM prep_clinic pc " +
+            "            INNER JOIN (SELECT DISTINCT MAX(pc.encounter_date) encounter_date, pc.person_uuid " +
+            "            FROM prep_clinic pc GROUP BY pc.person_uuid) max_p ON max_p.encounter_date=pc.encounter_date " +
+            "            AND max_p.person_uuid=pc.person_uuid  " +
+            " WHERE pc.archived=0 " +
+            "            GROUP BY pc.person_uuid, pc.duration, status)prepc ON prepc.person_uuid=p.uuid " +
+            " LEFT JOIN base_application_codeset bac ON bac.code=prepi.interruption_type " +
+            "            WHERE p.archived=0 AND p.facility_id=?1 AND p.date_of_registration >=?2 AND p.date_of_registration < ?3", nativeQuery = true)
     List<PrepReportDto> getPrepReport(Long facilityId, LocalDate start, LocalDate end);
 
     
@@ -304,8 +321,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     LEFT JOIN base_application_codeset preg ON preg.code = hac.pregnancy_status\n" +
             "     LEFT JOIN base_application_codeset tbs ON tbs.id = CAST(hac.tb_status AS INTEGER)\n" +
             "         WHERE\n" +
-            "     hac.archived = 0\n" +
+            "           hac.archived = 0\n" +
             "           AND he.archived = 0\n" +
+            "           AND hac.visit_date < ?3 \n" +
             "           AND he.facility_id = ?1\n" +
             "     ),\n" +
             "\n" +
@@ -317,10 +335,10 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     WHERE lt.lab_test_id=16\n" +
             "       AND  lt.viral_load_indication !=719\n" +
             "       AND date_sample_collected IS NOT null\n" +
+            "       AND date_sample_collected <= ?3\n" +
             " )as sample\n" +
             "         WHERE sample.rnkk = 1\n" +
             "           AND (sample.archived is null OR sample.archived = 0)\n" +
-            "           AND date_sample_collected <= ?3\n" +
             "           AND sample.facility_id = ?1 ),\n" +
             "current_vl_result AS (SELECT * FROM (\n" +
             "         SELECT CAST(ls.date_sample_collected AS DATE ) AS dateOfCurrentViralLoadSample, sm.patient_uuid as person_uuid130 , sm.facility_id as vlFacility, sm.archived as vlArchived, acode.display as viralLoadIndication, sm.result_reported as currentViralLoad,CAST(sm.date_result_reported AS DATE) as dateOfCurrentViralLoad,\n" +
@@ -332,11 +350,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         WHERE lt.lab_test_id = 16\n" +
             "           AND  lt.viral_load_indication !=719\n" +
             "           AND sm. date_result_reported IS NOT NULL\n" +
+            "           AND sm.date_result_reported <= ?3\n" +
             "           AND sm.result_reported is NOT NULL\n" +
             "     )as vl_result\n" +
             "   WHERE vl_result.rank2 = 1\n" +
             "     AND (vl_result.vlArchived = 0 OR vl_result.vlArchived is null)\n" +
-            "     AND  vl_result.dateOfCurrentViralLoad <= ?3\n" +
             "     AND  vl_result.vlFacility = ?1\n" +
             "     ), "+
             "     careCardCD4 AS (SELECT visit_date, coalesce(cast(cd_4 as varchar), cd4_semi_quantitative) as cd_4, person_uuid AS cccd4_person_uuid\n" +
@@ -352,7 +370,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "          SELECT sm.patient_uuid AS cd4_person_uuid,  sm.result_reported as cd4Lb,sm.date_result_reported as dateOfCD4Lb, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rnk\n" +
             "          FROM public.laboratory_result  sm\n" +
             "       INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
-            "          WHERE lt.lab_test_id = 1\n" +
+            "          WHERE lt.lab_test_id IN (1, 50) \n" +
             "AND sm. date_result_reported IS NOT NULL\n" +
             "AND sm.archived = 0\n" +
             "AND sm.facility_id = ?1\n" +
@@ -366,12 +384,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "FROM public.laboratory_sample  sm\n" +
             "         INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
             "         INNER JOIN  laboratory_labtest llt on llt.id = lt.lab_test_id\n" +
-            "WHERE lt.lab_test_id IN (65,51,66,64)\n" +
+            "WHERE lt.lab_test_id IN (65,51,66,64)\n"+
+            "        AND sm.archived = 0\n" +
+            "        AND sm. date_sample_collected <= ?3\n" +
+            "        AND sm.facility_id = ?1\n" +
             "        )as sample\n" +
             "      WHERE sample.rnkk = 1\n" +
-            "        AND sample.archived = 0\n" +
-            "        AND date_sample_collected <= ?3\n" +
-            "        AND sample.facility_id = ?1\n" +
             "     ),\n" +
             "\n" +
             "     current_tb_result AS (WITH tb_test as (SELECT personTbResult, dateofTbDiagnosticResultReceived,\n" +
@@ -560,6 +578,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " MIN(lr.date_result_reported) AS date_result_reported\n" +
             "         FROM\n" +
             " laboratory_result lr\n" +
+            "     INNER JOIN public.laboratory_test  lt on lr.test_id = lt.id\n" +
+            "     INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication"+
             "     INNER JOIN (\n" +
             "     SELECT\n" +
             "         *\n" +
@@ -578,12 +598,16 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         INNER JOIN hiv_eac_session hes ON hes.eac_id = he.uuid\n" +
             " WHERE\n" +
             "         he.status = 'COMPLETED'\n" +
+            "         AND hes.eac_session_date < ?3"+
             "   AND he.archived = 0\n" +
             "         ) e\n" +
             "     WHERE\n" +
             " e.row_number = 1\n" +
             " ) AS last_eac_complete ON last_eac_complete.person_uuid = lr.patient_uuid\n" +
             "     AND lr.date_result_reported > last_eac_complete.eac_session_date\n" +
+            "     AND lt.lab_test_id = 16\n" +
+            "     AND last_eac_complete.eac_session_date < ?3\n" +
+            "     AND  lt.viral_load_indication !=719"+
             "         GROUP BY\n" +
             " lr.patient_uuid\n" +
             "     ) r ON l.date_result_reported = r.date_result_reported\n" +
@@ -751,7 +775,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     SELECT\n" +
             "         hap.person_uuid,\n" +
             "         hap.visit_date,\n" +
-            "         TO_DATE(hap.ipt ->> 'dateCompleted', 'YYYY-MM-DD') AS date_completed\n" +
+            "        TO_DATE(NULLIF(NULLIF(TRIM(hap.ipt->>'dateCompleted'), ''), 'null'), 'YYYY-MM-DD') AS date_completed\n" +
             "     FROM\n" +
             "         hiv_art_pharmacy hap\n" +
             " INNER JOIN (\n" +
@@ -771,6 +795,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " ) complete ON complete.person_uuid = hap.person_uuid\n" +
             "         WHERE\n" +
             "     hap.archived = 0\n" +
+            "     AND hap.visit_date < ?3 \n" +
             "         GROUP BY\n" +
             " hap.person_uuid,\n" +
             " ipt_type.regimen_name,\n" +
@@ -784,6 +809,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "      ho.date_of_observation AS dateOfCervicalCancerScreening,\n" +
             "      cc_type.display AS cervicalCancerScreeningType,\n" +
             "      cc_method.display AS cervicalCancerScreeningMethod,\n" +
+            "      cc_trtm.display AS cervicalCancerTreatmentScreened,\n" +
             "      cc_result.display AS resultOfCervicalCancerScreening\n" +
             "         FROM\n" +
             " hiv_observation ho\n" +
@@ -795,6 +821,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         hiv_observation\n" +
             "     WHERE\n" +
             " archived = 0\n" +
+            "AND date_of_observation < ?3"+
             "     GROUP BY\n" +
             "         person_uuid\n" +
             "     ORDER BY\n" +
@@ -804,6 +831,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     INNER JOIN base_application_codeset cc_type ON cc_type.code = CAST(ho.data ->> 'screenType' AS VARCHAR)\n" +
             "     INNER JOIN base_application_codeset cc_method ON cc_method.code = CAST(ho.data ->> 'screenMethod' AS VARCHAR)\n" +
             "     INNER JOIN base_application_codeset cc_result ON cc_result.code = CAST(ho.data ->> 'screeningResult' AS VARCHAR)\n" +
+            "      LEFT JOIN base_application_codeset cc_trtm   ON  cc_trtm.code = CAST(ho.data ->> 'screenTreatment' AS VARCHAR)\n" +
             "     ),\n" +
             "\n" +
             "     ovc AS (\n" +
@@ -822,8 +850,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    CASE\n" +
             "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'DEATH'\n" +
             "        WHEN(\n" +
-            "        stat.status_date > pharmacy.visit_date\n" +
-            "    AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%')\n" +
+            "        stat.status_date > pharmacy.maxdate\n" +
+            "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
             ")THEN stat.hiv_status\n" +
             "        ELSE pharmacy.status\n" +
             "        END\n" +
@@ -833,8 +861,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    CASE\n" +
             "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%'  THEN stat.status_date\n" +
             "        WHEN(\n" +
-            "        stat.status_date > pharmacy.visit_date\n" +
-            "    AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%')\n" +
+            "        stat.status_date > pharmacy.maxdate\n" +
+            "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
             ") THEN stat.status_date\n" +
             "        ELSE pharmacy.visit_date\n" +
             "        END\n" +
@@ -847,35 +875,32 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     SELECT\n" +
             "         (\n" +
             " CASE\n" +
-            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '28 day' < ?5 THEN 'IIT'\n" +
+            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?5 THEN 'IIT'\n" +
             "     ELSE 'ACTIVE'\n" +
             "     END\n" +
             " ) status,\n" +
             "         (\n" +
             " CASE\n" +
-            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '28 day' < ?5  THEN hp.visit_date + hp.refill_period + INTERVAL '28 day'\n" +
+            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?5  THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
             "     ELSE hp.visit_date\n" +
             "     END\n" +
             " ) AS visit_date,\n" +
-            "         hp.person_uuid\n" +
+            "         hp.person_uuid, MAXDATE\n" +
             "     FROM\n" +
             "         hiv_art_pharmacy hp\n" +
             " INNER JOIN (\n" +
-            " SELECT\n" +
-            "     DISTINCT hap.person_uuid,\n" +
-            "  MAX(visit_date) AS MAXDATE\n" +
-            " FROM\n" +
-            "     hiv_art_pharmacy hap\n" +
-            "         INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid\n" +
-            "         AND h.archived = 0\n" +
-            " WHERE\n" +
-            "         hap.archived = 0\n" +
-            "   AND hap.visit_date <= ?5\n" +
-            " GROUP BY\n" +
-            "     hap.person_uuid\n" +
-            " ORDER BY\n" +
-            "     MAXDATE ASC\n" +
-            "         ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid\n" +
+            "         SELECT hap.person_uuid, hap.visit_date AS  MAXDATE, ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
+            "           FROM public.hiv_art_pharmacy hap \n" +
+            "                    INNER JOIN public.hiv_art_pharmacy_regimens pr \n" +
+            "                    ON pr.art_pharmacy_id = hap.id \n" +
+            "            INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+            "            INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
+            "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
+            "            WHERE r.regimen_type_id in (1,2,3,4,14) \n" +
+            "            AND hap.archived = 0                \n" +
+            "            AND hap.visit_date < ?3\n" +
+            "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
+            "      AND MAX.rnkkk3 = 1"+
             "     WHERE\n" +
             " hp.archived = 0\n" +
             "       AND hp.visit_date <= ?5\n" +
@@ -908,8 +933,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    CASE\n" +
             "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'DEATH'\n" +
             "        WHEN(\n" +
-            "        stat.status_date > pharmacy.visit_date\n" +
-            "    AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%')\n" +
+            "        stat.status_date > pharmacy.maxdate\n" +
+            "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %')\n" +
             ")THEN stat.hiv_status\n" +
             "        ELSE pharmacy.status\n" +
             "        END\n" +
@@ -919,8 +944,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    CASE\n" +
             "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%'  THEN stat.status_date\n" +
             "        WHEN(\n" +
-            "        stat.status_date > pharmacy.visit_date\n" +
-            "    AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%')\n" +
+            "        stat.status_date > pharmacy.maxdate\n" +
+            "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %')\n" +
             ") THEN stat.status_date\n" +
             "        ELSE pharmacy.visit_date\n" +
             "        END\n" +
@@ -933,35 +958,32 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     SELECT\n" +
             "         (\n" +
             " CASE\n" +
-            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '28 day' < ?4 THEN 'IIT'\n" +
+            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?4 THEN 'IIT'\n" +
             "     ELSE 'ACTIVE'\n" +
             "     END\n" +
             " ) status,\n" +
             "         (\n" +
             " CASE\n" +
-            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '28 day' <  ?4 THEN hp.visit_date + hp.refill_period + INTERVAL '28 day'\n" +
+            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' <  ?4 THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
             "     ELSE hp.visit_date\n" +
             "     END\n" +
             " ) AS visit_date,\n" +
-            "         hp.person_uuid\n" +
+            "         hp.person_uuid, MAXDATE\n" +
             "     FROM\n" +
             "         hiv_art_pharmacy hp\n" +
             " INNER JOIN (\n" +
-            " SELECT\n" +
-            "     DISTINCT hap.person_uuid,\n" +
-            "  MAX(visit_date) AS MAXDATE\n" +
-            " FROM\n" +
-            "     hiv_art_pharmacy hap\n" +
-            "         INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid\n" +
-            "         AND h.archived = 0\n" +
-            " WHERE\n" +
-            "         hap.archived = 0\n" +
-            "   AND hap.visit_date <=  ?4\n" +
-            " GROUP BY\n" +
-            "     hap.person_uuid\n" +
-            " ORDER BY\n" +
-            "     MAXDATE ASC\n" +
-            "         ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid\n" +
+            "         SELECT hap.person_uuid, hap.visit_date AS  MAXDATE, ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
+            "           FROM public.hiv_art_pharmacy hap \n" +
+            "                    INNER JOIN public.hiv_art_pharmacy_regimens pr \n" +
+            "                    ON pr.art_pharmacy_id = hap.id \n" +
+            "            INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+            "            INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
+            "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
+            "            WHERE r.regimen_type_id in (1,2,3,4,14) \n" +
+            "            AND hap.archived = 0                \n" +
+            "            AND hap.visit_date < ?4\n" +
+            "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
+            "      AND MAX.rnkkk3 = 1"+
             "     WHERE\n" +
             " hp.archived = 0\n" +
             "       AND hp.visit_date <=  ?4\n" +
@@ -989,7 +1011,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        (\n" +
             "CASE\n" +
             "    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'DEATH'\n" +
-            "    WHEN( stat.status_date > pharmacy.visit_date AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%'))\n" +
+            "    WHEN( stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %'))\n" +
             "        THEN stat.hiv_status\n" +
             "    ELSE pharmacy.status\n" +
             "    END\n" +
@@ -997,7 +1019,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        (\n" +
             "CASE\n" +
             "    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%'  THEN stat.status_date\n" +
-            "    WHEN(stat.status_date > pharmacy.visit_date AND (stat.hiv_status ILIKE '%STOP%' OR stat.hiv_status ILIKE '%OUT%')) THEN stat.status_date\n" +
+            "    WHEN(stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.status_date\n" +
             "    ELSE pharmacy.visit_date\n" +
             "    END\n" +
             ") AS status_date,\n" +
@@ -1007,38 +1029,35 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         SELECT\n" +
             " (\n" +
             "     CASE\n" +
-            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '28 day' < '2023-04-14' THEN 'IIT'\n" +
+            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?3 THEN 'IIT'\n" +
             "         ELSE 'ACTIVE'\n" +
             "         END\n" +
             "     ) status,\n" +
             " (\n" +
             "     CASE\n" +
-            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '28 day' < '2023-04-14' THEN hp.visit_date + hp.refill_period + INTERVAL '28 day'\n" +
+            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?3 THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
             "         ELSE hp.visit_date\n" +
             "         END\n" +
             "     ) AS visit_date,\n" +
-            " hp.person_uuid\n" +
+            " hp.person_uuid, MAXDATE \n" +
             "         FROM\n" +
             " hiv_art_pharmacy hp\n" +
             "     INNER JOIN (\n" +
-            "     SELECT\n" +
-            "         DISTINCT hap.person_uuid,\n" +
-            "      MAX(visit_date) AS MAXDATE\n" +
-            "     FROM\n" +
-            "         hiv_art_pharmacy hap\n" +
-            " INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid\n" +
-            " AND h.archived = 0\n" +
+            "         SELECT hap.person_uuid, hap.visit_date AS  MAXDATE, ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
+            "           FROM public.hiv_art_pharmacy hap \n" +
+            "                    INNER JOIN public.hiv_art_pharmacy_regimens pr \n" +
+            "                    ON pr.art_pharmacy_id = hap.id \n" +
+            "            INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
+            "            INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
+            "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
+            "            WHERE r.regimen_type_id in (1,2,3,4,14) \n" +
+            "            AND hap.archived = 0                \n" +
+            "            AND hap.visit_date < ?3\n" +
+            "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
+            "      AND MAX.rnkkk3 = 1"+
             "     WHERE\n" +
-            " hap.archived = 0\n" +
-            "       AND hap.visit_date <= '2023-04-14'\n" +
-            "     GROUP BY\n" +
-            "         hap.person_uuid\n" +
-            "     ORDER BY\n" +
-            "         MAXDATE ASC\n" +
-            " ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid\n" +
-            "         WHERE\n" +
             "     hp.archived = 0\n" +
-            "           AND hp.visit_date <= '2023-04-14'\n" +
+            "     AND hp.visit_date < ?3\n" +
             "     ) pharmacy\n" +
             "\n" +
             "         LEFT JOIN (\n" +
@@ -1051,11 +1070,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " (\n" +
             "     SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,\n" +
             "hiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
-            "        FROM hiv_status_tracker WHERE archived=0 AND status_date <= '2023-04-14' )s\n" +
+            "        FROM hiv_status_tracker WHERE archived=0 AND status_date <= ?3 )s\n" +
             "     WHERE s.row_number=1\n" +
             " ) hst\n" +
             "     INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
-            "         WHERE hst.status_date <= '2023-04-14'\n" +
+            "         WHERE hst.status_date < ?3\n" +
             "     ) stat ON stat.person_id = pharmacy.person_uuid\n" +
             "     ),\n" +
             "\n" +
@@ -1109,12 +1128,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           (\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN 'DEATH'\n" +
-            "       WHEN prepre.status ILIKE '%OUT%' THEN 'TRANSFER OUT'\n" +
+            "       WHEN prepre.status ILIKE '%out%' THEN 'TRANSFER OUT'\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN 'DEATH'\n" +
-            "       WHEN pre.status ILIKE '%OUT%' THEN 'TRANSFER OUT'\n" +
+            "       WHEN pre.status ILIKE '%out%' THEN 'TRANSFER OUT'\n" +
             "       WHEN (\n" +
             "prepre.status ILIKE '%IIT%'\n" +
-            "        OR prepre.status ILIKE '%STOP%'\n" +
+            "        OR prepre.status ILIKE '%stop%'\n" +
             "    )\n" +
             "           AND (pre.status ILIKE '%ACTIVE%') THEN 'ACTIVE RESTART'\n" +
             "       WHEN prepre.status ILIKE '%ACTIVE%'\n" +
@@ -1125,12 +1144,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           CAST((\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN prepre.status_date\n" +
-            "       WHEN prepre.status ILIKE '%OUT%' THEN prepre.status_date\n" +
+            "       WHEN prepre.status ILIKE '%out%' THEN prepre.status_date\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN pre.status_date\n" +
-            "       WHEN pre.status ILIKE '%OUT%' THEN pre.status_date\n" +
+            "       WHEN pre.status ILIKE '%out%' THEN pre.status_date\n" +
             "       WHEN (\n" +
             "prepre.status ILIKE '%IIT%'\n" +
-            "        OR prepre.status ILIKE '%STOP%'\n" +
+            "        OR prepre.status ILIKE '%stop%'\n" +
             "    )\n" +
             "           AND (pre.status ILIKE '%ACTIVE%') THEN pre.status_date\n" +
             "       WHEN prepre.status ILIKE '%ACTIVE%'\n" +
@@ -1141,15 +1160,15 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           (\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN 'DEATH'\n" +
-            "       WHEN prepre.status ILIKE '%OUT%' THEN 'TRANSFER OUT'\n" +
+            "       WHEN prepre.status ILIKE '%out%' THEN 'TRANSFER OUT'\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN 'DEATH'\n" +
-            "       WHEN pre.status ILIKE '%OUT%' THEN 'TRANSFER OUT'\n" +
+            "       WHEN pre.status ILIKE '%out%' THEN 'TRANSFER OUT'\n" +
             "       WHEN ct.status ILIKE '%IIT%' THEN 'IIT'\n" +
-            "       WHEN ct.status ILIKE '%OUT%' THEN 'TRANSFER OUT'\n" +
+            "       WHEN ct.status ILIKE '%out%' THEN 'TRANSFER OUT'\n" +
             "       WHEN ct.status ILIKE '%DEATH%' THEN 'DEATH'\n" +
             "       WHEN (\n" +
             "pre.status ILIKE '%IIT%'\n" +
-            "        OR pre.status ILIKE '%STOP%'\n" +
+            "        OR pre.status ILIKE '%stop%'\n" +
             "    )\n" +
             "           AND (ct.status ILIKE '%ACTIVE%') THEN 'ACTIVE RESTART'\n" +
             "       WHEN pre.status ILIKE '%ACTIVE%'\n" +
@@ -1160,27 +1179,27 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           CAST((\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN prepre.status_date\n" +
-            "       WHEN prepre.status ILIKE '%OUT%' THEN prepre.status_date\n" +
+            "       WHEN prepre.status ILIKE '%out%' THEN prepre.status_date\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN pre.status_date\n" +
-            "       WHEN pre.status ILIKE '%OUT%' THEN pre.status_date\n" +
+            "       WHEN pre.status ILIKE '%out%' THEN pre.status_date\n" +
             "       WHEN ct.status ILIKE '%IIT%' THEN\n" +
             "           CASE\n" +
-            "   WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%OUT%' OR pre.status ILIKE '%STOP%') THEN pre.status_date\n" +
+            "   WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%out%' OR pre.status ILIKE '%stop%') THEN pre.status_date\n" +
             "   ELSE ct.status_date --check the pre to see the status and return date appropriate\n" +
             "   END\n" +
-            "       WHEN ct.status ILIKE '%STOP%' THEN\n" +
+            "       WHEN ct.status ILIKE '%stop%' THEN\n" +
             "           CASE\n" +
-            "   WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%OUT%' OR pre.status ILIKE '%IIT%') THEN pre.status_date\n" +
+            "   WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%out%' OR pre.status ILIKE '%IIT%') THEN pre.status_date\n" +
             "   ELSE ct.status_date --check the pre to see the status and return date appropriate\n" +
             "   END\n" +
-            "       WHEN ct.status ILIKE '%OUT%' THEN\n" +
+            "       WHEN ct.status ILIKE '%out%' THEN\n" +
             "           CASE\n" +
-            "   WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%STOP%' OR pre.status ILIKE '%IIT%') THEN pre.status_date\n" +
+            "   WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%stop%' OR pre.status ILIKE '%IIT%') THEN pre.status_date\n" +
             "   ELSE ct.status_date --check the pre to see the status and return date appropriate\n" +
             "   END\n" +
             "       WHEN (\n" +
             "pre.status ILIKE '%IIT%'\n" +
-            "        OR pre.status ILIKE '%STOP%'\n" +
+            "        OR pre.status ILIKE '%stop%'\n" +
             "    )\n" +
             "           AND (ct.status ILIKE '%ACTIVE%') THEN ct.status_date\n" +
             "       WHEN pre.status ILIKE '%ACTIVE%'\n" +
@@ -1191,13 +1210,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           (\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN FALSE\n" +
-            "       WHEN prepre.status ILIKE '%OUT%' THEN FALSE\n" +
+            "       WHEN prepre.status ILIKE '%out%' THEN FALSE\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN FALSE\n" +
-            "       WHEN pre.status ILIKE '%OUT%' THEN FALSE\n" +
+            "       WHEN pre.status ILIKE '%out%' THEN FALSE\n" +
             "       WHEN ct.status ILIKE '%IIT%' THEN FALSE\n" +
-            "       WHEN ct.status ILIKE '%OUT%' THEN FALSE\n" +
+            "       WHEN ct.status ILIKE '%out%' THEN FALSE\n" +
             "       WHEN ct.status ILIKE '%DEATH%' THEN FALSE\n" +
-            "       WHEN ct.status ILIKE '%STOP%' THEN FALSE\n" +
+            "       WHEN ct.status ILIKE '%stop%' THEN FALSE\n" +
             "       WHEN (nvd.age >= 15\n" +
             "           AND nvd.regimen ILIKE '%DTG%'\n" +
             "           AND bd.artstartdate + 91 < ?3) THEN TRUE\n" +
@@ -1249,13 +1268,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           (\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN NULL\n" +
-            "       WHEN prepre.status ILIKE '%OUT%' THEN NULL\n" +
+            "       WHEN prepre.status ILIKE '%out%' THEN NULL\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN NULL\n" +
-            "       WHEN pre.status ILIKE '%OUT%' THEN NULL\n" +
+            "       WHEN pre.status ILIKE '%out%' THEN NULL\n" +
             "       WHEN ct.status ILIKE '%IIT%' THEN NULL\n" +
-            "       WHEN ct.status ILIKE '%OUT%' THEN NULL\n" +
+            "       WHEN ct.status ILIKE '%out%' THEN NULL\n" +
             "       WHEN ct.status ILIKE '%DEATH%' THEN NULL\n" +
-            "       WHEN ct.status ILIKE '%STOP%' THEN NULL\n" +
+            "       WHEN ct.status ILIKE '%stop%' THEN NULL\n" +
             "       WHEN (nvd.age >= 15\n" +
             "           AND nvd.regimen ILIKE '%DTG%'\n" +
             "           AND bd.artstartdate + 91 < ?3)\n" +
