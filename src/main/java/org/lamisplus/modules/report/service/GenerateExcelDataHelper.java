@@ -126,10 +126,12 @@ public class GenerateExcelDataHelper {
 					 map.put(index++, sn);
 					 map.put(index++, radetReportDto.getState());
 					 map.put(index++, radetReportDto.getLga());
+					 map.put(index++, radetReportDto.getLgaOfResidence());
 					 map.put(index++, radetReportDto.getFacilityName());
 					 map.put(index++, radetReportDto.getDatimId());
 					 map.put(index++, personUuid);
 					 map.put(index++, radetReportDto.getHospitalNumber());
+					 map.put(index++, radetReportDto.getUniqueId());
 					 //ovc
 					 map.put(index++, radetReportDto.getHouseholdNumber());
 					 map.put(index++, radetReportDto.getOvcNumber());
@@ -233,12 +235,20 @@ public class GenerateExcelDataHelper {
 						 map.put(index++, null);
 					 }
 					 map.put(index++, radetReportDto.getCervicalCancerTreatmentScreened());
-					
-					
+
+					 map.put(index++, radetReportDto.getLastCrytococalAntigen());
+					 map.put(index++, radetReportDto.getDateOfLastCrytococalAntigen());
+
+
+
 					 //biometrics
 					 map.put(index++, radetReportDto.getDateBiometricsEnrolled());
 					 map.put(index++, radetReportDto.getNumberOfFingersCaptured());
-					 map.put(index, null);
+					 map.put(index++, null);
+
+					 //case manager
+					 map.put(index, radetReportDto.getCaseManager());
+
 					 result.add(map);
 					 sn++;
 				 } catch (Exception e) {
