@@ -105,10 +105,12 @@ public class Constants {
 					"S/No.",
 					"State",
 					"L.G.A",
+					"LGA Of Residence",
 					"Facility Name",
 					"DatimId",
 					"Patient ID",
 					"Hospital Number",
+					"Unique Id",
 					"Household Unique No",
 					"OVC Unique ID",
 					"Sex",
@@ -176,9 +178,12 @@ public class Constants {
 					"Result of Cervical Cancer Screening",
 					"Date of Precancerous Lesions Treatment (yyyy-mm-dd)",
 					"Precancerous Lesions Treatment Methods",
+					"Last Cryptococcal Antigen",
+					"Date of Last Cryptococcal Antigen (yyyy-mm-dd)",
 					"Date Biometrics Enrolled (yyyy-mm-dd)",
 					"Number of Fingers Captured",
-					"Valid Biometrics(Hexadecimal/Base64 Unique Identifier)"
+					"Valid Biometrics(Hexadecimal/Base64 Unique Identifier)",
+					"Case Manager"
 			);
 	
 	public static final String PHARMACY_SHEET = "pharmacy-report";
