@@ -19,12 +19,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " (CASE WHEN hc.person_uuid IS NULL THEN INITCAP(hc.extra->>'surname') ELSE INITCAP(pp.surname) END) AS surname,      " +
             " (CASE WHEN hc.person_uuid IS NULL THEN INITCAP(hc.extra->>'middile_name') ELSE INITCAP(pp.other_name) END) AS otherName,      " +
             " (CASE WHEN hc.person_uuid IS NULL THEN INITCAP(hc.extra->>'gender') ELSE INITCAP(pp.sex) END) AS sex,      " +
-            "             (CASE WHEN hc.person_uuid IS NULL THEN CAST(hc.extra->>'age' AS INTEGER)       " +
+            " (CASE WHEN hc.person_uuid IS NULL THEN CAST(hc.extra->>'age' AS INTEGER)       " +
             " ELSE CAST(EXTRACT(YEAR from AGE(NOW(),  pp.date_of_birth)) AS INTEGER )      " +
             " END) AS age,      " +
             " (CASE WHEN hc.person_uuid IS NOT NULL THEN pp.date_of_birth      " +
             " WHEN hc.person_uuid IS NULL AND LENGTH(hc.extra->>'date_of_birth') > 0   " +
-            "             AND hc.extra->>'date_of_birth' != '' THEN CAST(NULLIF(hc.extra->>'date_of_birth', '') AS DATE)       " +
+            " AND hc.extra->>'date_of_birth' != '' THEN CAST(NULLIF(hc.extra->>'date_of_birth', '') AS DATE)       " +
             " ELSE NULL END) AS dateOfBirth,      " +
             "  (CASE WHEN hc.person_uuid IS NULL THEN hc.extra->>'phone_number'      " +
             " ELSE pp.contact_point->'contactPoint'->0->'value'->>0 END) AS phoneNumber,      " +
@@ -118,7 +118,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " LEFT JOIN base_organisation_unit state ON state.id=facility.parent_organisation_unit_id      " +
             " LEFT JOIN base_organisation_unit lga ON lga.id=state.parent_organisation_unit_id      " +
             " LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=hc.facility_id   " +
-            "WHERE hc.archived=0 AND hc.facility_id=?1 AND hc.date_visit >=?2 AND hc.date_visit < ?3", nativeQuery = true)
+            "WHERE hc.archived=0 AND pp.archived = 0 AND hc.facility_id=?1 AND hc.date_visit >=?2 AND hc.date_visit < ?3", nativeQuery = true)
     List<HtsReportDto> getHtsReport(Long facilityId, LocalDate start, LocalDate end);
     
     
@@ -240,8 +240,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "            WHERE p.archived=0 AND p.facility_id=?1 AND p.date_of_registration >=?2 AND p.date_of_registration < ?3", nativeQuery = true)
     List<PrepReportDto> getPrepReport(Long facilityId, LocalDate start, LocalDate end);
 
-    
-    @Query(value = "WITH bio_data AS (SELECT DISTINCT (p.uuid) AS personUuid,p.hospital_number AS hospitalNumber,\n" +
+    //Start of RADET Query
+    @Query(value = "WITH bio_data AS (SELECT DISTINCT (p.uuid) AS personUuid,p.hospital_number AS hospitalNumber, h.unique_id as uniqueId,\n" +
             "EXTRACT(YEAR FROM  AGE(NOW(), date_of_birth)) AS age,\n" +
             "INITCAP(p.sex) AS gender,\n" +
             "p.date_of_birth AS dateOfBirth,\n" +
@@ -270,13 +270,21 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "AND hac.archived = 0\n" +
             "INNER JOIN hiv_regimen hr ON hr.id = hac.regimen_id\n" +
             "INNER JOIN hiv_regimen_type hrt ON hrt.id = hac.regimen_type_id\n" +
-            "    WHERE\n" +
+            "WHERE\n" +
             "h.archived = 0\n" +
-            "      AND h.facility_id = ?1\n" +
-            "      AND hac.is_commencement = TRUE\n" +
-            "      AND hac.visit_date >= ?2\n" +
-            "      AND hac.visit_date < ?3\n" +
+            "AND p.archived = 0\n"+
+            "AND h.facility_id = ?1\n" +
+            "AND hac.is_commencement = TRUE\n" +
+            "AND hac.visit_date >= ?2\n" +
+            "AND hac.visit_date < ?3\n" +
             "),\n" +
+            "\n" +
+            "patient_lga as (select DISTINCT ON (personUuid) personUuid as personUuid11, \n" +
+            "case when (addr ~ '^[0-9\\.]+$') =TRUE \n" +
+            "then (select name from base_organisation_unit where id = cast(addr as int)) end as lgaOfResidence \n" +
+            "from (\n" +
+            "select uuid AS personUuid, (jsonb_array_elements(address->'address')->>'district') as addr from patient_person \n" +
+            ") dt),"+
             "\n" +
             "current_clinical AS (SELECT DISTINCT ON (tvs.person_uuid) tvs.person_uuid AS person_uuid10,\n" +
             "       body_weight AS currentWeight,\n" +
@@ -747,7 +755,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     FROM\n" +
             "         hiv_art_pharmacy\n" +
             "     WHERE\n" +
-            "         (ipt ->> 'type' ilike '%INITIATION%')\n" +
+            "         (ipt ->> 'type' ilike '%INITIATION%' or ipt ->> 'type' ilike 'START_REFILL')\n" +
             "       AND archived = 0\n" +
             "     GROUP BY\n" +
             "         person_uuid\n" +
@@ -1102,11 +1110,19 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "      WHERE ls.archived=0 AND ls.facility_id=?1\n" +
             "      GROUP BY ls.patient_uuid\n" +
             "  )t )\n" +
-            "     )\n" +
+            "     ),\n" +
             "\n" +
+            "crytococal_antigen as (select personuuid12, date_result_reported as dateOfLastCrytococalAntigen, result_reported as lastCrytococalAntigen from (\n" +
+            "select DISTINCT ON (lr.patient_uuid) lr.patient_uuid as personuuid12, lr.date_result_reported, lr.result_reported, \n" +
+            "ROW_NUMBER() OVER (PARTITION BY lr.patient_uuid ORDER BY lr.date_result_reported DESC) as rowNum\n" +
+            "from public.laboratory_test lt \n" +
+            "inner join laboratory_result lr on lr.test_id = lt.id\n" +
+            "where lab_test_id=52\n" +
+            ") dt where rowNum=1)\n"+
             "\n" +
             "SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,\n" +
             "           bd.*,\n" +
+            "           p_lga.*,\n"+
             "           scd.*,\n" +
             "           cvlr.*,\n" +
             "           pdr.*,\n" +
@@ -1336,8 +1352,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     ELSE NULL END) as lastCd4Count,\n" +
             "           (CASE WHEN  ccd.visit_date IS NOT NULL THEN CAST(ccd.visit_date as DATE)\n" +
             "     WHEN  cd.dateOfCd4Lb IS NOT NULL THEN  CAST(cd.dateOfCd4Lb as DATE)\n" +
-            "     ELSE NULL END) as dateOfLastCd4Count\n" +
+            "     ELSE NULL END) as dateOfLastCd4Count, \n" +
+            "      crypt.*, \n"+
+            "   (select concat(cm.first_name, ' ', cm.last_name) from public.case_manager_patients cmp \n" +
+            "   inner join case_manager cm on cmp.case_manager_id=cm.id and cmp.person_uuid=bd.personUuid) as caseManager\n"+
             "FROM bio_data bd\n" +
+            "        LEFT JOIN patient_lga p_lga on p_lga.personUuid11 = bd.personUuid \n"+
             "        LEFT JOIN pharmacy_details_regimen pdr ON pdr.person_uuid40 = bd.personUuid\n" +
             "        LEFT JOIN current_clinical c ON c.person_uuid10 = bd.personUuid\n" +
             "        LEFT JOIN sample_collection_date scd ON scd.person_uuid120 = bd.personUuid\n" +
@@ -1356,7 +1376,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        LEFT JOIN naive_vl_data nvd ON nvd.nvl_person_uuid = bd.personUuid\n" +
             "        LEFT JOIN tb_sample_collection tbSample ON tbSample.personTbSample = bd.personUuid\n" +
             "        LEFT JOIN  tbTreatment tbTment ON tbTment.tbTreatmentPersonUuid = bd.personUuid\n" +
-            "        LEFT JOIN  current_tb_result tbResult ON tbResult.personTbResult = bd.personUuid\n"
+            "        LEFT JOIN  current_tb_result tbResult ON tbResult.personTbResult = bd.personUuid\n" +
+            "        LEFT JOIN crytococal_antigen crypt on crypt.personuuid12= bd.personUuid"
              , nativeQuery = true)
     List<RADETDTOProjection> getRadetData(Long facilityId, LocalDate start, LocalDate end, LocalDate previous, LocalDate previousPrevious);
     
@@ -1401,6 +1422,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
            "           INNER JOIN triage_vital_sign tvs ON tvs.uuid = hac.vital_sign_uuid \n" +
            "                       AND hac.archived = 0 \n" +
            "               WHERE   hac.archived = 0 \n" +
+           "                AND p.archived = 0\n"+
            "           AND hac.facility_id =?1",nativeQuery = true)
    List<ClinicDataDto> getClinicData(Long facilityId);
 }
