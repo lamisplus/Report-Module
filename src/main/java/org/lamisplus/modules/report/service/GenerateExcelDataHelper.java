@@ -1,7 +1,6 @@
 package org.lamisplus.modules.report.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import liquibase.pro.packaged.O;
 import lombok.NonNull;
 
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -119,9 +117,9 @@ public class GenerateExcelDataHelper {
 					 Double repeatVl = null;
 					 Double currentVl = null;
 					 int index = 0;
-					 boolean isCurrentVlValid = isNotANull(radetReportDto.getCurrentViralLoad());
+					 boolean isCurrentVlValid = isValidResult(radetReportDto.getCurrentViralLoad());
 					 currentVl = isCurrentVlValid ? Double.parseDouble(radetReportDto.getCurrentViralLoad()) : null;
-					 boolean isRepeatValidNumber = isNotANull(radetReportDto.getRepeatViralLoadResult());
+					 boolean isRepeatValidNumber = isValidResult(radetReportDto.getRepeatViralLoadResult());
 					 repeatVl = isRepeatValidNumber ? Double.parseDouble(radetReportDto.getRepeatViralLoadResult()) : null;
 					 map.put(index++, sn);
 					 map.put(index++, radetReportDto.getState());
@@ -173,6 +171,7 @@ public class GenerateExcelDataHelper {
 					 map.put(index++, radetReportDto.getCurrentStatus());
 					 map.put(index++, radetReportDto.getCurrentStatusDate());
 					 map.put(index++, radetReportDto.getCauseOfDeath());
+					 map.put(index++, radetReportDto.getVaCauseOfDeath());
 					
 					 //previous status
 					
@@ -287,11 +286,12 @@ public class GenerateExcelDataHelper {
 	}
 	
 	
-	private static boolean isNotANull(String value) {
+	private static boolean isValidResult(String value) {
 		return value != null
 				&& !value.isEmpty()
 				&& !value.contains("-")
 				&& !value.contains("+")
+				&& !value.contains("<")
 				&& ! value.equalsIgnoreCase("null");
 	}
 	

@@ -143,6 +143,7 @@ public class Constants {
 					"Current ART Status",
 					"Date of Current ART Status",
 					"Cause of Death",
+					"VA Cause of Death",
 					"Previous ART Status",
 					"Confirmed Date of Previous ART Status",
 					"ART Enrollment Setting",

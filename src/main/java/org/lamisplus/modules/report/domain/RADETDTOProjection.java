@@ -140,4 +140,5 @@ public interface RADETDTOProjection {
 	String	getLastCrytococalAntigen();
 
 	String getCaseManager();
+	String getVaCauseOfDeath();
 }

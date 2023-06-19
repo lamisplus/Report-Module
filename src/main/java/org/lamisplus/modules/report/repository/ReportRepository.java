@@ -876,7 +876,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        END\n" +
             "    ) AS status_date,\n" +
             "\n" +
-            "stat.cause_of_death\n" +
+            "stat.cause_of_death, stat.va_cause_of_death\n" +
             "\n" +
             "         FROM\n" +
             " (\n" +
@@ -918,11 +918,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     SELECT\n" +
             "         hst.hiv_status,\n" +
             "         hst.person_id,\n" +
-            "         hst.cause_of_death,\n" +
+            "         hst.cause_of_death," +
+            "          hst.va_cause_of_death,\n" +
             "         hst.status_date\n" +
             "     FROM\n" +
             "         (\n" +
-            " SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,\n" +
+            " SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,va_cause_of_death,\n" +
             "        hiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
             "    FROM hiv_status_tracker WHERE archived=0 AND status_date <= ?5 )s\n" +
             " WHERE s.row_number=1\n" +
@@ -959,7 +960,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        END\n" +
             "    ) AS status_date,\n" +
             "\n" +
-            "stat.cause_of_death\n" +
+            "stat.cause_of_death, stat.va_cause_of_death\n" +
             "\n" +
             "         FROM\n" +
             " (\n" +
@@ -1001,11 +1002,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     SELECT\n" +
             "         hst.hiv_status,\n" +
             "         hst.person_id,\n" +
-            "         hst.cause_of_death,\n" +
+            "         hst.cause_of_death, " +
+            "         hst.va_cause_of_death,\n" +
             "         hst.status_date\n" +
             "     FROM\n" +
             "         (\n" +
-            " SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,\n" +
+            " SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,va_cause_of_death,\n" +
             "        hiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
             "    FROM hiv_status_tracker WHERE archived=0 AND status_date <=  ?4 )s\n" +
             " WHERE s.row_number=1\n" +
@@ -1031,7 +1033,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    ELSE pharmacy.visit_date\n" +
             "    END\n" +
             ") AS status_date,\n" +
-            "        stat.cause_of_death\n" +
+            "        stat.cause_of_death, stat.va_cause_of_death\n" +
             " FROM\n" +
             "     (\n" +
             "         SELECT\n" +
@@ -1072,11 +1074,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         SELECT\n" +
             " hst.hiv_status,\n" +
             " hst.person_id,\n" +
-            " hst.cause_of_death,\n" +
+            " hst.cause_of_death," +
+            " hst.va_cause_of_death,\n" +
             " hst.status_date\n" +
             "         FROM\n" +
             " (\n" +
-            "     SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,\n" +
+            "     SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death, va_cause_of_death,\n" +
             "hiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
             "        FROM hiv_status_tracker WHERE archived=0 AND status_date <= ?3 )s\n" +
             "     WHERE s.row_number=1\n" +
@@ -1141,6 +1144,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           tbSample.*,\n" +
             "           tbResult.*,\n" +
             "           ct.cause_of_death AS causeOfDeath,\n" +
+            "           ct.va_cause_of_death AS vaCauseOfDeath,\n" +
             "           (\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN 'DEATH'\n" +
