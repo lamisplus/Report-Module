@@ -122,6 +122,7 @@ public class Constants {
 					//"Services Provided (Enter one line per service)",
 					"Age",
 					"Care Entry Point",
+					"Date of Registration",
 					"ART Start Date (yyyy-mm-dd)",
 					"Last Pickup Date (yyyy-mm-dd)",
 					"Months of ARV Refill",
