@@ -252,6 +252,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "tgroup.display AS targetGroup,\n" +
             "eSetting.display AS enrollmentSetting,\n" +
             "hac.visit_date AS artStartDate,\n" +
+            "p.date_of_registration as dateOfRegistration, \n"+
             "hr.description AS regimenAtStart,\n" +
             "h.ovc_number AS ovcUniqueId,\n" +
             "h.house_hold_number AS householdUniqueNo,\n" +
@@ -1355,7 +1356,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     ELSE NULL END) as dateOfLastCd4Count, \n" +
             "      crypt.*, \n"+
             "   (select concat(cm.first_name, ' ', cm.last_name) from public.case_manager_patients cmp \n" +
-            "   inner join case_manager cm on cmp.case_manager_id=cm.id and cmp.person_uuid=bd.personUuid) as caseManager\n"+
+            "   inner join case_manager cm on cmp.case_manager_id=cm.id and cmp.person_uuid=bd.personUuid limit 1) as caseManager\n"+
             "FROM bio_data bd\n" +
             "        LEFT JOIN patient_lga p_lga on p_lga.personUuid11 = bd.personUuid \n"+
             "        LEFT JOIN pharmacy_details_regimen pdr ON pdr.person_uuid40 = bd.personUuid\n" +
