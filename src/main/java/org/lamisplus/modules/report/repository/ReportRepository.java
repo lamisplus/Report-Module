@@ -164,7 +164,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "            WHEN he.date_started IS NOT NULL THEN 'Positive' ELSE NULL    " +
             "  END) AS currentHivStatus,      " +
             "  current_pc.encounter_date AS DateOfCurrentHIVStatus, " +
-            "            (CASE WHEN current_pc.pregnant IS NOT NULL AND current_pc.pregnant='true' THEN 'Pregnant'      " +
+            "  (CASE WHEN p.sex='Male' THEN NULL " +
+            " WHEN current_pc.pregnant IS NOT NULL AND current_pc.pregnant='true' THEN 'Pregnant'      " +
             "            ELSE 'Not Pregnant' END) AS pregnancyStatus, " +
             " (CASE  " +
             " WHEN prepi.interruption_date  > prepc.encounter_date THEN bac.display " +
@@ -636,6 +637,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         biometric b\n" +
             "     WHERE\n" +
             " archived = 0\n" +
+            " AND enrollment_date >=?2 " +
+            " AND enrollment_date <=?3 " +
             "     GROUP BY\n" +
             "         b.person_uuid\n" +
             " ) biometric_count ON biometric_count.person_uuid = he.person_uuid\n" +
