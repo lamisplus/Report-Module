@@ -5,6 +5,7 @@ import lombok.NonNull;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.audit4j.core.util.Log;
 import org.lamisplus.modules.hiv.domain.dto.*;
 import org.lamisplus.modules.report.domain.BiometricReportDto;
@@ -121,6 +122,11 @@ public class GenerateExcelDataHelper {
 					 currentVl = isCurrentVlValid ? Double.parseDouble(radetReportDto.getCurrentViralLoad()) : null;
 					 boolean isRepeatValidNumber = isValidResult(radetReportDto.getRepeatViralLoadResult());
 					 repeatVl = isRepeatValidNumber ? Double.parseDouble(radetReportDto.getRepeatViralLoadResult()) : null;
+					 String treatmentMethodDate = radetReportDto.getTreatmentMethodDate();
+					 LocalDate treatmentMethodDateValue =  null;
+					 if(StringUtils.isNotBlank(treatmentMethodDate)){
+						 treatmentMethodDateValue =  LocalDate.parse(treatmentMethodDate);
+					 }
 					 map.put(index++, sn);
 					 map.put(index++, radetReportDto.getState());
 					 map.put(index++, radetReportDto.getLga());
@@ -143,11 +149,11 @@ public class GenerateExcelDataHelper {
 					 map.put(index++, radetReportDto.getAge());
 					 map.put(index++, getStringValue(String.valueOf(radetReportDto.getCareEntry())));
 					 map.put(index++, radetReportDto.getDateOfRegistration());
+					 map.put(index++, radetReportDto.getDateOfEnrollment());
 					 map.put(index++, radetReportDto.getArtStartDate());
 					 map.put(index++, radetReportDto.getLastPickupDate());
 					 map.put(index++, radetReportDto.getMonthsOfARVRefill());
-					
-					
+					 
 					 map.put(index++, radetReportDto.getRegimenLineAtStart());
 					 map.put(index++, radetReportDto.getRegimenAtStart());
 					 map.put(index++, radetReportDto.getDateOfCurrentRegimen());
@@ -159,7 +165,6 @@ public class GenerateExcelDataHelper {
 					 map.put(index++, radetReportDto.getDateOfLastCd4Count());
 					 map.put(index++, radetReportDto.getLastCd4Count());
 					 //vl
-					 map.put(index++, radetReportDto.getDateOfViralLoadSampleCollection());
 					 map.put(index++, radetReportDto.getDateOfCurrentViralLoadSample());
 					 map.put(index++, currentVl);
 					 map.put(index++, radetReportDto.getDateOfCurrentViralLoad());
@@ -188,7 +193,7 @@ public class GenerateExcelDataHelper {
 					 map.put(index++, radetReportDto.getTbDiagnosticTestType());
 					 map.put(index++, radetReportDto.getDateofTbDiagnosticResultReceived());
 					 map.put(index++, radetReportDto.getTbDiagnosticResult());
-					
+					 
 					 map.put(index++, radetReportDto.getTbTreatmentStartDate());
 					 map.put(index++, radetReportDto.getTbTreatementType());
 					 map.put(index++, radetReportDto.getTbCompletionDate());
@@ -217,7 +222,7 @@ public class GenerateExcelDataHelper {
 						 map.put(index++, null);
 					 }
 					 map.put(index++, null);
-					
+					 
 					 //chronic care
 					 map.put(index++, null);
 					 map.put(index++, null);
@@ -228,11 +233,7 @@ public class GenerateExcelDataHelper {
 					 map.put(index++, radetReportDto.getCervicalCancerScreeningMethod());
 					 map.put(index++, radetReportDto.getResultOfCervicalCancerScreening());
 					 //Precancerous
-					 if (radetReportDto.getCervicalCancerTreatmentScreened() != null) {
-						 map.put(index++, radetReportDto.getDateOfCervicalCancerScreening());
-					 } else {
-						 map.put(index++, null);
-					 }
+					 map.put(index++, treatmentMethodDateValue);
 					 map.put(index++, radetReportDto.getCervicalCancerTreatmentScreened());
 
 					 map.put(index++, radetReportDto.getLastCrytococalAntigen());

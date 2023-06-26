@@ -141,4 +141,7 @@ public interface RADETDTOProjection {
 
 	String getCaseManager();
 	String getVaCauseOfDeath();
+	String getTreatmentMethodDate();
+	LocalDate getDateOfRegistration();
+	LocalDate getDateOfEnrollment();
 }
