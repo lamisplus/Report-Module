@@ -171,7 +171,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "\n" +
             "current_clinical AS (SELECT DISTINCT ON (tvs.person_uuid) tvs.person_uuid AS person_uuid10,\n" +
             "       body_weight AS currentWeight,\n" +
-            "       tbs.display AS tbStatus,\n" +
+            "       tbs.display AS tbStatus1,\n" +
             "       bac.display AS currentClinicalStage,\n" +
             "       (CASE\n" +
             "WHEN preg.display IS NOT NULL THEN preg.display\n" +
@@ -179,7 +179,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "       CASE\n" +
             "           WHEN hac.tb_screen IS NOT NULL THEN hac.visit_date\n" +
             "           ELSE NULL\n" +
-            "           END AS dateOfTbScreened\n" +
+            "           END AS dateOfTbScreened1\n" +
             "         FROM\n" +
             " triage_vital_sign tvs\n" +
             "     INNER JOIN (\n" +
@@ -231,6 +231,23 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         WHERE sample.rnkk = 1\n" +
             "           AND (sample.archived is null OR sample.archived = 0)\n" +
             "           AND sample.facility_id = ?1 ),\n" +
+            "tbstatus as (select personUuid133, tbstatus_date as dateOfTbScreened ,tbStatus from (\n" +
+            "select DISTINCT ON (hac.person_uuid) person_uuid as personUuid133, hac.visit_date as tbstatus_date, tbs.display AS tbStatus, \n" +
+            "ROW_NUMBER () OVER (PARTITION BY hac.person_uuid ORDER BY tbs.display DESC, hac.visit_date DESC) as rowNums\n" +
+            "from hiv_art_clinical hac \n" +
+            "LEFT JOIN base_application_codeset tbs ON tbs.id = CAST(hac.tb_status AS INTEGER)\n" +
+            "where hac.tb_status is not null and hac.archived=0\n" +
+            "and hac.visit_date between ?6 and ?3 \n" +
+            "and hac.facility_id = ?1 \n" +
+            ")dt where dt.rowNums=1),"+
+            "tblam AS (SELECT * FROM (\n" +
+            "SELECT CAST(lr.date_result_reported AS DATE ) AS dateOfLastTbLam, lr.patient_uuid as personuuidtblam , lr.result_reported as tbLamResult,\n" +
+            "ROW_NUMBER () OVER (PARTITION BY lr.patient_uuid ORDER BY lr.date_result_reported DESC) as rank2333\n" +
+            "FROM laboratory_result  lr INNER JOIN public.laboratory_test  lt on lr.test_id = lt.id\n" +
+            "WHERE lt.lab_test_id = 51 AND lr.date_result_reported IS NOT NULL AND lr.date_result_reported <= ?3 \n" +
+            "AND lr.date_result_reported >= ?2 AND lr.result_reported is NOT NULL AND lr.archived=0\n" +
+            "AND lr.facility_id=1425) as tblam\n" +
+            "WHERE tblam.rank2333 = 1), "+
             "current_vl_result AS (SELECT * FROM (\n" +
             "         SELECT CAST(ls.date_sample_collected AS DATE ) AS dateOfCurrentViralLoadSample, sm.patient_uuid as person_uuid130 , sm.facility_id as vlFacility, sm.archived as vlArchived, acode.display as viralLoadIndication, sm.result_reported as currentViralLoad,CAST(sm.date_result_reported AS DATE) as dateOfCurrentViralLoad,\n" +
             "     ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rank2\n" +
@@ -740,7 +757,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " DISTINCT ON (pharmacy.person_uuid) pharmacy.person_uuid AS prePrePersonUuid,\n" +
             "(\n" +
             "    CASE\n" +
-            "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'DEATH'\n" +
+            "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
             "        WHEN(\n" +
             "        stat.status_date > pharmacy.maxdate\n" +
             "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
@@ -768,7 +785,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         (\n" +
             " CASE\n" +
             "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?5 THEN 'IIT'\n" +
-            "     ELSE 'ACTIVE'\n" +
+            "     ELSE 'Active'\n" +
             "     END\n" +
             " ) status,\n" +
             "         (\n" +
@@ -824,7 +841,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " DISTINCT ON (pharmacy.person_uuid) pharmacy.person_uuid AS prePersonUuid,\n" +
             "(\n" +
             "    CASE\n" +
-            "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'DEATH'\n" +
+            "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
             "        WHEN(\n" +
             "        stat.status_date > pharmacy.maxdate\n" +
             "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %')\n" +
@@ -852,7 +869,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         (\n" +
             " CASE\n" +
             "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?4 THEN 'IIT'\n" +
-            "     ELSE 'ACTIVE'\n" +
+            "     ELSE 'Active'\n" +
             "     END\n" +
             " ) status,\n" +
             "         (\n" +
@@ -904,7 +921,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     current_status AS ( SELECT  DISTINCT ON (pharmacy.person_uuid) pharmacy.person_uuid AS cuPersonUuid,\n" +
             "        (\n" +
             "CASE\n" +
-            "    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'DEATH'\n" +
+            "    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
             "    WHEN( stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %'))\n" +
             "        THEN stat.hiv_status\n" +
             "    ELSE pharmacy.status\n" +
@@ -924,7 +941,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " (\n" +
             "     CASE\n" +
             "         WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?3 THEN 'IIT'\n" +
-            "         ELSE 'ACTIVE'\n" +
+            "         ELSE 'Active'\n" +
             "         END\n" +
             "     ) status,\n" +
             " (\n" +
@@ -1027,21 +1044,23 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           tbTment.*,\n" +
             "           tbSample.*,\n" +
             "           tbResult.*,\n" +
+            "           tbS.*,\n" +
+            "           tbl.*,\n" +
             "           ct.cause_of_death AS causeOfDeath,\n" +
             "           ct.va_cause_of_death AS vaCauseOfDeath,\n" +
             "           (\n" +
             "   CASE\n" +
-            "       WHEN prepre.status ILIKE '%DEATH%' THEN 'DEATH'\n" +
-            "       WHEN prepre.status ILIKE '%out%' THEN 'TRANSFER OUT'\n" +
-            "       WHEN pre.status ILIKE '%DEATH%' THEN 'DEATH'\n" +
-            "       WHEN pre.status ILIKE '%out%' THEN 'TRANSFER OUT'\n" +
+            "       WHEN prepre.status ILIKE '%DEATH%' THEN 'Died'\n" +
+            "       WHEN prepre.status ILIKE '%out%' THEN ''\n" +
+            "       WHEN pre.status ILIKE '%DEATH%' THEN 'Died'\n" +
+            "       WHEN pre.status ILIKE '%out%' THEN 'Transferred Out'\n" +
             "       WHEN (\n" +
             "prepre.status ILIKE '%IIT%'\n" +
             "        OR prepre.status ILIKE '%stop%'\n" +
             "    )\n" +
-            "           AND (pre.status ILIKE '%ACTIVE%') THEN 'ACTIVE RESTART'\n" +
+            "           AND (pre.status ILIKE '%ACTIVE%') THEN 'Active Restart'\n" +
             "       WHEN prepre.status ILIKE '%ACTIVE%'\n" +
-            "           AND pre.status ILIKE '%ACTIVE%' THEN 'ACTIVE'\n" +
+            "           AND pre.status ILIKE '%ACTIVE%' THEN 'Active'\n" +
             "       ELSE REPLACE(pre.status, '_', ' ')\n" +
             "       END\n" +
             "   ) AS previousStatus,\n" +
@@ -1063,20 +1082,20 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "   ) AS DATE)AS previousStatusDate,\n" +
             "           (\n" +
             "   CASE\n" +
-            "       WHEN prepre.status ILIKE '%DEATH%' THEN 'DEATH'\n" +
-            "       WHEN prepre.status ILIKE '%out%' THEN 'TRANSFER OUT'\n" +
-            "       WHEN pre.status ILIKE '%DEATH%' THEN 'DEATH'\n" +
-            "       WHEN pre.status ILIKE '%out%' THEN 'TRANSFER OUT'\n" +
+            "       WHEN prepre.status ILIKE '%DEATH%' THEN 'Died'\n" +
+            "       WHEN prepre.status ILIKE '%out%' THEN 'Transferred Out'\n" +
+            "       WHEN pre.status ILIKE '%DEATH%' THEN 'Died'\n" +
+            "       WHEN pre.status ILIKE '%out%' THEN 'Transferred Out'\n" +
             "       WHEN ct.status ILIKE '%IIT%' THEN 'IIT'\n" +
-            "       WHEN ct.status ILIKE '%out%' THEN 'TRANSFER OUT'\n" +
-            "       WHEN ct.status ILIKE '%DEATH%' THEN 'DEATH'\n" +
+            "       WHEN ct.status ILIKE '%out%' THEN 'Transferred Out'\n" +
+            "       WHEN ct.status ILIKE '%DEATH%' THEN 'Died'\n" +
             "       WHEN (\n" +
             "pre.status ILIKE '%IIT%'\n" +
             "        OR pre.status ILIKE '%stop%'\n" +
             "    )\n" +
-            "           AND (ct.status ILIKE '%ACTIVE%') THEN 'ACTIVE RESTART'\n" +
+            "           AND (ct.status ILIKE '%ACTIVE%') THEN 'Active Restart'\n" +
             "       WHEN pre.status ILIKE '%ACTIVE%'\n" +
-            "           AND ct.status ILIKE '%ACTIVE%' THEN 'ACTIVE'\n" +
+            "           AND ct.status ILIKE '%ACTIVE%' THEN 'Active'\n" +
             "       ELSE REPLACE(ct.status, '_', ' ')\n" +
             "       END\n" +
             "   ) AS currentStatus,\n" +
@@ -1265,9 +1284,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        LEFT JOIN tb_sample_collection tbSample ON tbSample.personTbSample = bd.personUuid\n" +
             "        LEFT JOIN  tbTreatment tbTment ON tbTment.tbTreatmentPersonUuid = bd.personUuid\n" +
             "        LEFT JOIN  current_tb_result tbResult ON tbResult.personTbResult = bd.personUuid\n" +
-            "        LEFT JOIN crytococal_antigen crypt on crypt.personuuid12= bd.personUuid"
+            "        LEFT JOIN crytococal_antigen crypt on crypt.personuuid12= bd.personUuid"+
+            "        LEFT JOIN  tbstatus tbS on tbS.personUuid133 = bd.personUuid"+
+            "        LEFT JOIN  tblam tbl  on tbl.personuuidtblam = bd.personUuid"
             , nativeQuery = true)
-    List<RADETDTOProjection> getRadetData(Long facilityId, LocalDate start, LocalDate end, LocalDate previous, LocalDate previousPrevious);
+    List<RADETDTOProjection> getRadetData(Long facilityId, LocalDate start, LocalDate end,
+                                          LocalDate previous, LocalDate previousPrevious, LocalDate dateOfStartOfCurrentQuarter);
     
     @Query(value = "SELECT DISTINCT ON (p.uuid)p.uuid AS PersonUuid, p.id, p.uuid,p.hospital_number as hospitalNumber,       " +
             "            INITCAP(p.surname) AS surname, INITCAP(p.first_name) as firstName, he.date_started AS hivEnrollmentDate,    " +

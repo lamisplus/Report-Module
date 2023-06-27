@@ -26,13 +26,14 @@ public class RadetService {
 	@NotNull
 	public List<RADETDTOProjection> getRadetDtos(Long facilityId, LocalDate start, LocalDate end) {
 		LocalDate previousQuarterEnd = quarterService.getPreviousQuarter(end).getEnd();
+		LocalDate currentQterStartDate = quarterService.getCurrentQuarter(end).getStart();
 		LocalDate previousPreviousQuarterEnd = quarterService.getPreviousQuarter(previousQuarterEnd).getEnd();
 		LOG.info("facilityId: " + facilityId +" "  +start + "  to " + end.plusDays(1));
 		LOG.info("previous : "+previousQuarterEnd);
 		LOG.info("previousPreviousQuarterEnd : "+previousPreviousQuarterEnd);
 		LOG.info("Fetching RADET records...");
-		List<RADETDTOProjection> radetData =
-				repository.getRadetData(facilityId, start, end.plusDays(1), previousQuarterEnd, previousPreviousQuarterEnd);
+		List<RADETDTOProjection> radetData = repository.getRadetData(facilityId, start, end.plusDays(1),
+						previousQuarterEnd, previousPreviousQuarterEnd, currentQterStartDate);
 		LOG.info("Done fetching RADET records total size : "+radetData.size());
 		return radetData;
 	}

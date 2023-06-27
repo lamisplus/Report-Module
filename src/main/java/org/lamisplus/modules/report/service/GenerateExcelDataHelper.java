@@ -117,6 +117,7 @@ public class GenerateExcelDataHelper {
 					 String personUuid = radetReportDto.getPersonUuid();
 					 Double repeatVl = null;
 					 Double currentVl = null;
+					 String tbStatusOutCome = null;
 					 int index = 0;
 					 boolean isCurrentVlValid = isValidResult(radetReportDto.getCurrentViralLoad());
 					 currentVl = isCurrentVlValid ? Double.parseDouble(radetReportDto.getCurrentViralLoad()) : null;
@@ -126,6 +127,27 @@ public class GenerateExcelDataHelper {
 					 LocalDate treatmentMethodDateValue =  null;
 					 if(StringUtils.isNotBlank(treatmentMethodDate)){
 						 treatmentMethodDateValue =  LocalDate.parse(treatmentMethodDate);
+					 }
+					 String currentStatus = radetReportDto.getCurrentStatus();
+					 String previousStatus = radetReportDto.getPreviousStatus();
+					 if(currentStatus != null
+							 && (currentStatus.contains("STOP")
+							 || currentStatus.contains("Stop")
+							 || currentStatus.contains("stop"))){
+						 currentStatus = "Stopped Treatment";
+					 }
+					 if(previousStatus != null
+							 && (previousStatus.contains("STOP")
+							 || previousStatus.contains("Stop")
+							 || previousStatus.contains("stop"))){
+						 previousStatus = "Stopped Treatment";
+					 }
+					 if(radetReportDto.getTbStatus() != null){
+						if(radetReportDto.getTbStatus().contains("No")){
+							tbStatusOutCome ="No sign or symptoms of TB";
+						}else {
+						    tbStatusOutCome = "TB Suspected";
+						}
 					 }
 					 map.put(index++, sn);
 					 map.put(index++, radetReportDto.getState());
@@ -173,14 +195,14 @@ public class GenerateExcelDataHelper {
 					 map.put(index++, radetReportDto.getDateOfVlEligibilityStatus());
 					
 					 //current status
-					 map.put(index++, radetReportDto.getCurrentStatus());
+					 map.put(index++, currentStatus);
 					 map.put(index++, radetReportDto.getCurrentStatusDate());
 					 map.put(index++, radetReportDto.getCauseOfDeath());
 					 map.put(index++, radetReportDto.getVaCauseOfDeath());
 					
 					 //previous status
 					
-					 map.put(index++, radetReportDto.getPreviousStatus());
+					 map.put(index++, previousStatus);
 					 map.put(index++, radetReportDto.getPreviousStatusDate());
 					
 					
@@ -188,6 +210,7 @@ public class GenerateExcelDataHelper {
 					 //TB
 					 map.put(index++, radetReportDto.getDateOfTbScreened());
 					 map.put(index++, radetReportDto.getTbStatus());
+					 map.put(index++, tbStatusOutCome);
 					 //tb lab
 					 map.put(index++, radetReportDto.getDateOfTbSampleCollection());
 					 map.put(index++, radetReportDto.getTbDiagnosticTestType());
@@ -198,6 +221,9 @@ public class GenerateExcelDataHelper {
 					 map.put(index++, radetReportDto.getTbTreatementType());
 					 map.put(index++, radetReportDto.getTbCompletionDate());
 					 map.put(index++, radetReportDto.getTbTreatmentOutcome());
+					 map.put(index++, radetReportDto.getDateOfLastTbLam());
+					 map.put(index++, radetReportDto.getTbLamResult());
+					 
 					
 					 //TPT
 					 map.put(index++, radetReportDto.getDateOfIptStart());
