@@ -37,6 +37,8 @@ public class PatientReportController {
 	private final GenerateExcelService generateExcelService;
 	
 	private final StatusManagementService statusManagementService;
+	private final PMTCTReportService pmtctReportService;
+	private final DeduplicationReportService deduplicationReportService;
 	
 	@PostMapping("/patient-line-list")
 	public void patientLineList(HttpServletResponse response, @RequestParam("facilityId") Long facility) throws IOException {
@@ -166,6 +168,28 @@ public class PatientReportController {
 		ByteArrayOutputStream baos = generateExcelService.generateClinicReport(facility);
 		setStream(baos, response);
 		messagingTemplate.convertAndSend("/topic/clinic-data", "end");
+	}
+
+	@GetMapping("/pmtct")
+	public void generatePMTCTReport(
+			@RequestParam("facilityId") Long facility,
+			@RequestParam("startDate") LocalDate start,
+			@RequestParam("endDate") LocalDate end ,
+			HttpServletResponse response) throws IOException {
+		messagingTemplate.convertAndSend("/topic/pmtct", "start");
+		ByteArrayOutputStream baos = pmtctReportService.generateReport(facility, start, end);
+		setStream(baos, response);
+		messagingTemplate.convertAndSend("/topic/pmtct", "end");
+	}
+
+	@GetMapping("/deduplication-result")
+	public void generateDeduplicationTReport(
+			@RequestParam("patientId") Long patientId,
+			HttpServletResponse response) throws IOException {
+		messagingTemplate.convertAndSend("/topic/deduplication-result", "start");
+		ByteArrayOutputStream baos = deduplicationReportService.generateReport(patientId);
+		setStream(baos, response);
+		messagingTemplate.convertAndSend("/topic/deduplication-result", "end");
 	}
 	
 	

@@ -16,6 +16,7 @@ import LaboratoryReport from "./LaboratoryReport";
 import HTSReport from "./HTSReport";
 import PrepReport from "./PrepReport";
 import ClinicData from "./ClinicData";
+import PMTCTReport from "./PMTCTReport";
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -152,15 +153,28 @@ const Reports = (props) => {
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
                   <Menu.Item
-                    name="inbox"
-                    active={activeItem === "clinic-data-report"}
-                    onClick={() => handleItemClick("clinic-data-report")}
-                    style={{
-                      backgroundColor:
-                        activeItem === "clinic-data-report" ? "#000" : "",
-                    }}
+                      name="inbox"
+                      active={activeItem === "clinic-data-report"}
+                      onClick={() => handleItemClick("clinic-data-report")}
+                      style={{
+                        backgroundColor:
+                            activeItem === "clinic-data-report" ? "#000" : "",
+                      }}
                   >
                     <span style={{ color: "#fff" }}>CLINIC DATA REPORT</span>
+
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
+                  <Menu.Item
+                      name="inbox"
+                      active={activeItem === "pmtct-report"}
+                      onClick={() => handleItemClick("pmtct-report")}
+                      style={{
+                        backgroundColor:
+                            activeItem === "pmtct-report" ? "#000" : "",
+                      }}
+                  >
+                    <span style={{ color: "#fff" }}>PMTCT REPORT</span>
 
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
@@ -232,6 +246,13 @@ const Reports = (props) => {
                     setCompleted={setCompleted}
                     completed={completed}
                   />
+                )}
+                {activeItem === "pmtct-report" && (
+                    <PMTCTReport
+                        handleItemClick={handleItemClick}
+                        setCompleted={setCompleted}
+                        completed={completed}
+                    />
                 )}
               </div>
             </form>
