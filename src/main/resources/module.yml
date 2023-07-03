@@ -1,6 +1,6 @@
 basePackage: org.lamisplus.modules.report
 name: ReportModule
-dependencies: {}
+dependencies: {HivModule: 2.1.1 }
 store: true
 menus:
   - icon: fa fa-bar-chart
