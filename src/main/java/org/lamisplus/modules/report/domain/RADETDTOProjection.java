@@ -11,7 +11,10 @@ public interface RADETDTOProjection {
 	String getLga();
 	
 	String getFacilityName();
-	
+
+	String getUniqueId();
+	String getLgaOfResidence();
+
 	String getDatimId();
 	
 	String getPersonUuid();
@@ -131,4 +134,14 @@ public interface RADETDTOProjection {
 	LocalDate getTbTreatmentStartDate();
 	LocalDate getTbCompletionDate();
 	String getIptCompletionStatus();
+
+	//Crytococal Antigen
+	Date getDateOfLastCrytococalAntigen();
+	String	getLastCrytococalAntigen();
+
+	String getCaseManager();
+	String getVaCauseOfDeath();
+	String getTreatmentMethodDate();
+	LocalDate getDateOfRegistration();
+	LocalDate getDateOfEnrollment();
 }
