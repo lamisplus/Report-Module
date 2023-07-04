@@ -241,8 +241,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "            WHERE p.archived=0 AND p.facility_id=?1 AND p.date_of_registration >=?2 AND p.date_of_registration < ?3", nativeQuery = true)
     List<PrepReportDto> getPrepReport(Long facilityId, LocalDate start, LocalDate end);
 
-    
-    @Query(value = "WITH bio_data AS (SELECT DISTINCT (p.uuid) AS personUuid,p.hospital_number AS hospitalNumber,\n" +
+
+    @Query(value = "WITH bio_data AS (SELECT DISTINCT (p.uuid) AS personUuid,p.hospital_number AS hospitalNumber, h.unique_id as uniqueId,\n" +
             "EXTRACT(YEAR FROM  AGE(NOW(), date_of_birth)) AS age,\n" +
             "INITCAP(p.sex) AS gender,\n" +
             "p.date_of_birth AS dateOfBirth,\n" +
@@ -254,6 +254,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "eSetting.display AS enrollmentSetting,\n" +
             "hac.visit_date AS artStartDate,\n" +
             "hr.description AS regimenAtStart,\n" +
+            "p.date_of_registration as dateOfRegistration,"+
+            "h.date_of_registration as dateOfEnrollment,"+
             "h.ovc_number AS ovcUniqueId,\n" +
             "h.house_hold_number AS householdUniqueNo,\n" +
             "ecareEntry.display AS careEntry,\n" +
@@ -271,13 +273,21 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "AND hac.archived = 0\n" +
             "INNER JOIN hiv_regimen hr ON hr.id = hac.regimen_id\n" +
             "INNER JOIN hiv_regimen_type hrt ON hrt.id = hac.regimen_type_id\n" +
-            "    WHERE\n" +
+            "WHERE\n" +
             "h.archived = 0\n" +
-            "      AND h.facility_id = ?1\n" +
-            "      AND hac.is_commencement = TRUE\n" +
-            "      AND hac.visit_date >= ?2\n" +
-            "      AND hac.visit_date < ?3\n" +
+            "AND p.archived = 0\n"+
+            "AND h.facility_id = ?1\n" +
+            "AND hac.is_commencement = TRUE\n" +
+            "AND hac.visit_date >= ?2\n" +
+            "AND hac.visit_date < ?3\n" +
             "),\n" +
+            "\n" +
+            "patient_lga as (select DISTINCT ON (personUuid) personUuid as personUuid11, \n" +
+            "case when (addr ~ '^[0-9\\.]+$') =TRUE \n" +
+            "then (select name from base_organisation_unit where id = cast(addr as int)) end as lgaOfResidence \n" +
+            "from (\n" +
+            "select uuid AS personUuid, (jsonb_array_elements(address->'address')->>'district') as addr from patient_person \n" +
+            ") dt),"+
             "\n" +
             "current_clinical AS (SELECT DISTINCT ON (tvs.person_uuid) tvs.person_uuid AS person_uuid10,\n" +
             "       body_weight AS currentWeight,\n" +
@@ -748,7 +758,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     FROM\n" +
             "         hiv_art_pharmacy\n" +
             "     WHERE\n" +
-            "         (ipt ->> 'type' ilike '%INITIATION%')\n" +
+            "         (ipt ->> 'type' ilike '%INITIATION%' or ipt ->> 'type' ilike 'START_REFILL')\n" +
             "       AND archived = 0\n" +
             "     GROUP BY\n" +
             "         person_uuid\n" +
@@ -808,6 +818,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         SELECT\n" +
             " DISTINCT ON (ho.person_uuid) ho.person_uuid AS person_uuid90,\n" +
             "      ho.date_of_observation AS dateOfCervicalCancerScreening,\n" +
+            "      ho.data ->> 'screenTreatmentMethodDate' AS treatmentMethodDate,\n" +
             "      cc_type.display AS cervicalCancerScreeningType,\n" +
             "      cc_method.display AS cervicalCancerScreeningMethod,\n" +
             "      cc_trtm.display AS cervicalCancerTreatmentScreened,\n" +
@@ -831,8 +842,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     AND max_cc.person_uuid = ho.person_uuid\n" +
             "     INNER JOIN base_application_codeset cc_type ON cc_type.code = CAST(ho.data ->> 'screenType' AS VARCHAR)\n" +
             "     INNER JOIN base_application_codeset cc_method ON cc_method.code = CAST(ho.data ->> 'screenMethod' AS VARCHAR)\n" +
-            "     INNER JOIN base_application_codeset cc_result ON cc_result.code = CAST(ho.data ->> 'screeningResult' AS VARCHAR)\n" +
-            "      LEFT JOIN base_application_codeset cc_trtm   ON  cc_trtm.code = CAST(ho.data ->> 'screenTreatment' AS VARCHAR)\n" +
+            "     LEFT JOIN base_application_codeset cc_result ON cc_result.code = CAST(ho.data ->> 'screeningResult' AS VARCHAR)\n" +
+            "     LEFT JOIN base_application_codeset cc_trtm   ON  cc_trtm.code = CAST(ho.data ->> 'screenTreatment' AS VARCHAR)\n" +
             "     ),\n" +
             "\n" +
             "     ovc AS (\n" +
@@ -869,7 +880,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        END\n" +
             "    ) AS status_date,\n" +
             "\n" +
-            "stat.cause_of_death\n" +
+            "stat.cause_of_death, stat.va_cause_of_death\n" +
             "\n" +
             "         FROM\n" +
             " (\n" +
@@ -911,11 +922,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     SELECT\n" +
             "         hst.hiv_status,\n" +
             "         hst.person_id,\n" +
-            "         hst.cause_of_death,\n" +
+            "         hst.cause_of_death," +
+            "          hst.va_cause_of_death,\n" +
             "         hst.status_date\n" +
             "     FROM\n" +
             "         (\n" +
-            " SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,\n" +
+            " SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,va_cause_of_death,\n" +
             "        hiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
             "    FROM hiv_status_tracker WHERE archived=0 AND status_date <= ?5 )s\n" +
             " WHERE s.row_number=1\n" +
@@ -952,7 +964,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        END\n" +
             "    ) AS status_date,\n" +
             "\n" +
-            "stat.cause_of_death\n" +
+            "stat.cause_of_death, stat.va_cause_of_death\n" +
             "\n" +
             "         FROM\n" +
             " (\n" +
@@ -994,11 +1006,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     SELECT\n" +
             "         hst.hiv_status,\n" +
             "         hst.person_id,\n" +
-            "         hst.cause_of_death,\n" +
+            "         hst.cause_of_death, " +
+            "         hst.va_cause_of_death,\n" +
             "         hst.status_date\n" +
             "     FROM\n" +
             "         (\n" +
-            " SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,\n" +
+            " SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,va_cause_of_death,\n" +
             "        hiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
             "    FROM hiv_status_tracker WHERE archived=0 AND status_date <=  ?4 )s\n" +
             " WHERE s.row_number=1\n" +
@@ -1024,7 +1037,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    ELSE pharmacy.visit_date\n" +
             "    END\n" +
             ") AS status_date,\n" +
-            "        stat.cause_of_death\n" +
+            "        stat.cause_of_death, stat.va_cause_of_death\n" +
             " FROM\n" +
             "     (\n" +
             "         SELECT\n" +
@@ -1065,11 +1078,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         SELECT\n" +
             " hst.hiv_status,\n" +
             " hst.person_id,\n" +
-            " hst.cause_of_death,\n" +
+            " hst.cause_of_death," +
+            " hst.va_cause_of_death,\n" +
             " hst.status_date\n" +
             "         FROM\n" +
             " (\n" +
-            "     SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,\n" +
+            "     SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death, va_cause_of_death,\n" +
             "hiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
             "        FROM hiv_status_tracker WHERE archived=0 AND status_date <= ?3 )s\n" +
             "     WHERE s.row_number=1\n" +
@@ -1103,11 +1117,23 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "      WHERE ls.archived=0 AND ls.facility_id=?1\n" +
             "      GROUP BY ls.patient_uuid\n" +
             "  )t )\n" +
-            "     )\n" +
+            "     ),\n" +
             "\n" +
-            "\n" +
+            "crytococal_antigen as (select personuuid12, date_result_reported as dateOfLastCrytococalAntigen, result_reported as lastCrytococalAntigen from (\n" +
+            "select DISTINCT ON (lr.patient_uuid) lr.patient_uuid as personuuid12, lr.date_result_reported, lr.result_reported, \n" +
+            "ROW_NUMBER() OVER (PARTITION BY lr.patient_uuid ORDER BY lr.date_result_reported DESC) as rowNum\n" +
+            "from public.laboratory_test lt \n" +
+            "inner join laboratory_result lr on lr.test_id = lt.id\n" +
+            "where lab_test_id=52\n" +
+            ") dt where rowNum=1), "+
+            "case_manager AS (\n" +
+            " SELECT DISTINCT ON (cmp.person_uuid)person_uuid AS caseperson, cmp.case_manager_id, CONCAT(cm.first_name, ' ', cm.last_name) AS caseManager FROM (SELECT person_uuid, case_manager_id,\n" +
+            " ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY id DESC)\n" +
+            " FROM case_manager_patients) cmp  INNER JOIN case_manager cm ON cm.id=cmp.case_manager_id\n" +
+            " WHERE cmp.row_number=1 AND cm.facility_id=?1)" +
             "SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,\n" +
             "           bd.*,\n" +
+            "           p_lga.*,\n"+
             "           scd.*,\n" +
             "           cvlr.*,\n" +
             "           pdr.*,\n" +
@@ -1126,6 +1152,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           tbSample.*,\n" +
             "           tbResult.*,\n" +
             "           ct.cause_of_death AS causeOfDeath,\n" +
+            "           ct.va_cause_of_death AS vaCauseOfDeath,\n" +
             "           (\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN 'DEATH'\n" +
@@ -1304,9 +1331,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "   OR  scd.dateofviralloadsamplecollection IS NULL )\n" +
             "           AND CAST(cvlr.dateofcurrentviralload AS DATE) + 181 < ?3\n" +
             "           THEN CAST(cvlr.dateofcurrentviralload AS DATE) + 181\n" +
-            "\n" +
-            "\n" +
-            "\n" +
             "       WHEN  CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000\n" +
             "           AND (scd.dateofviralloadsamplecollection > cvlr.dateofcurrentviralload\n" +
             "   OR cvlr.dateofcurrentviralload IS NULL\n" +
@@ -1337,8 +1361,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     ELSE NULL END) as lastCd4Count,\n" +
             "           (CASE WHEN  ccd.visit_date IS NOT NULL THEN CAST(ccd.visit_date as DATE)\n" +
             "     WHEN  cd.dateOfCd4Lb IS NOT NULL THEN  CAST(cd.dateOfCd4Lb as DATE)\n" +
-            "     ELSE NULL END) as dateOfLastCd4Count\n" +
+            "     ELSE NULL END) as dateOfLastCd4Count, \n" +
+            "      crypt.*, " +
+            "INITCAP(cm.caseManager) AS caseManager "+
             "FROM bio_data bd\n" +
+            "        LEFT JOIN patient_lga p_lga on p_lga.personUuid11 = bd.personUuid \n"+
             "        LEFT JOIN pharmacy_details_regimen pdr ON pdr.person_uuid40 = bd.personUuid\n" +
             "        LEFT JOIN current_clinical c ON c.person_uuid10 = bd.personUuid\n" +
             "        LEFT JOIN sample_collection_date scd ON scd.person_uuid120 = bd.personUuid\n" +
@@ -1357,11 +1384,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        LEFT JOIN naive_vl_data nvd ON nvd.nvl_person_uuid = bd.personUuid\n" +
             "        LEFT JOIN tb_sample_collection tbSample ON tbSample.personTbSample = bd.personUuid\n" +
             "        LEFT JOIN  tbTreatment tbTment ON tbTment.tbTreatmentPersonUuid = bd.personUuid\n" +
-            "        LEFT JOIN  current_tb_result tbResult ON tbResult.personTbResult = bd.personUuid\n"
-             , nativeQuery = true)
+            "        LEFT JOIN  current_tb_result tbResult ON tbResult.personTbResult = bd.personUuid\n" +
+            "        LEFT JOIN crytococal_antigen crypt on crypt.personuuid12= bd.personUuid " +
+            "       LEFT JOIN case_manager cm on cm.caseperson= bd.personUuid"
+            , nativeQuery = true)
     List<RADETDTOProjection> getRadetData(Long facilityId, LocalDate start, LocalDate end, LocalDate previous, LocalDate previousPrevious);
-    
-   @Query(value = "SELECT  DISTINCT (p.uuid) AS patientId, \n" +
+
+    @Query(value = "SELECT  DISTINCT (p.uuid) AS patientId, \n" +
            "                            p.hospital_number AS hospitalNumber, \n" +
            "                            EXTRACT( \n" +
            "                                    YEAR \n" +
