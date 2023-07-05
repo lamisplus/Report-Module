@@ -28,7 +28,7 @@ public class Constants {
 			"Unique ID",
 			"Surname",
 			"Other Name",
-			"Date Birth",
+			"Date Of Birth (yyyy-mm-dd)",
 			"Age",
 			"Gender",
 			"Marital Status",
