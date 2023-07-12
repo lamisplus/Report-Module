@@ -19,6 +19,7 @@ import org.lamisplus.modules.hiv.domain.entity.Regimen;
 import org.lamisplus.modules.hiv.repositories.*;
 import org.lamisplus.modules.patient.domain.entity.Person;
 import org.lamisplus.modules.report.domain.PatientLineListDto;
+import org.lamisplus.modules.report.repository.ReportRepository;
 import org.lamisplus.modules.triage.domain.entity.VitalSign;
 import org.lamisplus.modules.triage.repository.VitalSignRepository;
 import org.springframework.scheduling.annotation.Async;
@@ -52,6 +53,8 @@ public class PatientReportService {
 	private final HIVEacRepository hIVEacRepository;
 	
 	private final ModuleService moduleService;
+
+	private final ReportRepository reportRepository;
 	
 	
 	public List<PatientLineListDto> getPatientLineList(Long facilityId) {
@@ -66,7 +69,7 @@ public class PatientReportService {
 	
 	public List<PatientLineDto> getPatientLine(Long facilityId) {
 		System.out.println("start: fetching records from db: ");
-		List<PatientLineDto> patientLineDtoList = hIVEacRepository.getPatientLineByFacilityId(facilityId);
+		List<PatientLineDto> patientLineDtoList = reportRepository.getPatientLineByFacilityId(facilityId);
 		System.out.println("Total size:  " + patientLineDtoList.size());
 		return patientLineDtoList;
 	}
