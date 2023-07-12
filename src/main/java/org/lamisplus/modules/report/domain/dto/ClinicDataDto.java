@@ -1,6 +1,5 @@
 package org.lamisplus.modules.report.domain.dto;
 
-import javafx.stage.Stage;
 import liquibase.pro.packaged.m;
 import org.lamisplus.modules.patient.domain.Patient;
 import org.lamisplus.modules.patient.domain.entity.Visit;

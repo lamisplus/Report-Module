@@ -19,7 +19,8 @@ public class ReportModule extends AcrossModule {
 				getClass ().getPackage ().getName () + ".service",
 				getClass ().getPackage ().getName () + ".controller",
 				getClass ().getPackage ().getName () + ".domain",
-				getClass ().getPackage ().getName () + ".config"
+				getClass ().getPackage ().getName () + ".config",
+				getClass ().getPackage ().getName () + ".utility"
 		));
 	}
 
