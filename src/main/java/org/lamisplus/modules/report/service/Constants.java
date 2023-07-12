@@ -1,9 +1,5 @@
 package org.lamisplus.modules.report.service;
 
-import javafx.stage.Stage;
-import org.lamisplus.modules.patient.domain.Patient;
-import org.lamisplus.modules.patient.domain.entity.Visit;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,7 +28,7 @@ public class Constants {
 			"Unique ID",
 			"Surname",
 			"Other Name",
-			"Date Birth",
+			"Date Of Birth (yyyy-mm-dd)",
 			"Age",
 			"Gender",
 			"Marital Status",
@@ -307,14 +303,13 @@ public class Constants {
 					"State",
 					"LGA",
 					"Facility Name",
-					"Unique ID",
-					//"Patient Identifier",
+					"Patient Identifier",
 					"Hospital Number",
 					"First Name",
 					"Surname",
 					"Other Names",
 					"Sex",
-					//"Target Group",
+					"Target Group",
 					"Age",
 					"Date Of Birth (yyyy-mm-dd)",
 					"Phone Number",
@@ -325,6 +320,7 @@ public class Constants {
 					"Education",
 					"Occupation",
 					"Date Of Registration (yyyy-mm-dd)",
+					"Date Of Commencement (yyyy-mm-dd)",
 					"Baseline Regimen",
 					"Baseline Systolic bp",
 					"Baseline Diastolic bp",
@@ -337,33 +333,22 @@ public class Constants {
 					"Baseline Urinalysis",
 					"Baseline Urinalysis Date",
 					"Indication for PrEP",
-					//"Risk Type",
-					//"Entry Point",
-					//"Current Regimen Start",
-
-
-
-//					"PrEP Commencement Date",
-
-//					"Base Urinalysis Test Date",
-//					"Base Urinalysis Result",
 					"Current Regimen",
 					"Date Of Last Pickup (yyyy-mm-dd)",
-					"Current PrEP Status",
-					"current PrEP Status Date",
+					"Current Status",
+					"Date Of Current Status (yyyy-mm-dd)",
 					"Current Systolic bp",
 					"Current Diastolic bp",
 					"Current Weight (kg)",
 					"Current Height (cm)",
 					"Current HIV Status",
-					"Current HIV Status Date",
-					"Current Urinalysis Result",
-					"Current Urinalysis Test Date",
+					"Date of Current HIV Status (yyyy-mm-dd)",
+					"Current Urinalysis",
+					"Date of Current Urinalysis",
 					"Pregnancy Status",
-					"Interruption Reason",
-					"Interruption Date",
-//					"Facility Referred To",
-					"HIV Enrollment Date"
+					"Reasons for discontinuation/Stopped",
+					"Date of Discontinuation/Stopped",
+					"Date Of HIV Enrollment (yyyy-mm-dd)"
 			);
 	
 	public static final List<String> CLINIC_HEADER =
