@@ -6,10 +6,10 @@ import org.jetbrains.annotations.NotNull;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnit;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
-import org.lamisplus.modules.hiv.domain.dto.BiometricReport;
-import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
+import org.lamisplus.modules.report.domain.BiometricReport;
 import org.lamisplus.modules.patient.domain.entity.Person;
 import org.lamisplus.modules.report.domain.BiometricReportDto;
+import org.lamisplus.modules.report.repository.ReportRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,7 +23,9 @@ public class BiometricReportService {
 	
 	private final OrganisationUnitService organisationUnitService;
 	
-	private final HIVEacRepository hivEacRepository;
+	private final ReportRepository reportRepository;
+
+
 	
 	List<BiometricReportDto> getBiometricReportDtoList(Long facilityId, LocalDate start, LocalDate end) {
 		OrganisationUnit facility = organisationUnitService.getOrganizationUnit(facilityId);
@@ -39,7 +41,7 @@ public class BiometricReportService {
 			OrganisationUnit facility,
 			OrganisationUnit lgaOrgUnitOfFacility,
 			OrganisationUnit state) {
-		List<BiometricReport> biometricReports = hivEacRepository.getBiometricReports(facility.getId(), start, end);
+		List<BiometricReport> biometricReports = reportRepository.getBiometricReports(facility.getId(), start, end);
 		if(!biometricReports.isEmpty())
 		 return biometricReports.stream()
 				   .filter(Objects::nonNull)
@@ -92,7 +94,7 @@ public class BiometricReportService {
 		biometricReportDto.setDatimId(datimId);
 		biometricReportDto.setState(state.getName());
 		biometricReportDto.setAddress(info.getAddress());
-		//biometricReportDto.setPhone(info.getPhone()); //TODO: revert
+		biometricReportDto.setPhone(info.getPhone());
 		biometricReportDto.setFacilityName(facility.getName());
 		biometricReportDto.setSex(info.getSex());
 		biometricReportDto.setHospitalNum(info.getHospitalNumber());

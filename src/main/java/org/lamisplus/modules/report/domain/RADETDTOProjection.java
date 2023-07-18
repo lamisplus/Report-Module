@@ -51,7 +51,6 @@ public interface RADETDTOProjection {
 	LocalDate getDateOfViralLoadSampleCollection();
 
 	String getCurrentViralLoad();
-
 	LocalDate getDateOfCurrentViralLoad();
 	LocalDate getDateOfCurrentViralLoadSample();
 
@@ -91,7 +90,7 @@ public interface RADETDTOProjection {
 	//eac
 	LocalDate getDateOfCommencementOfEAC();
 	Integer getNumberOfEACSessionCompleted();
-	LocalDate	getDateOfLastEACSessionCompleted();
+	LocalDate  getDateOfLastEACSessionCompleted();
 	LocalDate getDateOfExtendEACCompletion();
 	LocalDateTime getDateOfRepeatViralLoadResult();
 	LocalDateTime getDateOfRepeatViralLoadEACSampleCollection();
@@ -137,11 +136,13 @@ public interface RADETDTOProjection {
 
 	//Crytococal Antigen
 	Date getDateOfLastCrytococalAntigen();
-	String	getLastCrytococalAntigen();
+	String getLastCrytococalAntigen();
 
 	String getCaseManager();
 	String getVaCauseOfDeath();
 	String getTreatmentMethodDate();
 	LocalDate getDateOfRegistration();
 	LocalDate getDateOfEnrollment();
+	LocalDate getDateOfLastTbLam();
+	String  getTbLamResult();
 }
