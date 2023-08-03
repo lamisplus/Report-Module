@@ -105,6 +105,7 @@ public class Constants {
 					"Facility Name",
 					"DatimId",
 					"Patient ID",
+					"NDR Patient Identifier",
 					"Hospital Number",
 					"Unique Id",
 					"Household Unique No",

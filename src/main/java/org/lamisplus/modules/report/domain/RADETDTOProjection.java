@@ -145,4 +145,6 @@ public interface RADETDTOProjection {
 	LocalDate getDateOfEnrollment();
 	LocalDate getDateOfLastTbLam();
 	String  getTbLamResult();
+
+	String getNdrPatientIdentifier();
 }

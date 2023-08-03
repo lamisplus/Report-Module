@@ -1154,6 +1154,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " WHERE cmp.row_number=1 AND cm.facility_id=?1)" +
             "SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,\n" +
             "           bd.*,\n" +
+            "CONCAT(bd.datimId, '_', bd.personUuid) AS ndrPatientIdentifier, " +
             "           p_lga.*,\n"+
             "           scd.*,\n" +
             "           cvlr.*,\n" +

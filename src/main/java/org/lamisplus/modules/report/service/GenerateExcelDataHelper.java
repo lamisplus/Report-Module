@@ -156,6 +156,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getFacilityName());
 				map.put(index++, radetReportDto.getDatimId());
 				map.put(index++, personUuid);
+				map.put(index++, radetReportDto.getNdrPatientIdentifier());
 				map.put(index++, radetReportDto.getHospitalNumber());
 				map.put(index++, radetReportDto.getUniqueId());
 				//ovc
