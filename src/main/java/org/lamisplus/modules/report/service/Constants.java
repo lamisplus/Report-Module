@@ -105,6 +105,7 @@ public class Constants {
 					"Facility Name",
 					"DatimId",
 					"Patient ID",
+					"NDR Patient Identifier",
 					"Hospital Number",
 					"Unique Id",
 					"Household Unique No",
@@ -132,6 +133,7 @@ public class Constants {
 					"Date of Last CD4 Count",
 					"Last CD4 Count",
 					"Date of Viral Load Sample Collection (yyyy-mm-dd)",
+					"Date of Current ViralLoad Result Sample (yyyy-mm-dd)",
 					"Current Viral Load (c/ml)",
 					"Date of Current Viral Load (yyyy-mm-dd)",
 					"Viral Load Indication",
@@ -146,6 +148,7 @@ public class Constants {
 					"ART Enrollment Setting",
 					"Date of TB Screening (yyyy-mm-dd)",
 					"TB status at Last Visit",
+					"TB Screening Outcome",
 					"Date of TB Sample Collection (yyyy-mm-dd)",
 					"TB Diagnostic Test Type",
 					"Date of TB Diagnostic Result Received (yyyy-mm-dd)",
@@ -154,6 +157,8 @@ public class Constants {
 					"TB Treatment Type (new, relapsed etc)",
 					"Date of Completion of TB Treatment (yyyy-mm-dd)",
 					"TB Treatment Outcome",
+					"Date of TB-LAM",
+					"TB-LAM result",
 					"Date of TPT Start (yyyy-mm-dd)",
 					"TPT Type",
 					"TPT Completion date (yyyy-mm-dd)",
@@ -183,7 +188,8 @@ public class Constants {
 					"Valid Biometrics(Hexadecimal/Base64 Unique Identifier)",
 					"Case Manager"
 			);
-	
+
+
 	public static final String PHARMACY_SHEET = "pharmacy-report";
 	public static final String BIOMETRIC_SHEET_SHEET = "biometric-report";
 	public static final String LAB_SHEET_NAME = "laboratory-report";
