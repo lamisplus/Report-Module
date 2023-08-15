@@ -145,8 +145,10 @@ public class GenerateExcelDataHelper {
 				if(radetReportDto.getTbStatus() != null){
 					if(radetReportDto.getTbStatus().contains("No")){
 						tbStatusOutCome ="No sign or symptoms of TB";
+						LOG.info("tbStatusOutCome {}", radetReportDto.getTbStatus());
 					}else {
 						tbStatusOutCome = "TB Suspected and referred for evaluation";
+						LOG.info("tbStatusOutCome {}", radetReportDto.getTbStatus());
 					}
 				}
 				map.put(index++, sn);
