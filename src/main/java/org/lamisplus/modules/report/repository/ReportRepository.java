@@ -401,11 +401,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           AND facility_id = ?1\n" +
             "     ),\n" +
             "\n" +
-            "     labCD4 AS (SELECT * FROM (\n" +
-            "          SELECT sm.patient_uuid AS cd4_person_uuid,  sm.result_reported as cd4Lb,sm.date_result_reported as dateOfCD4Lb, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rnk\n" +
-            "          FROM public.laboratory_result  sm\n" +
-            "       INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
-            "          WHERE lt.lab_test_id IN (1, 50) \n" +
+            "labCD4 AS (SELECT * FROM (\n" +
+            "SELECT sm.patient_uuid AS cd4_person_uuid,  sm.result_reported as cd4Lb,sm.date_result_reported as dateOfCD4Lb, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rnk\n" +
+            "FROM public.laboratory_result  sm\n" +
+            "INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
+            "WHERE lt.lab_test_id IN (1, 50) \n" +
             "AND sm. date_result_reported IS NOT NULL\n" +
             "AND sm.archived = 0\n" +
             "AND sm.facility_id = ?1\n" +
@@ -488,7 +488,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        ON pr.art_pharmacy_id = p.id\n" +
             "         INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id\n" +
             "         INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id\n" +
-            "INNER JOIN base_application_codeset ds_model on ds_model.code = p.dsd_model_type " +
+            "left JOIN base_application_codeset ds_model on ds_model.code = p.dsd_model_type " +
             "WHERE r.regimen_type_id in (1,2,3,4,14)\n" +
             "  AND  p.archived = 0\n" +
             "  AND  p.facility_id = ?1\n" +
@@ -1387,11 +1387,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "       ELSE NULL\n" +
             "       END\n" +
             "   ) AS dateOfVlEligibilityStatus,\n" +
-            "           (CASE WHEN  ccd.cd_4 IS NOT NULL THEN CAST(ccd.cd_4 as VARCHAR)\n" +
-            "     WHEN  cd.cd4lb IS NOT NULL THEN  cd.cd4lb\n" +
+            "           (CASE WHEN cd.cd4lb IS NOT NULL THEN  cd.cd4lb" +
+            "                 WHEN  ccd.cd_4 IS NOT NULL THEN CAST(ccd.cd_4 as VARCHAR)\n" +
             "     ELSE NULL END) as lastCd4Count,\n" +
-            "           (CASE WHEN  ccd.visit_date IS NOT NULL THEN CAST(ccd.visit_date as DATE)\n" +
-            "     WHEN  cd.dateOfCd4Lb IS NOT NULL THEN  CAST(cd.dateOfCd4Lb as DATE)\n" +
+            "           (CASE WHEN cd.dateOfCd4Lb IS NOT NULL THEN  CAST(cd.dateOfCd4Lb as DATE)" +
+            "                   WHEN ccd.visit_date IS NOT NULL THEN CAST(ccd.visit_date as DATE)\n" +
             "     ELSE NULL END) as dateOfLastCd4Count, \n" +
             "      (CASE WHEN bd.gender ILIKE 'MALE' THEN NULL \n" +
             " ELSE crypt.dateOfLastCrytococalAntigen END) AS dateOfLastCrytococalAntigen, \n" +
