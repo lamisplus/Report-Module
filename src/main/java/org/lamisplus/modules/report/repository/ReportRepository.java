@@ -1393,10 +1393,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           (CASE WHEN cd.dateOfCd4Lb IS NOT NULL THEN  CAST(cd.dateOfCd4Lb as DATE)" +
             "                   WHEN ccd.visit_date IS NOT NULL THEN CAST(ccd.visit_date as DATE)\n" +
             "     ELSE NULL END) as dateOfLastCd4Count, \n" +
-            "      (CASE WHEN bd.gender ILIKE 'MALE' THEN NULL \n" +
-            " ELSE crypt.dateOfLastCrytococalAntigen END) AS dateOfLastCrytococalAntigen, \n" +
-            " (CASE WHEN bd.gender ILIKE 'MALE' THEN NULL\n" +
-            " ELSE crypt.lastCrytococalAntigen END) AS lastCrytococalAntigen, " +
+            " crypt.dateOfLastCrytococalAntigen AS dateOfLastCrytococalAntigen, \n" +
+            " crypt.lastCrytococalAntigen AS lastCrytococalAntigen, " +
             "INITCAP(cm.caseManager) AS caseManager "+
             "FROM bio_data bd\n" +
             "        LEFT JOIN patient_lga p_lga on p_lga.personUuid11 = bd.personUuid \n"+
