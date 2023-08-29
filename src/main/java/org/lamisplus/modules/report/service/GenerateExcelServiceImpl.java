@@ -84,6 +84,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		} catch (Exception e) {
 			LOG.error("An error Occurred when generating RADET...");
 			LOG.error("Error message: " + e.getMessage());
+			e.printStackTrace();
 		}
 		LOG.info("End generate patient Radet");
 		return null;

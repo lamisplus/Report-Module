@@ -109,7 +109,7 @@ public class GenerateExcelDataHelper {
 		deleteErrorFile();
 		int sn = 1;
 		Log.info("converting RADET db records to excel ....");
-		RADETDTOProjection currentRecord = reportDtos.get(0);
+		RADETDTOProjection currentRecord = null;
 		for (RADETDTOProjection radetReportDto : reportDtos) {
 			try {
 				currentRecord = radetReportDto;
@@ -145,10 +145,10 @@ public class GenerateExcelDataHelper {
 				if(radetReportDto.getTbStatus() != null){
 					if(radetReportDto.getTbStatus().contains("No")){
 						tbStatusOutCome ="No sign or symptoms of TB";
-						LOG.info("tbStatusOutCome {}", radetReportDto.getTbStatus());
+						//LOG.info("tbStatusOutCome {}", radetReportDto.getTbStatus());
 					}else {
 						tbStatusOutCome = "TB Suspected and referred for evaluation";
-						LOG.info("tbStatusOutCome {}", radetReportDto.getTbStatus());
+						//LOG.info("tbStatusOutCome {}", radetReportDto.getTbStatus());
 					}
 				}
 				map.put(index++, sn);
