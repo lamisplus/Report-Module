@@ -2,6 +2,7 @@ package org.lamisplus.modules.report.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
+import org.audit4j.core.util.Log;
 import org.jetbrains.annotations.NotNull;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnit;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
@@ -42,11 +43,19 @@ public class BiometricReportService {
 			OrganisationUnit lgaOrgUnitOfFacility,
 			OrganisationUnit state) {
 		List<BiometricReport> biometricReports = reportRepository.getBiometricReports(facility.getId(), start, end);
+
+		Log.info("start ...." +start);
+		Log.info("end ...." +end);
+
 		if(!biometricReports.isEmpty())
-		 return biometricReports.stream()
-				   .filter(Objects::nonNull)
-				   .map(b -> getBiometricReportDto(facility, lgaOrgUnitOfFacility,state, b))
-				   .collect(Collectors.toList());
+		{
+			Log.info("biometric data retrieved ....", +facility.getId());
+			return biometricReports.stream()
+					.filter(Objects::nonNull)
+					.map(b -> getBiometricReportDto(facility, lgaOrgUnitOfFacility,state, b))
+					.collect(Collectors.toList());
+		}
+		Log.info("No biometric data retrieved ....");
 		return null;
 		
 	}
@@ -87,7 +96,9 @@ public class BiometricReportService {
 				.filter(identifier -> identifier.getName().equalsIgnoreCase("DATIM_ID"))
 				.map(OrganisationUnitIdentifier::getCode)
 				.findFirst().orElse("");
-		
+
+		Log.info("datimId "+datimId);
+
 		BiometricReportDto biometricReportDto = new BiometricReportDto();
 		biometricReportDto.setLga(lgaOrgUnitOfFacility.getName());
 		biometricReportDto.setFacilityId(facility.getId());
