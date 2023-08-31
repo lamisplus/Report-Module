@@ -184,7 +184,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                        INNER JOIN (\n" +
             "            SELECT * FROM (SELECT p.id, CONCAT(CAST(address_object->>'city' AS VARCHAR), ' ', REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '\\\\', ''), ']', ''), '[', ''), 'null',''), '\\\"', '')) AS address, \n" +
             "             CASE WHEN address_object->>'stateId'  ~ '^\\d+(\\.\\d+)?$' THEN address_object->>'stateId' ELSE null END  AS stateId,\n" +
-            "             CASE WHEN address_object->>'stateId'  ~ '^\\d+(\\.\\d+)?$' THEN address_object->>'district' ELSE null END  AS lgaId \n" +
+            "             CASE WHEN address_object->>'district'  ~ '^\\d+(\\.\\d+)?$' THEN address_object->>'district' ELSE null END  AS lgaId \n" +
             "            FROM patient_person p,\n" +
             "            jsonb_array_elements(p.address-> 'address') with ordinality l(address_object)) as result\n" +
             "              ) r ON r.id=p.id \n" +
@@ -1482,7 +1482,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "   INNER JOIN (\n" +
             "SELECT * FROM (SELECT p.id, CONCAT(CAST(address_object->>'city' AS VARCHAR), ' ', REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '\\\\', ''), ']', ''), '[', ''), 'null',''), '\"', '')) AS address, \n " +
              " CASE WHEN address_object->>'stateId'  ~ '^\\d+(\\.\\d+)?$' THEN address_object->>'stateId' ELSE null END  AS stateId,      " +
-             " CASE WHEN address_object->>'stateId'  ~ '^\\d+(\\.\\d+)?$' THEN address_object->>'district' ELSE null END  AS lgaId      " +
+             " CASE WHEN address_object->>'district'  ~ '^\\d+(\\.\\d+)?$' THEN address_object->>'district' ELSE null END  AS lgaId      " +
             " FROM patient_person p,\n" +
             " jsonb_array_elements(p.address-> 'address') with ordinality l(address_object)) as result\n" +
             "   ) r ON r.id=p.id\n" +
