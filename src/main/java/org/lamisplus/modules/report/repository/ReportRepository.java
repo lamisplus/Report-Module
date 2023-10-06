@@ -367,15 +367,36 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         WHERE sample.rnkk = 1\n" +
             "           AND (sample.archived is null OR sample.archived = 0)\n" +
             "           AND sample.facility_id = ?1 ),\n" +
-            "tbstatus as (select personUuid133, tbstatus_date as dateOfTbScreened ,tbStatus from (\n" +
-            "select DISTINCT ON (hac.person_uuid) person_uuid as personUuid133, hac.visit_date as tbstatus_date, tbs.display AS tbStatus, \n" +
-            "ROW_NUMBER () OVER (PARTITION BY hac.person_uuid ORDER BY tbs.display DESC, hac.visit_date DESC) as rowNums\n" +
-            "from hiv_art_clinical hac \n" +
-            "LEFT JOIN base_application_codeset tbs ON tbs.id = CAST(hac.tb_status AS INTEGER)\n" +
-            "where hac.tb_status is not null and hac.archived=0\n" +
-            "and hac.visit_date between ?2 and ?3 \n" +
-            "and hac.facility_id = ?1 \n" +
-            ")dt where dt.rowNums=1),"+
+            "tbstatus as (\n" +
+            "  select \n" +
+            "    personUuid133, \n" +
+            "    dateOfTbScreened, \n" +
+            "    tbStatus,\n" +
+            "    tbStatusOutcome \n" +
+            "  from \n" +
+            "    (\n" +
+            "     SELECT \n" +
+            "\t\tDISTINCT ON (hac.person_uuid) hac.person_uuid AS personUuid133,\n" +
+            "\t\tho.date_of_observation AS dateOfTbScreened,\n" +
+            "\t\tho.data->'tbIptScreening'->>'status' AS tbStatus, \n" +
+            "\t\tho.data->'tbIptScreening'->>'outcome' AS tbStatusOutcome,\n" +
+            "\t\tROW_NUMBER() OVER (\n" +
+            "\t\t  PARTITION BY hac.person_uuid\n" +
+            "\t\t  ORDER BY ho.date_of_observation DESC\n" +
+            "\t\t) AS rowNums\n" +
+            "\tFROM\n" +
+            "\t\thiv_art_clinical hac\n" +
+            "\t\tLEFT JOIN hiv_observation ho ON ho.person_uuid = hac.person_uuid\n" +
+            "\tWHERE\n" +
+            "\t\tho.data is not null \n" +
+            "        and hac.archived = 0 \n" +
+            "        and ho.date_of_observation between ?2\n" +
+            "        and ?3 \n" +
+            "        and hac.facility_id = ?1\n" +
+            "    ) dt \n" +
+            "  where \n" +
+            "    dt.rowNums = 1\n" +
+            "),"+
             "tblam AS (SELECT * FROM (\n" +
             "SELECT CAST(lr.date_result_reported AS DATE ) AS dateOfLastTbLam, lr.patient_uuid as personuuidtblam , lr.result_reported as tbLamResult,\n" +
             "ROW_NUMBER () OVER (PARTITION BY lr.patient_uuid ORDER BY lr.date_result_reported DESC) as rank2333\n" +
@@ -665,29 +686,39 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     he.archived = 0\n" +
             "     ),\n" +
             "\n" +
-            "     biometric AS (\n" +
-            "         SELECT\n" +
-            " DISTINCT ON (he.person_uuid) he.person_uuid AS person_uuid60,\n" +
-            "      biometric_count.enrollment_date AS dateBiometricsEnrolled,\n" +
-            "      biometric_count.count AS numberOfFingersCaptured\n" +
-            "         FROM\n" +
-            " hiv_enrollment he\n" +
-            "     LEFT JOIN (\n" +
-            "     SELECT\n" +
-            "         b.person_uuid,\n" +
-            "         COUNT(b.person_uuid),\n" +
-            "         MAX(enrollment_date) enrollment_date\n" +
-            "     FROM\n" +
-            "         biometric b\n" +
-            "     WHERE\n" +
-            " archived = 0 AND recapture=0\n" +
-            "     GROUP BY\n" +
-            "         b.person_uuid\n" +
-            " ) biometric_count ON biometric_count.person_uuid = he.person_uuid\n" +
-            "         WHERE\n" +
-            "     he.archived = 0\n" +
-            "     ),\n" +
+            "  biometric AS (\n" +
+            "  SELECT \n" +
+            "    DISTINCT ON (he.person_uuid) he.person_uuid AS person_uuid60, \n" +
+            "    biometric_count.enrollment_date AS dateBiometricsEnrolled, \n" +
+            "    biometric_count.count AS numberOfFingersCaptured,\n" +
+            "    bst.biometric_status AS biometricStatus \n" +
+            "  FROM \n" +
+            "    hiv_enrollment he \n" +
+            "    LEFT JOIN (\n" +
+            "      SELECT \n" +
+            "        b.person_uuid, \n" +
+            "        COUNT(b.person_uuid), \n" +
+            "        MAX(enrollment_date) enrollment_date \n" +
+            "      FROM \n" +
+            "        biometric b \n" +
+            "      WHERE \n" +
+            "        archived = 0 \n" +
+            "        AND recapture = 0 \n" +
+            "      GROUP BY \n" +
+            "        b.person_uuid\n" +
+            "    ) biometric_count ON biometric_count.person_uuid = he.person_uuid \n" +
+            "    LEFT JOIN (\n" +
             "\n" +
+            "\tSELECT DISTINCT ON (person_id) person_id, \n" +
+            "\t(CASE WHEN biometric_status IS NULL OR biometric_status=''\n" +
+            "\t\t  THEN hiv_status ELSE biometric_status END) AS biometric_status, \n" +
+            "\tMAX(status_date) OVER (PARTITION BY person_id) AS status_date FROM hiv_status_tracker \n" +
+            "\tWHERE archived=0 AND facility_id=?1\n" +
+            "\n" +
+            "    ) bst ON bst.person_id = he.person_uuid \n" +
+            "  WHERE \n" +
+            "    he.archived = 0\n" +
+            "), " +
             "     current_regimen AS (\n" +
             "         SELECT\n" +
             " DISTINCT ON (regiment_table.person_uuid) regiment_table.person_uuid AS person_uuid70,\n" +

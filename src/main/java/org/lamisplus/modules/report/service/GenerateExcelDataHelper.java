@@ -142,15 +142,16 @@ public class GenerateExcelDataHelper {
 						|| previousStatus.contains("stop"))){
 					previousStatus = "Stopped Treatment";
 				}
-				if(radetReportDto.getTbStatus() != null){
-					if(radetReportDto.getTbStatus().contains("No")){
-						tbStatusOutCome ="No sign or symptoms of TB";
-						//LOG.info("tbStatusOutCome {}", radetReportDto.getTbStatus());
-					}else {
-						tbStatusOutCome = "TB Suspected and referred for evaluation";
-						//LOG.info("tbStatusOutCome {}", radetReportDto.getTbStatus());
-					}
-				}
+//				if(radetReportDto.getTbStatus() != null){
+//					if(radetReportDto.getTbStatus().contains("No")){
+//						tbStatusOutCome ="No sign or symptoms of TB";
+//						//LOG.info("tbStatusOutCome {}", radetReportDto.getTbStatus());
+//					}else {
+//						tbStatusOutCome = "TB Suspected and referred for evaluation";
+//						//LOG.info("tbStatusOutCome {}", radetReportDto.getTbStatus());
+//					}
+//				}
+
 				map.put(index++, sn);
 				map.put(index++, radetReportDto.getState());
 				map.put(index++, radetReportDto.getLga());
@@ -201,11 +202,12 @@ public class GenerateExcelDataHelper {
 				//current status
 				map.put(index++, currentStatus);
 				map.put(index++, radetReportDto.getCurrentStatusDate());
+				map.put(index++, radetReportDto.getBiometricStatus());
+
 				map.put(index++, radetReportDto.getCauseOfDeath());
 				map.put(index++, radetReportDto.getVaCauseOfDeath());
 
 				//previous status
-
 				map.put(index++, previousStatus);
 				map.put(index++, radetReportDto.getPreviousStatusDate());
 
@@ -214,7 +216,7 @@ public class GenerateExcelDataHelper {
 				//TB
 				map.put(index++, radetReportDto.getDateOfTbScreened());
 				map.put(index++, radetReportDto.getTbStatus());
-				map.put(index++, tbStatusOutCome);
+				map.put(index++, radetReportDto.getTbStatusOutCome());
 				//tb lab
 				map.put(index++, radetReportDto.getDateOfTbSampleCollection());
 				map.put(index++, radetReportDto.getTbDiagnosticTestType());
@@ -269,8 +271,6 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getLastCrytococalAntigen());
 				map.put(index++, radetReportDto.getDateOfLastCrytococalAntigen());
 
-
-
 				//biometrics
 				map.put(index++, radetReportDto.getDateBiometricsEnrolled());
 				map.put(index++, radetReportDto.getNumberOfFingersCaptured());
@@ -278,6 +278,7 @@ public class GenerateExcelDataHelper {
 
 				//case manager
 				map.put(index, radetReportDto.getCaseManager());
+
 
 				result.add(map);
 				sn++;
