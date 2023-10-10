@@ -397,14 +397,35 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "  where \n" +
             "    dt.rowNums = 1\n" +
             "),"+
-            "tblam AS (SELECT * FROM (\n" +
-            "SELECT CAST(lr.date_result_reported AS DATE ) AS dateOfLastTbLam, lr.patient_uuid as personuuidtblam , lr.result_reported as tbLamResult,\n" +
-            "ROW_NUMBER () OVER (PARTITION BY lr.patient_uuid ORDER BY lr.date_result_reported DESC) as rank2333\n" +
-            "FROM laboratory_result  lr INNER JOIN public.laboratory_test  lt on lr.test_id = lt.id\n" +
-            "WHERE lt.lab_test_id = 51 AND lr.date_result_reported IS NOT NULL AND lr.date_result_reported <= ?3 \n" +
-            "AND lr.date_result_reported >= ?2 AND lr.result_reported is NOT NULL AND lr.archived=0\n" +
-            "AND lr.facility_id=1425) as tblam\n" +
-            "WHERE tblam.rank2333 = 1), "+
+            "tblam AS (\n" +
+            "  SELECT \n" +
+            "    * \n" +
+            "  FROM \n" +
+            "    (\n" +
+            "      SELECT \n" +
+            "        CAST(lr.date_result_reported AS DATE) AS dateOfLastTbLam, \n" +
+            "        lr.patient_uuid as personuuidtblam, \n" +
+            "        lr.result_reported as tbLamResult, \n" +
+            "        ROW_NUMBER () OVER (\n" +
+            "          PARTITION BY lr.patient_uuid \n" +
+            "          ORDER BY \n" +
+            "            lr.date_result_reported DESC\n" +
+            "        ) as rank2333 \n" +
+            "      FROM \n" +
+            "        laboratory_result lr \n" +
+            "        INNER JOIN public.laboratory_test lt on lr.test_id = lt.id \n" +
+            "      WHERE \n" +
+            "        lt.lab_test_id = 51 \n" +
+            "        AND lr.date_result_reported IS NOT NULL \n" +
+            "        AND lr.date_result_reported <= ?3 \n" +
+            "        AND lr.date_result_reported >= ?2 \n" +
+            "        AND lr.result_reported is NOT NULL \n" +
+            "        AND lr.archived = 0 \n" +
+            "        AND lr.facility_id = ?1\n" +
+            "    ) as tblam \n" +
+            "  WHERE \n" +
+            "    tblam.rank2333 = 1\n" +
+            "),"+
             "current_vl_result AS (SELECT * FROM (\n" +
             "         SELECT CAST(ls.date_sample_collected AS DATE ) AS dateOfCurrentViralLoadSample, sm.patient_uuid as person_uuid130 , sm.facility_id as vlFacility, sm.archived as vlArchived, acode.display as viralLoadIndication, sm.result_reported as currentViralLoad,CAST(sm.date_result_reported AS DATE) as dateOfCurrentViralLoad,\n" +
             "     ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rank2\n" +
@@ -709,10 +730,10 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    ) biometric_count ON biometric_count.person_uuid = he.person_uuid \n" +
             "    LEFT JOIN (\n" +
             "\n" +
-            "\tSELECT DISTINCT ON (person_id) person_id, \n" +
-            "\t(CASE WHEN biometric_status IS NULL OR biometric_status=''\n" +
-            "\t\t  THEN hiv_status ELSE biometric_status END) AS biometric_status, \n" +
-            "\tMAX(status_date) OVER (PARTITION BY person_id) AS status_date FROM hiv_status_tracker \n" +
+            "\tSELECT DISTINCT ON (person_id) person_id, biometric_status,\n" +
+            "\t-- (CASE WHEN biometric_status IS NULL OR biometric_status=''\n" +
+            "\t-- \t  THEN hiv_status ELSE biometric_status END) AS biometric_status, \n" +
+            "\tMAX(status_date) OVER (PARTITION BY person_id ORDER BY status_date DESC) AS status_date FROM hiv_status_tracker \n" +
             "\tWHERE archived=0 AND facility_id=?1\n" +
             "\n" +
             "    ) bst ON bst.person_id = he.person_uuid \n" +
@@ -1180,13 +1201,35 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "  )t )\n" +
             "     ),\n" +
             "\n" +
-            "crytococal_antigen as (select personuuid12, date_result_reported as dateOfLastCrytococalAntigen, result_reported as lastCrytococalAntigen from (\n" +
-            "select DISTINCT ON (lr.patient_uuid) lr.patient_uuid as personuuid12, lr.date_result_reported, lr.result_reported, \n" +
-            "ROW_NUMBER() OVER (PARTITION BY lr.patient_uuid ORDER BY lr.date_result_reported DESC) as rowNum\n" +
-            "from public.laboratory_test lt \n" +
-            "inner join laboratory_result lr on lr.test_id = lt.id\n" +
-            "where lab_test_id=52\n" +
-            ") dt where rowNum=1),\n"+
+            "crytococal_antigen as (\n" +
+            " select \n" +
+            "    *\n" +
+            "  from \n" +
+            "    (\n" +
+            "      select \n" +
+            "        DISTINCT ON (lr.patient_uuid) lr.patient_uuid as personuuid12, \n" +
+            "        CAST(lr.date_result_reported AS DATE) AS dateOfLastCrytococalAntigen, \n" +
+            "        lr.result_reported AS lastCrytococalAntigen , \n" +
+            "        ROW_NUMBER() OVER (\n" +
+            "          PARTITION BY lr.patient_uuid \n" +
+            "          ORDER BY \n" +
+            "            lr.date_result_reported DESC\n" +
+            "        ) as rowNum \n" +
+            "      from \n" +
+            "        public.laboratory_test lt \n" +
+            "        inner join laboratory_result lr on lr.test_id = lt.id \n" +
+            "      where \n" +
+            "        lab_test_id = 52 OR lab_test_id = 69 OR lab_test_id = 70\n" +
+            "        AND lr.date_result_reported IS NOT NULL \n" +
+            "        AND lr.date_result_reported <= ?3 \n" +
+            "        AND lr.date_result_reported >= ?2 \n" +
+            "        AND lr.result_reported is NOT NULL \n" +
+            "        AND lr.archived = 0 \n" +
+            "        AND lr.facility_id = ?1\n" +
+            "    ) dt \n" +
+            "  where \n" +
+            "    rowNum = 1\n" +
+            "), "+
             "case_manager AS (\n" +
             " SELECT DISTINCT ON (cmp.person_uuid)person_uuid AS caseperson, cmp.case_manager_id, CONCAT(cm.first_name, ' ', cm.last_name) AS caseManager FROM (SELECT person_uuid, case_manager_id,\n" +
             " ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY id DESC)\n" +
@@ -1215,6 +1258,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           tbResult.*,\n" +
             "           tbS.*,\n" +
             "           tbl.*,\n" +
+            "           crypt.*, \n" +
             "           ct.cause_of_death AS causeOfDeath,\n" +
             "           ct.va_cause_of_death AS vaCauseOfDeath,\n" +
             "           (\n" +
@@ -1429,10 +1473,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           (CASE WHEN cd.dateOfCd4Lb IS NOT NULL THEN  CAST(cd.dateOfCd4Lb as DATE)" +
             "                   WHEN ccd.visit_date IS NOT NULL THEN CAST(ccd.visit_date as DATE)\n" +
             "     ELSE NULL END) as dateOfLastCd4Count, \n" +
-            "      (CASE WHEN bd.gender ILIKE 'MALE' THEN NULL \n" +
-            " ELSE crypt.dateOfLastCrytococalAntigen END) AS dateOfLastCrytococalAntigen, \n" +
-            " (CASE WHEN bd.gender ILIKE 'MALE' THEN NULL\n" +
-            " ELSE crypt.lastCrytococalAntigen END) AS lastCrytococalAntigen, " +
             "INITCAP(cm.caseManager) AS caseManager "+
             "FROM bio_data bd\n" +
             "        LEFT JOIN patient_lga p_lga on p_lga.personUuid11 = bd.personUuid \n"+
