@@ -113,7 +113,6 @@ public class GenerateExcelDataHelper {
 		RADETDTOProjection currentRecord = null;
 		for (RADETDTOProjection radetReportDto : reportDtos) {
 			try {
-				System.out.println("radet value" + radetReportDto.getLastCrytococalAntigen() + radetReportDto.getDateOfLastCrytococalAntigen());
 				currentRecord = radetReportDto;
 				Map<Integer, Object> map = new HashMap<>();
 				String personUuid = radetReportDto.getPersonUuid();
