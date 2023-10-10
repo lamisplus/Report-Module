@@ -51,7 +51,6 @@ public interface RADETDTOProjection {
 	LocalDate getDateOfViralLoadSampleCollection();
 
 	String getCurrentViralLoad();
-
 	LocalDate getDateOfCurrentViralLoad();
 	LocalDate getDateOfCurrentViralLoadSample();
 
@@ -69,7 +68,7 @@ public interface RADETDTOProjection {
 
 	LocalDate getLastPickupDate();
 
-	LocalDate getNextPickupDate();
+	//LocalDate getNextPickupDate();
 
 	// art status
 
@@ -85,18 +84,18 @@ public interface RADETDTOProjection {
 
 	//Biometric status
 	LocalDate getDateBiometricsEnrolled();
-
 	Integer getNumberOfFingersCaptured();
-
+	String getBiometricStatus();
 	//eac
 	LocalDate getDateOfCommencementOfEAC();
 	Integer getNumberOfEACSessionCompleted();
-	LocalDate	getDateOfLastEACSessionCompleted();
+	LocalDate  getDateOfLastEACSessionCompleted();
 	LocalDate getDateOfExtendEACCompletion();
 	LocalDateTime getDateOfRepeatViralLoadResult();
 	LocalDateTime getDateOfRepeatViralLoadEACSampleCollection();
 	String getRepeatViralLoadResult();
 	String getTbStatus();
+	String getTbStatusOutCome();
 	LocalDate getDateOfTbScreened();
 	LocalDate getDateOfCurrentRegimen();
 	LocalDate getDateOfIptStart();
@@ -137,11 +136,15 @@ public interface RADETDTOProjection {
 
 	//Crytococal Antigen
 	Date getDateOfLastCrytococalAntigen();
-	String	getLastCrytococalAntigen();
+	String getLastCrytococalAntigen();
 
 	String getCaseManager();
 	String getVaCauseOfDeath();
 	String getTreatmentMethodDate();
 	LocalDate getDateOfRegistration();
 	LocalDate getDateOfEnrollment();
+	LocalDate getDateOfLastTbLam();
+	String  getTbLamResult();
+
+	String getNdrPatientIdentifier();
 }

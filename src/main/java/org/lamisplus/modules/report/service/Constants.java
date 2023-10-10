@@ -105,6 +105,7 @@ public class Constants {
 					"Facility Name",
 					"DatimId",
 					"Patient ID",
+					"NDR Patient Identifier",
 					"Hospital Number",
 					"Unique Id",
 					"Household Unique No",
@@ -132,6 +133,7 @@ public class Constants {
 					"Date of Last CD4 Count",
 					"Last CD4 Count",
 					"Date of Viral Load Sample Collection (yyyy-mm-dd)",
+					"Date of Current ViralLoad Result Sample (yyyy-mm-dd)",
 					"Current Viral Load (c/ml)",
 					"Date of Current Viral Load (yyyy-mm-dd)",
 					"Viral Load Indication",
@@ -139,6 +141,7 @@ public class Constants {
 					"Date of Viral Load Eligibility Status",
 					"Current ART Status",
 					"Date of Current ART Status",
+					"Biometric Status",
 					"Cause of Death",
 					"VA Cause of Death",
 					"Previous ART Status",
@@ -185,8 +188,10 @@ public class Constants {
 					"Number of Fingers Captured",
 					"Valid Biometrics(Hexadecimal/Base64 Unique Identifier)",
 					"Case Manager"
+
 			);
-	
+
+
 	public static final String PHARMACY_SHEET = "pharmacy-report";
 	public static final String BIOMETRIC_SHEET_SHEET = "biometric-report";
 	public static final String LAB_SHEET_NAME = "laboratory-report";
