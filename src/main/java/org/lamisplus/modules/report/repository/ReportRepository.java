@@ -388,7 +388,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "\t\thiv_art_clinical hac\n" +
             "\t\tLEFT JOIN hiv_observation ho ON ho.person_uuid = hac.person_uuid\n" +
             "\tWHERE\n" +
-            "\t\tho.data is not null \n" +
+            "ho.type = 'Chronic Care'\n" +
+            " and ho.data is not null \n" +
             "        and hac.archived = 0 \n" +
             "        and ho.date_of_observation between ?2\n" +
             "        and ?3 \n" +
@@ -707,11 +708,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     he.archived = 0\n" +
             "     ),\n" +
             "\n" +
-            "  biometric AS (\n" +
+            "biometric AS (\n" +
             "  SELECT \n" +
             "    DISTINCT ON (he.person_uuid) he.person_uuid AS person_uuid60, \n" +
             "    biometric_count.enrollment_date AS dateBiometricsEnrolled, \n" +
             "    biometric_count.count AS numberOfFingersCaptured,\n" +
+            "\t  recapture_count.recapture_date AS dateBiometricsRecaptured,\n" +
+            "\t  recapture_count.count AS numberOfFingersRecaptured,\n" +
             "    bst.biometric_status AS biometricStatus \n" +
             "  FROM \n" +
             "    hiv_enrollment he \n" +
@@ -728,6 +731,19 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "      GROUP BY \n" +
             "        b.person_uuid\n" +
             "    ) biometric_count ON biometric_count.person_uuid = he.person_uuid \n" +
+            "\t  LEFT JOIN (\n" +
+            "      SELECT \n" +
+            "        r.person_uuid, \n" +
+            "        COUNT(r.person_uuid), \n" +
+            "        MAX(enrollment_date) recapture_date \n" +
+            "      FROM \n" +
+            "        biometric r \n" +
+            "      WHERE \n" +
+            "        archived = 0 \n" +
+            "        AND recapture = 1 \n" +
+            "      GROUP BY \n" +
+            "        r.person_uuid\n" +
+            "    ) recapture_count ON recapture_count.person_uuid = he.person_uuid \n" +
             "    LEFT JOIN (\n" +
             "\n" +
             "\tSELECT DISTINCT ON (person_id) person_id, biometric_status,\n" +
