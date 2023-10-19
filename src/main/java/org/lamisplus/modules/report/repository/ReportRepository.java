@@ -715,7 +715,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    biometric_count.count AS numberOfFingersCaptured,\n" +
             "\t  recapture_count.recapture_date AS dateBiometricsRecaptured,\n" +
             "\t  recapture_count.count AS numberOfFingersRecaptured,\n" +
-            "    bst.biometric_status AS biometricStatus \n" +
+            "    bst.biometric_status AS biometricStatus, \n" +
+            "    bst.status_date \n" +
             "  FROM \n" +
             "    hiv_enrollment he \n" +
             "    LEFT JOIN (\n" +
