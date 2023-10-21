@@ -35,7 +35,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " (CASE WHEN hc.person_uuid IS NULL      " +
             " THEN hc.extra->>'lga_of_residence' ELSE res_lga.name END) AS LGAOfResidence,      " +
             " (CASE WHEN hc.person_uuid IS NULL       " +
-            "  THEN hc.extra->>'state_of_residence' ELSE res_state.name END) AS StateOfResidence,      " +
+            "  THEN hc.extra->>'state_of_residence' ELSE pp.address ->>'{address,0,city}' END) AS StateOfResidence,      " +
             "  facility.name AS facility,      " +
             "  state.name AS state,      " +
             "  lga.name AS lga,      " +
@@ -59,11 +59,15 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " ts.display AS testingSetting,      " +
             " tc.display AS counselingType,      " +
             " preg.display AS pregnacyStatus,      " +
-            " hc.breast_feeding AS breastFeeding,      " +
-            " relation.display AS indexType,      " +
-            " (CASE WHEN hc.recency->>'optOutRTRI' ILIKE 'true' THEN 'Yes'" +
-            " WHEN hc.recency->>'optOutRTRI' ILIKE 'false' THEN 'No' " +
-            " WHEN hc.recency->>'optOutRTRI' != NULL THEN hc.recency->>'optOutRTRI'" +
+            " (CASE  " +
+            "WHEN preg.display='Breastfeeding' THEN 'Yes'   " +
+            "WHEN preg.display IS NULL THEN NULL  " +
+            "ELSE 'No'  " +
+            "END) AS breastFeeding, " +
+            " it.display AS indexType,      " +
+            " (CASE WHEN hc.recency->>'optOutRTRI' ILIKE 'true' THEN 'Yes'    " +
+            " WHEN hc.recency->>'optOutRTRI' ILIKE 'false' THEN 'No'   " +
+            " WHEN hc.recency->>'optOutRTRI' != NULL THEN hc.recency->>'optOutRTRI'  " +
             " ELSE NULL END) AS IfRecencyTestingOptIn,      " +
             " hc.recency->>'rencencyId' AS RecencyID,      " +
             " hc.recency->>'optOutRTRITestName' AS recencyTestType,      " +
@@ -104,6 +108,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " CAST(post_test_counseling->>'lubricantProvidedToClientCount' AS VARCHAR) AS numberOfLubricantsGiven    " +
             " FROM hts_client hc      " +
             " LEFT JOIN base_application_codeset tg ON tg.code = hc.target_group      " +
+            "LEFT JOIN base_application_codeset it ON it.id = hc.relation_with_index_client" +
             " LEFT JOIN base_application_codeset rf ON rf.id = hc.referred_from      " +
             " LEFT JOIN base_application_codeset ts ON ts.code = hc.testing_setting      " +
             " LEFT JOIN base_application_codeset tc ON tc.id = hc.type_counseling      " +
@@ -112,11 +117,15 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " LEFT JOIN hts_risk_stratification hrs ON hrs.code = hc.risk_stratification_code      " +
             " LEFT JOIN base_application_codeset modality_code ON modality_code.code = hrs.modality      " +
             " LEFT JOIN patient_person pp ON pp.uuid=hc.person_uuid      " +
-            " LEFT JOIN (SELECT * FROM (SELECT p.id, CONCAT(CAST(address_object->>'city' AS VARCHAR), ' ', REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '\\', ''), ']', ''), '[', '')) AS address,       " +
-            " CASE WHEN address_object->>'stateId'  ~ '^\\d+(\\.\\d+)?$' THEN address_object->>'stateId' ELSE null END  AS stateid,      " +
-            " CASE WHEN address_object->>'district' ~ '^\\d+(\\.\\d+)?$' THEN address_object->>'district' ELSE null END  AS lgaid      " +
-            " FROM patient_person p,      " +
-            " jsonb_array_elements(p.address-> 'address') with ordinality l(address_object)) as result ) r ON r.id=pp.id      " +
+            " LEFT JOIN (SELECT * FROM (SELECT " +
+            " p.id," +
+            " p.address ->>'{address,0,city}' as clientcity," +
+            " p.address ->> '{address,0,line,0}' as clientaddress," +
+            " p.address ->>'{address,0,district}' as lgaid," +
+            " p.address ->> '{address,0,stateId}' as stateid, " +
+            " CONCAT (p.address ->>'{address,0,city}',' :',p.address ->> '{address,0,line,0}')  AS address " +
+            " FROM patient_person p) as result ) r ON r.id=pp.id" +
+
             " LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)      " +
             " LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)      " +
             " LEFT JOIN base_organisation_unit facility ON facility.id=hc.facility_id      " +
