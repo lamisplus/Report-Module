@@ -220,7 +220,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                                    LEFT JOIN (SELECT DISTINCT pc.* FROM prep_clinic pc      \n" +
             "                                    INNER JOIN (SELECT DISTINCT MAX(encounter_date)encounter_date, person_uuid FROM prep_clinic      \n" +
             "                                    GROUP BY person_uuid)max ON max.encounter_date=pc.encounter_date       \n" +
-            "                                    AND max.person_uuid=pc.person_uuid)current_pc ON current_pc.person_uuid=p.uuid    \n" +
+            "                                    AND max.person_uuid=pc.person_uuid WHERE date_prep_start IS NULL)current_pc ON current_pc.person_uuid=p.uuid    \n" +
             "                                      LEFT JOIN (SELECT DISTINCT pi.* FROM prep_interruption pi     \n" +
             "                                    LEFT JOIN (SELECT DISTINCT MAX(encounter_date)encounter_date, person_uuid FROM prep_interruption     \n" +
             "                                    GROUP BY person_uuid)max ON max.encounter_date=pi.encounter_date       \n" +
@@ -230,7 +230,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                                    LEFT JOIN (SELECT pc.* FROM prep_clinic pc      \n" +
             "                                    INNER JOIN (SELECT DISTINCT MIN(encounter_date)encounter_date, person_uuid FROM prep_clinic      \n" +
             "                                    GROUP BY person_uuid)min ON min.encounter_date=pc.encounter_date       \n" +
-            "                                    AND min.person_uuid=pc.person_uuid)baseline_pc ON baseline_pc.person_uuid=p.uuid      \n" +
+            "                                    AND min.person_uuid=pc.person_uuid WHERE date_prep_start IS NULL)baseline_pc ON baseline_pc.person_uuid=p.uuid      \n" +
             "                                                LEFT JOIN (SELECT pc.* FROM prep_clinic pc      \n" +
             "                                    INNER JOIN (SELECT DISTINCT MIN(encounter_date)encounter_date, person_uuid FROM prep_clinic      \n" +
             "                                    WHERE other_tests_done->>'name' = 'Creatinine' GROUP BY person_uuid)min ON min.encounter_date=pc.encounter_date       \n" +
