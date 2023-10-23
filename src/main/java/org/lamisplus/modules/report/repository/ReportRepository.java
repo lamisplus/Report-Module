@@ -156,7 +156,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                                    -- baseline_pc.hepatitis->>'result' AS baseLineHepatitisB, --  \n" +
             "                                    -- baseline_pc.hepatitis->>'result' AS baseLineHepatitisC,--   \n" +
             "                                    current_pi.reason_stopped AS InterruptionReason,   \n" +
-            "                                    current_pi.encounter_date AS InterruptionDate,   \n" +
+            "                                    current_pi.interruption_date AS InterruptionDate,   \n" +
             "                                     (CASE WHEN baseline_hiv_status.display IS NULL AND base_eli_test.base_eli_hiv_result IS NOT NULL    \n" +
             "                                    THEN base_eli_test.base_eli_hiv_result ELSE    \n" +
             "                                    REPLACE(baseline_hiv_status.display, 'HIV ', '') END) AS HIVStatusAtPrEPInitiation,   \n" +
