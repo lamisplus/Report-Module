@@ -58,7 +58,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " rf.display AS referredFrom,      " +
             " ts.display AS testingSetting,      " +
             " tc.display AS counselingType,      " +
-            " preg.display AS pregnacyStatus,      " +
+            " preg.display AS pregnancyStatus,      " +
             " (CASE  " +
             "WHEN preg.display='Breastfeeding' THEN 'Yes'   " +
             "WHEN preg.display IS NULL THEN NULL  " +
@@ -123,7 +123,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " p.address ->> '{address,0,line,0}' as clientaddress," +
             " p.address ->>'{address,0,district}' as lgaid," +
             " p.address ->> '{address,0,stateId}' as stateid, " +
-            " CONCAT (p.address ->>'{address,0,city}',' :',p.address ->> '{address,0,line,0}')  AS address " +
+            " (jsonb_array_elements(p.address->'address')->>'city') as address " +
             " FROM patient_person p) as result ) r ON r.id=pp.id" +
 
             " LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)      " +
