@@ -240,11 +240,10 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                                    INNER JOIN (SELECT DISTINCT MIN(encounter_date)encounter_date, person_uuid FROM prep_clinic      \n" +
             "                                    GROUP BY person_uuid)min ON min.encounter_date=pc.encounter_date       \n" +
             "                                    AND min.person_uuid=pc.person_uuid WHERE date_prep_start IS NULL)baseline_pc ON baseline_pc.person_uuid=p.uuid      \n" +
-            "                                                LEFT JOIN (SELECT pc.* FROM prep_clinic pc      \n" +
+            "                                        LEFT JOIN (SELECT pc.* FROM prep_clinic pc      \n" +
             "                                    INNER JOIN (SELECT DISTINCT MIN(encounter_date)encounter_date, person_uuid FROM prep_clinic      \n" +
-            "                                    WHERE other_tests_done->>'name' = 'Creatinine' GROUP BY person_uuid)min ON min.encounter_date=pc.encounter_date       \n" +
-            "                                    AND min.person_uuid=pc.person_uuid \n" +
-            "                                    )baseline_creatinine ON baseline_creatinine.person_uuid=p.uuid      \n" +
+            "                                    GROUP BY person_uuid)min ON min.person_uuid=pc.person_uuid \n" +
+            "                                    WHERE pc.other_tests_done->>'name' = 'Creatinine' )baseline_creatinine ON baseline_creatinine.person_uuid=p.uuid" +
             "                                    LEFT JOIN prep_regimen baseline_reg ON baseline_reg.id = baseline_pc.regimen_id      \n" +
             "                                    LEFT JOIN base_application_codeset baseline_hiv_status ON baseline_hiv_status.code=baseline_pc.hiv_test_result \n" +
             "                         LEFT JOIN hiv_enrollment he ON he.person_uuid = p.uuid \n" +
