@@ -1,12 +1,8 @@
 package org.lamisplus.modules.report.service;
 
-
-import org.springframework.stereotype.Service;
-
 import java.util.Arrays;
 import java.util.List;
 
-@Service
 public class Constants {
 	
 	// EXTENSION
@@ -32,7 +28,7 @@ public class Constants {
 			"Unique ID",
 			"Surname",
 			"Other Name",
-			"Date Birth",
+			"Date Of Birth (yyyy-mm-dd)",
 			"Age",
 			"Gender",
 			"Marital Status",
@@ -105,10 +101,13 @@ public class Constants {
 					"S/No.",
 					"State",
 					"L.G.A",
+					"LGA Of Residence",
 					"Facility Name",
-					"Datim Id",
+					"DatimId",
 					"Patient ID",
+					"NDR Patient Identifier",
 					"Hospital Number",
+					"Unique Id",
 					"Household Unique No",
 					"OVC Unique ID",
 					"Sex",
@@ -120,6 +119,8 @@ public class Constants {
 					//"Services Provided (Enter one line per service)",
 					"Age",
 					"Care Entry Point",
+					"Date of Registration",
+					"Enrollment  Date (yyyy-mm-dd)",
 					"ART Start Date (yyyy-mm-dd)",
 					"Last Pickup Date (yyyy-mm-dd)",
 					"Months of ARV Refill",
@@ -132,7 +133,7 @@ public class Constants {
 					"Date of Last CD4 Count",
 					"Last CD4 Count",
 					"Date of Viral Load Sample Collection (yyyy-mm-dd)",
-					"Date of Current ViralLoad Result Sample",
+					"Date of Current ViralLoad Result Sample (yyyy-mm-dd)",
 					"Current Viral Load (c/ml)",
 					"Date of Current Viral Load (yyyy-mm-dd)",
 					"Viral Load Indication",
@@ -140,21 +141,25 @@ public class Constants {
 					"Date of Viral Load Eligibility Status",
 					"Current ART Status",
 					"Date of Current ART Status",
+					"Biometric Status",
 					"Cause of Death",
+					"VA Cause of Death",
 					"Previous ART Status",
 					"Confirmed Date of Previous ART Status",
 					"ART Enrollment Setting",
-					//"TB status at Last Visit",
-					"Date of TB Screening at Last Visit (yyyy-mm-dd)",
-					"TB Screening Outcome at Last Visit",
-					"Date of TB Diagnostic Evaluation (yyyy-mm-dd)",
-					"TB Diagnostic Evaluation Type",
-					"Date of TB Diagnostic Evaluation Result Received (yyyy-mm-dd)",
-					"TB Diagnostic Evaluation Result",
+					"Date of TB Screening (yyyy-mm-dd)",
+					"TB status at Last Visit",
+					"TB Screening Outcome",
+					"Date of TB Sample Collection (yyyy-mm-dd)",
+					"TB Diagnostic Test Type",
+					"Date of TB Diagnostic Result Received (yyyy-mm-dd)",
+					"TB Diagnostic Result",
 					"Date of Start of TB Treatment (yyyy-mm-dd)",
 					"TB Treatment Type (new, relapsed etc)",
 					"Date of Completion of TB Treatment (yyyy-mm-dd)",
 					"TB Treatment Outcome",
+					"Date of TB-LAM",
+					"TB-LAM result",
 					"Date of TPT Start (yyyy-mm-dd)",
 					"TPT Type",
 					"TPT Completion date (yyyy-mm-dd)",
@@ -177,11 +182,16 @@ public class Constants {
 					"Result of Cervical Cancer Screening",
 					"Date of Precancerous Lesions Treatment (yyyy-mm-dd)",
 					"Precancerous Lesions Treatment Methods",
+					"Last Cryptococcal Antigen",
+					"Date of Last Cryptococcal Antigen (yyyy-mm-dd)",
 					"Date Biometrics Enrolled (yyyy-mm-dd)",
 					"Number of Fingers Captured",
-					"Valid Biometrics(Hexadecimal/Base64 Unique Identifier)"
+					"Valid Biometrics(Hexadecimal/Base64 Unique Identifier)",
+					"Case Manager"
+
 			);
-	
+
+
 	public static final String PHARMACY_SHEET = "pharmacy-report";
 	public static final String BIOMETRIC_SHEET_SHEET = "biometric-report";
 	public static final String LAB_SHEET_NAME = "laboratory-report";
@@ -236,11 +246,8 @@ public class Constants {
 	public static final List<String> HTS_HEADER =
 			Arrays.asList(
 					"S/No",
-					"State",
-					"LGA",
-					"Facility",
 					"Facility Id (Datim)",
-					"Patient Id (uuid)",
+					"Facility",
 					"Client Code",
 					"First Name",
 					"Surname",
@@ -251,41 +258,43 @@ public class Constants {
 					"Date Of Birth (yyyy-mm-dd)",
 					"Phone Number",
 					"Marital Status",
-					"Pregnancy Status",
-					"Breastfeeding",
-					"State Of Residence",
-					"LGA of Residence",
 					"Client Address",
+					"LGA of Residence",
+					"State Of Residence",
 					"Education",
 					"Occupation",
-					"Number of wives",
-					"Number of Children",
 					"Date of Visit (yyyy-mm-dd)",
 					"First Time Visit",
+					"Number of wives",
+					"Number of Children",
 					"Index Client",
-					"Index Type",
 					"Previously Tested",
 					"Referred From",
-					"Assessment Code",
 					"Testing Setting",
-					"Modality",
 					"Counseling Type",
-					"Date Of HIV Testing (yyyy-mm-dd)",
-					"HIV Test Result",
+					"Pregnancy Status",
+					"Breastfeeding",
+					"Index Type",
 					"If Recency Testing Opt In",
 					"Recency Id",
 					"Recency Test Type",
 					"Recency Test Date (yyyy-mm-dd)",
-					"Recency Interpretation - RTRI",
-					"Viral Load Sample Collection Date (yyyy-mm-dd)",
+					"Recency Interpretation",
+					"Final Recency Result",
+					"Viral Load Sample Collection Date",
+					"Viral Load Result Classification",
 					"Viral Load Confirmation Result",
 					"Viral Load Confirmation Date (yyyy-mm-dd)",
-					"Final Recency Result - RITA",
+					"Assessment Code",
+					"Modality",
 					"Syphilis Test Result",
 					"Hepatitis B Result",
 					"Hepatitis C Result",
 					"CD4 Type",
 					"CD4 Test Result",
+					"HIV Test Result",
+					"Final HIV Test Result",
+					"Date Of HIV Testing (yyyy-mm-dd)",
 					"Prep Offered",
 					"Prep Accepted",
 					"Number of condoms given",
@@ -295,23 +304,22 @@ public class Constants {
 			);
 
 
-	
 	public static final List<String> PrEP_HEADER =
 			Arrays.asList(
 					"S/No",
+					"Facility Id (Datim)",
 					"State",
 					"LGA",
-					"Facility Id (Datim)",
 					"Facility Name",
-					"Patient Id (uuid)",
+					"Patient Identifier",
 					"Hospital Number",
 					"First Name",
 					"Surname",
 					"Other Names",
 					"Sex",
+					"Target Group",
 					"Age",
 					"Date Of Birth (yyyy-mm-dd)",
-					"Target Group",
 					"Phone Number",
 					"Marital Status",
 					"Client Address",
@@ -326,12 +334,12 @@ public class Constants {
 					"Baseline Diastolic bp",
 					"Baseline Weight (kg)",
 					"Baseline Height (cm)",
-					"Baseline Creatinine Clearance (mL/min)",
-					"Baseline Hepatitis B Screening",
-					"Baseline Hepatitis C Screening",
-					"Baseline Urinalysis",
-					"Date of Baseline Urinalysis",
+					"Baseline Creatinine",
+					"Baseline Hepatitis B",
+					"Baseline Hepatitis C",
 					"HIV status at PrEP Initiation",
+					"Baseline Urinalysis",
+					"Baseline Urinalysis Date",
 					"Indication for PrEP",
 					"Current Regimen",
 					"Date Of Last Pickup (yyyy-mm-dd)",
@@ -350,7 +358,6 @@ public class Constants {
 					"Date of Discontinuation/Stopped",
 					"Date Of HIV Enrollment (yyyy-mm-dd)"
 			);
-	
 	
 	public static final List<String> CLINIC_HEADER =
 			Arrays.asList(

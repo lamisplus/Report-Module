@@ -84,6 +84,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		} catch (Exception e) {
 			LOG.error("An error Occurred when generating RADET...");
 			LOG.error("Error message: " + e.getMessage());
+			e.printStackTrace();
 		}
 		LOG.info("End generate patient Radet");
 		return null;
@@ -110,6 +111,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		try {
 			LOG.info("start to generate biometric report");
 			List<BiometricReportDto> biometricReportDtoList = biometricReportService.getBiometricReportDtoList(facilityId, start, end);
+			LOG.info("biometric Report List retrieved");
 			List<Map<Integer, Object>> biometricData = GenerateExcelDataHelper.fillBiometricDataMapper(biometricReportDtoList);
 			LOG.info("biometric report size {}", biometricData.size());
 			return excelService.generate(Constants.BIOMETRIC_SHEET_SHEET, biometricData, Constants.BIOMETRIC_HEADER);
