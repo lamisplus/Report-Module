@@ -120,8 +120,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)      " +
             " LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)      " +
             " LEFT JOIN base_organisation_unit facility ON facility.id=hc.facility_id      " +
-            " LEFT JOIN base_organisation_unit state ON state.id=facility.parent_organisation_unit_id      " +
-            " LEFT JOIN base_organisation_unit lga ON lga.id=state.parent_organisation_unit_id      " +
+            " LEFT JOIN base_organisation_unit lga ON lga.id=facility.parent_organisation_unit_id      " +
+            " LEFT JOIN base_organisation_unit state ON state.id=lga.parent_organisation_unit_id      " +
             " LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=hc.facility_id AND boui.name='DATIM_ID'   " +
             "WHERE hc.archived=0 AND hc.facility_id=?1 AND hc.date_visit >=?2 AND hc.date_visit <= ?3", nativeQuery = true)
     List<HtsReportDto> getHtsReport(Long facilityId, LocalDate start, LocalDate end);
