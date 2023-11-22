@@ -275,6 +275,8 @@ public class GenerateExcelDataHelper {
 				//biometrics
 				map.put(index++, radetReportDto.getDateBiometricsEnrolled());
 				map.put(index++, radetReportDto.getNumberOfFingersCaptured());
+				map.put(index++, radetReportDto.getDateBiometricsRecaptured());
+				map.put(index++, radetReportDto.getNumberOfFingersRecaptured());
 				map.put(index++, null);
 
 				//case manager

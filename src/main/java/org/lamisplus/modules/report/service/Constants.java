@@ -186,6 +186,8 @@ public class Constants {
 					"Date of Last Cryptococcal Antigen (yyyy-mm-dd)",
 					"Date Biometrics Enrolled (yyyy-mm-dd)",
 					"Number of Fingers Captured",
+					"Date Biometrics Recapture (yyyy-mm-dd)",
+					"Number of Fingers Recaptured",
 					"Valid Biometrics(Hexadecimal/Base64 Unique Identifier)",
 					"Case Manager"
 
