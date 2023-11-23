@@ -85,6 +85,8 @@ public interface RADETDTOProjection {
 	//Biometric status
 	LocalDate getDateBiometricsEnrolled();
 	Integer getNumberOfFingersCaptured();
+	LocalDate getDateBiometricsRecaptured();
+	Integer getNumberOfFingersRecaptured();
 	String getBiometricStatus();
 	//eac
 	LocalDate getDateOfCommencementOfEAC();
