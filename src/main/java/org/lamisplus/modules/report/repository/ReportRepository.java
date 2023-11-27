@@ -144,7 +144,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                                    education->>'display' as education, p.employment_status->>'display' as occupation,       \n" +
             "                                    facility.name as facilityName, facility_lga.name as lga, facility_state.name as state,       \n" +
             "                                    boui.code as datimId, (SELECT name FROM base_organisation_unit WHERE id = CAST(p.address->'address'->0 ->'stateId' ->> 0 AS BIGINT)) as residentialState, (SELECT name FROM base_organisation_unit WHERE id = CAST(p.address->'address'->0 ->'district' ->> 0 AS BIGINT)) as residentialLga,      \n" +
-            "                                    r.address as address, p.contact_point->'contactPoint'->0->'value'->>0 AS phone,      \n" +
+            "                                    r.address as address, (CASE WHEN contact_point->'contactPoint'->0->>'type'='phone' THEN contact_point->'contactPoint'->0->>'value' ELSE null END) AS phone,      \n" +
             "                                    baseline_reg.regimen AS baselineRegimen,      \n" +
             "                                    baseline_pc.systolic AS baselineSystolicBP,      \n" +
             "                                    baseline_pc.diastolic AS baselineDiastolicBP,      \n" +
