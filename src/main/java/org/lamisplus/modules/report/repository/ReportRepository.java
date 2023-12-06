@@ -193,7 +193,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                         ELSE NULL END) AS CurrentStatus, \n" +
             "                         (CASE  \n" +
             "                         WHEN prepi.interruption_date  > prepc.encounter_date THEN prepi.interruption_date \n" +
-            "                          WHEN prepc.status IS NOT NULL THEN (prepc.encounter_date  + COALESCE(prepc.duration, 0)) \n" +
+            "                          WHEN prepc.status IS NOT NULL THEN prepc.encounter_date  \n" +
             "                         ELSE NULL END) AS DateOfCurrentStatus \n" +
             "                                    FROM patient_person p      \n" +
             "                                    INNER JOIN (\n" +
