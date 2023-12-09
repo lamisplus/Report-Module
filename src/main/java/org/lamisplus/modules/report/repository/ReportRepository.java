@@ -738,7 +738,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                  biometric b \n" +
             "                WHERE \n" +
             "                  archived = 0 \n" +
-            "                  AND recapture = 0 \n" +
+            "                  AND (recapture = 0 or recapture is null) \n" +
             "                GROUP BY \n" +
             "                  b.person_uuid\n" +
             "              ) biometric_count ON biometric_count.person_uuid = he.person_uuid \n" +
