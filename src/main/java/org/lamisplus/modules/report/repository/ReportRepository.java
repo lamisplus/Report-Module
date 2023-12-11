@@ -129,8 +129,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)      " +
             " LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)      " +
             " LEFT JOIN base_organisation_unit facility ON facility.id=hc.facility_id      " +
-            " LEFT JOIN base_organisation_unit lga ON lga.id=facility.parent_organisation_unit_id      " +
-            " LEFT JOIN base_organisation_unit state ON state.id=lga.parent_organisation_unit_id      " +
+            " LEFT JOIN base_organisation_unit state ON state.id=facility.parent_organisation_unit_id      " +
+            " LEFT JOIN base_organisation_unit lga ON lga.id=state.parent_organisation_unit_id      " +
             " LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=hc.facility_id AND boui.name='DATIM_ID'   " +
             "WHERE hc.archived=0 AND hc.facility_id=?1 AND hc.date_visit >=?2 AND hc.date_visit <= ?3", nativeQuery = true)
     List<HtsReportDto> getHtsReport(Long facilityId, LocalDate start, LocalDate end);
@@ -300,7 +300,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "INNER JOIN hiv_regimen_type hrt ON hrt.id = hac.regimen_type_id\n" +
             "WHERE\n" +
             "h.archived = 0\n" +
-            "AND p.archived = 0\n" +
+            "AND p.archived = 0\n"+
             "AND h.facility_id = ?1\n" +
             "AND hac.is_commencement = TRUE\n" +
             "AND hac.visit_date >= ?2\n" +
@@ -312,7 +312,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "then (select name from base_organisation_unit where id = cast(addr as int)) end as lgaOfResidence \n" +
             "from (\n" +
             "select uuid AS personUuid, (jsonb_array_elements(address->'address')->>'district') as addr from patient_person \n" +
-            ") dt)," +
+            ") dt),"+
             "\n" +
             "current_clinical AS (SELECT DISTINCT ON (tvs.person_uuid) tvs.person_uuid AS person_uuid10,\n" +
             "       body_weight AS currentWeight,\n" +
@@ -737,7 +737,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                  biometric b \n" +
             "                WHERE \n" +
             "                  archived = 0 \n" +
-            "                  AND recapture = 0 \n" +
+            "                  AND (recapture = 0 or recapture is null) \n" +
             "                GROUP BY \n" +
             "                  b.person_uuid\n" +
             "              ) biometric_count ON biometric_count.person_uuid = he.person_uuid \n" +
