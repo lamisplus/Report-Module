@@ -1661,7 +1661,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "\t\t\t\t INNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
             "\t\t\t\t LEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
             "\t\t\t\t LEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
-            "\t\t\t\t WHERE ll.lab_test_name = ' Viral Load ' AND h.archived=0 AND lo.archived=0 AND lo.facility_id=?1\n" +
+            "\t\t\t\t WHERE ll.lab_test_name = 'Viral Load' AND h.archived=0 AND lo.archived=0 AND lo.facility_id=?1\n" +
             "\t\t\t ),\n" +
             "\t\t\t pharmacy_details AS (\n" +
             "\t\t\t\t SELECT DISTINCT ON (hartp.person_uuid)hartp.person_uuid as person_uuid, r.visit_date as dateOfLastRefill,\n" +
