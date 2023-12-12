@@ -1680,10 +1680,10 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "\t\t\t\t THEN CAST((hartp.visit_date + hartp.refill_period + INTERVAL ' 28 day ') AS date) ELSE hartp.visit_date\n" +
             "\t\t\t\t END)AS dateOfCurrentStatus\n" +
             "\t\t\t\t FROM hiv_art_pharmacy hartp\n" +
-            "\t\t\t\t INNER JOIN (SELECT distinct r.* FROM (SELECT h.person_uuid, h.visit_date, CAST(pharmacy_object ->> ' regimenName ' AS VARCHAR) AS regimen_name,\n" +
+            "\t\t\t\t INNER JOIN (SELECT distinct r.* FROM (SELECT h.person_uuid, h.visit_date, CAST(pharmacy_object ->> 'regimenName' AS VARCHAR) AS regimen_name,\n" +
             "\t\t\t\t hrt.description FROM hiv_art_pharmacy h,\n" +
-            "\t\t\t\t jsonb_array_elements(h.extra->' regimens ') with ordinality p(pharmacy_object)\n" +
-            "\t\t\t\t INNER JOIN hiv_regimen hr ON hr.description=CAST(pharmacy_object ->> ' regimenName ' AS VARCHAR)\n" +
+            "\t\t\t\t jsonb_array_elements(h.extra->'regimens') with ordinality p(pharmacy_object)\n" +
+            "\t\t\t\t INNER JOIN hiv_regimen hr ON hr.description=CAST(pharmacy_object ->> 'regimenName' AS VARCHAR)\n" +
             "\t\t\t\t INNER JOIN hiv_regimen_type hrt ON hrt.id=hr.regimen_type_id\n" +
             "\t\t\t\t WHERE hrt.id IN (1,2,3,4,14))r\n" +
             "\t\t\t\t INNER JOIN (SELECT hap.person_uuid, MAX(visit_date) AS MAXDATE FROM hiv_art_pharmacy hap\n" +
