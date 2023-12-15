@@ -129,8 +129,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)      " +
             " LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)      " +
             " LEFT JOIN base_organisation_unit facility ON facility.id=hc.facility_id      " +
-            " LEFT JOIN base_organisation_unit lga ON lga.id=facility.parent_organisation_unit_id      " +
-            " LEFT JOIN base_organisation_unit state ON state.id=lga.parent_organisation_unit_id      " +
+            " LEFT JOIN base_organisation_unit state ON state.id=facility.parent_organisation_unit_id      " +
+            " LEFT JOIN base_organisation_unit lga ON lga.id=state.parent_organisation_unit_id      " +
             " LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=hc.facility_id AND boui.name='DATIM_ID'   " +
             "WHERE hc.archived=0 AND hc.facility_id=?1 AND hc.date_visit >=?2 AND hc.date_visit <= ?3", nativeQuery = true)
     List<HtsReportDto> getHtsReport(Long facilityId, LocalDate start, LocalDate end);
@@ -144,7 +144,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                                    education->>'display' as education, p.employment_status->>'display' as occupation,       \n" +
             "                                    facility.name as facilityName, facility_lga.name as lga, facility_state.name as state,       \n" +
             "                                    boui.code as datimId, (SELECT name FROM base_organisation_unit WHERE id = CAST(p.address->'address'->0 ->'stateId' ->> 0 AS BIGINT)) as residentialState, (SELECT name FROM base_organisation_unit WHERE id = CAST(p.address->'address'->0 ->'district' ->> 0 AS BIGINT)) as residentialLga,      \n" +
-            "                                    r.address as address, p.contact_point->'contactPoint'->0->'value'->>0 AS phone,      \n" +
+            "                                    r.address as address, (CASE WHEN contact_point->'contactPoint'->0->>'type'='phone' THEN contact_point->'contactPoint'->0->>'value' ELSE null END) AS phone,      \n" +
             "                                    baseline_reg.regimen AS baselineRegimen,      \n" +
             "                                    baseline_pc.systolic AS baselineSystolicBP,      \n" +
             "                                    baseline_pc.diastolic AS baselineDiastolicBP,      \n" +
@@ -193,7 +193,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                         ELSE NULL END) AS CurrentStatus, \n" +
             "                         (CASE  \n" +
             "                         WHEN prepi.interruption_date  > prepc.encounter_date THEN prepi.interruption_date \n" +
-            "                          WHEN prepc.status IS NOT NULL THEN (prepc.encounter_date  + COALESCE(prepc.duration, 0)) \n" +
+            "                          WHEN prepc.status IS NOT NULL THEN prepc.encounter_date  \n" +
             "                         ELSE NULL END) AS DateOfCurrentStatus \n" +
             "                                    FROM patient_person p      \n" +
             "                                    INNER JOIN (\n" +
@@ -300,7 +300,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "INNER JOIN hiv_regimen_type hrt ON hrt.id = hac.regimen_type_id\n" +
             "WHERE\n" +
             "h.archived = 0\n" +
-            "AND p.archived = 0\n" +
+            "AND p.archived = 0\n"+
             "AND h.facility_id = ?1\n" +
             "AND hac.is_commencement = TRUE\n" +
             "AND hac.visit_date >= ?2\n" +
@@ -312,7 +312,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "then (select name from base_organisation_unit where id = cast(addr as int)) end as lgaOfResidence \n" +
             "from (\n" +
             "select uuid AS personUuid, (jsonb_array_elements(address->'address')->>'district') as addr from patient_person \n" +
-            ") dt)," +
+            ") dt),"+
             "\n" +
             "current_clinical AS (SELECT DISTINCT ON (tvs.person_uuid) tvs.person_uuid AS person_uuid10,\n" +
             "       body_weight AS currentWeight,\n" +
@@ -737,7 +737,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                  biometric b \n" +
             "                WHERE \n" +
             "                  archived = 0 \n" +
-            "                  AND recapture = 0 \n" +
+            "                  AND (recapture = 0 or recapture is null) \n" +
             "                GROUP BY \n" +
             "                  b.person_uuid\n" +
             "              ) biometric_count ON biometric_count.person_uuid = he.person_uuid \n" +
@@ -1647,21 +1647,27 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "\t\t\t\t LEFT JOIN base_application_codeset ep ON ep.id=h.entry_point_id\n" +
             "\t\t\t\t WHERE h.archived=0 AND h.facility_id=?1\n" +
             "\t\t\t ),\n" +
-            "\t\t\t laboratory_details AS (\n" +
-            "\t\t\t\t SELECT DISTINCT ON(lo.patient_uuid) lo.patient_uuid as person_uuid, ll.lab_test_name as test,\n" +
-            "\t\t\t\t bac_viral_load.display viralLoadType, ls.date_sample_collected as dateSampleCollected,\n" +
-            "\t\t\t\t lr.result_reported as lastViralLoad, lr.date_result_reported as dateOfLastViralLoad\n" +
-            "\t\t\t\t FROM laboratory_order lo\n" +
-            "\t\t\t\t LEFT JOIN ( SELECT patient_uuid, MAX(order_date) AS MAXDATE FROM laboratory_order lo\n" +
-            "\t\t\t\t GROUP BY patient_uuid ORDER BY MAXDATE ASC ) AS current_lo\n" +
-            "\t\t\t\t ON current_lo.patient_uuid=lo.patient_uuid AND current_lo.MAXDATE=lo.order_date\n" +
-            "\t\t\t\t LEFT JOIN laboratory_test lt ON lt.lab_order_id=lo.id AND lt.patient_uuid = lo.patient_uuid\n" +
-            "\t\t\t\t LEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id=lt.viral_load_indication\n" +
-            "\t\t\t\t LEFT JOIN laboratory_labtest ll ON ll.id=lt.lab_test_id\n" +
-            "\t\t\t\t INNER JOIN hiv_enrollment h ON h.person_uuid=current_lo.patient_uuid\n" +
-            "\t\t\t\t LEFT JOIN laboratory_sample ls ON ls.test_id=lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
-            "\t\t\t\t LEFT JOIN laboratory_result lr ON lr.test_id=lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
-            "\t\t\t\t WHERE ll.lab_test_name = ' Viral Load ' AND h.archived=0 AND lo.archived=0 AND lo.facility_id=?1\n" +
+            "\t\t\t laboratory_details AS ( SELECT DISTINCT ON (lo.patient_uuid)\n" +
+            "    lo.patient_uuid AS person_uuid,\n" +
+            "    ll.lab_test_name AS test,\n" +
+            "    bac_viral_load.display AS viralLoadType,\n" +
+            "    ls.date_sample_collected AS dateSampleCollected,\n" +
+            "    lr.result_reported AS lastViralLoad,\n" +
+            "    lr.date_result_reported AS dateOfLastViralLoad\n" +
+            "FROM\n" +
+            "    laboratory_order lo\n" +
+            "        INNER JOIN hiv_enrollment h ON h.person_uuid = lo.patient_uuid\n" +
+            "        LEFT JOIN laboratory_test lt ON lt.lab_order_id = lo.id\n" +
+            "        LEFT JOIN laboratory_labtest ll ON ll.id = lt.lab_test_id AND ll.lab_test_name = 'Viral Load'\n" +
+            "        LEFT JOIN laboratory_sample ls ON ls.test_id = lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
+            "        LEFT JOIN laboratory_result lr ON lr.test_id = lt.id AND lr.patient_uuid = lo.patient_uuid\n" +
+            "        LEFT JOIN base_application_codeset bac_viral_load ON bac_viral_load.id = lt.viral_load_indication\n" +
+            "WHERE\n" +
+            "    lo.archived = 0\n" +
+            "  AND h.archived = 0\n" +
+            "  AND lo.facility_id = ?1\n" +
+            "ORDER BY\n" +
+            "    lo.patient_uuid, lo.order_date DESC" +
             "\t\t\t ),\n" +
             "\t\t\t pharmacy_details AS (\n" +
             "\t\t\t\t SELECT DISTINCT ON (hartp.person_uuid)hartp.person_uuid as person_uuid, r.visit_date as dateOfLastRefill,\n" +
@@ -1680,10 +1686,10 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "\t\t\t\t THEN CAST((hartp.visit_date + hartp.refill_period + INTERVAL ' 28 day ') AS date) ELSE hartp.visit_date\n" +
             "\t\t\t\t END)AS dateOfCurrentStatus\n" +
             "\t\t\t\t FROM hiv_art_pharmacy hartp\n" +
-            "\t\t\t\t INNER JOIN (SELECT distinct r.* FROM (SELECT h.person_uuid, h.visit_date, CAST(pharmacy_object ->> ' regimenName ' AS VARCHAR) AS regimen_name,\n" +
+            "\t\t\t\t INNER JOIN (SELECT distinct r.* FROM (SELECT h.person_uuid, h.visit_date, CAST(pharmacy_object ->> 'regimenName' AS VARCHAR) AS regimen_name,\n" +
             "\t\t\t\t hrt.description FROM hiv_art_pharmacy h,\n" +
-            "\t\t\t\t jsonb_array_elements(h.extra->' regimens ') with ordinality p(pharmacy_object)\n" +
-            "\t\t\t\t INNER JOIN hiv_regimen hr ON hr.description=CAST(pharmacy_object ->> ' regimenName ' AS VARCHAR)\n" +
+            "\t\t\t\t jsonb_array_elements(h.extra->'regimens') with ordinality p(pharmacy_object)\n" +
+            "\t\t\t\t INNER JOIN hiv_regimen hr ON hr.description=CAST(pharmacy_object ->> 'regimenName' AS VARCHAR)\n" +
             "\t\t\t\t INNER JOIN hiv_regimen_type hrt ON hrt.id=hr.regimen_type_id\n" +
             "\t\t\t\t WHERE hrt.id IN (1,2,3,4,14))r\n" +
             "\t\t\t\t INNER JOIN (SELECT hap.person_uuid, MAX(visit_date) AS MAXDATE FROM hiv_art_pharmacy hap\n" +
