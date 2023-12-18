@@ -10,10 +10,7 @@ import org.lamisplus.modules.hiv.domain.dto.PharmacyReport;
 import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
 import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 
-import org.lamisplus.modules.report.domain.BiometricReportDto;
-import org.lamisplus.modules.report.domain.HtsReportDto;
-import org.lamisplus.modules.report.domain.PrepReportDto;
-import org.lamisplus.modules.report.domain.RADETDTOProjection;
+import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.repository.ReportRepository;
 import org.springframework.stereotype.Service;
@@ -70,6 +67,23 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			e.printStackTrace();
 		}
 		LOG.info("End generate patient line list ");
+		return null;
+	}
+
+	@Override
+	public ByteArrayOutputStream generateClientServiceList(HttpServletResponse response, Long facilityId) {
+		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
+		try {
+			List<ClientServiceDto> data = reportRepository.generateClientServiceList(facilityId);
+			LOG.info("fullData 1: " + data);
+			List<Map<Integer, Object>> fullData = GenerateExcelDataHelper.fillClientServiceListDataMapper(data);
+			LOG.info("fullData 2: " + data.size());
+			return excelService.generate(Constants.CLIENT_SERVICE_LIST, fullData, Constants.CLIENT_SERVICE_HEADER);
+		} catch (Exception e) {
+			LOG.error("Error Occurred when generating CLIENT SERVICE LIST!!!");
+			e.printStackTrace();
+		}
+		LOG.info("End generate client service list ");
 		return null;
 	}
 	

@@ -8,10 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.audit4j.core.util.Log;
 import org.lamisplus.modules.hiv.domain.dto.*;
-import org.lamisplus.modules.report.domain.BiometricReportDto;
-import org.lamisplus.modules.report.domain.HtsReportDto;
-import org.lamisplus.modules.report.domain.PrepReportDto;
-import org.lamisplus.modules.report.domain.RADETDTOProjection;
+import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.springframework.stereotype.Component;
 
@@ -630,6 +627,33 @@ public class GenerateExcelDataHelper {
 		}
 		return result;
 	}
+
+	public static List<Map<Integer, Object>> fillClientServiceListDataMapper(@NonNull List<ClientServiceDto> listFinalResult) {
+		List<Map<Integer, Object>> result = new ArrayList<>();
+		for (ClientServiceDto clientService : listFinalResult) {
+			if (clientService != null) {
+				Map<Integer, Object> map = new HashMap<>();
+				int index = 0;
+
+				map.put(index++, getStringValue(String.valueOf(clientService.getPatientId())));
+				map.put(index++, getStringValue(clientService.getComment()));
+				map.put(index++, getStringValue(clientService.getOutcome()));
+				map.put(index++, getStringValue(clientService.getDateOfAttempt()));
+				map.put(index++, getStringValue(clientService.getVerificationStatus()));
+				map.put(index++, getStringValue(clientService.getVerificationAttempts()));
+				map.put(index++, getStringValue(clientService.getSerialEnrollmentNo()));
+				map.put(index++, getStringValue(clientService.getReferredTo()));
+				map.put(index++, getStringValue(clientService.getDiscontinuation()));
+				map.put(index++, getStringValue(clientService.getDateReturnedToCare()));
+				map.put(index++, getStringValue(clientService.getDateOfDiscontinuation()));
+
+				result.add(map);
+			}
+		}
+		Log.info("result: " + result.size()); // going to be one
+		return result;
+	}
+
 
 
 }

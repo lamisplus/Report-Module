@@ -1,10 +1,7 @@
 package org.lamisplus.modules.report.repository;
 
-import org.lamisplus.modules.report.domain.BiometricReport;
+import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.hiv.domain.dto.PatientLineDto;
-import org.lamisplus.modules.report.domain.HtsReportDto;
-import org.lamisplus.modules.report.domain.PrepReportDto;
-import org.lamisplus.modules.report.domain.RADETDTOProjection;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.domain.entity.Report;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -1825,5 +1822,27 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "result.facility_id, result.phone, result.address;", nativeQuery = true
     )
     List<BiometricReport> getBiometricReports(Long facilityId, LocalDate startDate, LocalDate endDate);
+
+    @Query(value =
+            "SELECT " +
+                    "id as patientId, " +
+                    "obj.value->>'comment' AS comment, " +
+                    "obj.value->>'outcome' AS outcome, " +
+                    "obj.value->>'dateOfAttempt' AS dateOfAttempt, " +
+                    "obj.value->>'verificationStatus' AS verificationStatus, " +
+                    "obj.value->>'verificationAttempts' AS verificationAttempts, " +
+                    "obj.value->>'serialEnrollmentNo' AS serialEnrollmentNo, " +
+                    "hiv_observation.data->>'referedTo' AS referredTo, " +
+                    "hiv_observation.data->>'discontinuation' AS discontinuation, " +
+                    "hiv_observation.data->>'returnedToCare' AS dateReturnedToCare, " +
+                    "hiv_observation.data->>'dateOfDiscontinuation' AS dateOfDiscontinuation " +
+                    "FROM " +
+                    "public.hiv_observation, " +
+                    "jsonb_array_elements(hiv_observation.data->'attempt') as obj " +
+                    "WHERE " +
+                    "hiv_observation.type = 'Client Verification' AND hiv_observation.facility_id = ?1 AND hiv_observation.archived = 0;",
+            nativeQuery = true
+    )
+    List<ClientServiceDto> generateClientServiceList(Long facilityId);
 }
 
