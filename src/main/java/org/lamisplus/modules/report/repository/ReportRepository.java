@@ -1,5 +1,6 @@
 package org.lamisplus.modules.report.repository;
 
+import lombok.extern.java.Log;
 import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.hiv.domain.dto.PatientLineDto;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
@@ -1823,26 +1824,24 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     )
     List<BiometricReport> getBiometricReports(Long facilityId, LocalDate startDate, LocalDate endDate);
 
-    @Query(value =
-            "SELECT " +
-                    "id as patientId, " +
-                    "obj.value->>'comment' AS comment, " +
-                    "obj.value->>'outcome' AS outcome, " +
-                    "obj.value->>'dateOfAttempt' AS dateOfAttempt, " +
-                    "obj.value->>'verificationStatus' AS verificationStatus, " +
-                    "obj.value->>'verificationAttempts' AS verificationAttempts, " +
-                    "obj.value->>'serialEnrollmentNo' AS serialEnrollmentNo, " +
-                    "hiv_observation.data->>'referedTo' AS referredTo, " +
-                    "hiv_observation.data->>'discontinuation' AS discontinuation, " +
-                    "hiv_observation.data->>'returnedToCare' AS dateReturnedToCare, " +
-                    "hiv_observation.data->>'dateOfDiscontinuation' AS dateOfDiscontinuation " +
-                    "FROM " +
-                    "public.hiv_observation, " +
-                    "jsonb_array_elements(hiv_observation.data->'attempt') as obj " +
-                    "WHERE " +
-                    "hiv_observation.type = 'Client Verification' AND hiv_observation.facility_id = ?1 AND hiv_observation.archived = 0;",
-            nativeQuery = true
-    )
-    List<ClientServiceDto> generateClientServiceList(Long facilityId);
+    @Query(value = "SELECT " +
+            "h.id as patientId, " +
+            "h.date_of_observation AS dateOfObservation, " +
+            "u.name AS facilityName, " +
+            "obj.value->>'comment' AS comment, " +
+            "obj.value->>'outcome' AS outcome, " +
+            "obj.value->>'dateOfAttempt' AS dateOfAttempt, " +
+            "obj.value->>'verificationStatus' AS verificationStatus, " +
+            "obj.value->>'verificationAttempts' AS verificationAttempts, " +
+            "obj.value->>'serialEnrollmentNo' AS serialEnrollmentNo, " +
+            "h.data->>'referedTo' AS referredTo, " +
+            "h.data->>'discontinuation' AS discontinuation, " +
+            "h.data->>'returnedToCare' AS dateReturnedToCare, " +
+            "h.data->>'dateOfDiscontinuation' AS dateOfDiscontinuation " +
+            "FROM hiv_observation h " +
+            "INNER JOIN base_organisation_unit u ON h.facility_id = u.id, " +
+            "jsonb_array_elements(h.data->'attempt') as obj " +
+            "WHERE h.type = 'Client Verification' AND h.facility_id = ?1 AND h.archived = 0;", nativeQuery = true )
+    List<ClientServiceDto>  generateClientServiceList(Long facilityId);
 }
 
