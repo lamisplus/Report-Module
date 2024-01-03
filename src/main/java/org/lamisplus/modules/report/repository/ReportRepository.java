@@ -277,8 +277,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "eSetting.display AS enrollmentSetting,\n" +
             "hac.visit_date AS artStartDate,\n" +
             "hr.description AS regimenAtStart,\n" +
-            "p.date_of_registration as dateOfRegistration,"+
-            "h.date_of_registration as dateOfEnrollment,"+
+            "p.date_of_registration as dateOfRegistration," +
+            "h.date_of_registration as dateOfEnrollment," +
             "h.ovc_number AS ovcUniqueId,\n" +
             "h.house_hold_number AS householdUniqueNo,\n" +
             "ecareEntry.display AS careEntry,\n" +
@@ -1839,9 +1839,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "h.data->>'returnedToCare' AS returnedToCare, " +
             "h.data->>'dateOfDiscontinuation' AS dateOfDiscontinuation " +
             "FROM hiv_observation h " +
-            "INNER JOIN base_organisation_unit u ON h.facility_id = u.id, " +
-            "jsonb_array_elements(h.data->'attempt') as obj " +
-            "WHERE h.type = 'Client Verification' AND h.facility_id = ?1 AND h.archived = 0;", nativeQuery = true )
-    List<ClientServiceDto>  generateClientServiceList(Long facilityId);
+            "INNER JOIN base_organisation_unit u ON h.facility_id = u.id " +
+            "CROSS JOIN jsonb_array_elements(h.data->'attempt') as obj " +
+            "WHERE h.type = 'Client Verification' AND h.facility_id = ?1 AND h.archived = 0", nativeQuery = true)
+    List<ClientServiceDto> generateClientServiceList(Long facilityId);
 }
-

@@ -398,8 +398,8 @@ public class Constants {
 					"Verification Attempts",
 					"Serial Enrollment No",
 					"Referred To",
-					"Date of Discontinuation",
+					"Discontinued",
 					"Date Returned To Care",
-					"Discontinued"
+					"Date of Discontinuation"
 			);
 }
