@@ -1833,10 +1833,10 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "obj.value->>'dateOfAttempt' AS dateOfAttempt, " +
             "obj.value->>'verificationStatus' AS verificationStatus, " +
             "obj.value->>'verificationAttempts' AS verificationAttempts, " +
-            "obj.value->>'serialEnrollmentNo' AS serialEnrollmentNo, " +
-            "h.data->>'referedTo' AS referredTo, " +
+            "h.data->>'serialEnrollmentNo' AS serialEnrollmentNo, " +
+            "h.data->>'referredTo' AS referredTo, " +
             "h.data->>'discontinuation' AS discontinuation, " +
-            "h.data->>'returnedToCare' AS dateReturnedToCare, " +
+            "h.data->>'returnedToCare' AS returnedToCare, " +
             "h.data->>'dateOfDiscontinuation' AS dateOfDiscontinuation " +
             "FROM hiv_observation h " +
             "INNER JOIN base_organisation_unit u ON h.facility_id = u.id, " +

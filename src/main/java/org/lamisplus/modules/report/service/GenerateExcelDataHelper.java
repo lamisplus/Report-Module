@@ -646,7 +646,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(clientService.getSerialEnrollmentNo()));
 				map.put(index++, getStringValue(clientService.getReferredTo()));
 				map.put(index++, getStringValue(clientService.getDiscontinuation()));
-				map.put(index++, getStringValue(clientService.getDateReturnedToCare()));
+				map.put(index++, getStringValue(clientService.getReturnedToCare()));
 				map.put(index++, getStringValue(clientService.getDateOfDiscontinuation()));
 
 				result.add(map);

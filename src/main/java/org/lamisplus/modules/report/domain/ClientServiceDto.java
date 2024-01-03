@@ -21,8 +21,7 @@ public interface ClientServiceDto {
 
     String getDiscontinuation();
 
-    String getDateReturnedToCare();
-
+    String getReturnedToCare();
     String getDateOfDiscontinuation();
 
 }
