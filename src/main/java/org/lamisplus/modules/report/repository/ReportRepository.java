@@ -722,7 +722,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "              DISTINCT ON (he.person_uuid) he.person_uuid AS person_uuid60, \n" +
             "               CASE WHEN biometric_count.count > 5 THEN biometric_count.enrollment_date\n" +
             "               ELSE NULL\n" +
-            "           END AS dateBiometricsEnrolled,\n" +
+            "               END AS dateBiometricsEnrolled,\n" +
             "           CASE WHEN biometric_count.count > 5 THEN biometric_count.count\n" +
             "           ELSE NULL\n" +
             "           END AS numberOfFingersCaptured,\n" +
@@ -731,7 +731,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           END AS dateBiometricsRecaptured,\n" +
             "           CASE WHEN recapture_count.count > 5 THEN recapture_count.count\n" +
             "           ELSE NULL\n" +
-            "           END AS numberOfFingersRecaptured\n" +
+            "           END AS numberOfFingersRecaptured,\n" +
 //            "              biometric_count.enrollment_date AS dateBiometricsEnrolled, \n" +
 //            "              biometric_count.count AS numberOfFingersCaptured,\n" +
 //            "              recapture_count.recapture_date AS dateBiometricsRecaptured,\n" +
