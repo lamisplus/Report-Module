@@ -1825,9 +1825,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<BiometricReport> getBiometricReports(Long facilityId, LocalDate startDate, LocalDate endDate);
 
     @Query(value = "SELECT " +
-            "h.id as patientId, " +
+            "h.id AS patientId, " +
             "h.date_of_observation AS dateOfObservation, " +
             "u.name AS facilityName, " +
+            "CASE WHEN facility_state.name IS NULL THEN '' ELSE facility_state.name END AS facilityState, " +
+            "CASE WHEN hp.dsd_model IS NULL THEN '' ELSE hp.dsd_model END  AS dsdModel, " +
             "obj.value->>'comment' AS comment, " +
             "obj.value->>'outcome' AS outcome, " +
             "obj.value->>'dateOfAttempt' AS dateOfAttempt, " +
@@ -1837,10 +1839,24 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "h.data->>'referredTo' AS referredTo, " +
             "h.data->>'discontinuation' AS discontinuation, " +
             "h.data->>'returnedToCare' AS returnedToCare, " +
-            "h.data->>'dateOfDiscontinuation' AS dateOfDiscontinuation " +
+            "h.data->>'dateOfDiscontinuation' AS dateOfDiscontinuation, " +
+            "CASE WHEN pt.reason_for_discountinuation IS NULL THEN '' ELSE pt.reason_for_discountinuation END  AS reasonForDiscontinuation, " +
+            "string_agg(CAST (any_element.value AS text), ', ') AS anyOfTheFollowing " +
             "FROM hiv_observation h " +
-            "INNER JOIN base_organisation_unit u ON h.facility_id = u.id " +
+            "JOIN base_organisation_unit u ON h.facility_id = u.id " +
             "CROSS JOIN jsonb_array_elements(h.data->'attempt') as obj " +
-            "WHERE h.type = 'Client Verification' AND h.facility_id = ?1 AND h.archived = 0", nativeQuery = true)
+            "LEFT JOIN jsonb_array_elements_text(h.data->'anyOfTheFollowing') any_element ON true " +
+            "LEFT JOIN patient_person p ON p.id = h.id " +
+            "LEFT JOIN base_organisation_unit facility ON facility.id = p.facility_id " +
+            "LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id " +
+            "LEFT JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id " +
+            "LEFT JOIN hiv_patient_tracker pt ON pt.id = h.id " +
+            "LEFT JOIN hiv_art_pharmacy hp ON hp.id = h.id " +
+            "WHERE h.type = 'Client Verification' AND h.facility_id = ?1 AND h.archived = 0 " +
+            "GROUP BY " +
+            "h.id, h.date_of_observation, u.name, facility_state.name, hp.dsd_model, obj.value, " +
+            "h.data->>'serialEnrollmentNo', h.data->>'referredTo', " +
+            "h.data->>'discontinuation', h.data->>'returnedToCare', " +
+            "h.data->>'dateOfDiscontinuation', pt.reason_for_discountinuation", nativeQuery = true)
     List<ClientServiceDto> generateClientServiceList(Long facilityId);
 }

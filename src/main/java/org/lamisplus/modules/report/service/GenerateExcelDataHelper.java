@@ -638,6 +638,8 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(clientService.getPatientId())));
 				map.put(index++, getStringValue(String.valueOf(clientService.getDateOfObservation())));
 				map.put(index++, getStringValue(clientService.getFacilityName()));
+				map.put(index++, getStringValue(clientService.getFacilityState()));
+				map.put(index++, getStringValue(clientService.getDsdModel()));
 				map.put(index++, getStringValue(clientService.getComment()));
 				map.put(index++, getStringValue(clientService.getOutcome()));
 				map.put(index++, getStringValue(clientService.getDateOfAttempt()));
@@ -648,7 +650,8 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(clientService.getDiscontinuation()));
 				map.put(index++, getStringValue(clientService.getReturnedToCare()));
 				map.put(index++, getStringValue(clientService.getDateOfDiscontinuation()));
-
+				map.put(index++, getStringValue(clientService.getReasonForDiscontinuation()));
+				map.put(index++, getStringValue(clientService.getAnyOfTheFollowing()));
 				result.add(map);
 			}
 		}

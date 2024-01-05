@@ -5,6 +5,10 @@ public interface ClientServiceDto {
 
     String getDateOfObservation();
     String getFacilityName();
+    String getFacilityState();
+
+    String getDsdModel();
+
     String getComment();
 
     String getOutcome();
@@ -23,5 +27,8 @@ public interface ClientServiceDto {
 
     String getReturnedToCare();
     String getDateOfDiscontinuation();
+    String getReasonForDiscontinuation();
+
+    String getAnyOfTheFollowing();
 
 }

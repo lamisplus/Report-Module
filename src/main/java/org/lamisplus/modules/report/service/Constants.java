@@ -391,6 +391,8 @@ public class Constants {
 					"Patient Id",
 					"Date of Observation",
 					"Facility Name",
+					"State",
+					"DSD Model",
 					"Comment",
 					"Outcome",
 					"Date Of Attempt",
@@ -400,6 +402,8 @@ public class Constants {
 					"Referred To",
 					"Discontinued",
 					"Date Returned To Care",
-					"Date of Discontinuation"
+					"Date of Discontinuation",
+					"Reason For Discontinuation",
+					"Indicators"
 			);
 }
