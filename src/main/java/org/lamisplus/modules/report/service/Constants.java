@@ -388,22 +388,22 @@ public class Constants {
 
 	public static final List<String> CLIENT_SERVICE_HEADER =
 			Arrays.asList(
+					"State",
+					"Facility Name",
+					"Serial Enrollment No",
 					"Patient Id",
 					"Date of Observation",
-					"Facility Name",
-					"State",
-					"DSD Model",
-					"Comment",
-					"Outcome",
+					"Indication For Client Verification",
 					"Date Of Attempt",
-					"Verification Status",
 					"Verification Attempts",
-					"Serial Enrollment No",
+					"Verification Status",
+					"DSD Model",
+					"Outcome",
+					"Comment",
+					"Date Returned To Care",
 					"Referred To",
 					"Discontinued",
-					"Date Returned To Care",
 					"Date of Discontinuation",
-					"Reason For Discontinuation",
-					"Indicators"
+					"Reason For Discontinuation"
 			);
 }

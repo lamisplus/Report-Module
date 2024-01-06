@@ -1829,7 +1829,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "h.date_of_observation AS dateOfObservation, " +
             "u.name AS facilityName, " +
             "CASE WHEN facility_state.name IS NULL THEN '' ELSE facility_state.name END AS facilityState, " +
-            "CASE WHEN hp.dsd_model IS NULL THEN '' ELSE hp.dsd_model END  AS dsdModel, " +
+            "CASE WHEN pt.dsd_model IS NULL THEN '' ELSE pt.dsd_model END  AS dsdModel, " +
             "obj.value->>'comment' AS comment, " +
             "obj.value->>'outcome' AS outcome, " +
             "obj.value->>'dateOfAttempt' AS dateOfAttempt, " +
@@ -1850,11 +1850,10 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "LEFT JOIN base_organisation_unit facility ON facility.id = p.facility_id " +
             "LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id " +
             "LEFT JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id " +
-            "LEFT JOIN hiv_patient_tracker pt ON pt.id = h.id " +
-            "LEFT JOIN hiv_art_pharmacy hp ON hp.id = h.id " +
+            "LEFT JOIN hiv_patient_tracker pt ON pt.person_uuid = h.person_uuid " +
             "WHERE h.type = 'Client Verification' AND h.facility_id = ?1 AND h.archived = 0 " +
             "GROUP BY " +
-            "h.id, h.date_of_observation, u.name, facility_state.name, hp.dsd_model, obj.value, " +
+            "h.id, h.date_of_observation, u.name, facility_state.name, pt.dsd_model, obj.value, " +
             "h.data->>'serialEnrollmentNo', h.data->>'referredTo', " +
             "h.data->>'discontinuation', h.data->>'returnedToCare', " +
             "h.data->>'dateOfDiscontinuation', pt.reason_for_discountinuation", nativeQuery = true)
