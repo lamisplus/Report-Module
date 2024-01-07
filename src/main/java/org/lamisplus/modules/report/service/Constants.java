@@ -11,6 +11,9 @@ public class Constants {
 	
 	// Sheet name
 	public static final String PATIENT_LINE_LIST = "patient_line__list";
+
+	public static final String CLIENT_SERVICE_LIST = "client_service_list";
+
 	public static final String RADET_SHEET = "radet";
 
 	public static final String HTS_SHEET = "hts";
@@ -382,4 +385,25 @@ public class Constants {
 			);
 	
 	public static final String CLINIC_NAME = "clinic";
+
+	public static final List<String> CLIENT_SERVICE_HEADER =
+			Arrays.asList(
+					"State",
+					"Facility Name",
+					"Serial Enrollment No",
+					"Patient Id",
+					"Date of Observation",
+					"Indication For Client Verification",
+					"Date Of Attempt",
+					"Verification Attempts",
+					"Verification Status",
+					"DSD Model",
+					"Outcome",
+					"Comment",
+					"Date Returned To Care",
+					"Referred To",
+					"Discontinued",
+					"Date of Discontinuation",
+					"Reason For Discontinuation"
+			);
 }
