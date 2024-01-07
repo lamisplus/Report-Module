@@ -1,9 +1,12 @@
 package org.lamisplus.modules.report.domain;
+
+import java.util.UUID;
+
 public interface ClientServiceDto {
     String getFacilityState();
     String getFacilityName();
     String getSerialEnrollmentNo();
-    Long getPatientId();
+    String getPersonUuid();
     String getDateOfObservation();
     String getAnyOfTheFollowing();
     String getDateOfAttempt();

@@ -1825,23 +1825,23 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<BiometricReport> getBiometricReports(Long facilityId, LocalDate startDate, LocalDate endDate);
 
     @Query(value = "SELECT " +
-            "h.id AS patientId, " +
-            "h.date_of_observation AS dateOfObservation, " +
-            "u.name AS facilityName, " +
             "CASE WHEN facility_state.name IS NULL THEN '' ELSE facility_state.name END AS facilityState, " +
-            "CASE WHEN pt.dsd_model IS NULL THEN '' ELSE pt.dsd_model END  AS dsdModel, " +
-            "obj.value->>'comment' AS comment, " +
-            "obj.value->>'outcome' AS outcome, " +
-            "obj.value->>'dateOfAttempt' AS dateOfAttempt, " +
-            "obj.value->>'verificationStatus' AS verificationStatus, " +
-            "obj.value->>'verificationAttempts' AS verificationAttempts, " +
+            "u.name AS facilityName, " +
             "h.data->>'serialEnrollmentNo' AS serialEnrollmentNo, " +
+            "h.person_uuid AS personUuid, " +
+            "h.date_of_observation AS dateOfObservation, " +
+            "string_agg(CAST (any_element.value AS text), ', ') AS anyOfTheFollowing, " +
+            "obj.value->>'dateOfAttempt' AS dateOfAttempt, " +
+            "obj.value->>'verificationAttempts' AS verificationAttempts, " +
+            "obj.value->>'verificationStatus' AS verificationStatus, " +
+            "CASE WHEN pt.dsd_model IS NULL THEN '' ELSE pt.dsd_model END  AS dsdModel, " +
+            "obj.value->>'outcome' AS outcome, " +
+            "obj.value->>'comment' AS comment, " +
+            "h.data->>'returnedToCare' AS returnedToCare, " +
             "h.data->>'referredTo' AS referredTo, " +
             "h.data->>'discontinuation' AS discontinuation, " +
-            "h.data->>'returnedToCare' AS returnedToCare, " +
             "h.data->>'dateOfDiscontinuation' AS dateOfDiscontinuation, " +
-            "CASE WHEN pt.reason_for_discountinuation IS NULL THEN '' ELSE pt.reason_for_discountinuation END  AS reasonForDiscontinuation, " +
-            "string_agg(CAST (any_element.value AS text), ', ') AS anyOfTheFollowing " +
+            "CASE WHEN pt.reason_for_discountinuation IS NULL THEN '' ELSE pt.reason_for_discountinuation END  AS reasonForDiscontinuation " +
             "FROM hiv_observation h " +
             "JOIN base_organisation_unit u ON h.facility_id = u.id " +
             "CROSS JOIN jsonb_array_elements(h.data->'attempt') as obj " +
@@ -1853,7 +1853,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "LEFT JOIN hiv_patient_tracker pt ON pt.person_uuid = h.person_uuid " +
             "WHERE h.type = 'Client Verification' AND h.facility_id = ?1 AND h.archived = 0 " +
             "GROUP BY " +
-            "h.id, h.date_of_observation, u.name, facility_state.name, pt.dsd_model, obj.value, " +
+            "h.id, h.person_uuid, h.date_of_observation, u.name, facility_state.name, pt.dsd_model, obj.value, " +
             "h.data->>'serialEnrollmentNo', h.data->>'referredTo', " +
             "h.data->>'discontinuation', h.data->>'returnedToCare', " +
             "h.data->>'dateOfDiscontinuation', pt.reason_for_discountinuation", nativeQuery = true)

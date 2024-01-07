@@ -637,7 +637,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(clientService.getFacilityState()));
 				map.put(index++, getStringValue(clientService.getFacilityName()));
 				map.put(index++, getStringValue(clientService.getSerialEnrollmentNo()));
-				map.put(index++, getStringValue(String.valueOf(clientService.getPatientId())));
+				map.put(index++, getStringValue(clientService.getPersonUuid()));
 				map.put(index++, getStringValue(String.valueOf(clientService.getDateOfObservation())));
 				map.put(index++, getStringValue(clientService.getAnyOfTheFollowing()));
 				map.put(index++, getStringValue(clientService.getDateOfAttempt()));
