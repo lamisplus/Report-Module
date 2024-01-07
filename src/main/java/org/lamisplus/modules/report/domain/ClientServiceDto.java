@@ -3,7 +3,7 @@ public interface ClientServiceDto {
     String getFacilityState();
     String getFacilityName();
     String getSerialEnrollmentNo();
-    Long getPatientId();
+    String getPatientId();
     String getDateOfObservation();
     String getAnyOfTheFollowing();
     String getDateOfAttempt();

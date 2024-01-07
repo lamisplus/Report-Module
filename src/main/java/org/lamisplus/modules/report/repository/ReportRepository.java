@@ -141,7 +141,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                                    p.date_of_registration as dateOfRegistration, p.marital_status->>'display' as maritalStatus,       \n" +
             "                                    education->>'display' as education, p.employment_status->>'display' as occupation,       \n" +
             "                                    facility.name as facilityName, facility_lga.name as lga, facility_state.name as state,       \n" +
-            "                                    boui.code as datimId, (SELECT name FROM base_organisation_unit WHERE id = CAST(p.address->'address'->0 ->'stateId' ->> 0 AS BIGINT)) as residentialState, (SELECT name FROM base_organisation_unit WHERE id = CAST(p.address->'address'->0 ->'district' ->> 0 AS BIGINT)) as residentialLga,      \n" +
+            "                                    boui.code as datimId, (SELECT name FROM base_organisation_unit WHERE id = CAST(NULLIF(p.address->'address'->0 ->'stateId' ->> 0,'') AS BIGINT)) as residentialState, (SELECT name FROM base_organisation_unit WHERE id = CAST(NULLIF(p.address->'address'->0 ->'district' ->> 0,'') AS BIGINT)) as residentialLga,      \n" +
             "                                    r.address as address, (CASE WHEN contact_point->'contactPoint'->0->>'type'='phone' THEN contact_point->'contactPoint'->0->>'value' ELSE null END) AS phone,      \n" +
             "                                    baseline_reg.regimen AS baselineRegimen,      \n" +
             "                                    baseline_pc.systolic AS baselineSystolicBP,      \n" +
@@ -1843,7 +1843,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<BiometricReport> getBiometricReports(Long facilityId, LocalDate startDate, LocalDate endDate);
 
     @Query(value = "SELECT " +
-            "h.id AS patientId, " +
+            "h.person_uuid AS patientId, " +
             "h.date_of_observation AS dateOfObservation, " +
             "u.name AS facilityName, " +
             "CASE WHEN facility_state.name IS NULL THEN '' ELSE facility_state.name END AS facilityState, " +
