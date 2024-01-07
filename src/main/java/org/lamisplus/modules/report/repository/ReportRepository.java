@@ -1,10 +1,8 @@
 package org.lamisplus.modules.report.repository;
 
-import org.lamisplus.modules.report.domain.BiometricReport;
+import lombok.extern.java.Log;
+import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.hiv.domain.dto.PatientLineDto;
-import org.lamisplus.modules.report.domain.HtsReportDto;
-import org.lamisplus.modules.report.domain.PrepReportDto;
-import org.lamisplus.modules.report.domain.RADETDTOProjection;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.domain.entity.Report;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -279,8 +277,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "eSetting.display AS enrollmentSetting,\n" +
             "hac.visit_date AS artStartDate,\n" +
             "hr.description AS regimenAtStart,\n" +
-            "p.date_of_registration as dateOfRegistration,"+
-            "h.date_of_registration as dateOfEnrollment,"+
+            "p.date_of_registration as dateOfRegistration," +
+            "h.date_of_registration as dateOfEnrollment," +
             "h.ovc_number AS ovcUniqueId,\n" +
             "h.house_hold_number AS householdUniqueNo,\n" +
             "ecareEntry.display AS careEntry,\n" +
@@ -1843,5 +1841,39 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "result.facility_id, result.phone, result.address;", nativeQuery = true
     )
     List<BiometricReport> getBiometricReports(Long facilityId, LocalDate startDate, LocalDate endDate);
-}
 
+    @Query(value = "SELECT " +
+            "h.id AS patientId, " +
+            "h.date_of_observation AS dateOfObservation, " +
+            "u.name AS facilityName, " +
+            "CASE WHEN facility_state.name IS NULL THEN '' ELSE facility_state.name END AS facilityState, " +
+            "CASE WHEN pt.dsd_model IS NULL THEN '' ELSE pt.dsd_model END  AS dsdModel, " +
+            "obj.value->>'comment' AS comment, " +
+            "obj.value->>'outcome' AS outcome, " +
+            "obj.value->>'dateOfAttempt' AS dateOfAttempt, " +
+            "obj.value->>'verificationStatus' AS verificationStatus, " +
+            "obj.value->>'verificationAttempts' AS verificationAttempts, " +
+            "h.data->>'serialEnrollmentNo' AS serialEnrollmentNo, " +
+            "h.data->>'referredTo' AS referredTo, " +
+            "h.data->>'discontinuation' AS discontinuation, " +
+            "h.data->>'returnedToCare' AS returnedToCare, " +
+            "h.data->>'dateOfDiscontinuation' AS dateOfDiscontinuation, " +
+            "CASE WHEN pt.reason_for_discountinuation IS NULL THEN '' ELSE pt.reason_for_discountinuation END  AS reasonForDiscontinuation, " +
+            "string_agg(CAST (any_element.value AS text), ', ') AS anyOfTheFollowing " +
+            "FROM hiv_observation h " +
+            "JOIN base_organisation_unit u ON h.facility_id = u.id " +
+            "CROSS JOIN jsonb_array_elements(h.data->'attempt') as obj " +
+            "LEFT JOIN jsonb_array_elements_text(h.data->'anyOfTheFollowing') any_element ON true " +
+            "LEFT JOIN patient_person p ON p.id = h.id " +
+            "LEFT JOIN base_organisation_unit facility ON facility.id = p.facility_id " +
+            "LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id " +
+            "LEFT JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id " +
+            "LEFT JOIN hiv_patient_tracker pt ON pt.person_uuid = h.person_uuid " +
+            "WHERE h.type = 'Client Verification' AND h.facility_id = ?1 AND h.archived = 0 " +
+            "GROUP BY " +
+            "h.id, h.date_of_observation, u.name, facility_state.name, pt.dsd_model, obj.value, " +
+            "h.data->>'serialEnrollmentNo', h.data->>'referredTo', " +
+            "h.data->>'discontinuation', h.data->>'returnedToCare', " +
+            "h.data->>'dateOfDiscontinuation', pt.reason_for_discountinuation", nativeQuery = true)
+    List<ClientServiceDto> generateClientServiceList(Long facilityId);
+}
