@@ -58,7 +58,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("Start generating patient line list for facility: " + getFacilityName(facilityId));
 		try {
 			List<PatientLineDto> data = patientReportService.getPatientLine(facilityId);
-			LOG.info("fullData 1: " + data);
+//			LOG.info("fullData 1: " + data);
 			List<Map<Integer, Object>> fullData = GenerateExcelDataHelper.fillPatientLineListDataMapper(data);
 			LOG.info("fullData 2: " + data.size());
 			return excelService.generate(Constants.PATIENT_LINE_LIST, fullData, Constants.PATIENT_LINE_LIST_HEADER);
