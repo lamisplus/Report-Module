@@ -307,18 +307,27 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "\n" +
             "patient_lga as (select DISTINCT ON (personUuid) personUuid as personUuid11, \n" +
             "case when (addr ~ '^[0-9\\.]+$') =TRUE \n" +
-            "then (select name from base_organisation_unit where id = cast(addr as int)) end as lgaOfResidence \n" +
+            " then (select name from base_organisation_unit where id = cast(addr as int)) ELSE\n" +
+            "(select name from base_organisation_unit where id = cast(facilityLga as int)) end as lgaOfResidence " +
+//            "then (select name from base_organisation_unit where id = cast(addr as int)) end as lgaOfResidence \n" +
             "from (\n" +
-            "select uuid AS personUuid, (jsonb_array_elements(address->'address')->>'district') as addr from patient_person \n" +
+            " select pp.uuid AS personUuid, facility_lga.parent_organisation_unit_id AS facilityLga, (jsonb_array_elements(pp.address->'address')->>'district') as addr from patient_person pp\n" +
+            "LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = CAST (pp.organization->'id' AS INTEGER) " +
+//            "select uuid AS personUuid, (jsonb_array_elements(address->'address')->>'district') as addr from patient_person \n" +
             ") dt),"+
             "\n" +
             "current_clinical AS (SELECT DISTINCT ON (tvs.person_uuid) tvs.person_uuid AS person_uuid10,\n" +
             "       body_weight AS currentWeight,\n" +
             "       tbs.display AS tbStatus1,\n" +
             "       bac.display AS currentClinicalStage,\n" +
-            "       (CASE\n" +
-            "WHEN preg.display IS NOT NULL THEN preg.display\n" +
-            "ELSE hac.pregnancy_status  END ) AS pregnancyStatus,\n" +
+            "       (CASE \n" +
+            "    \tWHEN INITCAP(pp.sex) = 'Male' THEN NULL\n" +
+            "    \tWHEN preg.display IS NOT NULL THEN preg.display\n" +
+            "    \tELSE hac.pregnancy_status\n" +
+            "\t\t   END ) AS pregnancyStatus, " +
+//            "       (CASE\n" +
+//            "WHEN preg.display IS NOT NULL THEN preg.display\n" +
+//            "ELSE hac.pregnancy_status  END ) AS pregnancyStatus,\n" +
             "       CASE\n" +
             "           WHEN hac.tb_screen IS NOT NULL THEN hac.visit_date\n" +
             "           ELSE NULL\n" +
@@ -338,6 +347,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " ) AS current_triage ON current_triage.MAXDATE = tvs.capture_date\n" +
             "     AND current_triage.person_uuid = tvs.person_uuid\n" +
             "     INNER JOIN hiv_art_clinical hac ON tvs.uuid = hac.vital_sign_uuid\n" +
+            "       LEFT JOIN patient_person pp ON tvs.person_uuid = pp.uuid" +
             "     INNER JOIN (\n" +
             "     SELECT\n" +
             "         person_uuid,\n" +
@@ -1301,7 +1311,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           (\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN 'Died'\n" +
-            "       WHEN prepre.status ILIKE '%out%' THEN ''\n" +
+            "       WHEN prepre.status ILIKE '%out%' THEN 'Transferred Out'\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN 'Died'\n" +
             "       WHEN pre.status ILIKE '%out%' THEN 'Transferred Out'\n" +
             "       WHEN (\n" +
