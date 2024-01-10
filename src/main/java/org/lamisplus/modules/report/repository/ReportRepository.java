@@ -1281,7 +1281,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " SELECT DISTINCT ON (cmp.person_uuid)person_uuid AS caseperson, cmp.case_manager_id, CONCAT(cm.first_name, ' ', cm.last_name) AS caseManager FROM (SELECT person_uuid, case_manager_id,\n" +
             " ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY id DESC)\n" +
             " FROM case_manager_patients) cmp  INNER JOIN case_manager cm ON cm.id=cmp.case_manager_id\n" +
-            " WHERE cmp.row_number=1 AND cm.facility_id=?1)" +
+            " WHERE cmp.row_number=1 AND cm.facility_id=?1), " +
             "client_verification AS (\n" +
             "\t SELECT * FROM (\n" +
             "select person_uuid,  data->'attempt'->0->>'outcome' AS clientVerificationStatus,\n" +
@@ -1319,7 +1319,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           tbS.*,\n" +
             "           tbl.*,\n" +
             "           crypt.*, \n" +
-            "           cvl.*, " +
+//            "           cvl.clientVerificationStatus, " +
             "           ct.cause_of_death AS causeOfDeath,\n" +
             "           ct.va_cause_of_death AS vaCauseOfDeath,\n" +
             "           (\n" +
@@ -1404,6 +1404,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "       ELSE ct.status_date\n" +
             "       END\n" +
             "   )AS DATE) AS currentStatusDate,\n" +
+//            "  -- client verification column\n" +
+            "       cvl.clientVerificationStatus, "+
             "           (\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN FALSE\n" +
