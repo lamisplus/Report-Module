@@ -144,6 +144,7 @@ public class Constants {
 					"Date of Viral Load Eligibility Status",
 					"Current ART Status",
 					"Date of Current ART Status",
+					"Client Verification Status",
 					"Biometric Status",
 					"Cause of Death",
 					"VA Cause of Death",

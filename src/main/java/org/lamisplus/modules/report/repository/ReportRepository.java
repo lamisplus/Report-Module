@@ -307,18 +307,27 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "\n" +
             "patient_lga as (select DISTINCT ON (personUuid) personUuid as personUuid11, \n" +
             "case when (addr ~ '^[0-9\\.]+$') =TRUE \n" +
-            "then (select name from base_organisation_unit where id = cast(addr as int)) end as lgaOfResidence \n" +
+            " then (select name from base_organisation_unit where id = cast(addr as int)) ELSE\n" +
+            "(select name from base_organisation_unit where id = cast(facilityLga as int)) end as lgaOfResidence " +
+//            "then (select name from base_organisation_unit where id = cast(addr as int)) end as lgaOfResidence \n" +
             "from (\n" +
-            "select uuid AS personUuid, (jsonb_array_elements(address->'address')->>'district') as addr from patient_person \n" +
+            " select pp.uuid AS personUuid, facility_lga.parent_organisation_unit_id AS facilityLga, (jsonb_array_elements(pp.address->'address')->>'district') as addr from patient_person pp\n" +
+            "LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = CAST (pp.organization->'id' AS INTEGER) " +
+//            "select uuid AS personUuid, (jsonb_array_elements(address->'address')->>'district') as addr from patient_person \n" +
             ") dt),"+
             "\n" +
             "current_clinical AS (SELECT DISTINCT ON (tvs.person_uuid) tvs.person_uuid AS person_uuid10,\n" +
             "       body_weight AS currentWeight,\n" +
             "       tbs.display AS tbStatus1,\n" +
             "       bac.display AS currentClinicalStage,\n" +
-            "       (CASE\n" +
-            "WHEN preg.display IS NOT NULL THEN preg.display\n" +
-            "ELSE hac.pregnancy_status  END ) AS pregnancyStatus,\n" +
+            "       (CASE \n" +
+            "    \tWHEN INITCAP(pp.sex) = 'Male' THEN NULL\n" +
+            "    \tWHEN preg.display IS NOT NULL THEN preg.display\n" +
+            "    \tELSE hac.pregnancy_status\n" +
+            "\t\t   END ) AS pregnancyStatus, " +
+//            "       (CASE\n" +
+//            "WHEN preg.display IS NOT NULL THEN preg.display\n" +
+//            "ELSE hac.pregnancy_status  END ) AS pregnancyStatus,\n" +
             "       CASE\n" +
             "           WHEN hac.tb_screen IS NOT NULL THEN hac.visit_date\n" +
             "           ELSE NULL\n" +
@@ -338,6 +347,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " ) AS current_triage ON current_triage.MAXDATE = tvs.capture_date\n" +
             "     AND current_triage.person_uuid = tvs.person_uuid\n" +
             "     INNER JOIN hiv_art_clinical hac ON tvs.uuid = hac.vital_sign_uuid\n" +
+            "       LEFT JOIN patient_person pp ON tvs.person_uuid = pp.uuid" +
             "     INNER JOIN (\n" +
             "     SELECT\n" +
             "         person_uuid,\n" +
@@ -1271,7 +1281,20 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " SELECT DISTINCT ON (cmp.person_uuid)person_uuid AS caseperson, cmp.case_manager_id, CONCAT(cm.first_name, ' ', cm.last_name) AS caseManager FROM (SELECT person_uuid, case_manager_id,\n" +
             " ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY id DESC)\n" +
             " FROM case_manager_patients) cmp  INNER JOIN case_manager cm ON cm.id=cmp.case_manager_id\n" +
-            " WHERE cmp.row_number=1 AND cm.facility_id=?1)" +
+            " WHERE cmp.row_number=1 AND cm.facility_id=?1), " +
+            "client_verification AS (\n" +
+            "\t SELECT * FROM (\n" +
+            "select person_uuid,  data->'attempt'->0->>'outcome' AS clientVerificationStatus,\n" +
+            "CAST (data->'attempt'->0->>'dateOfAttempt' AS DATE) AS dateOfOutcome,\n" +
+            "ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) DESC)\n" +
+            "from public.hiv_observation where type = 'Client Verification' \n" +
+            "AND archived = 0\n" +
+            " AND CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) <= ?3 \n" +
+            " AND CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) >= ?2 "+
+            "AND facility_id = ?1\n" +
+            "\t) clientVerification WHERE row_number = 1\n" +
+            "\tAND dateOfOutcome IS NOT NULL\n" +
+            " ) "+
             "SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,\n" +
             "           bd.*,\n" +
             "CONCAT(bd.datimId, '_', bd.personUuid) AS ndrPatientIdentifier, " +
@@ -1296,12 +1319,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           tbS.*,\n" +
             "           tbl.*,\n" +
             "           crypt.*, \n" +
+//            "           cvl.clientVerificationStatus, " +
             "           ct.cause_of_death AS causeOfDeath,\n" +
             "           ct.va_cause_of_death AS vaCauseOfDeath,\n" +
             "           (\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN 'Died'\n" +
-            "       WHEN prepre.status ILIKE '%out%' THEN ''\n" +
+            "       WHEN prepre.status ILIKE '%out%' THEN 'Transferred Out'\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN 'Died'\n" +
             "       WHEN pre.status ILIKE '%out%' THEN 'Transferred Out'\n" +
             "       WHEN (\n" +
@@ -1380,6 +1404,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "       ELSE ct.status_date\n" +
             "       END\n" +
             "   )AS DATE) AS currentStatusDate,\n" +
+//            "  -- client verification column\n" +
+            "       cvl.clientVerificationStatus, "+
             "           (\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN FALSE\n" +
@@ -1535,7 +1561,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        LEFT JOIN crytococal_antigen crypt on crypt.personuuid12= bd.personUuid" +
             "        LEFT JOIN  tbstatus tbS on tbS.personUuid133 = bd.personUuid" +
             "        LEFT JOIN  tblam tbl  on tbl.personuuidtblam = bd.personUuid" +
-            "       LEFT JOIN case_manager cm on cm.caseperson= bd.personUuid"
+            "       LEFT JOIN case_manager cm on cm.caseperson= bd.personUuid" +
+            "       LEFT JOIN client_verification cvl on cvl.person_uuid = bd.personUuid "
             , nativeQuery = true)
     List<RADETDTOProjection> getRadetData(Long facilityId, LocalDate start, LocalDate end,
                                           LocalDate previous, LocalDate previousPrevious, LocalDate dateOfStartOfCurrentQuarter);
