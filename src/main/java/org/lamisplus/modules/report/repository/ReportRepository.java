@@ -1282,6 +1282,19 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY id DESC)\n" +
             " FROM case_manager_patients) cmp  INNER JOIN case_manager cm ON cm.id=cmp.case_manager_id\n" +
             " WHERE cmp.row_number=1 AND cm.facility_id=?1)" +
+            "client_verification AS (\n" +
+            "\t SELECT * FROM (\n" +
+            "select person_uuid,  data->'attempt'->0->>'outcome' AS clientVerificationStatus,\n" +
+            "CAST (data->'attempt'->0->>'dateOfAttempt' AS DATE) AS dateOfOutcome,\n" +
+            "ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) DESC)\n" +
+            "from public.hiv_observation where type = 'Client Verification' \n" +
+            "AND archived = 0\n" +
+            " AND CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) <= ?3 \n" +
+            " AND CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) >= ?2 "+
+            "AND facility_id = ?1\n" +
+            "\t) clientVerification WHERE row_number = 1\n" +
+            "\tAND dateOfOutcome IS NOT NULL\n" +
+            " ) "+
             "SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,\n" +
             "           bd.*,\n" +
             "CONCAT(bd.datimId, '_', bd.personUuid) AS ndrPatientIdentifier, " +
@@ -1306,6 +1319,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           tbS.*,\n" +
             "           tbl.*,\n" +
             "           crypt.*, \n" +
+            "           cvl.*, " +
             "           ct.cause_of_death AS causeOfDeath,\n" +
             "           ct.va_cause_of_death AS vaCauseOfDeath,\n" +
             "           (\n" +
@@ -1545,7 +1559,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        LEFT JOIN crytococal_antigen crypt on crypt.personuuid12= bd.personUuid" +
             "        LEFT JOIN  tbstatus tbS on tbS.personUuid133 = bd.personUuid" +
             "        LEFT JOIN  tblam tbl  on tbl.personuuidtblam = bd.personUuid" +
-            "       LEFT JOIN case_manager cm on cm.caseperson= bd.personUuid"
+            "       LEFT JOIN case_manager cm on cm.caseperson= bd.personUuid" +
+            "       LEFT JOIN client_verification cvl on cvl.person_uuid = bd.personUuid "
             , nativeQuery = true)
     List<RADETDTOProjection> getRadetData(Long facilityId, LocalDate start, LocalDate end,
                                           LocalDate previous, LocalDate previousPrevious, LocalDate dateOfStartOfCurrentQuarter);
