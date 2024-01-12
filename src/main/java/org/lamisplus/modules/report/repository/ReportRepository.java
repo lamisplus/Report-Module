@@ -49,8 +49,10 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " hc.num_children AS numberOfChildren,      " +
             " hc.num_wives AS numberOfWives,      " +
             " (CASE WHEN hc.index_client IS true THEN 'Yes' ELSE 'No' END) indexClient,      " +
-            " (CASE WHEN hc.prep_offered IS true THEN 'Yes' ELSE 'No' END)  AS prepOffered,      " +
-            " (CASE WHEN hc.prep_accepted IS true THEN 'Yes' ELSE 'No' END) AS prepAccepted,      " +
+            " (CASE WHEN hc.hiv_test_result = 'Positive' THEN 'No' " +
+            "  WHEN hc.prep_offered IS true THEN 'Yes' ELSE 'No' END)  AS prepOffered,      " +
+            " (CASE WHEN hc.hiv_test_result = 'Positive' THEN 'No' " +
+            "WHEN hc.prep_accepted IS true THEN 'Yes' ELSE 'No' END) AS prepAccepted,      " +
             " (CASE WHEN hc.previously_tested IS true THEN 'Yes' ELSE 'No' END) AS previouslyTested,       " +
             " tg.display AS targetGroup,      " +
             " rf.display AS referredFrom,      " +
