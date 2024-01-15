@@ -137,7 +137,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
 
     @Query(value = "SELECT DISTINCT ON (p.uuid)p.uuid AS PersonUuid, p.id, p.uuid,p.hospital_number as hospitalNumber,       \n" +
-            "                                    INITCAP(p.surname) AS surname, INITCAP(p.first_name) as firstName, he.date_started AS hivEnrollmentDate,    \n" +
+            "                                    INITCAP(p.surname) AS surname, INITCAP(p.first_name) as firstName, " +
+//            "                                    he.date_started AS hivEnrollmentDate, " +
+            "                                    CASE WHEN eli_hiv_result ILIKE '%NEG%' THEN NULL ELSE he.date_started END AS hivEnrollmentDate,  \n" +
             "                                    EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) as age,      \n" +
             "                                    p.other_name as otherName, p.sex as sex, p.date_of_birth as dateOfBirth,       \n" +
             "                                    p.date_of_registration as dateOfRegistration, p.marital_status->>'display' as maritalStatus,       \n" +
@@ -730,22 +732,22 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "biometric AS (\n" +
             "            SELECT \n" +
             "              DISTINCT ON (he.person_uuid) he.person_uuid AS person_uuid60, \n" +
-            "               CASE WHEN biometric_count.count > 5 THEN biometric_count.enrollment_date\n" +
-            "               ELSE NULL\n" +
-            "               END AS dateBiometricsEnrolled,\n" +
-            "           CASE WHEN biometric_count.count > 5 THEN biometric_count.count\n" +
-            "           ELSE NULL\n" +
-            "           END AS numberOfFingersCaptured,\n" +
-            "           CASE WHEN recapture_count.count > 5 THEN recapture_count.recapture_date\n" +
-            "           ELSE NULL\n" +
-            "           END AS dateBiometricsRecaptured,\n" +
-            "           CASE WHEN recapture_count.count > 5 THEN recapture_count.count\n" +
-            "           ELSE NULL\n" +
-            "           END AS numberOfFingersRecaptured,\n" +
-//            "              biometric_count.enrollment_date AS dateBiometricsEnrolled, \n" +
-//            "              biometric_count.count AS numberOfFingersCaptured,\n" +
-//            "              recapture_count.recapture_date AS dateBiometricsRecaptured,\n" +
-//            "              recapture_count.count AS numberOfFingersRecaptured,\n" +
+//            "               CASE WHEN biometric_count.count > 5 THEN biometric_count.enrollment_date\n" +
+//            "               ELSE NULL\n" +
+//            "               END AS dateBiometricsEnrolled,\n" +
+//            "           CASE WHEN biometric_count.count > 5 THEN biometric_count.count\n" +
+//            "           ELSE NULL\n" +
+//            "           END AS numberOfFingersCaptured,\n" +
+//            "           CASE WHEN recapture_count.count > 5 THEN recapture_count.recapture_date\n" +
+//            "           ELSE NULL\n" +
+//            "           END AS dateBiometricsRecaptured,\n" +
+//            "           CASE WHEN recapture_count.count > 5 THEN recapture_count.count\n" +
+//            "           ELSE NULL\n" +
+//            "           END AS numberOfFingersRecaptured,\n" +
+            "              biometric_count.enrollment_date AS dateBiometricsEnrolled, \n" +
+            "              biometric_count.count AS numberOfFingersCaptured,\n" +
+            "              recapture_count.recapture_date AS dateBiometricsRecaptured,\n" +
+            "              recapture_count.count AS numberOfFingersRecaptured,\n" +
             "              bst.biometric_status AS biometricStatus, \n" +
             "              bst.status_date\n" +
             "            FROM \n" +
