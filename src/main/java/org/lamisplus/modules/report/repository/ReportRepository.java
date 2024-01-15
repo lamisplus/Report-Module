@@ -1890,7 +1890,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "h.data->>'returnedToCare' AS returnedToCare, " +
             "h.data->>'dateOfDiscontinuation' AS dateOfDiscontinuation, " +
             "CASE WHEN pt.reason_for_discountinuation IS NULL THEN '' ELSE pt.reason_for_discountinuation END  AS reasonForDiscontinuation, " +
-            "string_agg(CAST (any_element.value AS text), ', ') AS anyOfTheFollowing " +
+            "COALESCE(string_agg(CAST(any_element.value AS text), ', '), '') AS anyOfTheFollowing " +
+//            "string_agg(CAST (any_element.value AS text), ', ') AS anyOfTheFollowing " +
             "FROM hiv_observation h " +
             "JOIN base_organisation_unit u ON h.facility_id = u.id " +
             "CROSS JOIN jsonb_array_elements(h.data->'attempt') as obj " +
