@@ -141,6 +141,7 @@ public class Constants {
 					"Date of Viral Load Eligibility Status",
 					"Current ART Status",
 					"Date of Current ART Status",
+					"Biometric Status",
 					"Cause of Death",
 					"VA Cause of Death",
 					"Previous ART Status",
@@ -185,8 +186,11 @@ public class Constants {
 					"Date of Last Cryptococcal Antigen (yyyy-mm-dd)",
 					"Date Biometrics Enrolled (yyyy-mm-dd)",
 					"Number of Fingers Captured",
+					"Date Biometrics Recapture (yyyy-mm-dd)",
+					"Number of Fingers Recaptured",
 					"Valid Biometrics(Hexadecimal/Base64 Unique Identifier)",
 					"Case Manager"
+
 			);
 
 

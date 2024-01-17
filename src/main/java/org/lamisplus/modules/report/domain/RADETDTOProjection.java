@@ -68,7 +68,7 @@ public interface RADETDTOProjection {
 
 	LocalDate getLastPickupDate();
 
-	LocalDate getNextPickupDate();
+	//LocalDate getNextPickupDate();
 
 	// art status
 
@@ -84,9 +84,10 @@ public interface RADETDTOProjection {
 
 	//Biometric status
 	LocalDate getDateBiometricsEnrolled();
-
 	Integer getNumberOfFingersCaptured();
-
+	LocalDate getDateBiometricsRecaptured();
+	Integer getNumberOfFingersRecaptured();
+	String getBiometricStatus();
 	//eac
 	LocalDate getDateOfCommencementOfEAC();
 	Integer getNumberOfEACSessionCompleted();
@@ -96,6 +97,7 @@ public interface RADETDTOProjection {
 	LocalDateTime getDateOfRepeatViralLoadEACSampleCollection();
 	String getRepeatViralLoadResult();
 	String getTbStatus();
+	String getTbStatusOutCome();
 	LocalDate getDateOfTbScreened();
 	LocalDate getDateOfCurrentRegimen();
 	LocalDate getDateOfIptStart();
