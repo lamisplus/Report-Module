@@ -10,6 +10,7 @@ import org.audit4j.core.util.Log;
 import org.lamisplus.modules.hiv.domain.dto.*;
 import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
+import org.lamisplus.modules.report.repository.ReportRepository;
 import org.springframework.stereotype.Component;
 
 
@@ -24,6 +25,7 @@ import java.util.*;
 @Slf4j
 public class GenerateExcelDataHelper {
 	List<Object> errorObjects = new ArrayList<Object>();
+	private final ReportRepository reportRepository;
 
 	public static List<Map<Integer, Object>> fillPatientLineListDataMapper(@NonNull List<PatientLineDto> listFinalResult) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
@@ -247,8 +249,9 @@ public class GenerateExcelDataHelper {
 
 				//DSD MOdel
 				map.put(index++, radetReportDto.getDsdModel());
-				if (radetReportDto.getDsdModel() != null) {
-					map.put(index++, radetReportDto.getDateOfCurrentRegimen());
+				if (radetReportDto.getDsdModel() != null && !radetReportDto.getDsdModel().isEmpty()) {
+					LocalDate dsdStarteDate = reportRepository.getDSDStarteDate(radetReportDto.getPersonUuid());
+					map.put(index++, dsdStarteDate);
 				} else {
 					map.put(index++, null);
 				}

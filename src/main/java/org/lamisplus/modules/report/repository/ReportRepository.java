@@ -1903,4 +1903,10 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "h.data->>'discontinuation', h.data->>'returnedToCare', " +
             "h.data->>'dateOfDiscontinuation', pt.reason_for_discountinuation", nativeQuery = true)
     List<ClientServiceDto> generateClientServiceList(Long facilityId);
+
+
+   @Query(value = "SELECT  MIN(visit_date) AS min_visit_date FROM hiv_art_pharmacy WHERE dsd_model IS NOT NULL " +
+           "    AND dsd_model != ''\n" +
+           "    AND person_uuid = ?1", nativeQuery = true)
+   LocalDate getDSDStarteDate(String patientId);
 }
