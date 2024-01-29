@@ -521,7 +521,11 @@ public class GenerateExcelDataHelper {
 	}
 
 	private static String getStringValue(String value) {
-		return value.replace("null", "");
+		if(value != null) {
+			return value.replace("null", "");
+		}else {
+			return "";
+		}
 	}
 
 	public static List<Map<Integer, Object>> fillClinicDataMapper(
