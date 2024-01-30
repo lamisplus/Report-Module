@@ -1909,4 +1909,20 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
            "    AND dsd_model != ''\n" +
            "    AND person_uuid = ?1", nativeQuery = true)
    LocalDate getDSDStarteDate(String patientId);
+
+   @Query(value = "select\n" +
+           "COALESCE(ds_model.display, dsd_model_type)\n" +
+           "from hiv_art_pharmacy p\n" +
+           "  left JOIN base_application_codeset ds_model on ds_model.code = p.dsd_model_type \n" +
+           "  where\n" +
+           "dsd_model is not null \n" +
+           "and dsd_model_type is not null\n" +
+           "and dsd_model_type != ''\n" +
+           "and dsd_model != ''\n" +
+           "and person_uuid = ?1 \n" +
+           "order by visit_date desc \n" +
+           "limit 1", nativeQuery = true)
+   String getDSDModel(String patientId);
+
+
 }

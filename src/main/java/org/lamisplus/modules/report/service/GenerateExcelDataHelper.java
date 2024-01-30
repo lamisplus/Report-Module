@@ -248,10 +248,13 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getDateOfRepeatViralLoadResult());
 
 				//DSD MOdel
-				map.put(index++, radetReportDto.getDsdModel());
-				if (radetReportDto.getDsdModel() != null && !radetReportDto.getDsdModel().isEmpty()) {
-					LocalDate dsdStarteDate = reportRepository.getDSDStarteDate(radetReportDto.getPersonUuid());
-					map.put(index++, dsdStarteDate);
+				String dsdModel = reportRepository.getDSDModel(radetReportDto.getPersonUuid());
+				map.put(index++, dsdModel);
+				if (dsdModel != null ) {
+					LocalDate dsdStartDate = reportRepository.getDSDStarteDate(radetReportDto.getPersonUuid());
+					if(dsdStartDate != null) {
+						map.put(index++, dsdStartDate);
+					}
 				} else {
 					map.put(index++, null);
 				}
