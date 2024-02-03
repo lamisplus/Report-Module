@@ -80,6 +80,8 @@ public interface RADETDTOProjection {
 
 	String getPreviousStatus();
 
+	String getClientVerificationStatus();
+
 
 
 	//Biometric status

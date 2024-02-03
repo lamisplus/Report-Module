@@ -200,6 +200,7 @@ public class GenerateExcelDataHelper {
 				//current status
 				map.put(index++, currentStatus);
 				map.put(index++, radetReportDto.getCurrentStatusDate());
+				map.put(index++, radetReportDto.getClientVerificationStatus());
 				map.put(index++, radetReportDto.getBiometricStatus());
 
 				map.put(index++, radetReportDto.getCauseOfDeath());
