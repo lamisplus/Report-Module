@@ -640,12 +640,11 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(clientService.getSerialEnrollmentNo()));
 				map.put(index++, getStringValue(clientService.getPersonUuid()));
 				map.put(index++, getStringValue(String.valueOf(clientService.getDateOfObservation())));
-				map.put(index++, getStringValue(clientService.getAnyOfTheFollowing()));
+				map.put(index++, getStringValue(clientService.getAnyOfTheFollowingList()));
 				map.put(index++, getStringValue(clientService.getDateOfAttempt()));
 				map.put(index++, getStringValue(clientService.getVerificationAttempts()));
 				map.put(index++, getStringValue(clientService.getVerificationStatus()));
 				map.put(index++, getStringValue(clientService.getDsdModel()));
-				map.put(index++, getStringValue(clientService.getOutcome()));
 				map.put(index++, getStringValue(clientService.getComment()));
 				map.put(index++, getStringValue(clientService.getReturnedToCare()));
 				map.put(index++, getStringValue(clientService.getReferredTo()));

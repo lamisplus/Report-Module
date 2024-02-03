@@ -7,12 +7,11 @@ public interface ClientServiceDto {
     String getSerialEnrollmentNo();
     String getPersonUuid();
     String getDateOfObservation();
-    String getAnyOfTheFollowing();
+    String getAnyOfTheFollowingList();
     String getDateOfAttempt();
     String getVerificationAttempts();
     String getVerificationStatus();
     String getDsdModel();
-    String getOutcome();
     String getComment();
     String getReturnedToCare();
     String getReferredTo();
