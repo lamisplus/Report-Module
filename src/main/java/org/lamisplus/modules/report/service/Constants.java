@@ -398,6 +398,7 @@ public class Constants {
 					"Date Of Attempt",
 					"Verification Attempts",
 					"Verification Status",
+					"Outcome",
 					"DSD Model",
 					"Comment",
 					"Date Returned To Care",

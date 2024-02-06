@@ -1882,6 +1882,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "obj.value->>'dateOfAttempt' AS dateOfAttempt, " +
             "obj.value->>'verificationAttempts' AS verificationAttempts, " +
             "obj.value->>'verificationStatus' AS verificationStatus, " +
+            "obj.value->>'outcome' AS outcome, " +
             "CASE WHEN pt.dsd_model IS NULL THEN '' ELSE pt.dsd_model END  AS dsdModel, " +
             "obj.value->>'comment' AS comment, " +
             "h.data->>'returnedToCare' AS returnedToCare, " +

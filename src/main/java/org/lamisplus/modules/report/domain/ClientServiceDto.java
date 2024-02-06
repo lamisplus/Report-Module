@@ -11,6 +11,7 @@ public interface ClientServiceDto {
     String getDateOfAttempt();
     String getVerificationAttempts();
     String getVerificationStatus();
+    String getOutcome();
     String getDsdModel();
     String getComment();
     String getReturnedToCare();
