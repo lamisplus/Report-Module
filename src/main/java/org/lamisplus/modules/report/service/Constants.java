@@ -254,6 +254,7 @@ public class Constants {
 			Arrays.asList(
 					"S/No",
 					"Facility Id (Datim)",
+
 					"Facility",
 					"Client Code",
 					"First Name",
@@ -295,6 +296,7 @@ public class Constants {
 					"Viral Load Sample Collection Date",
 					"Viral Load Result Classification",
 					"Viral Load Confirmation Result",
+					"Viral Load Result Received Date (yyyy-mm-dd)",
 					"Viral Load Confirmation Date (yyyy-mm-dd)",
 					"Final Recency Result",
 					"Assessment Code",
