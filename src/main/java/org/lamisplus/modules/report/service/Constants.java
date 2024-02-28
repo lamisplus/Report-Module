@@ -145,15 +145,16 @@ public class Constants {
 					"Current ART Status",
 					"Date of Current ART Status",
 					"Client Verification Status",
-					"Biometric Status",
+					// "Biometric Status",
 					"Cause of Death",
 					"VA Cause of Death",
 					"Previous ART Status",
 					"Confirmed Date of Previous ART Status",
 					"ART Enrollment Setting",
 					"Date of TB Screening (yyyy-mm-dd)",
-					"TB status at Last Visit",
-					"TB Screening Outcome",
+					"TB Screening Type",
+					"TB status",
+					// "TB Screening Outcome",
 					"Date of TB Sample Collection (yyyy-mm-dd)",
 					"TB Diagnostic Test Type",
 					"Date of TB Diagnostic Result Received (yyyy-mm-dd)",
@@ -162,8 +163,8 @@ public class Constants {
 					"TB Treatment Type (new, relapsed etc)",
 					"Date of Completion of TB Treatment (yyyy-mm-dd)",
 					"TB Treatment Outcome",
-					"Date of TB-LAM",
-					"TB-LAM result",
+					// "Date of TB-LAM",
+					// "TB-LAM result",
 					"Date of TPT Start (yyyy-mm-dd)",
 					"TPT Type",
 					"TPT Completion date (yyyy-mm-dd)",
@@ -186,13 +187,13 @@ public class Constants {
 					"Result of Cervical Cancer Screening",
 					"Date of Precancerous Lesions Treatment (yyyy-mm-dd)",
 					"Precancerous Lesions Treatment Methods",
-					"Last Cryptococcal Antigen",
-					"Date of Last Cryptococcal Antigen (yyyy-mm-dd)",
+					// "Last Cryptococcal Antigen",
+					// "Date of Last Cryptococcal Antigen (yyyy-mm-dd)",
 					"Date Biometrics Enrolled (yyyy-mm-dd)",
 					"Number of Fingers Captured",
 					"Date Biometrics Recapture (yyyy-mm-dd)",
 					"Number of Fingers Recaptured",
-					"Valid Biometrics(Hexadecimal/Base64 Unique Identifier)",
+					// "Valid Biometrics(Hexadecimal/Base64 Unique Identifier)",
 					"Case Manager"
 
 			);
@@ -231,7 +232,8 @@ public class Constants {
 					"Phone Number",
 					"Enrollment Date (yyyy-mm-dd)",
 					"Number of Fingers Captured",
-					"Fingers Valid"
+					"Fingers Valid",
+					"Biometric Status"
 			);
 	
 	public static final List<String> LAB_HEADER =

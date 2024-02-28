@@ -381,39 +381,46 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "       AND date_sample_collected IS NOT null\n" +
             "       AND date_sample_collected <= ?3\n" +
             " )as sample\n" +
-            "         WHERE sample.rnkk = 1\n" +
-            "           AND (sample.archived is null OR sample.archived = 0)\n" +
-            "           AND sample.facility_id = ?1 ),\n" +
-            "tbstatus as (\n" +
-            "  select \n" +
-            "    personUuid133, \n" +
-            "    dateOfTbScreened, \n" +
-            "    tbStatus,\n" +
-            "    tbStatusOutcome \n" +
-            "  from \n" +
-            "    (\n" +
-            "     SELECT \n" +
-            "\t\tDISTINCT ON (hac.person_uuid) hac.person_uuid AS personUuid133,\n" +
-            "\t\tho.date_of_observation AS dateOfTbScreened,\n" +
-            "\t\tho.data->'tbIptScreening'->>'status' AS tbStatus, \n" +
-            "\t\tho.data->'tbIptScreening'->>'outcome' AS tbStatusOutcome,\n" +
-            "\t\tROW_NUMBER() OVER (\n" +
-            "\t\t  PARTITION BY hac.person_uuid\n" +
-            "\t\t  ORDER BY ho.date_of_observation DESC\n" +
-            "\t\t) AS rowNums\n" +
-            "\tFROM\n" +
-            "\t\thiv_art_clinical hac\n" +
-            "\t\tLEFT JOIN hiv_observation ho ON ho.person_uuid = hac.person_uuid\n" +
-            "\tWHERE\n" +
-            "ho.type = 'Chronic Care'\n" +
-            " and ho.data is not null \n" +
-            "        and hac.archived = 0 \n" +
-            "        and ho.date_of_observation between ?2\n" +
-            "        and ?3 \n" +
-            "        and hac.facility_id = ?1\n" +
-            "    ) dt \n" +
-            "  where \n" +
-            "    dt.rowNums = 1\n" +
+            "         WHERE sample.rnkk = 1 " +
+            "           AND (sample.archived is null OR sample.archived = 0) " +
+            "           AND sample.facility_id = ?1 ), " +
+            "tbstatus as ( " +
+            "    with tbscreening_cs as ( " +
+            "        with cs as ( " +
+            "            SELECT id, person_uuid, date_of_observation AS dateOfTbScreened, data->'tbIptScreening'->>'status' AS tbStatus, " +
+            "                data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, " +
+            "                ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS rowNums " +
+            "        FROM hiv_observation " +
+            "        WHERE type = 'Chronic Care' and data is not null and archived = 0 " +
+            "            and date_of_observation between ?2 and ?3 " +
+            "            and facility_id = ?1 " +
+            "        ) " +
+            "        select * from cs where rowNums = 1 " +
+            "    ), " +
+            "    tbscreening_hac as ( " +
+            "        with h as (" +
+            "            select h.id, h.person_uuid, h.visit_date, cast(h.tb_screen->>'tbStatusId' as bigint) as tb_status_id, " +
+            "               b.display as h_status, " +
+            "               ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY visit_date DESC) AS rowNums " +
+            "            from hiv_art_clinical h " +
+            "            join base_application_codeset b on b.id = cast(h.tb_screen->>'tbStatusId' as bigint) " +
+            "            where h.archived = 0 and h.visit_date between ?2 and ?3 and facility_id = ?1 " +
+            "        ) " +
+            "        select *from h where rowNums = 1 " +
+            "    ) " +
+            "    select " +
+            "         tcs.person_uuid, " +
+            "         case " +
+            "             when tcs.tbStatus is not null then tcs.tbStatus " +
+            "             when tcs.tbStatus is null and th.h_status is not null then th.h_status " +
+            "         end as tbStatus, " +
+            "         case " +
+            "             when tcs.tbStatus is not null then tcs.dateOfTbScreened " +
+            "             when tcs.tbStatus is null and th.h_status is not null then th.visit_date " +
+            "         end as dateOfTbScreened, " +
+            "        tcs.tbScreeningType " +
+            "        from tbscreening_cs tcs " +
+            "             left join tbscreening_hac th on th.person_uuid = tcs.person_uuid " +
             ")," +
             "tblam AS (\n" +
             "  SELECT \n" +
@@ -540,7 +547,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     person_uuid as tbTreatmentPersonUuid,\n" +
             "     ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY date_of_observation DESC)\n" +
             " FROM public.hiv_observation WHERE type = 'Chronic Care'\n" +
-            "       AND facility_id = ?1\n" +
+            "       AND facility_id = ?1 and archived = 0\n" +
             ") tbTreatment WHERE row_number = 1\n" +
             "    AND tbTreatmentStartDate IS NOT NULL),\n" +
             "\n" +
@@ -1128,7 +1135,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "      AND MAX.rnkkk3 = 1" +
             "     WHERE\n" +
             " hp.archived = 0\n" +
-            "       AND hp.visit_date <=  ?4\n" +
+            "       AND hp.visit_date <= ?4\n" +
             " ) pharmacy\n" +
             "\n" +
             "     LEFT JOIN (\n" +
@@ -1559,7 +1566,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        LEFT JOIN  tbTreatment tbTment ON tbTment.tbTreatmentPersonUuid = bd.personUuid\n" +
             "        LEFT JOIN  current_tb_result tbResult ON tbResult.personTbResult = bd.personUuid\n" +
             "        LEFT JOIN crytococal_antigen crypt on crypt.personuuid12= bd.personUuid" +
-            "        LEFT JOIN  tbstatus tbS on tbS.personUuid133 = bd.personUuid" +
+            "        LEFT JOIN  tbstatus tbS on tbS.person_uuid = bd.personUuid" +
             "        LEFT JOIN  tblam tbl  on tbl.personuuidtblam = bd.personUuid" +
             "       LEFT JOIN case_manager cm on cm.caseperson= bd.personUuid" +
             "       LEFT JOIN client_verification cvl on cvl.person_uuid = bd.personUuid "

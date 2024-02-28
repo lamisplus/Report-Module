@@ -137,7 +137,7 @@ public interface RADETDTOProjection {
 	LocalDate getTbTreatmentStartDate();
 	LocalDate getTbCompletionDate();
 	String getIptCompletionStatus();
-
+	String getTbScreeningType();
 	//Crytococal Antigen
 	Date getDateOfLastCrytococalAntigen();
 	String getLastCrytococalAntigen();
