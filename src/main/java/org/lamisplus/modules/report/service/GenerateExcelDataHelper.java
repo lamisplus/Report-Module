@@ -341,6 +341,9 @@ public class GenerateExcelDataHelper {
 
 					map.put(index++, String.valueOf(sn));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getDatimCode())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getDatimCode())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getDatimCode())));
+
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFacility())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getClientCode())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFirstName())));
@@ -383,6 +386,7 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getViralLoadConfirmationResult())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getViralLoadResult())));
 					map.put(index++, htsReportDto.getViralLoadConfirmationDate());
+					map.put(index++, htsReportDto.getViralLoadReceivedResultDate());
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getAssessmentCode())));
 
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getSyphilisTestResult())));

@@ -65,4 +65,6 @@ public  interface HtsReportDto {
       String getHtsLongitude();
       String getNumberOfCondomsGiven();
       String getNumberOfLubricantsGiven();
+       LocalDate getViralLoadReceivedResultDate();
+
 }
