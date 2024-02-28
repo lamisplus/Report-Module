@@ -368,7 +368,7 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getModality())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getCounselingType())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPregnancyStatus())));
-					map.put(index++, getStringValue(String.valueOf(htsReportDto.getBreastFeeding())));
+//					map.put(index++, getStringValue(String.valueOf(htsReportDto.getBreastFeeding())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getIndexType())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getHivTestResult())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFinalHivTestResult())));

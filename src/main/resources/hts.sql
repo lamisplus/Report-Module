@@ -47,11 +47,11 @@ SELECT hc.client_code AS clientCode,
 --modifiied
     it.display AS indexType,
 --hc.breast_feeding AS breastFeeding,
-    (CASE
-    WHEN preg.display='Breastfeeding' THEN 'Yes'
-    WHEN preg.display IS NULL THEN NULL
-    ELSE 'No'
-    END) AS breastFeeding,
+--     (CASE
+--     WHEN preg.display='Breastfeeding' THEN 'Yes'
+--     WHEN preg.display IS NULL THEN NULL
+--     ELSE 'No'
+--     END) AS breastFeeding,
 --relation.display AS indexType,
     (CASE WHEN hc.recency->>'optOutRTRI' ILIKE 'true' THEN 'Yes'
     WHEN hc.recency->>'optOutRTRI' ILIKE 'false' THEN 'No'
