@@ -266,1303 +266,1201 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<PrepReportDto> getPrepReport(Long facilityId, LocalDate start, LocalDate end);
 
     @Query(value = "WITH bio_data AS (SELECT DISTINCT (p.uuid) AS personUuid,p.hospital_number AS hospitalNumber, h.unique_id as uniqueId,\n" +
-            "EXTRACT(YEAR FROM  AGE(NOW(), date_of_birth)) AS age,\n" +
-            "INITCAP(p.sex) AS gender,\n" +
-            "p.date_of_birth AS dateOfBirth,\n" +
-            "facility.name AS facilityName,\n" +
-            "facility_lga.name AS lga,\n" +
-            "facility_state.name AS state,\n" +
-            "boui.code AS datimId,\n" +
-            "tgroup.display AS targetGroup,\n" +
-            "eSetting.display AS enrollmentSetting,\n" +
-            "hac.visit_date AS artStartDate,\n" +
-            "hr.description AS regimenAtStart,\n" +
-            "p.date_of_registration as dateOfRegistration," +
-            "h.date_of_registration as dateOfEnrollment," +
-            "h.ovc_number AS ovcUniqueId,\n" +
-            "h.house_hold_number AS householdUniqueNo,\n" +
-            "ecareEntry.display AS careEntry,\n" +
-            "hrt.description AS regimenLineAtStart\n" +
-            "FROM patient_person p\n" +
-            "INNER JOIN base_organisation_unit facility ON facility.id = facility_id\n" +
-            "INNER JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id\n" +
-            "INNER JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id\n" +
-            "INNER JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id = facility_id AND boui.name='DATIM_ID'\n" +
-            "INNER JOIN hiv_enrollment h ON h.person_uuid = p.uuid\n" +
-            "LEFT JOIN base_application_codeset tgroup ON tgroup.id = h.target_group_id\n" +
-            "LEFT JOIN base_application_codeset eSetting ON eSetting.id = h.enrollment_setting_id\n" +
-            "LEFT JOIN base_application_codeset ecareEntry ON ecareEntry.id = h.entry_point_id\n" +
-            "INNER JOIN hiv_art_clinical hac ON hac.hiv_enrollment_uuid = h.uuid\n" +
-            "AND hac.archived = 0\n" +
-            "INNER JOIN hiv_regimen hr ON hr.id = hac.regimen_id\n" +
-            "INNER JOIN hiv_regimen_type hrt ON hrt.id = hac.regimen_type_id\n" +
-            "WHERE\n" +
-            "h.archived = 0\n" +
-            "AND p.archived = 0\n"+
-            "AND h.facility_id = ?1\n" +
-            "AND hac.is_commencement = TRUE\n" +
-            "AND hac.visit_date >= ?2\n" +
-            "AND hac.visit_date < ?3\n" +
-            "),\n" +
-            "\n" +
-            "patient_lga as (select DISTINCT ON (personUuid) personUuid as personUuid11, \n" +
-            "case when (addr ~ '^[0-9\\.]+$') =TRUE \n" +
-            " then (select name from base_organisation_unit where id = cast(addr as int)) ELSE\n" +
-            "(select name from base_organisation_unit where id = cast(facilityLga as int)) end as lgaOfResidence " +
-//            "then (select name from base_organisation_unit where id = cast(addr as int)) end as lgaOfResidence \n" +
-            "from (\n" +
-            " select pp.uuid AS personUuid, facility_lga.parent_organisation_unit_id AS facilityLga, (jsonb_array_elements(pp.address->'address')->>'district') as addr from patient_person pp\n" +
-            "LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = CAST (pp.organization->'id' AS INTEGER) " +
-//            "select uuid AS personUuid, (jsonb_array_elements(address->'address')->>'district') as addr from patient_person \n" +
-            ") dt),"+
-            "\n" +
-            "current_clinical AS (SELECT DISTINCT ON (tvs.person_uuid) tvs.person_uuid AS person_uuid10,\n" +
-            "       body_weight AS currentWeight,\n" +
-            "       tbs.display AS tbStatus1,\n" +
-            "       bac.display AS currentClinicalStage,\n" +
-            "       (CASE \n" +
-            "    \tWHEN INITCAP(pp.sex) = 'Male' THEN NULL\n" +
-            "    \tWHEN preg.display IS NOT NULL THEN preg.display\n" +
-            "    \tELSE hac.pregnancy_status\n" +
-            "\t\t   END ) AS pregnancyStatus, " +
-//            "       (CASE\n" +
-//            "WHEN preg.display IS NOT NULL THEN preg.display\n" +
-//            "ELSE hac.pregnancy_status  END ) AS pregnancyStatus,\n" +
-            "       CASE\n" +
-            "           WHEN hac.tb_screen IS NOT NULL THEN hac.visit_date\n" +
-            "           ELSE NULL\n" +
-            "           END AS dateOfTbScreened1\n" +
-            "         FROM\n" +
-            " triage_vital_sign tvs\n" +
-            "     INNER JOIN (\n" +
-            "     SELECT\n" +
-            "         person_uuid,\n" +
-            "         MAX(capture_date) AS MAXDATE\n" +
-            "     FROM\n" +
-            "         triage_vital_sign\n" +
-            "     GROUP BY\n" +
-            "         person_uuid\n" +
-            "     ORDER BY\n" +
-            "         MAXDATE ASC\n" +
-            " ) AS current_triage ON current_triage.MAXDATE = tvs.capture_date\n" +
-            "     AND current_triage.person_uuid = tvs.person_uuid\n" +
-            "     INNER JOIN hiv_art_clinical hac ON tvs.uuid = hac.vital_sign_uuid\n" +
-            "       LEFT JOIN patient_person pp ON tvs.person_uuid = pp.uuid" +
-            "     INNER JOIN (\n" +
-            "     SELECT\n" +
-            "         person_uuid,\n" +
-            "         MAX(hac.visit_date) AS MAXDATE\n" +
-            "     FROM\n" +
-            "         hiv_art_clinical hac\n" +
-            "     GROUP BY\n" +
-            "         person_uuid\n" +
-            "     ORDER BY\n" +
-            "         MAXDATE ASC\n" +
-            " ) AS current_clinical_date ON current_clinical_date.MAXDATE = hac.visit_date\n" +
-            "     AND current_clinical_date.person_uuid = hac.person_uuid\n" +
-            "     INNER JOIN hiv_enrollment he ON he.person_uuid = hac.person_uuid\n" +
-            "     LEFT JOIN base_application_codeset bac ON bac.id = hac.clinical_stage_id\n" +
-            "     LEFT JOIN base_application_codeset preg ON preg.code = hac.pregnancy_status\n" +
-            "     LEFT JOIN base_application_codeset tbs ON tbs.id = CAST(hac.tb_status AS INTEGER)\n" +
-            "         WHERE\n" +
-            "           hac.archived = 0\n" +
-            "           AND he.archived = 0\n" +
-            "           AND hac.visit_date < ?3 \n" +
-            "           AND he.facility_id = ?1\n" +
-            "     ),\n" +
-            "\n" +
-            "     sample_collection_date AS (\n" +
-            "         SELECT CAST(sample.date_sample_collected AS DATE ) as dateOfViralLoadSampleCollection, patient_uuid as person_uuid120  FROM (\n" +
-            "     SELECT lt.viral_load_indication, sm.facility_id,sm.date_sample_collected, sm.patient_uuid, sm.archived, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_sample_collected DESC) as rnkk\n" +
-            "     FROM public.laboratory_sample  sm\n" +
-            "  INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
-            "     WHERE lt.lab_test_id=16\n" +
-            "       AND  lt.viral_load_indication !=719\n" +
-            "       AND date_sample_collected IS NOT null\n" +
-            "       AND date_sample_collected <= ?3\n" +
-            " )as sample\n" +
-            "         WHERE sample.rnkk = 1\n" +
-            "           AND (sample.archived is null OR sample.archived = 0)\n" +
-            "           AND sample.facility_id = ?1 ),\n" +
-            "tbstatus as (\n" +
-            "  select \n" +
-            "    personUuid133, \n" +
-            "    dateOfTbScreened, \n" +
-            "    tbStatus,\n" +
-            "    tbStatusOutcome \n" +
-            "  from \n" +
-            "    (\n" +
-            "     SELECT \n" +
-            "\t\tDISTINCT ON (hac.person_uuid) hac.person_uuid AS personUuid133,\n" +
-            "\t\tho.date_of_observation AS dateOfTbScreened,\n" +
-            "\t\tho.data->'tbIptScreening'->>'status' AS tbStatus, \n" +
-            "\t\tho.data->'tbIptScreening'->>'outcome' AS tbStatusOutcome,\n" +
-            "\t\tROW_NUMBER() OVER (\n" +
-            "\t\t  PARTITION BY hac.person_uuid\n" +
-            "\t\t  ORDER BY ho.date_of_observation DESC\n" +
-            "\t\t) AS rowNums\n" +
-            "\tFROM\n" +
-            "\t\thiv_art_clinical hac\n" +
-            "\t\tLEFT JOIN hiv_observation ho ON ho.person_uuid = hac.person_uuid\n" +
-            "\tWHERE\n" +
-            "ho.type = 'Chronic Care'\n" +
-            " and ho.data is not null \n" +
-            "        and hac.archived = 0 \n" +
-            "        and ho.date_of_observation between ?2\n" +
-            "        and ?3 \n" +
-            "        and hac.facility_id = ?1\n" +
-            "    ) dt \n" +
-            "  where \n" +
-            "    dt.rowNums = 1\n" +
-            ")," +
-            "tblam AS (\n" +
-            "  SELECT \n" +
-            "    * \n" +
-            "  FROM \n" +
-            "    (\n" +
-            "      SELECT \n" +
-            "        CAST(lr.date_result_reported AS DATE) AS dateOfLastTbLam, \n" +
-            "        lr.patient_uuid as personuuidtblam, \n" +
-            "        lr.result_reported as tbLamResult, \n" +
-            "        ROW_NUMBER () OVER (\n" +
-            "          PARTITION BY lr.patient_uuid \n" +
-            "          ORDER BY \n" +
-            "            lr.date_result_reported DESC\n" +
-            "        ) as rank2333 \n" +
-            "      FROM \n" +
-            "        laboratory_result lr \n" +
-            "        INNER JOIN public.laboratory_test lt on lr.test_id = lt.id \n" +
-            "      WHERE \n" +
-            "        lt.lab_test_id = 51 \n" +
-            "        AND lr.date_result_reported IS NOT NULL \n" +
-            "        AND lr.date_result_reported <= ?3 \n" +
-            "        AND lr.date_result_reported >= ?2 \n" +
-            "        AND lr.result_reported is NOT NULL \n" +
-            "        AND lr.archived = 0 \n" +
-            "        AND lr.facility_id = ?1\n" +
-            "    ) as tblam \n" +
-            "  WHERE \n" +
-            "    tblam.rank2333 = 1\n" +
-            ")," +
-            "current_vl_result AS (SELECT * FROM (\n" +
-            "         SELECT CAST(ls.date_sample_collected AS DATE ) AS dateOfCurrentViralLoadSample, sm.patient_uuid as person_uuid130 , sm.facility_id as vlFacility, sm.archived as vlArchived, acode.display as viralLoadIndication, sm.result_reported as currentViralLoad,CAST(sm.date_result_reported AS DATE) as dateOfCurrentViralLoad,\n" +
-            "     ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rank2\n" +
-            "         FROM public.laboratory_result  sm\n" +
-            "      INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
-            "\t  INNER JOIN public.laboratory_sample ls on ls.test_id = lt.id\n" +
-            "      INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication\n" +
-            "         WHERE lt.lab_test_id = 16\n" +
-            "           AND  lt.viral_load_indication !=719\n" +
-            "           AND sm. date_result_reported IS NOT NULL\n" +
-            "           AND sm.date_result_reported <= ?3\n" +
-            "           AND sm.result_reported is NOT NULL\n" +
-            "     )as vl_result\n" +
-            "   WHERE vl_result.rank2 = 1\n" +
-            "     AND (vl_result.vlArchived = 0 OR vl_result.vlArchived is null)\n" +
-            "     AND  vl_result.vlFacility = ?1\n" +
-            "     ), " +
-            "     careCardCD4 AS (SELECT visit_date, coalesce(cast(cd_4 as varchar), cd4_semi_quantitative) as cd_4, person_uuid AS cccd4_person_uuid\n" +
-            "         FROM public.hiv_art_clinical\n" +
-            "         WHERE is_commencement is true\n" +
-            "           AND  archived = 0\n" +
-            "           AND  cd_4 != 0\n" +
-            "           AND visit_date <= ?3\n" +
-            "           AND facility_id = ?1\n" +
-            "     ),\n" +
-            "\n" +
-            "labCD4 AS (SELECT * FROM (\n" +
-            "SELECT sm.patient_uuid AS cd4_person_uuid,  sm.result_reported as cd4Lb,sm.date_result_reported as dateOfCD4Lb, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rnk\n" +
-            "FROM public.laboratory_result  sm\n" +
-            "INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
-            "WHERE lt.lab_test_id IN (1, 50) \n" +
-            "AND sm. date_result_reported IS NOT NULL\n" +
-            "AND sm.archived = 0\n" +
-            "AND sm.facility_id = ?1\n" +
-            "AND sm.date_result_reported <= ?3\n" +
-            "      )as cd4_result\n" +
-            "    WHERE  cd4_result.rnk = 1\n" +
-            "     ),\n" +
-            "\n" +
-            "     tb_sample_collection AS (SELECT sample.created_by,CAST(sample.date_sample_collected AS DATE) as dateOfTbSampleCollection, patient_uuid as personTbSample  FROM (\n" +
-            "SELECT llt.lab_test_name,sm.created_by, lt.viral_load_indication, sm.facility_id,sm.date_sample_collected, sm.patient_uuid, sm.archived, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_sample_collected DESC) as rnkk\n" +
-            "FROM public.laboratory_sample  sm\n" +
-            "         INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
-            "         INNER JOIN  laboratory_labtest llt on llt.id = lt.lab_test_id\n" +
-            "WHERE lt.lab_test_id IN (65,51,66,64)\n" +
-            "        AND sm.archived = 0\n" +
-            "        AND sm. date_sample_collected <= ?3\n" +
-            "        AND sm.facility_id = ?1\n" +
-            "        )as sample\n" +
-            "      WHERE sample.rnkk = 1\n" +
-            "     ),\n" +
-            "\n" +
-            "     current_tb_result AS (WITH tb_test as (SELECT personTbResult, dateofTbDiagnosticResultReceived,\n" +
-            "   coalesce(\n" +
-            "           MAX(CASE WHEN lab_test_id = 65 THEN tbDiagnosticResult END) ,\n" +
-            "           MAX(CASE WHEN lab_test_id = 51 THEN tbDiagnosticResult END) ,\n" +
-            "           MAX(CASE WHEN lab_test_id = 66 THEN tbDiagnosticResult END),\n" +
-            "           MAX(CASE WHEN lab_test_id = 64 THEN tbDiagnosticResult END),\n" +
-            "           MAX(CASE WHEN lab_test_id = 67 THEN tbDiagnosticResult END),\n" +
-            "           MAX(CASE WHEN lab_test_id = 68 THEN tbDiagnosticResult END)\n" +
-            "       ) as tbDiagnosticResult ,\n" +
-            "   coalesce(\n" +
-            "           MAX(CASE WHEN lab_test_id = 65 THEN 'Gene Xpert' END) ,\n" +
-            "           MAX(CASE WHEN lab_test_id = 51 THEN 'TB-LAM' END) ,\n" +
-            "           MAX(CASE WHEN lab_test_id = 66 THEN 'Chest X-ray' END),\n" +
-            "           MAX(CASE WHEN lab_test_id = 64 THEN 'AFB microscopy' END),\n" +
-            "           MAX(CASE WHEN lab_test_id = 67 THEN 'Gene Xpert' END) ,\n" +
-            "           MAX(CASE WHEN lab_test_id = 58 THEN 'TB-LAM' END)\n" +
-            "       ) as tbDiagnosticTestType\n" +
-            "\n" +
+            "                                    EXTRACT(YEAR FROM  AGE(NOW(), date_of_birth)) AS age,\n" +
+            "                                    INITCAP(p.sex) AS gender,\n" +
+            "                                    p.date_of_birth AS dateOfBirth,\n" +
+            "                                    facility.name AS facilityName,\n" +
+            "                                    facility_lga.name AS lga,\n" +
+            "                                    facility_state.name AS state,\n" +
+            "                                    boui.code AS datimId,\n" +
+            "                                    tgroup.display AS targetGroup,\n" +
+            "                                    eSetting.display AS enrollmentSetting,\n" +
+            "                                    hac.visit_date AS artStartDate,\n" +
+            "                                    hr.description AS regimenAtStart,\n" +
+            "                                    p.date_of_registration as dateOfRegistration,\n" +
+            "                                    h.date_of_registration as dateOfEnrollment,\n" +
+            "                                    h.ovc_number AS ovcUniqueId,\n" +
+            "                                    h.house_hold_number AS householdUniqueNo,\n" +
+            "                                    ecareEntry.display AS careEntry,\n" +
+            "                                    hrt.description AS regimenLineAtStart\n" +
+            "                  FROM patient_person p\n" +
+            "                        INNER JOIN base_organisation_unit facility ON facility.id = facility_id\n" +
+            "                        INNER JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id\n" +
+            "                        INNER JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id\n" +
+            "                        INNER JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id = facility_id AND boui.name='DATIM_ID'\n" +
+            "                        INNER JOIN hiv_enrollment h ON h.person_uuid = p.uuid\n" +
+            "                        LEFT JOIN base_application_codeset tgroup ON tgroup.id = h.target_group_id\n" +
+            "                        LEFT JOIN base_application_codeset eSetting ON eSetting.id = h.enrollment_setting_id\n" +
+            "                        LEFT JOIN base_application_codeset ecareEntry ON ecareEntry.id = h.entry_point_id\n" +
+            "                        INNER JOIN hiv_art_clinical hac ON hac.hiv_enrollment_uuid = h.uuid\n" +
+            "                                                               AND hac.archived = 0\n" +
+            "                        INNER JOIN hiv_regimen hr ON hr.id = hac.regimen_id\n" +
+            "                        INNER JOIN hiv_regimen_type hrt ON hrt.id = hac.regimen_type_id\n" +
+            "                  WHERE\n" +
+            "                      h.archived = 0\n" +
+            "                    AND p.archived = 0\n" +
+            "                    AND h.facility_id = ?1\n" +
+            "                    AND hac.is_commencement = TRUE\n" +
+            "                    AND hac.visit_date >= ?2\n" +
+            "                    AND hac.visit_date < ?3\n" +
+            "                  ),\n" +
+            "    patient_lga AS (SELECT DISTINCT ON (personUuid) personUuid AS personUuid11,\n" +
+            "                    CASE WHEN (addr ~ '^[0-9\\\\.]+$') = TRUE\n" +
+            "                        THEN (SELECT name FROM base_organisation_unit WHERE id = cast(addr AS INT)) ELSE\n" +
+            "                            (SELECT name FROM base_organisation_unit WHERE id = cast(facilityLga AS INT)) END AS lgaOfResidence\n" +
+            "                        --then (select name from base_organisation_unit where id = cast(addr as int)) end as lgaOfResidence\n" +
+            "                    FROM (\n" +
+            "                    SELECT pp.uuid AS personUuid, facility_lga.parent_organisation_unit_id AS facilityLga,\n" +
+            "                           (jsonb_array_elements(pp.address->'address')->>'district') AS addr FROM patient_person pp\n" +
+            "                        LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = CAST (pp.organization->'id' AS INTEGER)\n" +
+            "                    --select uuid AS personUuid, (jsonb_array_elements(address->'address')->>'district') as addr from patient_person\n" +
+            "                        ) dt),\n" +
+            "    current_clinical AS (SELECT DISTINCT ON (tvs.person_uuid) tvs.person_uuid AS person_uuid10,\n" +
+            "                                body_weight AS currentWeight,\n" +
+            "                                tbs.display AS tbStatus1,\n" +
+            "                                bac.display AS currentClinicalStage,\n" +
+            "                                (CASE\n" +
+            "                                    WHEN INITCAP(pp.sex) = 'Male' THEN NULL\n" +
+            "                                    WHEN preg.display IS NOT NULL THEN preg.display\n" +
+            "                                    ELSE hac.pregnancy_status\n" +
+            "                                   END ) AS pregnancyStatus,\n" +
+            "                                --(CASE\n" +
+            "                                --WHEN preg.display IS NOT NULL THEN preg.display\n" +
+            "                                --ELSE hac.pregnancy_status  END ) AS pregnancyStatus,\n" +
+            "                               CASE\n" +
+            "                                   WHEN hac.tb_screen IS NOT NULL THEN hac.visit_date\n" +
+            "                                   ELSE NULL\n" +
+            "                                   END AS dateOfTbScreened1\n" +
+            "                         FROM\n" +
+            "                             triage_vital_sign tvs\n" +
+            "                                 INNER JOIN (\n" +
+            "                                             SELECT\n" +
+            "                                                 person_uuid,\n" +
+            "                                                 MAX(capture_date) AS MAXDATE\n" +
+            "                                             FROM\n" +
+            "                                                 triage_vital_sign\n" +
+            "                                             GROUP BY\n" +
+            "                                                 person_uuid\n" +
+            "                                             ORDER BY\n" +
+            "                                                 MAXDATE ASC\n" +
+            "                                 ) AS current_triage ON current_triage.MAXDATE = tvs.capture_date\n" +
+            "                                     AND current_triage.person_uuid = tvs.person_uuid\n" +
+            "                                     INNER JOIN hiv_art_clinical hac ON tvs.uuid = hac.vital_sign_uuid\n" +
+            "                                       LEFT JOIN patient_person pp ON tvs.person_uuid = pp.uuid\n" +
+            "                                     INNER JOIN (\n" +
+            "                                     SELECT\n" +
+            "                                         person_uuid,\n" +
+            "                                         MAX(hac.visit_date) AS MAXDATE\n" +
+            "                                     FROM\n" +
+            "                                         hiv_art_clinical hac\n" +
+            "                                     GROUP BY\n" +
+            "                                         person_uuid\n" +
+            "                                     ORDER BY\n" +
+            "                                         MAXDATE ASC\n" +
+            "                                 ) AS current_clinical_date ON current_clinical_date.MAXDATE = hac.visit_date\n" +
+            "                                     AND current_clinical_date.person_uuid = hac.person_uuid\n" +
+            "                                     INNER JOIN hiv_enrollment he ON he.person_uuid = hac.person_uuid\n" +
+            "                                     LEFT JOIN base_application_codeset bac ON bac.id = hac.clinical_stage_id\n" +
+            "                                     LEFT JOIN base_application_codeset preg ON preg.code = hac.pregnancy_status\n" +
+            "                                     LEFT JOIN base_application_codeset tbs ON tbs.id = CAST(hac.tb_status AS INTEGER)\n" +
+            "                                         WHERE\n" +
+            "                                           hac.archived = 0\n" +
+            "                                           AND he.archived = 0\n" +
+            "                                           AND hac.visit_date < ?3\n" +
+            "                                           AND he.facility_id = ?1\n" +
+            "                                         ),\n" +
+            "    sample_collection_date AS (SELECT CAST(sample.date_sample_collected AS DATE ) as dateOfViralLoadSampleCollection, patient_uuid as person_uuid120\n" +
+            "                               FROM (\n" +
+            "                               SELECT lt.viral_load_indication, sm.facility_id,sm.date_sample_collected, sm.patient_uuid, sm.archived,\n" +
+            "                                      ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_sample_collected DESC) as rnkk\n" +
+            "                               FROM public.laboratory_sample  sm\n" +
+            "                                   INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
+            "                               WHERE lt.lab_test_id=16\n" +
+            "                               AND  lt.viral_load_indication !=719\n" +
+            "                               AND date_sample_collected IS NOT null\n" +
+            "                               AND date_sample_collected <= ?3\n" +
+            "                               ) as sample\n" +
+            "                               WHERE sample.rnkk = 1\n" +
+            "                               AND (sample.archived is null OR sample.archived = 0)\n" +
+            "                               AND sample.facility_id = ?1\n" +
+            "                               ),\n" +
+            "    tbstatus AS (SELECT personUuid133, dateOfTbScreened, tbStatus, tbStatusOutcome\n" +
+            "                 FROM\n" +
+            "                     (SELECT DISTINCT ON (hac.person_uuid) hac.person_uuid AS personUuid133,\n" +
+            "                                                           ho.date_of_observation AS dateOfTbScreened,\n" +
+            "                                                           ho.data->'tbIptScreening'->>'status' AS tbStatus,\n" +
+            "                                                           ho.data->'tbIptScreening'->>'outcome' AS tbStatusOutcome,\n" +
+            "                                                           ROW_NUMBER() OVER (PARTITION BY hac.person_uuid\n" +
+            "                                                               ORDER BY ho.date_of_observation DESC) AS rowNums\n" +
+            "                      FROM hiv_art_clinical hac\n" +
+            "                          LEFT JOIN hiv_observation ho ON ho.person_uuid = hac.person_uuid\n" +
+            "                      WHERE\n" +
+            "                          ho.type = 'Chronic Care'\n" +
+            "                        AND ho.data IS NOT NULL\n" +
+            "                        AND hac.archived = 0\n" +
+            "                        AND ho.date_of_observation BETWEEN ?2\n" +
+            "                        AND ?3\n" +
+            "                        AND hac.facility_id = ?1) dt\n" +
+            "                 WHERE\n" +
+            "                     dt.rowNums = 1\n" +
+            "                 ),\n" +
+            "--     tblam AS (SELECT * FROM (SELECT CAST(lr.date_result_reported AS DATE) AS dateOfLastTbLam,\n" +
+            "--                                     lr.patient_uuid as personuuidtblam,\n" +
+            "--                                     lr.result_reported as tbLamResult,\n" +
+            "--                                     ROW_NUMBER () OVER (PARTITION BY lr.patient_uuid\n" +
+            "--                                         ORDER BY\n" +
+            "--                                             lr.date_result_reported DESC) AS rank2333\n" +
+            "--                              FROM\n" +
+            "--                                  laboratory_result lr\n" +
+            "--                                      INNER JOIN public.laboratory_test lt on lr.test_id = lt.id\n" +
+            "--                              WHERE\n" +
+            "--                             lt.lab_test_id = 51\n" +
+            "--                             AND lr.date_result_reported IS NOT NULL\n" +
+            "--                             AND lr.date_result_reported <= ?3\n" +
+            "--                             AND lr.date_result_reported >= ?2\n" +
+            "--                             AND lr.result_reported is NOT NULL\n" +
+            "--                             AND lr.archived = 0\n" +
+            "--                             AND lr.facility_id = ?1) AS tblam\n" +
+            "--                        WHERE\n" +
+            "--                            tblam.rank2333 = 1\n" +
+            "--                        ),\n" +
+            "    current_vl_result AS (SELECT * FROM\n" +
+            "                                       (SELECT CAST(ls.date_sample_collected AS DATE ) AS dateOfCurrentViralLoadSample,\n" +
+            "                                                sm.patient_uuid AS person_uuid130 ,\n" +
+            "                                                sm.facility_id AS vlFacility,\n" +
+            "                                                sm.archived AS vlArchived,\n" +
+            "                                                acode.display AS viralLoadIndication,\n" +
+            "                                                sm.result_reported AS currentViralLoad,\n" +
+            "                                                CAST(sm.date_result_reported AS DATE) AS dateOfCurrentViralLoad,\n" +
+            "                                                ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) AS rank2\n" +
+            "                                        FROM public.laboratory_result  sm\n" +
+            "                                            INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
+            "                                            INNER JOIN public.laboratory_sample ls on ls.test_id = lt.id\n" +
+            "                                            INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication\n" +
+            "                                        WHERE lt.lab_test_id = 16\n" +
+            "                                        AND  lt.viral_load_indication !=719\n" +
+            "                                        AND sm. date_result_reported IS NOT NULL\n" +
+            "                                        AND sm.date_result_reported <= ?3\n" +
+            "                                        AND sm.result_reported IS NOT NULL\n" +
+            "                                        ) AS vl_result\n" +
+            "                                   WHERE vl_result.rank2 = 1\n" +
+            "                                   AND (vl_result.vlArchived = 0 OR vl_result.vlArchived IS null)\n" +
+            "                                   AND  vl_result.vlFacility = ?1\n" +
+            "                                   ),\n" +
+            "    careCardCD4 AS (SELECT visit_date, coalesce(cast(cd_4 AS VARCHAR), cd4_semi_quantitative) AS cd_4, person_uuid AS cccd4_person_uuid\n" +
+            "                    FROM public.hiv_art_clinical\n" +
+            "                    WHERE is_commencement IS TRUE\n" +
+            "                    AND  archived = 0\n" +
+            "                    AND  cd_4 != 0\n" +
+            "                    AND visit_date <= ?3\n" +
+            "                    AND facility_id = ?1\n" +
+            "                    ),\n" +
+            "    labCD4 AS (SELECT * FROM ( SELECT sm.patient_uuid AS cd4_person_uuid,\n" +
+            "                                      sm.result_reported as cd4Lb,\n" +
+            "                                      sm.date_result_reported as dateOfCD4Lb,\n" +
+            "                                      ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) AS rnk\n" +
+            "                               FROM public.laboratory_result  sm\n" +
+            "                                   INNER JOIN public.laboratory_test  lt ON sm.test_id = lt.id\n" +
+            "                               WHERE lt.lab_test_id IN (1, 50)\n" +
+            "                                AND sm. date_result_reported IS NOT NULL\n" +
+            "                                AND sm.archived = 0\n" +
+            "                                AND sm.facility_id = ?1\n" +
+            "                                AND sm.date_result_reported <= ?3\n" +
+            "                               ) AS cd4_result\n" +
+            "                        WHERE  cd4_result.rnk = 1\n" +
+            "                        ),\n" +
+            "    tb_sample_collection AS (SELECT sample.created_by,CAST(sample.date_sample_collected AS DATE) AS dateOfTbSampleCollection,\n" +
+            "                                    patient_uuid AS personTbSample\n" +
+            "                             FROM (SELECT llt.lab_test_name, sm.created_by,\n" +
+            "                                          lt.viral_load_indication,\n" +
+            "                                          sm.facility_id,\n" +
+            "                                          sm.date_sample_collected,\n" +
+            "                                          sm.patient_uuid,\n" +
+            "                                          sm.archived,\n" +
+            "                                          ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_sample_collected DESC) AS rnkk\n" +
+            "                                   FROM public.laboratory_sample  sm\n" +
+            "                                       INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
+            "                                       INNER JOIN  laboratory_labtest llt ON llt.id = lt.lab_test_id\n" +
+            "                                   WHERE lt.lab_test_id IN (65,51,66,64)\n" +
+            "                                   AND sm.archived = 0\n" +
+            "                                   AND sm. date_sample_collected <= ?3\n" +
+            "                                   AND sm.facility_id = ?1 )  AS sample\n" +
+            "                             WHERE sample.rnkk = 1\n" +
+            "                             ),\n" +
+            "    current_tb_result AS (WITH tb_test AS (SELECT personTbResult, dateofTbDiagnosticResultReceived,\n" +
+            "                                                  COALESCE(\n" +
+            "                                                          MAX(CASE WHEN lab_test_id = 65 THEN tbDiagnosticResult END) ,\n" +
+            "                                                          MAX(CASE WHEN lab_test_id = 51 THEN tbDiagnosticResult END) ,\n" +
+            "                                                          MAX(CASE WHEN lab_test_id = 66 THEN tbDiagnosticResult END),\n" +
+            "                                                          MAX(CASE WHEN lab_test_id = 64 THEN tbDiagnosticResult END),\n" +
+            "                                                          MAX(CASE WHEN lab_test_id = 67 THEN tbDiagnosticResult END),\n" +
+            "                                                          MAX(CASE WHEN lab_test_id = 68 THEN tbDiagnosticResult END)\n" +
+            "                                                  ) AS tbDiagnosticResult,\n" +
+            "                                                  COALESCE(\n" +
+            "                                                           MAX(CASE WHEN lab_test_id = 65 THEN 'Gene Xpert' END) ,\n" +
+            "                                                           MAX(CASE WHEN lab_test_id = 51 THEN 'TB-LAM' END) ,\n" +
+            "                                                           MAX(CASE WHEN lab_test_id = 66 THEN 'Chest X-ray' END),\n" +
+            "                                                           MAX(CASE WHEN lab_test_id = 64 THEN 'AFB microscopy' END),\n" +
+            "                                                           MAX(CASE WHEN lab_test_id = 67 THEN 'Gene Xpert' END) ,\n" +
+            "                                                           MAX(CASE WHEN lab_test_id = 58 THEN 'TB-LAM' END)\n" +
+            "                                                  ) AS tbDiagnosticTestType\n" +
+            "                                           FROM\n" +
+            "                                               (SELECT sm.patient_uuid AS personTbResult,\n" +
+            "                                                          sm.result_reported AS tbDiagnosticResult,\n" +
+            "                                                          CAST(sm.date_result_reported AS DATE) AS dateofTbDiagnosticResultReceived,\n" +
+            "                                                          lt.lab_test_id\n" +
+            "                                                  FROM laboratory_result sm\n" +
+            "                                                      INNER JOIN public.laboratory_test  lt ON sm.test_id = lt.id\n" +
+            "                                                  WHERE lt.lab_test_id IN (65,51,66,64) AND sm.archived = 0\n" +
+            "                                                  AND sm.date_result_reported IS NOT NULL\n" +
+            "                                                  AND sm.facility_id = ?1\n" +
+            "                                                  AND sm.date_result_reported <= ?3\n" +
+            "                                                  ) AS dt\n" +
+            "                                           GROUP BY dt.personTbResult, dt.dateofTbDiagnosticResultReceived\n" +
+            "                                           )\n" +
+            "                          SELECT * FROM\n" +
+            "                                       (SELECT *, ROW_NUMBER() OVER (PARTITION BY personTbResult\n" +
+            "                                           ORDER BY dateofTbDiagnosticResultReceived DESC ) AS rnk FROM tb_test) AS dt\n" +
+            "                                   WHERE rnk = 1\n" +
+            "                                   ),\n" +
+            "    tbTreatment AS (SELECT * FROM\n" +
+            "                                 (SELECT\n" +
+            "                                     COALESCE(NULLIF(CAST(data->'tbIptScreening'->>'treatementType' AS text), ''), '') AS tbTreatementType,\n" +
+            "                                     NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'tbTreatmentStartDate', '') AS DATE), NULL) AS tbTreatmentStartDate,\n" +
+            "                                     CAST(data->'tbIptScreening'->>'treatmentOutcome' AS text) AS tbTreatmentOutcome,\n" +
+            "                                     NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'completionDate', '') AS DATE), NULL) AS tbCompletionDate,\n" +
+            "                                     person_uuid AS tbTreatmentPersonUuid,\n" +
+            "                                     ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS row_number\n" +
+            "                                  FROM public.hiv_observation WHERE type = 'Chronic Care'\n" +
+            "                                                                AND facility_id = ?1 ) tbTreatment\n" +
+            "                             WHERE row_number = 1\n" +
+            "                               AND tbTreatmentStartDate IS NOT NULL\n" +
+            "                             ),\n" +
+            "    pharmacy_details_regimen AS (SELECT * FROM\n" +
+            "                                              (SELECT *, ROW_NUMBER() OVER (PARTITION BY pr1.person_uuid40 ORDER BY pr1.lastPickupDate DESC) AS rnk3\n" +
+            "                                               FROM\n" +
+            "                                                   (SELECT p.person_uuid AS person_uuid40,\n" +
+            "                                                            COALESCE(ds_model.display, p.dsd_model_type) AS dsdModel,\n" +
+            "                                                            p.visit_date AS lastPickupDate,\n" +
+            "                                                            r.description AS currentARTRegimen,\n" +
+            "                                                            rt.description AS currentRegimenLine,\n" +
+            "                                                            p.next_appointment AS nextPickupDate,\n" +
+            "                                                            CAST(p.refill_period /30.0 AS DECIMAL(10,1)) AS monthsOfARVRefill\n" +
+            "                                                     FROM public.hiv_art_pharmacy p\n" +
+            "                                                         INNER JOIN public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = p.id\n" +
+            "                                                         INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id\n" +
+            "                                                         INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id\n" +
+            "                                                         LEFT JOIN base_application_codeset ds_model on ds_model.code = p.dsd_model_type\n" +
+            "                                                     WHERE r.regimen_type_id in (1,2,3,4,14)\n" +
+            "                                                     AND  p.archived = 0\n" +
+            "                                                     AND  p.facility_id = ?1\n" +
+            "                                                     AND  p.visit_date >= ?2\n" +
+            "                                                     AND  p.visit_date  < ?3) AS pr1\n" +
+            "                                               ) AS pr2\n" +
+            "                                          WHERE pr2.rnk3 = 1\n" +
+            "                                          ),\n" +
+            "    eac AS (SELECT DISTINCT ON (he.person_uuid)\n" +
+            "                he.person_uuid AS person_uuid50,\n" +
+            "                max_date_eac.eac_session_date AS dateOfCommencementOfEAC,\n" +
+            "                COUNT AS numberOfEACSessionCompleted,\n" +
+            "                last_eac_complete.eac_session_date AS dateOfLastEACSessionCompleted,\n" +
+            "                ext_date.eac_session_date AS dateOfExtendEACCompletion,\n" +
+            "                r.date_result_reported AS DateOfRepeatViralLoadResult,\n" +
+            "                r.result_reported AS repeatViralLoadResult\n" +
+            "            FROM\n" +
+            "                hiv_eac he\n" +
+            "                    INNER JOIN\n" +
+            "                    (SELECT * FROM\n" +
+            "                                  (SELECT hes.*,\n" +
+            "                                          ROW_NUMBER() OVER\n" +
+            "                                          (PARTITION BY hes.person_uuid\n" +
+            "                                          ORDER BY hes.eac_session_date, id DESC) as row_number\n" +
+            "                                   FROM\n" +
+            "                                       hiv_eac_session hes\n" +
+            "                                   WHERE\n" +
+            "                                       status = 'FIRST EAC'\n" +
+            "                                     AND archived = 0\n" +
+            "                                   ) e\n" +
+            "                              WHERE\n" +
+            "                                  e.row_number = 1 ) AS max_date_eac\n" +
+            "                        ON max_date_eac.eac_id = he.uuid\n" +
+            "                    LEFT JOIN\n" +
+            "                    (SELECT\n" +
+            "                         person_uuid,\n" +
+            "                         hes.eac_id,\n" +
+            "                         COUNT(person_uuid) AS COUNT\n" +
+            "                     FROM hiv_eac_session hes\n" +
+            "                     GROUP BY\n" +
+            "                         hes.eac_id,\n" +
+            "                         hes.person_uuid) AS completed_eac\n" +
+            "                        ON completed_eac.person_uuid = max_date_eac.person_uuid AND completed_eac.eac_id = he.uuid\n" +
+            "                    LEFT JOIN\n" +
+            "                    (SELECT * FROM\n" +
+            "                                  (SELECT hes.*,\n" +
+            "                                           ROW_NUMBER() OVER (PARTITION BY hes.person_uuid ORDER BY hes.eac_session_date) AS row_number\n" +
+            "                                    FROM\n" +
+            "                                        hiv_eac he\n" +
+            "                                            INNER JOIN hiv_eac_session hes ON hes.eac_id = he.uuid\n" +
+            "                                    WHERE\n" +
+            "                                        he.status = 'COMPLETED'\n" +
+            "                                      AND he.archived = 0) e\n" +
+            "                              WHERE\n" +
+            "                                  e.row_number = 1) AS last_eac_complete\n" +
+            "                        ON last_eac_complete.eac_id = max_date_eac.eac_id\n" +
+            "                               AND last_eac_complete.person_uuid = max_date_eac.person_uuid\n" +
+            "                    LEFT JOIN\n" +
+            "                    (SELECT * FROM\n" +
+            "                                  (SELECT hes.*,\n" +
+            "                                          ROW_NUMBER() OVER (PARTITION BY hes.person_uuid ORDER BY hes.eac_session_date, id DESC) AS row_number\n" +
+            "                                   FROM\n" +
+            "                                       hiv_eac_session hes\n" +
+            "                                   WHERE\n" +
+            "                                       hes.status NOT ilike 'FIRST%'\n" +
+            "                                     AND status NOT ilike 'SECOND%'\n" +
+            "                                     AND status NOT ilike 'THIRD%'\n" +
+            "                                     AND hes.archived = 0) e\n" +
+            "                              WHERE e.row_number = 1) AS ext_date\n" +
+            "                        ON ext_date.eac_id = he.uuid AND ext_date.person_uuid = he.person_uuid\n" +
+            "                    LEFT JOIN\n" +
+            "                    (SELECT * FROM\n" +
+            "                                  (SELECT l.patient_uuid,\n" +
+            "                                          l.date_result_reported,\n" +
+            "                                          l.result_reported,\n" +
+            "                                          ROW_NUMBER() OVER (PARTITION BY l.patient_uuid ORDER BY l.date_result_reported ASC) AS row_number\n" +
+            "                                   FROM laboratory_result l\n" +
+            "                                       INNER JOIN\n" +
+            "                                       (SELECT lr.patient_uuid,\n" +
+            "                                               MIN(lr.date_result_reported) AS date_result_reported\n" +
+            "                                        FROM\n" +
+            "                                            laboratory_result lr\n" +
+            "                                                INNER JOIN public.laboratory_test  lt on lr.test_id = lt.id\n" +
+            "                                                INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication\n" +
+            "                                                INNER JOIN\n" +
+            "                                                (SELECT * FROM\n" +
+            "                                                              (SELECT hes.*,\n" +
+            "                                                                      ROW_NUMBER() OVER (PARTITION BY hes.person_uuid ORDER BY hes.eac_session_date, he.id DESC) AS row_number\n" +
+            "                                                               FROM hiv_eac he\n" +
+            "                                                                   INNER JOIN hiv_eac_session hes ON hes.eac_id = he.uuid\n" +
+            "                                                               WHERE\n" +
+            "                                                                   he.status = 'COMPLETED'\n" +
+            "                                                                 AND hes.eac_session_date < ?3\n" +
+            "                                                                 AND he.archived = 0) e\n" +
+            "                                                          WHERE\n" +
+            "                                                              e.row_number = 1) AS last_eac_complete\n" +
+            "                                                    ON last_eac_complete.person_uuid = lr.patient_uuid\n" +
+            "                                                    AND lr.date_result_reported > last_eac_complete.eac_session_date\n" +
+            "                                                    AND lt.lab_test_id = 16\n" +
+            "                                                    AND last_eac_complete.eac_session_date < ?3\n" +
+            "                                                    AND  lt.viral_load_indication !=719\n" +
+            "                                        GROUP BY\n" +
+            "                                            lr.patient_uuid) r\n" +
+            "                                           ON l.date_result_reported = r.date_result_reported AND l.patient_uuid = r.patient_uuid) l\n" +
+            "                              WHERE\n" +
+            "                                  l.row_number = 1) r ON r.patient_uuid = he.person_uuid\n" +
+            "            WHERE\n" +
+            "                he.archived = 0 ),\n" +
+            "    biometric AS (\n" +
+            "        SELECT\n" +
+            "            DISTINCT ON (he.person_uuid)\n" +
+            "            he.person_uuid AS person_uuid60,\n" +
+            "            CASE WHEN biometric_count.count > 5 THEN biometric_count.enrollment_date ELSE NULL END AS dateBiometricsEnrolled,\n" +
+            "            CASE WHEN biometric_count.count > 5 THEN biometric_count.count ELSE NULL END AS numberOfFingersCaptured,\n" +
+            "            CASE WHEN recapture_count.count > 5 THEN recapture_count.recapture_date ELSE NULL END AS dateBiometricsRecaptured,\n" +
+            "            CASE WHEN recapture_count.count > 5 THEN recapture_count.count ELSE NULL END AS numberOfFingersRecaptured,\n" +
+            "            --bst.biometric_status AS biometricStatus,\n" +
+            "            bst.status_date\n" +
+            "        FROM\n" +
+            "            hiv_enrollment he\n" +
+            "        LEFT JOIN (\n" +
+            "            SELECT\n" +
+            "                b.person_uuid,\n" +
+            "                CASE WHEN COUNT(b.person_uuid) > 10 THEN 10 ELSE COUNT(b.person_uuid) END,\n" +
+            "                MAX(enrollment_date) enrollment_date\n" +
+            "            FROM\n" +
+            "                biometric b\n" +
+            "            WHERE\n" +
+            "                archived = 0\n" +
+            "                AND (recapture = 0 or recapture is null)\n" +
+            "            GROUP BY\n" +
+            "                b.person_uuid\n" +
+            "        ) biometric_count ON biometric_count.person_uuid = he.person_uuid\n" +
+            "        LEFT JOIN (\n" +
+            "            SELECT\n" +
+            "                r.person_uuid,\n" +
+            "                CASE WHEN COUNT(r.person_uuid) > 10 THEN 10 ELSE COUNT(r.person_uuid) END,\n" +
+            "                MAX(enrollment_date) recapture_date\n" +
+            "            FROM\n" +
+            "                biometric r\n" +
+            "            WHERE\n" +
+            "                archived = 0\n" +
+            "                AND recapture = 1\n" +
+            "            GROUP BY\n" +
+            "                r.person_uuid\n" +
+            "        ) recapture_count ON recapture_count.person_uuid = he.person_uuid\n" +
+            "        LEFT JOIN (\n" +
+            "            SELECT DISTINCT ON (person_id)\n" +
+            "                person_id,\n" +
+            "                biometric_status,\n" +
+            "                MAX(status_date) OVER (PARTITION BY person_id ORDER BY status_date DESC) AS status_date\n" +
+            "            FROM\n" +
+            "                hiv_status_tracker\n" +
+            "            WHERE\n" +
+            "                archived=0 AND facility_id = ?1\n" +
+            "        ) bst ON bst.person_id = he.person_uuid\n" +
+            "        WHERE\n" +
+            "            he.archived = 0\n" +
+            "    ),\n" +
+            "    current_regimen AS (\n" +
+            "        SELECT DISTINCT ON (regiment_table.person_uuid)\n" +
+            "            regiment_table.person_uuid AS person_uuid70,\n" +
+            "            start_or_regimen AS dateOfCurrentRegimen,\n" +
+            "            regiment_table.max_visit_date,\n" +
+            "            regiment_table.regimen\n" +
             "        FROM (\n" +
-            "     SELECT  sm.patient_uuid as personTbResult, sm.result_reported as tbDiagnosticResult,\n" +
-            " CAST(sm.date_result_reported AS DATE) as dateofTbDiagnosticResultReceived,\n" +
-            " lt.lab_test_id\n" +
-            "     FROM laboratory_result  sm\n" +
-            "  INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
-            "     WHERE lt.lab_test_id IN (65,51,66,64) and sm.archived = 0\n" +
-            "       AND sm.date_result_reported is not null\n" +
-            "       AND sm.facility_id = ?1\n" +
-            "       AND sm.date_result_reported <= ?3\n" +
-            " ) as dt\n" +
-            "        GROUP BY dt.personTbResult, dt.dateofTbDiagnosticResultReceived)\n" +
-            "   select * from (select *, row_number() over (partition by personTbResult\n" +
-            "         order by dateofTbDiagnosticResultReceived desc ) as rnk from tb_test) as dt\n" +
-            "   where rnk = 1\n" +
-            "     ),\n" +
-            "\n" +
-            "     tbTreatment AS\n" +
-            "         (SELECT * FROM (SELECT\n" +
-            "     COALESCE(NULLIF(CAST(data->'tbIptScreening'->>'treatementType' AS text), ''), '') as tbTreatementType,\n" +
-            "     NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'tbTreatmentStartDate', '') AS DATE), NULL)as tbTreatmentStartDate,\n" +
-            "     CAST(data->'tbIptScreening'->>'treatmentOutcome' AS text) as tbTreatmentOutcome,\n" +
-            "     NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'completionDate', '') AS DATE), NULL) as tbCompletionDate,\n" +
-            "     person_uuid as tbTreatmentPersonUuid,\n" +
-            "     ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY date_of_observation DESC)\n" +
-            " FROM public.hiv_observation WHERE type = 'Chronic Care'\n" +
-            "       AND facility_id = ?1\n" +
-            ") tbTreatment WHERE row_number = 1\n" +
-            "    AND tbTreatmentStartDate IS NOT NULL),\n" +
-            "\n" +
-            "     pharmacy_details_regimen AS (\n" +
-            "         select * from (\n" +
-            "   select *, ROW_NUMBER() OVER (PARTITION BY pr1.person_uuid40 ORDER BY pr1.lastPickupDate DESC) as rnk3\n" +
-            "   from (\n" +
-            "SELECT p.person_uuid as person_uuid40, COALESCE(ds_model.display, p.dsd_model_type) as dsdModel, p.visit_date as lastPickupDate,\n" +
-            "       r.description as currentARTRegimen, rt.description as currentRegimenLine,\n" +
-            "       p.next_appointment as nextPickupDate,\n" +
-            "       CAST(p.refill_period /30.0 AS DECIMAL(10,1)) AS monthsOfARVRefill\n" +
-            "from public.hiv_art_pharmacy p\n" +
-            "         INNER JOIN public.hiv_art_pharmacy_regimens pr\n" +
-            "        ON pr.art_pharmacy_id = p.id\n" +
-            "         INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id\n" +
-            "         INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id\n" +
-            "left JOIN base_application_codeset ds_model on ds_model.code = p.dsd_model_type " +
-            "WHERE r.regimen_type_id in (1,2,3,4,14)\n" +
-            "  AND  p.archived = 0\n" +
-            "  AND  p.facility_id = ?1\n" +
-            "  AND  p.visit_date >= ?2\n" +
-            "  AND  p.visit_date  < ?3\n" +
-            "        ) as pr1\n" +
-            "           ) as pr2\n" +
-            "         where pr2.rnk3 = 1\n" +
-            "     ),\n" +
-            "\n" +
-            "     eac AS (\n" +
-            "         SELECT\n" +
-            " DISTINCT ON (he.person_uuid) he.person_uuid AS person_uuid50,\n" +
-            "      max_date_eac.eac_session_date AS dateOfCommencementOfEAC,\n" +
-            "      COUNT AS numberOfEACSessionCompleted,\n" +
-            "      last_eac_complete.eac_session_date AS dateOfLastEACSessionCompleted,\n" +
-            "      ext_date.eac_session_date AS dateOfExtendEACCompletion,\n" +
-            "      r.date_result_reported AS DateOfRepeatViralLoadResult,\n" +
-            "      r.result_reported AS repeatViralLoadResult\n" +
-            "         FROM\n" +
-            " hiv_eac he\n" +
-            "     INNER JOIN (\n" +
-            "     SELECT\n" +
-            "         *\n" +
-            "     FROM\n" +
-            "         (\n" +
-            " SELECT\n" +
-            "     hes.*,\n" +
-            "     ROW_NUMBER() OVER (\n" +
-            "         PARTITION BY hes.person_uuid\n" +
-            "         ORDER BY\n" +
-            " hes.eac_session_date,\n" +
-            " id DESC\n" +
-            "         )\n" +
-            " FROM\n" +
-            "     hiv_eac_session hes\n" +
-            " WHERE\n" +
-            "         status = 'FIRST EAC'\n" +
-            "   AND archived = 0\n" +
-            "         ) e\n" +
-            "     WHERE\n" +
-            " e.row_number = 1\n" +
-            " ) AS max_date_eac ON max_date_eac.eac_id = he.uuid\n" +
-            "     LEFT JOIN (\n" +
-            "     SELECT\n" +
-            "         person_uuid,\n" +
-            "         hes.eac_id,\n" +
-            "         COUNT(person_uuid) AS COUNT\n" +
-            "     FROM\n" +
-            "         hiv_eac_session hes\n" +
-            "     GROUP BY\n" +
-            "         hes.eac_id,\n" +
-            "         hes.person_uuid\n" +
-            " ) AS completed_eac ON completed_eac.person_uuid = max_date_eac.person_uuid\n" +
-            "     AND completed_eac.eac_id = he.uuid\n" +
-            "     LEFT JOIN (\n" +
-            "     SELECT\n" +
-            "         *\n" +
-            "     FROM\n" +
-            "         (\n" +
-            " SELECT\n" +
-            "     hes.*,\n" +
-            "     ROW_NUMBER() OVER (\n" +
-            "         PARTITION BY hes.person_uuid\n" +
-            "         ORDER BY\n" +
-            " hes.eac_session_date\n" +
-            "         )\n" +
-            " FROM\n" +
-            "     hiv_eac he\n" +
-            "         INNER JOIN hiv_eac_session hes ON hes.eac_id = he.uuid\n" +
-            " WHERE\n" +
-            "         he.status = 'COMPLETED'\n" +
-            "   AND he.archived = 0\n" +
-            "         ) e\n" +
-            "     WHERE\n" +
-            " e.row_number = 1\n" +
-            " ) AS last_eac_complete ON last_eac_complete.eac_id = max_date_eac.eac_id\n" +
-            "     AND last_eac_complete.person_uuid = max_date_eac.person_uuid\n" +
-            "     LEFT JOIN (\n" +
-            "     SELECT\n" +
-            "         *\n" +
-            "     FROM\n" +
-            "         (\n" +
-            " SELECT\n" +
-            "     hes.*,\n" +
-            "     ROW_NUMBER() OVER (\n" +
-            "         PARTITION BY hes.person_uuid\n" +
-            "         ORDER BY\n" +
-            " hes.eac_session_date,\n" +
-            " id DESC\n" +
-            "         )\n" +
-            " FROM\n" +
-            "     hiv_eac_session hes\n" +
-            " WHERE\n" +
-            "         hes.status NOT ilike 'FIRST%'\n" +
-            "   AND status NOT ilike 'SECOND%'\n" +
-            "   AND status NOT ilike 'THIRD%'\n" +
-            "   AND hes.archived = 0\n" +
-            "         ) e\n" +
-            "     WHERE\n" +
-            " e.row_number = 1\n" +
-            " ) AS ext_date ON ext_date.eac_id = he.uuid\n" +
-            "     AND ext_date.person_uuid = he.person_uuid\n" +
-            "     LEFT JOIN (\n" +
-            "     SELECT\n" +
-            "         *\n" +
-            "     FROM\n" +
-            "         (\n" +
-            " SELECT\n" +
-            "     l.patient_uuid,\n" +
-            "     l.date_result_reported,\n" +
-            "     l.result_reported,\n" +
-            "     ROW_NUMBER() OVER (\n" +
-            "         PARTITION BY l.patient_uuid\n" +
-            "         ORDER BY\n" +
-            " l.date_result_reported ASC\n" +
-            "         )\n" +
-            " FROM\n" +
-            "     laboratory_result l\n" +
-            "         INNER JOIN (\n" +
-            "         SELECT\n" +
-            " lr.patient_uuid,\n" +
-            " MIN(lr.date_result_reported) AS date_result_reported\n" +
-            "         FROM\n" +
-            " laboratory_result lr\n" +
-            "     INNER JOIN public.laboratory_test  lt on lr.test_id = lt.id\n" +
-            "     INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication" +
-            "     INNER JOIN (\n" +
-            "     SELECT\n" +
-            "         *\n" +
-            "     FROM\n" +
-            "         (\n" +
-            " SELECT\n" +
-            "     hes.*,\n" +
-            "     ROW_NUMBER() OVER (\n" +
-            "         PARTITION BY hes.person_uuid\n" +
-            "         ORDER BY\n" +
-            " hes.eac_session_date,\n" +
-            " he.id DESC\n" +
-            "         )\n" +
-            " FROM\n" +
-            "     hiv_eac he\n" +
-            "         INNER JOIN hiv_eac_session hes ON hes.eac_id = he.uuid\n" +
-            " WHERE\n" +
-            "         he.status = 'COMPLETED'\n" +
-            "         AND hes.eac_session_date < ?3" +
-            "   AND he.archived = 0\n" +
-            "         ) e\n" +
-            "     WHERE\n" +
-            " e.row_number = 1\n" +
-            " ) AS last_eac_complete ON last_eac_complete.person_uuid = lr.patient_uuid\n" +
-            "     AND lr.date_result_reported > last_eac_complete.eac_session_date\n" +
-            "     AND lt.lab_test_id = 16\n" +
-            "     AND last_eac_complete.eac_session_date < ?3\n" +
-            "     AND  lt.viral_load_indication !=719" +
-            "         GROUP BY\n" +
-            " lr.patient_uuid\n" +
-            "     ) r ON l.date_result_reported = r.date_result_reported\n" +
-            "         AND l.patient_uuid = r.patient_uuid\n" +
-            "         ) l\n" +
-            "     WHERE\n" +
-            " l.row_number = 1\n" +
-            " ) r ON r.patient_uuid = he.person_uuid\n" +
-            "         WHERE\n" +
-            "     he.archived = 0\n" +
-            "     ),\n" +
-            "\n" +
-            "biometric AS (\n" +
-            "            SELECT \n" +
-            "              DISTINCT ON (he.person_uuid) he.person_uuid AS person_uuid60, \n" +
-            "               CASE WHEN biometric_count.count > 5 THEN biometric_count.enrollment_date\n" +
-            "               ELSE NULL\n" +
-            "               END AS dateBiometricsEnrolled,\n" +
-            "           CASE WHEN biometric_count.count > 5 THEN biometric_count.count\n" +
-            "           ELSE NULL\n" +
-            "           END AS numberOfFingersCaptured,\n" +
-            "           CASE WHEN recapture_count.count > 5 THEN recapture_count.recapture_date\n" +
-            "           ELSE NULL\n" +
-            "           END AS dateBiometricsRecaptured,\n" +
-            "           CASE WHEN recapture_count.count > 5 THEN recapture_count.count\n" +
-            "           ELSE NULL\n" +
-            "           END AS numberOfFingersRecaptured,\n" +
-//            "              biometric_count.enrollment_date AS dateBiometricsEnrolled, \n" +
-//            "              biometric_count.count AS numberOfFingersCaptured,\n" +
-//            "              recapture_count.recapture_date AS dateBiometricsRecaptured,\n" +
-//            "              recapture_count.count AS numberOfFingersRecaptured,\n" +
-            "              bst.biometric_status AS biometricStatus, \n" +
-            "              bst.status_date\n" +
-            "            FROM \n" +
-            "              hiv_enrollment he \n" +
-            "              LEFT JOIN (\n" +
-            "                SELECT \n" +
-            "                  b.person_uuid, \n" +
-            "                  CASE WHEN COUNT(b.person_uuid) > 10 THEN 10 ELSE COUNT(b.person_uuid) END, \n" +
-            "                  MAX(enrollment_date) enrollment_date \n" +
-            "                FROM \n" +
-            "                  biometric b \n" +
-            "                WHERE \n" +
-            "                  archived = 0 \n" +
-            "                  AND (recapture = 0 or recapture is null) \n" +
-            "                GROUP BY \n" +
-            "                  b.person_uuid\n" +
-            "              ) biometric_count ON biometric_count.person_uuid = he.person_uuid \n" +
-            "              LEFT JOIN (\n" +
-            "                SELECT \n" +
-            "                  r.person_uuid, \n" +
-            "                  CASE WHEN COUNT(r.person_uuid) > 10 THEN 10 ELSE COUNT(r.person_uuid) END, \n" +
-            "                  MAX(enrollment_date) recapture_date \n" +
-            "                FROM \n" +
-            "                  biometric r \n" +
-            "                WHERE \n" +
-            "                  archived = 0 \n" +
-            "                  AND recapture = 1 \n" +
-            "                GROUP BY \n" +
-            "                  r.person_uuid\n" +
-            "              ) recapture_count ON recapture_count.person_uuid = he.person_uuid \n" +
-            "              LEFT JOIN (\n" +
-            "            \n" +
-            "            SELECT DISTINCT ON (person_id) person_id, biometric_status,\n" +
-            "--              (CASE WHEN biometric_status IS NULL OR biometric_status=''\n" +
-            "--               THEN hiv_status ELSE biometric_status END) AS biometric_status, \n" +
-            "            MAX(status_date) OVER (PARTITION BY person_id ORDER BY status_date DESC) AS status_date \n" +
-            "\t\t\tFROM hiv_status_tracker \n" +
-            "            WHERE archived=0 AND facility_id=?1\n" +
-            "            \n" +
-            "              ) bst ON bst.person_id = he.person_uuid \n" +
-            "            WHERE \n" +
-            "              he.archived = 0\n" +
-            "            ), " +
-            "     current_regimen AS (\n" +
-            "         SELECT\n" +
-            " DISTINCT ON (regiment_table.person_uuid) regiment_table.person_uuid AS person_uuid70,\n" +
-            "      start_or_regimen AS dateOfCurrentRegimen,\n" +
-            "      regiment_table.max_visit_date,\n" +
-            "      regiment_table.regimen\n" +
-            "         FROM\n" +
-            " (\n" +
-            "     SELECT\n" +
-            "         MIN(visit_date) start_or_regimen,\n" +
-            "         MAX(visit_date) max_visit_date,\n" +
-            "         regimen,\n" +
-            "         person_uuid\n" +
-            "     FROM\n" +
-            "         (\n" +
-            " SELECT\n" +
-            "     hap.id,\n" +
-            "     hap.person_uuid,\n" +
-            "     hap.visit_date,\n" +
-            "     hivreg.description AS regimen,\n" +
-            "     ROW_NUMBER() OVER(\n" +
-            "         ORDER BY\n" +
-            " person_uuid,\n" +
-            " visit_date\n" +
-            "         ) rn1,\n" +
-            "     ROW_NUMBER() OVER(\n" +
-            "         PARTITION BY hivreg.description\n" +
-            "         ORDER BY\n" +
-            " person_uuid,\n" +
-            " visit_date\n" +
-            "         ) rn2\n" +
-            " FROM\n" +
-            "     public.hiv_art_pharmacy AS hap\n" +
-            "         INNER JOIN (\n" +
-            "         SELECT\n" +
-            " MAX(hapr.id) AS id,\n" +
-            " art_pharmacy_id,\n" +
-            " regimens_id,\n" +
-            " hr.description\n" +
-            "         FROM\n" +
-            " public.hiv_art_pharmacy_regimens AS hapr\n" +
-            "     INNER JOIN hiv_regimen AS hr ON hapr.regimens_id = hr.id\n" +
-            "         WHERE\n" +
-            "     hr.regimen_type_id IN (1,2,3,4,14)\n" +
-            "         GROUP BY\n" +
-            " art_pharmacy_id,\n" +
-            " regimens_id,\n" +
-            " hr.description\n" +
-            "     ) AS hapr ON hap.id = hapr.art_pharmacy_id and hap.archived=0\n" +
-            "         INNER JOIN hiv_regimen AS hivreg ON hapr.regimens_id = hivreg.id\n" +
-            "         INNER JOIN hiv_regimen_type AS hivregtype ON hivreg.regimen_type_id = hivregtype.id\n" +
-            "         AND hivreg.regimen_type_id IN (1,2,3,4,14)\n" +
-            " ORDER BY\n" +
-            "     person_uuid,\n" +
-            "     visit_date\n" +
-            "         ) t\n" +
-            "     GROUP BY\n" +
-            "         person_uuid,\n" +
-            "         regimen,\n" +
-            "         rn1 - rn2\n" +
-            "     ORDER BY\n" +
-            "         MIN(visit_date)\n" +
-            " ) AS regiment_table\n" +
-            "     INNER JOIN (\n" +
-            "     SELECT\n" +
-            "         DISTINCT MAX(visit_date) AS max_visit_date,\n" +
-            "      person_uuid\n" +
-            "     FROM hiv_art_pharmacy\n" +
-            "WHERE archived=0" +
-            "     GROUP BY\n" +
-            "         person_uuid\n" +
-            " ) AS hap ON regiment_table.person_uuid = hap.person_uuid\n" +
-            "         WHERE\n" +
-            "     regiment_table.max_visit_date = hap.max_visit_date\n" +
-            "         GROUP BY\n" +
-            " regiment_table.person_uuid,\n" +
-            " regiment_table.regimen,\n" +
-            " regiment_table.max_visit_date,\n" +
-            " start_or_regimen\n" +
-            "     ),\n" +
-            "ipt AS (\n" +
-            "              SELECT\n" +
-            "             DISTINCT ON (hap.person_uuid) hap.person_uuid AS personUuid80,\n" +
+            "            SELECT\n" +
+            "                MIN(visit_date) start_or_regimen,\n" +
+            "                MAX(visit_date) max_visit_date,\n" +
+            "                regimen,\n" +
+            "                person_uuid\n" +
+            "            FROM (\n" +
+            "                SELECT\n" +
+            "                    hap.id,\n" +
+            "                    hap.person_uuid,\n" +
+            "                    hap.visit_date,\n" +
+            "                    hivreg.description AS regimen,\n" +
+            "                    ROW_NUMBER() OVER(ORDER BY person_uuid, visit_date) rn1,\n" +
+            "                    ROW_NUMBER() OVER(PARTITION BY hivreg.description ORDER BY person_uuid, visit_date) rn2\n" +
+            "                FROM\n" +
+            "                    public.hiv_art_pharmacy AS hap\n" +
+            "                INNER JOIN (\n" +
+            "                    SELECT\n" +
+            "                        MAX(hapr.id) AS id,\n" +
+            "                        art_pharmacy_id,\n" +
+            "                        regimens_id,\n" +
+            "                        hr.description\n" +
+            "                    FROM\n" +
+            "                        public.hiv_art_pharmacy_regimens AS hapr\n" +
+            "                    INNER JOIN hiv_regimen AS hr ON hapr.regimens_id = hr.id\n" +
+            "                    WHERE\n" +
+            "                        hr.regimen_type_id IN (1,2,3,4,14)\n" +
+            "                    GROUP BY\n" +
+            "                        art_pharmacy_id,\n" +
+            "                        regimens_id,\n" +
+            "                        hr.description\n" +
+            "                ) AS hapr ON hap.id = hapr.art_pharmacy_id AND hap.archived = 0\n" +
+            "                INNER JOIN hiv_regimen AS hivreg ON hapr.regimens_id = hivreg.id\n" +
+            "                INNER JOIN hiv_regimen_type AS hivregtype ON hivreg.regimen_type_id = hivregtype.id\n" +
+            "                    AND hivreg.regimen_type_id IN (1,2,3,4,14)\n" +
+            "                ORDER BY\n" +
+            "                    person_uuid,\n" +
+            "                    visit_date\n" +
+            "            ) t\n" +
+            "            GROUP BY\n" +
+            "                person_uuid,\n" +
+            "                regimen,\n" +
+            "                rn1 - rn2\n" +
+            "            ORDER BY\n" +
+            "                MIN(visit_date)\n" +
+            "        ) AS regiment_table\n" +
+            "        INNER JOIN (\n" +
+            "            SELECT\n" +
+            "                DISTINCT MAX(visit_date) AS max_visit_date,\n" +
+            "                person_uuid\n" +
+            "            FROM\n" +
+            "                hiv_art_pharmacy\n" +
+            "            WHERE\n" +
+            "                archived = 0\n" +
+            "            GROUP BY\n" +
+            "                person_uuid\n" +
+            "        ) AS hap ON regiment_table.person_uuid = hap.person_uuid\n" +
+            "        WHERE\n" +
+            "            regiment_table.max_visit_date = hap.max_visit_date\n" +
+            "        GROUP BY\n" +
+            "            regiment_table.person_uuid,\n" +
+            "            regiment_table.regimen,\n" +
+            "            regiment_table.max_visit_date,\n" +
+            "            start_or_regimen\n" +
+            "    ),\n" +
+            "    ipt AS (\n" +
+            "        SELECT\n" +
+            "            DISTINCT ON (hap.person_uuid)\n" +
+            "            hap.person_uuid AS personUuid80,\n" +
             "            ipt_type.regimen_name AS iptType,\n" +
             "            hap.visit_date AS dateOfIptStart,\n" +
-            "            COALESCE(NULLIF(CAST(hap.ipt->>'completionStatus' AS text), ''), '') as iptCompletionStatus,\n" +
+            "            COALESCE(NULLIF(CAST(hap.ipt->>'completionStatus' AS text), ''), '') AS iptCompletionStatus,\n" +
             "            (\n" +
             "                CASE\n" +
-            "               WHEN MAX(CAST(complete.date_completed AS DATE)) > NOW() THEN NULL\n" +
-            "               WHEN MAX(CAST(complete.date_completed AS DATE)) IS NULL\n" +
-            "            AND CAST((hap.visit_date + 168) AS DATE) < NOW() THEN CAST((hap.visit_date + 168) AS DATE)\n" +
-            "               ELSE MAX(CAST(complete.date_completed AS DATE))\n" +
-            "               END\n" +
-            "                ) AS iptCompletionDate\n" +
-            "              FROM\n" +
-            "             hiv_art_pharmacy hap\n" +
-            "                 INNER JOIN (\n" +
-            "                 SELECT\n" +
-            "              DISTINCT person_uuid,\n" +
-            "                  MAX(visit_date) AS MAXDATE\n" +
-            "                 FROM\n" +
-            "              hiv_art_pharmacy\n" +
-            "                 WHERE\n" +
-            "              (ipt ->> 'type' ilike '%INITIATION%' or ipt ->> 'type' ilike 'START_REFILL')\n" +
-            "            AND archived = 0\n" +
-            "                 GROUP BY\n" +
-            "              person_uuid\n" +
-            "                 ORDER BY\n" +
-            "              MAXDATE ASC\n" +
-            "             ) AS max_ipt ON max_ipt.MAXDATE = hap.visit_date\n" +
-            "                 AND max_ipt.person_uuid = hap.person_uuid\n" +
-            "                 INNER JOIN (\n" +
-            "                 SELECT\n" +
-            "              DISTINCT h.person_uuid,\n" +
-            "                  h.visit_date,\n" +
-            "                  CAST(pharmacy_object ->> 'regimenName' AS VARCHAR) AS regimen_name,\n" +
-            "                  CAST(pharmacy_object ->> 'duration' AS VARCHAR) AS duration,\n" +
-            "                  hrt.description\n" +
-            "                 FROM\n" +
-            "              hiv_art_pharmacy h,\n" +
-            "              jsonb_array_elements(h.extra -> 'regimens') WITH ORDINALITY p(pharmacy_object)\n" +
-            "             RIGHT JOIN hiv_regimen hr ON hr.description = CAST(pharmacy_object ->> 'regimenName' AS VARCHAR)\n" +
-            "             RIGHT JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id\n" +
-            "                 WHERE\n" +
-            "             hrt.id IN (15)\n" +
-            "             ) AS ipt_type ON ipt_type.person_uuid = max_ipt.person_uuid\n" +
-            "                 AND ipt_type.visit_date = max_ipt.MAXDATE\n" +
-            "                 LEFT JOIN (\n" +
-            "                 SELECT\n" +
-            "              hap.person_uuid,\n" +
-            "              hap.visit_date,\n" +
-            "             TO_DATE(NULLIF(NULLIF(TRIM(hap.ipt->>'dateCompleted'), ''), 'null'), 'YYYY-MM-DD') AS date_completed\n" +
-            "                 FROM\n" +
-            "              hiv_art_pharmacy hap\n" +
-            "             INNER JOIN (\n" +
-            "             SELECT\n" +
-            "                 DISTINCT person_uuid,\n" +
-            "              MAX(visit_date) AS MAXDATE\n" +
-            "             FROM\n" +
-            "                 hiv_art_pharmacy\n" +
-            "             WHERE\n" +
-            "              ipt ->> 'dateCompleted' IS NOT NULL\n" +
-            "             GROUP BY\n" +
-            "                 person_uuid\n" +
-            "             ORDER BY\n" +
-            "                 MAXDATE ASC\n" +
-            "              ) AS complete_ipt ON CAST(complete_ipt.MAXDATE AS DATE) = hap.visit_date\n" +
-            "             AND complete_ipt.person_uuid = hap.person_uuid\n" +
-            "             ) complete ON complete.person_uuid = hap.person_uuid\n" +
-            "              WHERE\n" +
-            "                 hap.archived = 0\n" +
-            "                 AND hap.visit_date < ?3 \n" +
-            "              GROUP BY\n" +
-            "             hap.person_uuid,\n" +
-            "             ipt_type.regimen_name,\n" +
-            "             hap.ipt,\n" +
-            "             hap.visit_date\n" +
-            "                ) ,\n" +
-            " cervical_cancer AS (\n" +
-            "              SELECT\n" +
-            "             DISTINCT ON (ho.person_uuid) ho.person_uuid AS person_uuid90,\n" +
-            "                  ho.date_of_observation AS dateOfCervicalCancerScreening,\n" +
-            "                  ho.data ->> 'screenTreatmentMethodDate' AS treatmentMethodDate,\n" +
-            "                  cc_type.display AS cervicalCancerScreeningType,\n" +
-            "                  cc_method.display AS cervicalCancerScreeningMethod,\n" +
-            "                  cc_trtm.display AS cervicalCancerTreatmentScreened,\n" +
-            "                  cc_result.display AS resultOfCervicalCancerScreening\n" +
-            "              FROM\n" +
-            "             hiv_observation ho\n" +
-            "                 LEFT JOIN (\n" +
-            "                 SELECT\n" +
-            "              DISTINCT person_uuid,\n" +
-            "                  MAX(date_of_observation) AS MAXDATE\n" +
-            "                 FROM\n" +
-            "              hiv_observation\n" +
-            "                 WHERE\n" +
-            "             archived = 0\n" +
-            "            AND date_of_observation < ?3\n" +
-            "                 GROUP BY\n" +
-            "              person_uuid\n" +
-            "                 ORDER BY\n" +
-            "              MAXDATE ASC\n" +
-            "             ) AS max_cc ON max_cc.MAXDATE = ho.date_of_observation\n" +
-            "                 AND max_cc.person_uuid = ho.person_uuid\n" +
-            "                 INNER JOIN base_application_codeset cc_type ON cc_type.code = CAST(ho.data ->> 'screenType' AS VARCHAR)\n" +
-            "                 INNER JOIN base_application_codeset cc_method ON cc_method.code = CAST(ho.data ->> 'screenMethod' AS VARCHAR)\n" +
-            "                 LEFT JOIN base_application_codeset cc_result ON cc_result.code = CAST(ho.data ->> 'screeningResult' AS VARCHAR)\n" +
-            "                 LEFT JOIN base_application_codeset cc_trtm   ON  cc_trtm.code = CAST(ho.data ->> 'screenTreatment' AS VARCHAR)\n" +
-            "               ), " +
-            " ovc AS (\n" +
-            "         SELECT\n" +
-            " DISTINCT ON (person_uuid) person_uuid AS personUuid100,\n" +
-            "   ovc_number AS ovcNumber,\n" +
-            "   house_hold_number AS householdNumber\n" +
-            "         FROM\n" +
-            " hiv_enrollment\n" +
-            "     ), \n" +
-            "   previous_previous AS (\n" +
-            "         SELECT\n" +
-            " DISTINCT ON (pharmacy.person_uuid) pharmacy.person_uuid AS prePrePersonUuid,\n" +
-            "(\n" +
-            "    CASE\n" +
-            "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
-            "        WHEN(\n" +
-            "        stat.status_date > pharmacy.maxdate\n" +
-            "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
-            ")THEN stat.hiv_status\n" +
-            "        ELSE pharmacy.status\n" +
-            "        END\n" +
-            "    ) AS status,\n" +
-            "\n" +
-            "(\n" +
-            "    CASE\n" +
-            "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%'  THEN stat.status_date\n" +
-            "        WHEN(\n" +
-            "        stat.status_date > pharmacy.maxdate\n" +
-            "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
-            ") THEN stat.status_date\n" +
-            "        ELSE pharmacy.visit_date\n" +
-            "        END\n" +
-            "    ) AS status_date,\n" +
-            "\n" +
-            "stat.cause_of_death, stat.va_cause_of_death\n" +
-            "\n" +
-            "         FROM\n" +
-            " (\n" +
-            "     SELECT\n" +
-            "         (\n" +
-            " CASE\n" +
-            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?5 THEN 'IIT'\n" +
-            "     ELSE 'Active'\n" +
-            "     END\n" +
-            " ) status,\n" +
-            "         (\n" +
-            " CASE\n" +
-            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?5  THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
-            "     ELSE hp.visit_date\n" +
-            "     END\n" +
-            " ) AS visit_date,\n" +
-            "         hp.person_uuid, MAXDATE\n" +
-            "     FROM\n" +
-            "         hiv_art_pharmacy hp\n" +
-            " INNER JOIN (\n" +
-            "         SELECT hap.person_uuid, hap.visit_date AS  MAXDATE, ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
-            "           FROM public.hiv_art_pharmacy hap \n" +
-            "                    INNER JOIN public.hiv_art_pharmacy_regimens pr \n" +
-            "                    ON pr.art_pharmacy_id = hap.id \n" +
-            "            INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
-            "            INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
-            "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
-            "            WHERE r.regimen_type_id in (1,2,3,4,14) \n" +
-            "            AND hap.archived = 0                \n" +
+            "                    WHEN MAX(CAST(complete.date_completed AS DATE)) > NOW() THEN NULL\n" +
+            "                    WHEN MAX(CAST(complete.date_completed AS DATE)) IS NULL\n" +
+            "                        AND CAST((hap.visit_date + 168) AS DATE) < NOW() THEN CAST((hap.visit_date + 168) AS DATE)\n" +
+            "                    ELSE MAX(CAST(complete.date_completed AS DATE))\n" +
+            "                END\n" +
+            "            ) AS iptCompletionDate\n" +
+            "        FROM\n" +
+            "            hiv_art_pharmacy hap\n" +
+            "        INNER JOIN (\n" +
+            "            SELECT\n" +
+            "                DISTINCT person_uuid,\n" +
+            "                MAX(visit_date) AS MAXDATE\n" +
+            "            FROM\n" +
+            "                hiv_art_pharmacy\n" +
+            "            WHERE\n" +
+            "                (ipt ->> 'type' ILIKE '%INITIATION%' OR ipt ->> 'type' ILIKE 'START_REFILL')\n" +
+            "                AND archived = 0\n" +
+            "            GROUP BY\n" +
+            "                person_uuid\n" +
+            "            ORDER BY\n" +
+            "                MAXDATE ASC\n" +
+            "        ) AS max_ipt ON max_ipt.MAXDATE = hap.visit_date\n" +
+            "            AND max_ipt.person_uuid = hap.person_uuid\n" +
+            "        INNER JOIN (\n" +
+            "            SELECT\n" +
+            "                DISTINCT h.person_uuid,\n" +
+            "                h.visit_date,\n" +
+            "                CAST(pharmacy_object ->> 'regimenName' AS VARCHAR) AS regimen_name,\n" +
+            "                CAST(pharmacy_object ->> 'duration' AS VARCHAR) AS duration,\n" +
+            "                hrt.description\n" +
+            "            FROM\n" +
+            "                hiv_art_pharmacy h,\n" +
+            "                jsonb_array_elements(h.extra -> 'regimens') WITH ORDINALITY p(pharmacy_object)\n" +
+            "                RIGHT JOIN hiv_regimen hr ON hr.description = CAST(pharmacy_object ->> 'regimenName' AS VARCHAR)\n" +
+            "                RIGHT JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id\n" +
+            "            WHERE\n" +
+            "                hrt.id IN (15)\n" +
+            "        ) AS ipt_type ON ipt_type.person_uuid = max_ipt.person_uuid\n" +
+            "            AND ipt_type.visit_date = max_ipt.MAXDATE\n" +
+            "        LEFT JOIN (\n" +
+            "            SELECT\n" +
+            "                hap.person_uuid,\n" +
+            "                hap.visit_date,\n" +
+            "                TO_DATE(NULLIF(NULLIF(TRIM(hap.ipt->>'dateCompleted'), ''), 'null'), 'YYYY-MM-DD') AS date_completed\n" +
+            "            FROM\n" +
+            "                hiv_art_pharmacy hap\n" +
+            "            INNER JOIN (\n" +
+            "                SELECT\n" +
+            "                    DISTINCT person_uuid,\n" +
+            "                    MAX(visit_date) AS MAXDATE\n" +
+            "                FROM\n" +
+            "                    hiv_art_pharmacy\n" +
+            "                WHERE\n" +
+            "                    ipt ->> 'dateCompleted' IS NOT NULL\n" +
+            "                GROUP BY\n" +
+            "                    person_uuid\n" +
+            "                ORDER BY\n" +
+            "                    MAXDATE ASC\n" +
+            "            ) AS complete_ipt ON CAST(complete_ipt.MAXDATE AS DATE) = hap.visit_date\n" +
+            "                AND complete_ipt.person_uuid = hap.person_uuid\n" +
+            "        ) complete ON complete.person_uuid = hap.person_uuid\n" +
+            "        WHERE\n" +
+            "            hap.archived = 0\n" +
             "            AND hap.visit_date < ?3\n" +
-            "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
-            "      AND MAX.rnkkk3 = 1" +
-            "     WHERE\n" +
-            " hp.archived = 0\n" +
-            "       AND hp.visit_date <= ?5\n" +
-            " ) pharmacy\n" +
-            "\n" +
-            "     LEFT JOIN (\n" +
-            "     SELECT\n" +
-            "         hst.hiv_status,\n" +
-            "         hst.person_id,\n" +
-            "         hst.cause_of_death," +
-            "          hst.va_cause_of_death,\n" +
-            "         hst.status_date\n" +
-            "     FROM\n" +
-            "         (\n" +
-            " SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,va_cause_of_death,\n" +
-            "        hiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
-            "    FROM hiv_status_tracker WHERE archived=0 AND status_date <= ?5 )s\n" +
-            " WHERE s.row_number=1\n" +
-            "         ) hst\n" +
-            " INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
-            "     WHERE hst.status_date <= ?5\n" +
-            " ) stat ON stat.person_id = pharmacy.person_uuid\n" +
-            "\n" +
-            "     ),\n" +
-            "\n" +
-            "\n" +
-            "     previous AS (\n" +
-            "         SELECT\n" +
-            " DISTINCT ON (pharmacy.person_uuid) pharmacy.person_uuid AS prePersonUuid,\n" +
-            "(\n" +
-            "    CASE\n" +
-            "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
-            "        WHEN(\n" +
-            "        stat.status_date > pharmacy.maxdate\n" +
-            "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %')\n" +
-            ")THEN stat.hiv_status\n" +
-            "        ELSE pharmacy.status\n" +
-            "        END\n" +
-            "    ) AS status,\n" +
-            "\n" +
-            "(\n" +
-            "    CASE\n" +
-            "        WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%'  THEN stat.status_date\n" +
-            "        WHEN(\n" +
-            "        stat.status_date > pharmacy.maxdate\n" +
-            "    AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %')\n" +
-            ") THEN stat.status_date\n" +
-            "        ELSE pharmacy.visit_date\n" +
-            "        END\n" +
-            "    ) AS status_date,\n" +
-            "\n" +
-            "stat.cause_of_death, stat.va_cause_of_death\n" +
-            "\n" +
-            "         FROM\n" +
-            " (\n" +
-            "     SELECT\n" +
-            "         (\n" +
-            " CASE\n" +
-            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?4 THEN 'IIT'\n" +
-            "     ELSE 'Active'\n" +
-            "     END\n" +
-            " ) status,\n" +
-            "         (\n" +
-            " CASE\n" +
-            "     WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' <  ?4 THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
-            "     ELSE hp.visit_date\n" +
-            "     END\n" +
-            " ) AS visit_date,\n" +
-            "         hp.person_uuid, MAXDATE\n" +
-            "     FROM\n" +
-            "         hiv_art_pharmacy hp\n" +
-            " INNER JOIN (\n" +
-            "         SELECT hap.person_uuid, hap.visit_date AS  MAXDATE, ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
-            "           FROM public.hiv_art_pharmacy hap \n" +
-            "                    INNER JOIN public.hiv_art_pharmacy_regimens pr \n" +
-            "                    ON pr.art_pharmacy_id = hap.id \n" +
-            "            INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
-            "            INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
-            "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
-            "            WHERE r.regimen_type_id in (1,2,3,4,14) \n" +
-            "            AND hap.archived = 0                \n" +
-            "            AND hap.visit_date < ?4\n" +
-            "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
-            "      AND MAX.rnkkk3 = 1" +
-            "     WHERE\n" +
-            " hp.archived = 0\n" +
-            "       AND hp.visit_date <=  ?4\n" +
-            " ) pharmacy\n" +
-            "\n" +
-            "     LEFT JOIN (\n" +
-            "     SELECT\n" +
-            "         hst.hiv_status,\n" +
-            "         hst.person_id,\n" +
-            "         hst.cause_of_death, " +
-            "         hst.va_cause_of_death,\n" +
-            "         hst.status_date\n" +
-            "     FROM\n" +
-            "         (\n" +
-            " SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death,va_cause_of_death,\n" +
-            "        hiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
-            "    FROM hiv_status_tracker WHERE archived=0 AND status_date <=  ?4 )s\n" +
-            " WHERE s.row_number=1\n" +
-            "         ) hst\n" +
-            " INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
-            "     WHERE hst.status_date <=  ?4\n" +
-            " ) stat ON stat.person_id = pharmacy.person_uuid\n" +
-            "     ),\n" +
-            "\n" +
-            "     current_status AS ( SELECT  DISTINCT ON (pharmacy.person_uuid) pharmacy.person_uuid AS cuPersonUuid,\n" +
-            "        (\n" +
-            "CASE\n" +
-            "    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
-            "    WHEN( stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %'))\n" +
-            "        THEN stat.hiv_status\n" +
-            "    ELSE pharmacy.status\n" +
-            "    END\n" +
-            ") AS status,\n" +
-            "        (\n" +
-            "CASE\n" +
-            "    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%'  THEN stat.status_date\n" +
-            "    WHEN(stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.status_date\n" +
-            "    ELSE pharmacy.visit_date\n" +
-            "    END\n" +
-            ") AS status_date,\n" +
-            "        stat.cause_of_death, stat.va_cause_of_death\n" +
-            " FROM\n" +
-            "     (\n" +
-            "         SELECT\n" +
-            " (\n" +
-            "     CASE\n" +
-            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?3 THEN 'IIT'\n" +
-            "         ELSE 'Active'\n" +
-            "         END\n" +
-            "     ) status,\n" +
-            " (\n" +
-            "     CASE\n" +
-            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?3 THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
-            "         ELSE hp.visit_date\n" +
-            "         END\n" +
-            "     ) AS visit_date,\n" +
-            " hp.person_uuid, MAXDATE \n" +
-            "         FROM\n" +
-            " hiv_art_pharmacy hp\n" +
-            "     INNER JOIN (\n" +
-            "         SELECT hap.person_uuid, hap.visit_date AS  MAXDATE, ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
-            "           FROM public.hiv_art_pharmacy hap \n" +
-            "                    INNER JOIN public.hiv_art_pharmacy_regimens pr \n" +
-            "                    ON pr.art_pharmacy_id = hap.id \n" +
-            "            INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
-            "            INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
-            "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
-            "            WHERE r.regimen_type_id in (1,2,3,4,14) \n" +
-            "            AND hap.archived = 0                \n" +
-            "            AND hap.visit_date < ?3\n" +
-            "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
-            "      AND MAX.rnkkk3 = 1" +
-            "     WHERE\n" +
-            "     hp.archived = 0\n" +
-            "     AND hp.visit_date < ?3\n" +
-            "     ) pharmacy\n" +
-            "\n" +
-            "         LEFT JOIN (\n" +
-            "         SELECT\n" +
-            " hst.hiv_status,\n" +
-            " hst.person_id,\n" +
-            " hst.cause_of_death," +
-            " hst.va_cause_of_death,\n" +
-            " hst.status_date\n" +
-            "         FROM\n" +
-            " (\n" +
-            "     SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death, va_cause_of_death,\n" +
-            "hiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
-            "        FROM hiv_status_tracker WHERE archived=0 AND status_date <= ?3 )s\n" +
-            "     WHERE s.row_number=1\n" +
-            " ) hst\n" +
-            "     INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
-            "         WHERE hst.status_date < ?3\n" +
-            "     ) stat ON stat.person_id = pharmacy.person_uuid\n" +
-            "     ),\n" +
-            "\n" +
-            "     naive_vl_data AS (\n" +
-            "         SELECT pp.uuid AS nvl_person_uuid,\n" +
-            "    EXTRACT(YEAR FROM AGE(NOW(), pp.date_of_birth) ) as age, ph.visit_date, ph.regimen\n" +
-            "         FROM patient_person pp\n" +
-            "      INNER JOIN (\n" +
-            " SELECT DISTINCT * FROM (SELECT pharm.*,\n" +
-            "        ROW_NUMBER() OVER (PARTITION BY pharm.person_uuid ORDER BY pharm.visit_date DESC)\n" +
-            " FROM\n" +
-            "     (SELECT DISTINCT * FROM hiv_art_pharmacy hap\n" +
-            "         INNER JOIN hiv_art_pharmacy_regimens hapr\n" +
-            "         INNER JOIN hiv_regimen hr ON hr.id=hapr.regimens_id\n" +
-            "         INNER JOIN hiv_regimen_type hrt ON hrt.id=hr.regimen_type_id\n" +
-            "         INNER JOIN hiv_regimen_resolver hrr ON hrr.regimensys=hr.description\n" +
-            "        ON hapr.art_pharmacy_id=hap.id\n" +
-            "      WHERE hap.archived=0 AND hrt.id IN (1,2,3,4,14) AND hap.facility_id = ?1 ) pharm\n" +
-            ")ph WHERE ph.row_number=1\n" +
-            "         )ph ON ph.person_uuid=pp.uuid\n" +
-            "         WHERE pp.uuid NOT IN (\n" +
-            " SELECT patient_uuid FROM (\n" +
-            "      SELECT COUNT(ls.patient_uuid), ls.patient_uuid FROM laboratory_sample ls\n" +
-            "  INNER JOIN laboratory_test lt ON lt.id=ls.test_id AND lt.lab_test_id=16\n" +
-            "      WHERE ls.archived=0 AND ls.facility_id=?1\n" +
-            "      GROUP BY ls.patient_uuid\n" +
-            "  )t )\n" +
-            "     ),\n" +
-            "\n" +
-            "crytococal_antigen as (\n" +
-            " select \n" +
-            "    *\n" +
-            "  from \n" +
-            "    (\n" +
-            "      select \n" +
-            "        DISTINCT ON (lr.patient_uuid) lr.patient_uuid as personuuid12, \n" +
-            "        CAST(lr.date_result_reported AS DATE) AS dateOfLastCrytococalAntigen, \n" +
-            "        lr.result_reported AS lastCrytococalAntigen , \n" +
-            "        ROW_NUMBER() OVER (\n" +
-            "          PARTITION BY lr.patient_uuid \n" +
-            "          ORDER BY \n" +
-            "            lr.date_result_reported DESC\n" +
-            "        ) as rowNum \n" +
-            "      from \n" +
-            "        public.laboratory_test lt \n" +
-            "        inner join laboratory_result lr on lr.test_id = lt.id \n" +
-            "      where \n" +
-            "        lab_test_id = 52 OR lab_test_id = 69 OR lab_test_id = 70\n" +
-            "        AND lr.date_result_reported IS NOT NULL \n" +
-            "        AND lr.date_result_reported <= ?3 \n" +
-            "        AND lr.date_result_reported >= ?2 \n" +
-            "        AND lr.result_reported is NOT NULL \n" +
-            "        AND lr.archived = 0 \n" +
-            "        AND lr.facility_id = ?1\n" +
-            "    ) dt \n" +
-            "  where \n" +
-            "    rowNum = 1\n" +
-            "), " +
-            "case_manager AS (\n" +
-            " SELECT DISTINCT ON (cmp.person_uuid)person_uuid AS caseperson, cmp.case_manager_id, CONCAT(cm.first_name, ' ', cm.last_name) AS caseManager FROM (SELECT person_uuid, case_manager_id,\n" +
-            " ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY id DESC)\n" +
-            " FROM case_manager_patients) cmp  INNER JOIN case_manager cm ON cm.id=cmp.case_manager_id\n" +
-            " WHERE cmp.row_number=1 AND cm.facility_id=?1), " +
-            "client_verification AS (\n" +
-            "\t SELECT * FROM (\n" +
-            "select person_uuid,  data->'attempt'->0->>'outcome' AS clientVerificationStatus,\n" +
-            "CAST (data->'attempt'->0->>'dateOfAttempt' AS DATE) AS dateOfOutcome,\n" +
-            "ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) DESC)\n" +
-            "from public.hiv_observation where type = 'Client Verification' \n" +
-            "AND archived = 0\n" +
-            " AND CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) <= ?3 \n" +
-            " AND CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) >= ?2 "+
-            "AND facility_id = ?1\n" +
-            "\t) clientVerification WHERE row_number = 1\n" +
-            "\tAND dateOfOutcome IS NOT NULL\n" +
-            " ) "+
+            "        GROUP BY\n" +
+            "            hap.person_uuid,\n" +
+            "            ipt_type.regimen_name,\n" +
+            "            hap.ipt,\n" +
+            "            hap.visit_date\n" +
+            "    ),\n" +
+            "    cervical_cancer AS (\n" +
+            "        SELECT\n" +
+            "            DISTINCT ON (ho.person_uuid)\n" +
+            "            ho.person_uuid AS person_uuid90,\n" +
+            "            ho.date_of_observation AS dateOfCervicalCancerScreening,\n" +
+            "            ho.data ->> 'screenTreatmentMethodDate' AS treatmentMethodDate,\n" +
+            "            cc_type.display AS cervicalCancerScreeningType,\n" +
+            "            cc_method.display AS cervicalCancerScreeningMethod,\n" +
+            "            cc_trtm.display AS cervicalCancerTreatmentScreened,\n" +
+            "            cc_result.display AS resultOfCervicalCancerScreening\n" +
+            "        FROM\n" +
+            "            hiv_observation ho\n" +
+            "        LEFT JOIN (\n" +
+            "            SELECT\n" +
+            "                DISTINCT person_uuid,\n" +
+            "                MAX(date_of_observation) AS MAXDATE\n" +
+            "            FROM\n" +
+            "                hiv_observation\n" +
+            "            WHERE\n" +
+            "                archived = 0\n" +
+            "                AND date_of_observation < ?3\n" +
+            "            GROUP BY\n" +
+            "                person_uuid\n" +
+            "            ORDER BY\n" +
+            "                MAXDATE ASC\n" +
+            "        ) AS max_cc ON max_cc.MAXDATE = ho.date_of_observation\n" +
+            "            AND max_cc.person_uuid = ho.person_uuid\n" +
+            "        INNER JOIN base_application_codeset cc_type ON cc_type.code = CAST(ho.data ->> 'screenType' AS VARCHAR)\n" +
+            "        INNER JOIN base_application_codeset cc_method ON cc_method.code = CAST(ho.data ->> 'screenMethod' AS VARCHAR)\n" +
+            "        LEFT JOIN base_application_codeset cc_result ON cc_result.code = CAST(ho.data ->> 'screeningResult' AS VARCHAR)\n" +
+            "        LEFT JOIN base_application_codeset cc_trtm ON cc_trtm.code = CAST(ho.data ->> 'screenTreatment' AS VARCHAR)\n" +
+            "    ),\n" +
+            "    ovc AS (\n" +
+            "        SELECT DISTINCT ON (person_uuid)\n" +
+            "            person_uuid AS personUuid100,\n" +
+            "            ovc_number AS ovcNumber,\n" +
+            "            house_hold_number AS householdNumber\n" +
+            "        FROM\n" +
+            "            hiv_enrollment\n" +
+            "    ),\n" +
+            "    previous_previous AS (\n" +
+            "        SELECT DISTINCT ON (pharmacy.person_uuid)\n" +
+            "            pharmacy.person_uuid AS prePrePersonUuid,\n" +
+            "            (\n" +
+            "                CASE\n" +
+            "                    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
+            "                    WHEN (stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%'\n" +
+            "                                                                       OR stat.hiv_status ILIKE '%out%'\n" +
+            "                                                                       OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.hiv_status\n" +
+            "                    ELSE pharmacy.status\n" +
+            "                END\n" +
+            "            ) AS status,\n" +
+            "            (\n" +
+            "                CASE\n" +
+            "                    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN stat.status_date\n" +
+            "                    WHEN (stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR\n" +
+            "                                                                   stat.hiv_status ILIKE '%out%' OR\n" +
+            "                                                                   stat.hiv_status ILIKE '%Invalid %')) THEN stat.status_date\n" +
+            "                    ELSE pharmacy.visit_date\n" +
+            "                END\n" +
+            "            ) AS status_date,\n" +
+            "            stat.cause_of_death,\n" +
+            "            stat.va_cause_of_death\n" +
+            "        FROM (\n" +
+            "            SELECT\n" +
+            "                (\n" +
+            "                    CASE\n" +
+            "                        WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?5 THEN 'IIT'\n" +
+            "                        ELSE 'Active'\n" +
+            "                    END\n" +
+            "                ) status,\n" +
+            "                (\n" +
+            "                    CASE\n" +
+            "                        WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?5 THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
+            "                        ELSE hp.visit_date\n" +
+            "                    END\n" +
+            "                ) AS visit_date,\n" +
+            "                hp.person_uuid, MAXDATE\n" +
+            "            FROM\n" +
+            "                hiv_art_pharmacy hp\n" +
+            "            INNER JOIN (\n" +
+            "                SELECT hap.person_uuid, hap.visit_date AS MAXDATE,\n" +
+            "                       ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
+            "                FROM public.hiv_art_pharmacy hap\n" +
+            "                INNER JOIN public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = hap.id\n" +
+            "                INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0\n" +
+            "                INNER JOIN public.hiv_regimen r ON r.id = pr.regimens_id\n" +
+            "                INNER JOIN public.hiv_regimen_type rt ON rt.id = r.regimen_type_id\n" +
+            "                WHERE r.regimen_type_id IN (1,2,3,4,14)\n" +
+            "                AND hap.archived = 0\n" +
+            "                AND hap.visit_date < ?3\n" +
+            "            ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid AND MAX.rnkkk3 = 1\n" +
+            "            WHERE hp.archived = 0 AND hp.visit_date <= ?5\n" +
+            "        ) pharmacy\n" +
+            "        LEFT JOIN (\n" +
+            "            SELECT\n" +
+            "                hst.hiv_status,\n" +
+            "                hst.person_id,\n" +
+            "                hst.cause_of_death,\n" +
+            "                hst.va_cause_of_death,\n" +
+            "                hst.status_date\n" +
+            "            FROM (\n" +
+            "                SELECT * FROM (\n" +
+            "                    SELECT DISTINCT (person_id) person_id, status_date, cause_of_death, va_cause_of_death, hiv_status,\n" +
+            "                                    ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS row_number\n" +
+            "                    FROM hiv_status_tracker WHERE archived = 0 AND status_date <= ?5\n" +
+            "                ) s\n" +
+            "                WHERE s.row_number = 1\n" +
+            "            ) hst\n" +
+            "            INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+            "            WHERE hst.status_date <= ?5\n" +
+            "        ) stat ON stat.person_id = pharmacy.person_uuid\n" +
+            "    ),\n" +
+            "    previous AS (\n" +
+            "        SELECT DISTINCT ON (pharmacy.person_uuid)\n" +
+            "            pharmacy.person_uuid AS prePersonUuid,\n" +
+            "            (\n" +
+            "                CASE\n" +
+            "                    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
+            "                    WHEN (stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR\n" +
+            "                                                                   stat.hiv_status ILIKE '%out%' OR\n" +
+            "                                                                   stat.hiv_status ILIKE '%Invalid %')) THEN stat.hiv_status\n" +
+            "                    ELSE pharmacy.status\n" +
+            "                END\n" +
+            "            ) AS status,\n" +
+            "            (\n" +
+            "                CASE\n" +
+            "                    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN stat.status_date\n" +
+            "                    WHEN (stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%'\n" +
+            "                                                                       OR stat.hiv_status ILIKE '%out%'\n" +
+            "                                                                       OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.status_date\n" +
+            "                    ELSE pharmacy.visit_date\n" +
+            "                END\n" +
+            "            ) AS status_date,\n" +
+            "            stat.cause_of_death,\n" +
+            "            stat.va_cause_of_death\n" +
+            "        FROM (\n" +
+            "            SELECT\n" +
+            "                (\n" +
+            "                    CASE\n" +
+            "                        WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?4 THEN 'IIT'\n" +
+            "                        ELSE 'Active'\n" +
+            "                    END\n" +
+            "                ) status,\n" +
+            "                (\n" +
+            "                    CASE\n" +
+            "                        WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?4 THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
+            "                        ELSE hp.visit_date\n" +
+            "                    END\n" +
+            "                ) AS visit_date,\n" +
+            "                hp.person_uuid, MAXDATE\n" +
+            "            FROM\n" +
+            "                hiv_art_pharmacy hp\n" +
+            "            INNER JOIN (\n" +
+            "                SELECT hap.person_uuid, hap.visit_date AS MAXDATE,\n" +
+            "                       ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
+            "                FROM public.hiv_art_pharmacy hap\n" +
+            "                INNER JOIN public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = hap.id\n" +
+            "                INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0\n" +
+            "                INNER JOIN public.hiv_regimen r ON r.id = pr.regimens_id\n" +
+            "                INNER JOIN public.hiv_regimen_type rt ON rt.id = r.regimen_type_id\n" +
+            "                WHERE r.regimen_type_id IN (1,2,3,4,14)\n" +
+            "                AND hap.archived = 0\n" +
+            "                AND hap.visit_date < ?4\n" +
+            "            ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid AND MAX.rnkkk3 = 1\n" +
+            "            WHERE hp.archived = 0 AND hp.visit_date <= ?4\n" +
+            "        ) pharmacy\n" +
+            "        LEFT JOIN (\n" +
+            "            SELECT\n" +
+            "                hst.hiv_status,\n" +
+            "                hst.person_id,\n" +
+            "                hst.cause_of_death,\n" +
+            "                hst.va_cause_of_death,\n" +
+            "                hst.status_date\n" +
+            "            FROM (\n" +
+            "                SELECT * FROM (\n" +
+            "                    SELECT DISTINCT (person_id) person_id, status_date, cause_of_death, va_cause_of_death, hiv_status,\n" +
+            "                                    ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS row_number\n" +
+            "                    FROM hiv_status_tracker WHERE archived = 0 AND status_date <= ?4\n" +
+            "                ) s\n" +
+            "                WHERE s.row_number = 1\n" +
+            "            ) hst\n" +
+            "            INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+            "            WHERE hst.status_date <= ?4\n" +
+            "        ) stat ON stat.person_id = pharmacy.person_uuid\n" +
+            "    ),\n" +
+            "    current_status AS (\n" +
+            "        SELECT DISTINCT ON (pharmacy.person_uuid)\n" +
+            "            pharmacy.person_uuid AS cuPersonUuid,\n" +
+            "            (\n" +
+            "                CASE\n" +
+            "                    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
+            "                    WHEN (stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%'\n" +
+            "                                                                       OR stat.hiv_status ILIKE '%out%'\n" +
+            "                                                                       OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.hiv_status\n" +
+            "                    ELSE pharmacy.status\n" +
+            "                END\n" +
+            "            ) AS status,\n" +
+            "            (\n" +
+            "                CASE\n" +
+            "                    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN stat.status_date\n" +
+            "                    WHEN (stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%'\n" +
+            "                                                                       OR stat.hiv_status ILIKE '%out%'\n" +
+            "                                                                       OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.status_date\n" +
+            "                    ELSE pharmacy.visit_date\n" +
+            "                END\n" +
+            "            ) AS status_date,\n" +
+            "            stat.cause_of_death,\n" +
+            "            stat.va_cause_of_death\n" +
+            "        FROM (\n" +
+            "            SELECT\n" +
+            "                (\n" +
+            "                    CASE\n" +
+            "                        WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?3 THEN 'IIT'\n" +
+            "                        ELSE 'Active'\n" +
+            "                    END\n" +
+            "                ) status,\n" +
+            "                (\n" +
+            "                    CASE\n" +
+            "                        WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?3 THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
+            "                        ELSE hp.visit_date\n" +
+            "                    END\n" +
+            "                ) AS visit_date,\n" +
+            "                hp.person_uuid, MAXDATE\n" +
+            "            FROM\n" +
+            "                hiv_art_pharmacy hp\n" +
+            "            INNER JOIN (\n" +
+            "                SELECT hap.person_uuid, hap.visit_date AS MAXDATE,\n" +
+            "                       ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
+            "                FROM public.hiv_art_pharmacy hap\n" +
+            "                INNER JOIN public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = hap.id\n" +
+            "                INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0\n" +
+            "                INNER JOIN public.hiv_regimen r ON r.id = pr.regimens_id\n" +
+            "                INNER JOIN public.hiv_regimen_type rt ON rt.id = r.regimen_type_id\n" +
+            "                WHERE r.regimen_type_id IN (1,2,3,4,14)\n" +
+            "                AND hap.archived = 0\n" +
+            "                AND hap.visit_date < ?3\n" +
+            "            ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid AND MAX.rnkkk3 = 1\n" +
+            "            WHERE hp.archived = 0 AND hp.visit_date < ?3\n" +
+            "        ) pharmacy\n" +
+            "        LEFT JOIN (\n" +
+            "            SELECT\n" +
+            "                hst.hiv_status,\n" +
+            "                hst.person_id,\n" +
+            "                hst.cause_of_death,\n" +
+            "                hst.va_cause_of_death,\n" +
+            "                hst.status_date\n" +
+            "            FROM (\n" +
+            "                SELECT * FROM (\n" +
+            "                    SELECT DISTINCT (person_id) person_id, status_date, cause_of_death, va_cause_of_death, hiv_status,\n" +
+            "                                    ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS row_number\n" +
+            "                    FROM hiv_status_tracker WHERE archived = 0 AND status_date <= ?3\n" +
+            "                ) s\n" +
+            "                WHERE s.row_number = 1\n" +
+            "            ) hst\n" +
+            "            INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+            "            WHERE hst.status_date < ?3\n" +
+            "        ) stat ON stat.person_id = pharmacy.person_uuid\n" +
+            "    ),\n" +
+            "    naive_vl_data AS (\n" +
+            "        SELECT\n" +
+            "            pp.uuid AS nvl_person_uuid,\n" +
+            "            EXTRACT(YEAR FROM AGE(NOW(), pp.date_of_birth)) AS age,\n" +
+            "            ph.visit_date,\n" +
+            "            ph.regimen\n" +
+            "        FROM\n" +
+            "            patient_person pp\n" +
+            "        INNER JOIN (\n" +
+            "            SELECT DISTINCT *\n" +
+            "            FROM (\n" +
+            "                SELECT\n" +
+            "                    pharm.*,\n" +
+            "                    ROW_NUMBER() OVER (PARTITION BY pharm.person_uuid ORDER BY pharm.visit_date DESC) AS row_number\n" +
+            "                FROM\n" +
+            "                    (SELECT DISTINCT *\n" +
+            "                     FROM hiv_art_pharmacy hap\n" +
+            "                     INNER JOIN hiv_art_pharmacy_regimens hapr ON hapr.art_pharmacy_id = hap.id\n" +
+            "                     INNER JOIN hiv_regimen hr ON hr.id = hapr.regimens_id\n" +
+            "                     INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id\n" +
+            "                     INNER JOIN hiv_regimen_resolver hrr ON hrr.regimensys = hr.description\n" +
+            "                     WHERE\n" +
+            "                         hap.archived = 0\n" +
+            "                         AND hrt.id IN (1,2,3,4,14)\n" +
+            "                         AND hap.facility_id = ?1\n" +
+            "                    ) pharm\n" +
+            "            ) ph\n" +
+            "            WHERE ph.row_number = 1\n" +
+            "        ) ph ON ph.person_uuid = pp.uuid\n" +
+            "        WHERE\n" +
+            "            pp.uuid NOT IN (\n" +
+            "                SELECT patient_uuid\n" +
+            "                FROM (\n" +
+            "                    SELECT\n" +
+            "                        COUNT(ls.patient_uuid),\n" +
+            "                        ls.patient_uuid\n" +
+            "                    FROM\n" +
+            "                        laboratory_sample ls\n" +
+            "                    INNER JOIN laboratory_test lt ON lt.id = ls.test_id AND lt.lab_test_id = 16\n" +
+            "                    WHERE\n" +
+            "                        ls.archived = 0\n" +
+            "                        AND ls.facility_id = ?1\n" +
+            "                    GROUP BY\n" +
+            "                        ls.patient_uuid\n" +
+            "                ) t\n" +
+            "            )\n" +
+            "    ),\n" +
+            "--     crytococal_antigen AS (\n" +
+            "--         SELECT\n" +
+            "--             *\n" +
+            "--         FROM\n" +
+            "--             (\n" +
+            "--                 SELECT\n" +
+            "--                     DISTINCT ON (lr.patient_uuid) lr.patient_uuid AS personuuid12,\n" +
+            "--                     CAST(lr.date_result_reported AS DATE) AS dateOfLastCrytococalAntigen,\n" +
+            "--                     lr.result_reported AS lastCrytococalAntigen,\n" +
+            "--                     ROW_NUMBER() OVER (\n" +
+            "--                         PARTITION BY lr.patient_uuid\n" +
+            "--                         ORDER BY lr.date_result_reported DESC\n" +
+            "--                     ) AS rowNum\n" +
+            "--                 FROM\n" +
+            "--                     public.laboratory_test lt\n" +
+            "--                     INNER JOIN laboratory_result lr ON lr.test_id = lt.id\n" +
+            "--                 WHERE\n" +
+            "--                     (lab_test_id = 52 OR lab_test_id = 69 OR lab_test_id = 70)\n" +
+            "--                     AND lr.date_result_reported IS NOT NULL\n" +
+            "--                     AND lr.date_result_reported <= ?3\n" +
+            "--                     AND lr.date_result_reported >= ?2\n" +
+            "--                     AND lr.result_reported IS NOT NULL\n" +
+            "--                     AND lr.archived = 0\n" +
+            "--                     AND lr.facility_id = ?1\n" +
+            "--             ) dt\n" +
+            "--         WHERE\n" +
+            "--             rowNum = 1\n" +
+            "--     ),\n" +
+            "    case_manager AS (\n" +
+            "        SELECT DISTINCT ON (cmp.person_uuid) person_uuid AS caseperson, cmp.case_manager_id, CONCAT(cm.first_name, ' ', cm.last_name) AS caseManager\n" +
+            "        FROM (\n" +
+            "            SELECT\n" +
+            "                person_uuid,\n" +
+            "                case_manager_id,\n" +
+            "                ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row_number\n" +
+            "            FROM\n" +
+            "                case_manager_patients\n" +
+            "        ) cmp\n" +
+            "        INNER JOIN case_manager cm ON cm.id = cmp.case_manager_id\n" +
+            "        WHERE\n" +
+            "            cmp.row_number = 1\n" +
+            "            AND cm.facility_id = ?1\n" +
+            "    ),\n" +
+            "    client_verification AS (\n" +
+            "        SELECT *\n" +
+            "        FROM (\n" +
+            "            SELECT\n" +
+            "                person_uuid,\n" +
+            "                data->'attempt'->0->>'outcome' AS clientVerificationStatus,\n" +
+            "                CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) AS dateOfOutcome,\n" +
+            "                ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) DESC) AS row_number\n" +
+            "            FROM\n" +
+            "                public.hiv_observation\n" +
+            "            WHERE\n" +
+            "                type = 'Client Verification'\n" +
+            "                AND archived = 0\n" +
+            "                AND CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) <= ?3\n" +
+            "                AND CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) >= ?2\n" +
+            "                AND facility_id = ?1\n" +
+            "        ) clientVerification\n" +
+            "        WHERE\n" +
+            "            row_number = 1\n" +
+            "            AND dateOfOutcome IS NOT NULL\n" +
+            "    ) \n" +
             "SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,\n" +
-            "           bd.*,\n" +
-            "CONCAT(bd.datimId, '_', bd.personUuid) AS ndrPatientIdentifier, " +
-            "           p_lga.*,\n" +
-            "           scd.*,\n" +
-            "           cvlr.*,\n" +
-            "           pdr.*,\n" +
-            "           b.*,\n" +
-            "           c.*,\n" +
-            "           e.*,\n" +
-            "           ca.dateOfCurrentRegimen,\n" +
-            "           ca.person_uuid70,\n" +
-            "           ipt.dateOfIptStart,\n" +
-            "           ipt.iptCompletionDate,\n" +
-            "           ipt.iptCompletionStatus,\n" +
-            "           ipt.iptType,\n" +
-            "           cc.*,\n" +
-            "           ov.*,\n" +
-            "           tbTment.*,\n" +
-            "           tbSample.*,\n" +
-            "           tbResult.*,\n" +
-            "           tbS.*,\n" +
-            "           tbl.*,\n" +
-            "           crypt.*, \n" +
-//            "           cvl.clientVerificationStatus, " +
-            "           ct.cause_of_death AS causeOfDeath,\n" +
-            "           ct.va_cause_of_death AS vaCauseOfDeath,\n" +
-            "           (\n" +
-            "   CASE\n" +
-            "       WHEN prepre.status ILIKE '%DEATH%' THEN 'Died'\n" +
-            "       WHEN prepre.status ILIKE '%out%' THEN 'Transferred Out'\n" +
-            "       WHEN pre.status ILIKE '%DEATH%' THEN 'Died'\n" +
-            "       WHEN pre.status ILIKE '%out%' THEN 'Transferred Out'\n" +
-            "       WHEN (\n" +
-            "prepre.status ILIKE '%IIT%'\n" +
-            "        OR prepre.status ILIKE '%stop%'\n" +
-            "    )\n" +
-            "           AND (pre.status ILIKE '%ACTIVE%') THEN 'Active Restart'\n" +
-            "       WHEN prepre.status ILIKE '%ACTIVE%'\n" +
-            "           AND pre.status ILIKE '%ACTIVE%' THEN 'Active'\n" +
-            "       ELSE REPLACE(pre.status, '_', ' ')\n" +
-            "       END\n" +
-            "   ) AS previousStatus,\n" +
-            "           CAST((\n" +
-            "   CASE\n" +
-            "       WHEN prepre.status ILIKE '%DEATH%' THEN prepre.status_date\n" +
-            "       WHEN prepre.status ILIKE '%out%' THEN prepre.status_date\n" +
-            "       WHEN pre.status ILIKE '%DEATH%' THEN pre.status_date\n" +
-            "       WHEN pre.status ILIKE '%out%' THEN pre.status_date\n" +
-            "       WHEN (\n" +
-            "prepre.status ILIKE '%IIT%'\n" +
-            "        OR prepre.status ILIKE '%stop%'\n" +
-            "    )\n" +
-            "           AND (pre.status ILIKE '%ACTIVE%') THEN pre.status_date\n" +
-            "       WHEN prepre.status ILIKE '%ACTIVE%'\n" +
-            "           AND pre.status ILIKE '%ACTIVE%' THEN pre.status_date\n" +
-            "       ELSE pre.status_date\n" +
-            "       END\n" +
-            "   ) AS DATE)AS previousStatusDate,\n" +
-            "           (\n" +
-            "   CASE\n" +
-            "       WHEN prepre.status ILIKE '%DEATH%' THEN 'Died'\n" +
-            "       WHEN prepre.status ILIKE '%out%' THEN 'Transferred Out'\n" +
-            "       WHEN pre.status ILIKE '%DEATH%' THEN 'Died'\n" +
-            "       WHEN pre.status ILIKE '%out%' THEN 'Transferred Out'\n" +
-            "       WHEN ct.status ILIKE '%IIT%' THEN 'IIT'\n" +
-            "       WHEN ct.status ILIKE '%out%' THEN 'Transferred Out'\n" +
-            "       WHEN ct.status ILIKE '%DEATH%' THEN 'Died'\n" +
-            "       WHEN (\n" +
-            "pre.status ILIKE '%IIT%'\n" +
-            "        OR pre.status ILIKE '%stop%'\n" +
-            "    )\n" +
-            "           AND (ct.status ILIKE '%ACTIVE%') THEN 'Active Restart'\n" +
-            "       WHEN pre.status ILIKE '%ACTIVE%'\n" +
-            "           AND ct.status ILIKE '%ACTIVE%' THEN 'Active'\n" +
-            "       ELSE REPLACE(ct.status, '_', ' ')\n" +
-            "       END\n" +
-            "   ) AS currentStatus,\n" +
-            "           CAST((\n" +
-            "   CASE\n" +
-            "       WHEN prepre.status ILIKE '%DEATH%' THEN prepre.status_date\n" +
-            "       WHEN prepre.status ILIKE '%out%' THEN prepre.status_date\n" +
-            "       WHEN pre.status ILIKE '%DEATH%' THEN pre.status_date\n" +
-            "       WHEN pre.status ILIKE '%out%' THEN pre.status_date\n" +
-            "       WHEN ct.status ILIKE '%IIT%' THEN\n" +
+            "       bd.*,\n" +
+            "       CONCAT(bd.datimId, '_', bd.personUuid) AS ndrPatientIdentifier,\n" +
+            "       p_lga.*,\n" +
+            "       scd.*,\n" +
+            "       cvlr.*,\n" +
+            "       pdr.*,\n" +
+            "       b.*,\n" +
+            "       c.*,\n" +
+            "       e.*,\n" +
+            "       ca.dateOfCurrentRegimen,\n" +
+            "       ca.person_uuid70,\n" +
+            "       ipt.dateOfIptStart,\n" +
+            "       ipt.iptCompletionDate,\n" +
+            "       ipt.iptCompletionStatus,\n" +
+            "       ipt.iptType,\n" +
+            "       cc.*,\n" +
+            "       ov.*,\n" +
+            "       tbTment.*,\n" +
+            "       tbSample.*,\n" +
+            "       tbResult.*,\n" +
+            "       tbS.*,\n" +
+            "--        tbl.*,\n" +
+            "--        crypt.*,\n" +
+            "       ct.cause_of_death AS causeOfDeath,\n" +
+            "       ct.va_cause_of_death AS vaCauseOfDeath,\n" +
+            "       (\n" +
             "           CASE\n" +
-            "   WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%out%' OR pre.status ILIKE '%stop%') THEN pre.status_date\n" +
-            "   ELSE ct.status_date --check the pre to see the status and return date appropriate\n" +
-            "   END\n" +
-            "       WHEN ct.status ILIKE '%stop%' THEN\n" +
+            "               WHEN prepre.status ILIKE '%DEATH%' THEN 'Died'\n" +
+            "               WHEN prepre.status ILIKE '%out%' THEN 'Transferred Out'\n" +
+            "               WHEN pre.status ILIKE '%DEATH%' THEN 'Died'\n" +
+            "               WHEN pre.status ILIKE '%out%' THEN 'Transferred Out'\n" +
+            "               WHEN (\n" +
+            "                   prepre.status ILIKE '%IIT%'\n" +
+            "                   OR prepre.status ILIKE '%stop%'\n" +
+            "               )\n" +
+            "                   AND (pre.status ILIKE '%ACTIVE%') THEN 'Active Restart'\n" +
+            "               WHEN prepre.status ILIKE '%ACTIVE%'\n" +
+            "                   AND pre.status ILIKE '%ACTIVE%' THEN 'Active'\n" +
+            "               ELSE REPLACE(pre.status, '_', ' ')\n" +
+            "           END\n" +
+            "       ) AS previousStatus,\n" +
+            "       CAST((\n" +
             "           CASE\n" +
-            "   WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%out%' OR pre.status ILIKE '%IIT%') THEN pre.status_date\n" +
-            "   ELSE ct.status_date --check the pre to see the status and return date appropriate\n" +
-            "   END\n" +
-            "       WHEN ct.status ILIKE '%out%' THEN\n" +
+            "               WHEN prepre.status ILIKE '%DEATH%' THEN prepre.status_date\n" +
+            "               WHEN prepre.status ILIKE '%out%' THEN prepre.status_date\n" +
+            "               WHEN pre.status ILIKE '%DEATH%' THEN pre.status_date\n" +
+            "               WHEN pre.status ILIKE '%out%' THEN pre.status_date\n" +
+            "               WHEN (\n" +
+            "                   prepre.status ILIKE '%IIT%'\n" +
+            "                   OR prepre.status ILIKE '%stop%'\n" +
+            "               )\n" +
+            "                   AND (pre.status ILIKE '%ACTIVE%') THEN pre.status_date\n" +
+            "               WHEN prepre.status ILIKE '%ACTIVE%'\n" +
+            "                   AND pre.status ILIKE '%ACTIVE%' THEN pre.status_date\n" +
+            "               ELSE pre.status_date\n" +
+            "           END\n" +
+            "       ) AS DATE) AS previousStatusDate,\n" +
+            "       (\n" +
             "           CASE\n" +
-            "   WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%stop%' OR pre.status ILIKE '%IIT%') THEN pre.status_date\n" +
-            "   ELSE ct.status_date --check the pre to see the status and return date appropriate\n" +
-            "   END\n" +
-            "       WHEN (\n" +
-            "pre.status ILIKE '%IIT%'\n" +
-            "        OR pre.status ILIKE '%stop%'\n" +
-            "    )\n" +
-            "           AND (ct.status ILIKE '%ACTIVE%') THEN ct.status_date\n" +
-            "       WHEN pre.status ILIKE '%ACTIVE%'\n" +
-            "           AND ct.status ILIKE '%ACTIVE%' THEN ct.status_date\n" +
-            "       ELSE ct.status_date\n" +
-            "       END\n" +
-            "   )AS DATE) AS currentStatusDate,\n" +
-//            "  -- client verification column\n" +
-            "       cvl.clientVerificationStatus, "+
-            "           (\n" +
-            "   CASE\n" +
-            "       WHEN prepre.status ILIKE '%DEATH%' THEN FALSE\n" +
-            "       WHEN prepre.status ILIKE '%out%' THEN FALSE\n" +
-            "       WHEN pre.status ILIKE '%DEATH%' THEN FALSE\n" +
-            "       WHEN pre.status ILIKE '%out%' THEN FALSE\n" +
-            "       WHEN ct.status ILIKE '%IIT%' THEN FALSE\n" +
-            "       WHEN ct.status ILIKE '%out%' THEN FALSE\n" +
-            "       WHEN ct.status ILIKE '%DEATH%' THEN FALSE\n" +
-            "       WHEN ct.status ILIKE '%stop%' THEN FALSE\n" +
-            "       WHEN (nvd.age >= 15\n" +
-            "           AND nvd.regimen ILIKE '%DTG%'\n" +
-            "           AND bd.artstartdate + 91 < ?3) THEN TRUE\n" +
-            "       WHEN (nvd.age >= 15\n" +
-            "           AND nvd.regimen NOT ILIKE '%DTG%'\n" +
-            "           AND bd.artstartdate + 181 < ?3) THEN TRUE\n" +
-            "       WHEN (nvd.age <= 15 AND bd.artstartdate + 181 < ?3) THEN TRUE\n" +
-            "\n" +
-            "       WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL\n" +
-            "           AND scd.dateofviralloadsamplecollection IS NULL AND\n" +
-            "cvlr.dateofcurrentviralload IS NULL\n" +
-            "           AND CAST(bd.artstartdate AS DATE) + 181 < ?3 THEN TRUE\n" +
-            "\n" +
-            "       WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL\n" +
-            "           AND scd.dateofviralloadsamplecollection IS NOT NULL AND\n" +
-            "cvlr.dateofcurrentviralload IS NULL\n" +
-            "           AND CAST(bd.artstartdate AS DATE) + 91 < ?3 THEN TRUE\n" +
-            "\n" +
-            "\n" +
-            "       WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000\n" +
-            "           AND( scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload\n" +
-            "   OR  scd.dateofviralloadsamplecollection IS NULL )\n" +
-            "           AND CAST(cvlr.dateofcurrentviralload AS DATE) + 181 < ?3 THEN TRUE\n" +
-            "\n" +
-            "       WHEN  CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000\n" +
-            "           AND (scd.dateofviralloadsamplecollection > cvlr.dateofcurrentviralload\n" +
-            "   OR cvlr.dateofcurrentviralload IS NULL\n" +
-            "     )\n" +
-            "           AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 THEN TRUE\n" +
-            "\n" +
-            "       WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) > 1000\n" +
-            "           AND ( scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload\n" +
-            "   OR\n" +
-            "     scd.dateofviralloadsamplecollection IS NULL\n" +
-            "    )\n" +
-            "           AND CAST(cvlr.dateofcurrentviralload AS DATE) + 91 < ?3 THEN TRUE\n" +
-            "\n" +
-            "       WHEN\n" +
-            "       CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) > 1000\n" +
-            "   AND (scd.dateofviralloadsamplecollection > cvlr.dateofcurrentviralload\n" +
-            "   OR cvlr.dateofcurrentviralload IS NULL)\n" +
-            "   AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 THEN TRUE\n" +
-            "\n" +
-            "       ELSE FALSE\n" +
-            "       END\n" +
-            "   ) AS vlEligibilityStatus,\n" +
-            "           CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) AS test,\n" +
-            "\n" +
-            "           (\n" +
-            "   CASE\n" +
-            "       WHEN prepre.status ILIKE '%DEATH%' THEN NULL\n" +
-            "       WHEN prepre.status ILIKE '%out%' THEN NULL\n" +
-            "       WHEN pre.status ILIKE '%DEATH%' THEN NULL\n" +
-            "       WHEN pre.status ILIKE '%out%' THEN NULL\n" +
-            "       WHEN ct.status ILIKE '%IIT%' THEN NULL\n" +
-            "       WHEN ct.status ILIKE '%out%' THEN NULL\n" +
-            "       WHEN ct.status ILIKE '%DEATH%' THEN NULL\n" +
-            "       WHEN ct.status ILIKE '%stop%' THEN NULL\n" +
-            "       WHEN (nvd.age >= 15\n" +
-            "           AND nvd.regimen ILIKE '%DTG%'\n" +
-            "           AND bd.artstartdate + 91 < ?3)\n" +
-            "           THEN CAST(bd.artstartdate + 91 AS DATE)\n" +
-            "       WHEN (nvd.age >= 15\n" +
-            "           AND nvd.regimen NOT ILIKE '%DTG%'\n" +
-            "           AND bd.artstartdate + 181 < ?3)\n" +
-            "           THEN CAST(bd.artstartdate + 181 AS DATE)\n" +
-            "       WHEN (nvd.age <= 15 AND bd.artstartdate + 181 < ?3)\n" +
-            "           THEN CAST(bd.artstartdate + 181 AS DATE)\n" +
-            "\n" +
-            "       WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL\n" +
-            "           AND scd.dateofviralloadsamplecollection IS NULL AND\n" +
-            "cvlr.dateofcurrentviralload IS NULL\n" +
-            "           AND CAST(bd.artstartdate AS DATE) + 181 < ?3 THEN\n" +
-            "   CAST(bd.artstartdate AS DATE) + 181\n" +
-            "\n" +
-            "       WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL\n" +
-            "           AND scd.dateofviralloadsamplecollection IS NOT NULL AND\n" +
-            "cvlr.dateofcurrentviralload IS NULL\n" +
-            "           AND CAST(bd.artstartdate AS DATE) + 91 < ?3 THEN\n" +
-            "   CAST(bd.artstartdate AS DATE) + 91\n" +
-            "\n" +
-            "       WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000\n" +
-            "           AND( scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload\n" +
-            "   OR  scd.dateofviralloadsamplecollection IS NULL )\n" +
-            "           AND CAST(cvlr.dateofcurrentviralload AS DATE) + 181 < ?3\n" +
-            "           THEN CAST(cvlr.dateofcurrentviralload AS DATE) + 181\n" +
-            "\n" +
-            "\n" +
-            "\n" +
-            "       WHEN  CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000\n" +
-            "           AND (scd.dateofviralloadsamplecollection > cvlr.dateofcurrentviralload\n" +
-            "   OR cvlr.dateofcurrentviralload IS NULL\n" +
-            "     )\n" +
-            "           AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 THEN\n" +
-            "   CAST(scd.dateofviralloadsamplecollection AS DATE) + 91\n" +
-            "\n" +
-            "       WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) > 1000\n" +
-            "           AND ( scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload\n" +
-            "   OR\n" +
-            "     scd.dateofviralloadsamplecollection IS NULL\n" +
-            "    )\n" +
-            "           AND CAST(cvlr.dateofcurrentviralload AS DATE) + 91 < ?3 THEN\n" +
-            "   CAST(cvlr.dateofcurrentviralload AS DATE) + 91\n" +
-            "\n" +
-            "       WHEN\n" +
-            "       CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) > 1000\n" +
-            "   AND (scd.dateofviralloadsamplecollection > cvlr.dateofcurrentviralload\n" +
-            "   OR cvlr.dateofcurrentviralload IS NULL)\n" +
-            "   AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 THEN\n" +
-            "   CAST(scd.dateofviralloadsamplecollection AS DATE) + 91\n" +
-            "\n" +
-            "       ELSE NULL\n" +
-            "       END\n" +
-            "   ) AS dateOfVlEligibilityStatus,\n" +
-            "           (CASE WHEN cd.cd4lb IS NOT NULL THEN  cd.cd4lb" +
-            "                 WHEN  ccd.cd_4 IS NOT NULL THEN CAST(ccd.cd_4 as VARCHAR)\n" +
-            "     ELSE NULL END) as lastCd4Count,\n" +
-            "           (CASE WHEN cd.dateOfCd4Lb IS NOT NULL THEN  CAST(cd.dateOfCd4Lb as DATE)" +
-            "                   WHEN ccd.visit_date IS NOT NULL THEN CAST(ccd.visit_date as DATE)\n" +
-            "     ELSE NULL END) as dateOfLastCd4Count, \n" +
-            "INITCAP(cm.caseManager) AS caseManager " +
+            "               WHEN prepre.status ILIKE '%DEATH%' THEN 'Died'\n" +
+            "               WHEN prepre.status ILIKE '%out%' THEN 'Transferred Out'\n" +
+            "               WHEN pre.status ILIKE '%DEATH%' THEN 'Died'\n" +
+            "               WHEN pre.status ILIKE '%out%' THEN 'Transferred Out'\n" +
+            "               WHEN ct.status ILIKE '%IIT%' THEN 'IIT'\n" +
+            "               WHEN ct.status ILIKE '%out%' THEN 'Transferred Out'\n" +
+            "               WHEN ct.status ILIKE '%DEATH%' THEN 'Died'\n" +
+            "               WHEN (\n" +
+            "                   pre.status ILIKE '%IIT%'\n" +
+            "                   OR pre.status ILIKE '%stop%'\n" +
+            "               )\n" +
+            "                   AND (ct.status ILIKE '%ACTIVE%') THEN 'Active Restart'\n" +
+            "               WHEN pre.status ILIKE '%ACTIVE%'\n" +
+            "                   AND ct.status ILIKE '%ACTIVE%' THEN 'Active'\n" +
+            "               ELSE REPLACE(ct.status, '_', ' ')\n" +
+            "           END\n" +
+            "       ) AS currentStatus,\n" +
+            "       CAST((\n" +
+            "           CASE\n" +
+            "               WHEN prepre.status ILIKE '%DEATH%' THEN prepre.status_date\n" +
+            "               WHEN prepre.status ILIKE '%out%' THEN prepre.status_date\n" +
+            "               WHEN pre.status ILIKE '%DEATH%' THEN pre.status_date\n" +
+            "               WHEN pre.status ILIKE '%out%' THEN pre.status_date\n" +
+            "               WHEN ct.status ILIKE '%IIT%' THEN\n" +
+            "                   CASE\n" +
+            "                       WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%out%' OR pre.status ILIKE '%stop%') THEN pre.status_date\n" +
+            "                       ELSE ct.status_date\n" +
+            "                   END\n" +
+            "               WHEN ct.status ILIKE '%stop%' THEN\n" +
+            "                   CASE\n" +
+            "                       WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%out%' OR pre.status ILIKE '%IIT%') THEN pre.status_date\n" +
+            "                       ELSE ct.status_date\n" +
+            "                   END\n" +
+            "               WHEN ct.status ILIKE '%out%' THEN\n" +
+            "                   CASE\n" +
+            "                       WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%stop%' OR pre.status ILIKE '%IIT%') THEN pre.status_date\n" +
+            "                       ELSE ct.status_date\n" +
+            "                   END\n" +
+            "               WHEN (\n" +
+            "                   pre.status ILIKE '%IIT%'\n" +
+            "                   OR pre.status ILIKE '%stop%'\n" +
+            "               )\n" +
+            "                   AND (ct.status ILIKE '%ACTIVE%') THEN ct.status_date\n" +
+            "               WHEN pre.status ILIKE '%ACTIVE%'\n" +
+            "                   AND ct.status ILIKE '%ACTIVE%' THEN ct.status_date\n" +
+            "               ELSE ct.status_date\n" +
+            "           END\n" +
+            "       ) AS DATE) AS currentStatusDate,\n" +
+            "       cvl.clientVerificationStatus,\n" +
+            "       (\n" +
+            "           CASE\n" +
+            "               WHEN prepre.status ILIKE '%DEATH%' THEN FALSE\n" +
+            "               WHEN prepre.status ILIKE '%out%' THEN FALSE\n" +
+            "               WHEN pre.status ILIKE '%DEATH%' THEN FALSE\n" +
+            "               WHEN pre.status ILIKE '%out%' THEN FALSE\n" +
+            "               WHEN ct.status ILIKE '%IIT%' THEN FALSE\n" +
+            "               WHEN ct.status ILIKE '%out%' THEN FALSE\n" +
+            "               WHEN ct.status ILIKE '%DEATH%' THEN FALSE\n" +
+            "               WHEN ct.status ILIKE '%stop%' THEN FALSE\n" +
+            "               WHEN (nvd.age >= 15\n" +
+            "                   AND nvd.regimen ILIKE '%DTG%'\n" +
+            "                   AND bd.artstartdate + 91 < ?3) THEN TRUE\n" +
+            "               WHEN (nvd.age >= 15\n" +
+            "                   AND nvd.regimen NOT ILIKE '%DTG%'\n" +
+            "                   AND bd.artstartdate + 181 < ?3) THEN TRUE\n" +
+            "               WHEN (nvd.age <= 15 AND bd.artstartdate + 181 < ?3) THEN TRUE\n" +
+            "               WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL\n" +
+            "                   AND scd.dateofviralloadsamplecollection IS NULL\n" +
+            "                   AND cvlr.dateofcurrentviralload IS NULL\n" +
+            "                   AND CAST(bd.artstartdate AS DATE) + 181 < ?3 THEN TRUE\n" +
+            "               WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL\n" +
+            "                   AND scd.dateofviralloadsamplecollection IS NOT NULL\n" +
+            "                   AND cvlr.dateofcurrentviralload IS NULL\n" +
+            "                   AND CAST(bd.artstartdate AS DATE) + 91 < ?3 THEN TRUE\n" +
+            "               WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000\n" +
+            "                   AND (scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload OR scd.dateofviralloadsamplecollection IS NULL)\n" +
+            "                   AND CAST(cvlr.dateofcurrentviralload AS DATE) + 181 < ?3 THEN TRUE\n" +
+            "               WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000\n" +
+            "                   AND (scd.dateofviralloadsamplecollection > cvlr.dateofcurrentviralload OR cvlr.dateofcurrentviralload IS NULL)\n" +
+            "                   AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 THEN TRUE\n" +
+            "               WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) > 1000\n" +
+            "                   AND (scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload OR scd.dateofviralloadsamplecollection IS NULL)\n" +
+            "                   AND CAST(cvlr.dateofcurrentviralload AS DATE) + 91 < ?3 THEN TRUE\n" +
+            "               WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) > 1000\n" +
+            "                   AND (scd.dateofviralloadsamplecollection > cvlr.dateofcurrentviralload OR cvlr.dateofcurrentviralload IS NULL)\n" +
+            "                   AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 THEN TRUE\n" +
+            "               ELSE FALSE\n" +
+            "           END\n" +
+            "       ) AS vlEligibilityStatus,\n" +
+            "       CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) AS test,\n" +
+            "       (\n" +
+            "           CASE\n" +
+            "               WHEN prepre.status ILIKE '%DEATH%' THEN NULL\n" +
+            "               WHEN prepre.status ILIKE '%out%' THEN NULL\n" +
+            "               WHEN pre.status ILIKE '%DEATH%' THEN NULL\n" +
+            "               WHEN pre.status ILIKE '%out%' THEN NULL\n" +
+            "               WHEN ct.status ILIKE '%IIT%' THEN NULL\n" +
+            "               WHEN ct.status ILIKE '%out%' THEN NULL\n" +
+            "               WHEN ct.status ILIKE '%DEATH%' THEN NULL\n" +
+            "               WHEN ct.status ILIKE '%stop%' THEN NULL\n" +
+            "               WHEN (nvd.age >= 15\n" +
+            "                   AND nvd.regimen ILIKE '%DTG%'\n" +
+            "                   AND bd.artstartdate + 91 < ?3) THEN CAST(bd.artstartdate + 91 AS DATE)\n" +
+            "               WHEN (nvd.age >= 15\n" +
+            "                   AND nvd.regimen NOT ILIKE '%DTG%'\n" +
+            "                   AND bd.artstartdate + 181 < ?3) THEN CAST(bd.artstartdate + 181 AS DATE)\n" +
+            "               WHEN (nvd.age <= 15 AND bd.artstartdate + 181 < ?3) THEN CAST(bd.artstartdate + 181 AS DATE)\n" +
+            "               WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL\n" +
+            "                   AND scd.dateofviralloadsamplecollection IS NULL\n" +
+            "                   AND cvlr.dateofcurrentviralload IS NULL\n" +
+            "                   AND CAST(bd.artstartdate AS DATE) + 181 < ?3 THEN CAST(bd.artstartdate AS DATE) + 181\n" +
+            "               WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL\n" +
+            "                   AND scd.dateofviralloadsamplecollection IS NOT NULL\n" +
+            "                   AND cvlr.dateofcurrentviralload IS NULL\n" +
+            "                   AND CAST(bd.artstartdate AS DATE) + 91 < ?3 THEN CAST(bd.artstartdate AS DATE) + 91\n" +
+            "               WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000\n" +
+            "                   AND (scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload OR scd.dateofviralloadsamplecollection IS NULL)\n" +
+            "                   AND CAST(cvlr.dateofcurrentviralload AS DATE) + 181 < ?3 THEN CAST(cvlr.dateofcurrentviralload AS DATE) + 181\n" +
+            "               WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000\n" +
+            "                   AND (scd.dateofviralloadsamplecollection > cvlr.dateofcurrentviralload OR cvlr.dateofcurrentviralload IS NULL)\n" +
+            "                   AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 THEN CAST(scd.dateofviralloadsamplecollection AS DATE) + 91\n" +
+            "               WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) > 1000\n" +
+            "                   AND (scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload OR scd.dateofviralloadsamplecollection IS NULL)\n" +
+            "                   AND CAST(cvlr.dateofcurrentviralload AS DATE) + 91 < ?3 THEN CAST(cvlr.dateofcurrentviralload AS DATE) + 91\n" +
+            "               WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) > 1000\n" +
+            "                   AND (scd.dateofviralloadsamplecollection > cvlr.dateofcurrentviralload OR cvlr.dateofcurrentviralload IS NULL)\n" +
+            "                   AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 THEN CAST(scd.dateofviralloadsamplecollection AS DATE) + 91\n" +
+            "               ELSE NULL\n" +
+            "           END\n" +
+            "       ) AS dateOfVlEligibilityStatus,\n" +
+            "       (\n" +
+            "           CASE\n" +
+            "               WHEN cd.cd4lb IS NOT NULL THEN  cd.cd4lb\n" +
+            "               WHEN ccd.cd_4 IS NOT NULL THEN CAST(ccd.cd_4 as VARCHAR)\n" +
+            "               ELSE NULL\n" +
+            "           END\n" +
+            "       ) as lastCd4Count,\n" +
+            "       (\n" +
+            "           CASE\n" +
+            "               WHEN cd.dateOfCd4Lb IS NOT NULL THEN  CAST(cd.dateOfCd4Lb as DATE)\n" +
+            "               WHEN ccd.visit_date IS NOT NULL THEN CAST(ccd.visit_date as DATE)\n" +
+            "               ELSE NULL\n" +
+            "           END\n" +
+            "       ) as dateOfLastCd4Count,\n" +
+            "       INITCAP(cm.caseManager) AS caseManager\n" +
             "FROM bio_data bd\n" +
-            "        LEFT JOIN patient_lga p_lga on p_lga.personUuid11 = bd.personUuid \n" +
-            "        LEFT JOIN pharmacy_details_regimen pdr ON pdr.person_uuid40 = bd.personUuid\n" +
-            "        LEFT JOIN current_clinical c ON c.person_uuid10 = bd.personUuid\n" +
-            "        LEFT JOIN sample_collection_date scd ON scd.person_uuid120 = bd.personUuid\n" +
-            "        LEFT JOIN current_vl_result  cvlr ON cvlr.person_uuid130 = bd.personUuid\n" +
-            "        LEFT JOIN  labCD4 cd on cd.cd4_person_uuid = bd.personUuid\n" +
-            "        LEFT JOIN  careCardCD4 ccd on ccd.cccd4_person_uuid = bd.personUuid\n" +
-            "        LEFT JOIN eac e ON e.person_uuid50 = bd.personUuid\n" +
-            "        LEFT JOIN biometric b ON b.person_uuid60 = bd.personUuid\n" +
-            "        LEFT JOIN current_regimen  ca ON ca.person_uuid70 = bd.personUuid\n" +
-            "        LEFT JOIN ipt ipt ON ipt.personUuid80 = bd.personUuid\n" +
-            "        LEFT JOIN cervical_cancer cc ON cc.person_uuid90 = bd.personUuid\n" +
-            "        LEFT JOIN ovc ov ON ov.personUuid100 = bd.personUuid\n" +
-            "        LEFT JOIN current_status ct ON ct.cuPersonUuid = bd.personUuid\n" +
-            "        LEFT JOIN previous pre ON pre.prePersonUuid = ct.cuPersonUuid\n" +
-            "        LEFT JOIN previous_previous prepre ON prepre.prePrePersonUuid = ct.cuPersonUuid\n" +
-            "        LEFT JOIN naive_vl_data nvd ON nvd.nvl_person_uuid = bd.personUuid\n" +
-            "        LEFT JOIN tb_sample_collection tbSample ON tbSample.personTbSample = bd.personUuid\n" +
-            "        LEFT JOIN  tbTreatment tbTment ON tbTment.tbTreatmentPersonUuid = bd.personUuid\n" +
-            "        LEFT JOIN  current_tb_result tbResult ON tbResult.personTbResult = bd.personUuid\n" +
-            "        LEFT JOIN crytococal_antigen crypt on crypt.personuuid12= bd.personUuid" +
-            "        LEFT JOIN  tbstatus tbS on tbS.personUuid133 = bd.personUuid" +
-            "        LEFT JOIN  tblam tbl  on tbl.personuuidtblam = bd.personUuid" +
-            "       LEFT JOIN case_manager cm on cm.caseperson= bd.personUuid" +
-            "       LEFT JOIN client_verification cvl on cvl.person_uuid = bd.personUuid "
+            "LEFT JOIN patient_lga p_lga ON p_lga.personUuid11 = bd.personUuid\n" +
+            "LEFT JOIN pharmacy_details_regimen pdr ON pdr.person_uuid40 = bd.personUuid\n" +
+            "LEFT JOIN current_clinical c ON c.person_uuid10 = bd.personUuid\n" +
+            "LEFT JOIN sample_collection_date scd ON scd.person_uuid120 = bd.personUuid\n" +
+            "LEFT JOIN current_vl_result cvlr ON cvlr.person_uuid130 = bd.personUuid\n" +
+            "LEFT JOIN labCD4 cd ON cd.cd4_person_uuid = bd.personUuid\n" +
+            "LEFT JOIN careCardCD4 ccd ON ccd.cccd4_person_uuid = bd.personUuid\n" +
+            "LEFT JOIN eac e ON e.person_uuid50 = bd.personUuid\n" +
+            "LEFT JOIN biometric b ON b.person_uuid60 = bd.personUuid\n" +
+            "LEFT JOIN current_regimen ca ON ca.person_uuid70 = bd.personUuid\n" +
+            "LEFT JOIN ipt ipt ON ipt.personUuid80 = bd.personUuid\n" +
+            "LEFT JOIN cervical_cancer cc ON cc.person_uuid90 = bd.personUuid\n" +
+            "LEFT JOIN ovc ov ON ov.personUuid100 = bd.personUuid\n" +
+            "LEFT JOIN current_status ct ON ct.cuPersonUuid = bd.personUuid\n" +
+            "LEFT JOIN previous pre ON pre.prePersonUuid = ct.cuPersonUuid\n" +
+            "LEFT JOIN previous_previous prepre ON prepre.prePrePersonUuid = ct.cuPersonUuid\n" +
+            "LEFT JOIN naive_vl_data nvd ON nvd.nvl_person_uuid = bd.personUuid\n" +
+            "LEFT JOIN tb_sample_collection tbSample ON tbSample.personTbSample = bd.personUuid\n" +
+            "LEFT JOIN tbTreatment tbTment ON tbTment.tbTreatmentPersonUuid = bd.personUuid\n" +
+            "LEFT JOIN current_tb_result tbResult ON tbResult.personTbResult = bd.personUuid\n" +
+            "--LEFT JOIN crytococal_antigen crypt ON crypt.personuuid12 = bd.personUuid\n" +
+            "LEFT JOIN tbstatus tbS ON tbS.personUuid133 = bd.personUuid\n" +
+            "--LEFT JOIN tblam tbl ON tbl.personuuidtblam = bd.personUuid\n" +
+            "LEFT JOIN case_manager cm ON cm.caseperson = bd.personUuid\n" +
+            "LEFT JOIN client_verification cvl ON cvl.person_uuid = bd.personUuid\n"
             , nativeQuery = true)
     List<RADETDTOProjection> getRadetData(Long facilityId, LocalDate start, LocalDate end,
                                           LocalDate previous, LocalDate previousPrevious, LocalDate dateOfStartOfCurrentQuarter);

@@ -89,7 +89,7 @@ public interface RADETDTOProjection {
 	Integer getNumberOfFingersCaptured();
 	LocalDate getDateBiometricsRecaptured();
 	Integer getNumberOfFingersRecaptured();
-	String getBiometricStatus();
+	//String getBiometricStatus();
 	//eac
 	LocalDate getDateOfCommencementOfEAC();
 	Integer getNumberOfEACSessionCompleted();
@@ -139,16 +139,16 @@ public interface RADETDTOProjection {
 	String getIptCompletionStatus();
 
 	//Crytococal Antigen
-	Date getDateOfLastCrytococalAntigen();
-	String getLastCrytococalAntigen();
+	//Date getDateOfLastCrytococalAntigen();
+	//String getLastCrytococalAntigen();
 
 	String getCaseManager();
 	String getVaCauseOfDeath();
 	String getTreatmentMethodDate();
 	LocalDate getDateOfRegistration();
 	LocalDate getDateOfEnrollment();
-	LocalDate getDateOfLastTbLam();
-	String  getTbLamResult();
+	//LocalDate getDateOfLastTbLam();
+	//String  getTbLamResult();
 
 	String getNdrPatientIdentifier();
 }
