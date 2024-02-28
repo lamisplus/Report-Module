@@ -378,11 +378,12 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getRecencyTestType())));
 					map.put(index++, htsReportDto.getRecencyTestDate());
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getRecencyInterpretation())));
-					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFinalRecencyResult())));
+
 					map.put(index++, htsReportDto.getViralLoadSampleCollectionDate());
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getViralLoadConfirmationResult())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getViralLoadResult())));
 					map.put(index++, htsReportDto.getViralLoadConfirmationDate());
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFinalRecencyResult())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getAssessmentCode())));
 
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getSyphilisTestResult())));

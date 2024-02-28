@@ -291,11 +291,12 @@ public class Constants {
 					"Recency Test Type",
 					"Recency Test Date (yyyy-mm-dd)",
 					"Recency Interpretation",
-					"Final Recency Result",
+
 					"Viral Load Sample Collection Date",
 					"Viral Load Result Classification",
 					"Viral Load Confirmation Result",
 					"Viral Load Confirmation Date (yyyy-mm-dd)",
+					"Final Recency Result",
 					"Assessment Code",
 					"Syphilis Test Result",
 					"Hepatitis B Result",
