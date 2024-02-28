@@ -281,7 +281,7 @@ public class Constants {
 					"Testing Setting",
 					"Modality",
 					"Counseling Type",
-					"Pregnancy/Breastfeeding Status ",
+					"Pregnancy/Breastfeeding Status",
 //					"Breastfeeding",
 					"Index Type",
 					"HIV Test Result",
