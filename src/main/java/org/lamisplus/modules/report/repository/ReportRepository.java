@@ -78,7 +78,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "              AND hc.recency->>'sampleTestDate' != '' AND LENGTH(hc.recency->>'sampleTestDate') > 0   " +
             "              THEN CAST(NULLIF(hc.recency->>'sampleTestDate', '') AS DATE) ELSE NULL END) AS recencyTestDate,      " +
 
-            "(Case WHEN hc.recency->>'receivedResultDate' IS NOT NULL AND hc.recency->>'receivedResultDate' !='' AND LENGTH( hc.recency->>'hc.recency->>'receivedResultDate') > 0 )" +
+            "(Case WHEN hc.recency->>'receivedResultDate' IS NOT NULL AND hc.recency->>'receivedResultDate' !='' AND LENGTH( hc.recency->>'receivedResultDate') > 0 )" +
             "               THEN CAST(NULLIF(hc.recency->>'receivedResultDate', '') AS DATE) ELSE NULL END) AS viralLoadReceivedResultDate,    " +
 
             " (CASE     " +
