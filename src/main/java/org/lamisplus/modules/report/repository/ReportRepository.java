@@ -148,6 +148,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                                    boui.code as datimId, (SELECT name FROM base_organisation_unit WHERE id = CAST(NULLIF(p.address->'address'->0 ->'stateId' ->> 0,'') AS BIGINT)) as residentialState, (SELECT name FROM base_organisation_unit WHERE id = CAST(NULLIF(p.address->'address'->0 ->'district' ->> 0,'') AS BIGINT)) as residentialLga,      \n" +
             "                                    r.address as address, (CASE WHEN contact_point->'contactPoint'->0->>'type'='phone' THEN contact_point->'contactPoint'->0->>'value' ELSE null END) AS phone,      \n" +
             "                                    baseline_reg.regimen AS baselineRegimen,      \n" +
+            "                                    baseline_reg.prep_type as prepType,      \n" +
+            "                                    baseline_pc.prep_distribution_setting AS prepDistributionSetting,     \n" +
             "                                    baseline_pc.systolic AS baselineSystolicBP,      \n" +
             "                                    baseline_pc.diastolic AS baselineDiastolicBP,      \n" +
             "                                    baseline_pc.weight AS baselineWeight,      \n" +
