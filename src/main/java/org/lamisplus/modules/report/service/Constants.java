@@ -341,6 +341,8 @@ public class Constants {
 					"Date Of Registration (yyyy-mm-dd)",
 					"Date Of Commencement (yyyy-mm-dd)",
 					"Baseline Regimen",
+					"Prep Type",
+					"Prep Distribution Setting",
 					"Baseline Systolic bp",
 					"Baseline Diastolic bp",
 					"Baseline Weight (kg)",

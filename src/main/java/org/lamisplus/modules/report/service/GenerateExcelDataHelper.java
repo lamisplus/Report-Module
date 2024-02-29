@@ -445,6 +445,8 @@ public class GenerateExcelDataHelper {
 					map.put(index++, prepReportDto.getDateOfRegistration());
 					map.put(index++, prepReportDto.getPrepCommencementDate());
 					map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaseLineRegimen())));
+					map.put(index++, getStringValue(String.valueOf(prepReportDto.getPrepType())));
+					map.put(index++, getStringValue(String.valueOf(prepReportDto.getPrepDistributionSetting())));
 					map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineSystolicBp())));
 					map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineDiastolicBp())));
 					map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineWeight())));
