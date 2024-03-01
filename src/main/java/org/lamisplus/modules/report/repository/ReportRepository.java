@@ -78,8 +78,10 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "              AND hc.recency->>'sampleTestDate' != '' AND LENGTH(hc.recency->>'sampleTestDate') > 0   " +
             "              THEN CAST(NULLIF(hc.recency->>'sampleTestDate', '') AS DATE) ELSE NULL END) AS recencyTestDate,      " +
 
-            "(Case WHEN hc.recency->>'receivedResultDate' IS NOT NULL AND hc.recency->>'receivedResultDate' !='' AND LENGTH( hc.recency->>'receivedResultDate') > 0 )" +
-            "               THEN CAST(NULLIF(hc.recency->>'receivedResultDate', '') AS DATE) ELSE NULL END) AS viralLoadReceivedResultDate,    " +
+            " (CASE WHEN hc.recency->>'receivedResultDate' IS NOT NULL     " +
+            "              AND hc.recency->>'receivedResultDate' != '' AND LENGTH(hc.recency->>'receivedResultDate') > 0   " +
+            "              THEN CAST(NULLIF(hc.recency->>'receivedResultDate', '') AS DATE) ELSE NULL END) AS viralLoadReceivedResultDate,      "+
+
 
             " (CASE     " +
             "               WHEN hc.recency->>'rencencyInterpretation' IS NOT NULL     " +
@@ -152,6 +154,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                                    boui.code as datimId, (SELECT name FROM base_organisation_unit WHERE id = CAST(NULLIF(p.address->'address'->0 ->'stateId' ->> 0,'') AS BIGINT)) as residentialState, (SELECT name FROM base_organisation_unit WHERE id = CAST(NULLIF(p.address->'address'->0 ->'district' ->> 0,'') AS BIGINT)) as residentialLga,      \n" +
             "                                    r.address as address, (CASE WHEN contact_point->'contactPoint'->0->>'type'='phone' THEN contact_point->'contactPoint'->0->>'value' ELSE null END) AS phone,      \n" +
             "                                    baseline_reg.regimen AS baselineRegimen,      \n" +
+            "                                    (select display from base_application_codeset where code = baseline_reg.prep_type) as prepType,      \n" +
+            "                                    (select display from base_application_codeset where code = baseline_pc.prep_distribution_setting) AS prepDistributionSetting,     \n" +
             "                                    baseline_pc.systolic AS baselineSystolicBP,      \n" +
             "                                    baseline_pc.diastolic AS baselineDiastolicBP,      \n" +
             "                                    baseline_pc.weight AS baselineWeight,      \n" +

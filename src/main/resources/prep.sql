@@ -12,6 +12,8 @@ SELECT DISTINCT ON (p.uuid)p.uuid AS PersonUuid, p.id, p.uuid,p.hospital_number 
     (CASE WHEN contact_point->'contactPoint'->0->>'type'='phone' THEN contact_point->'contactPoint'->0->>'value' ELSE null END) AS phone,
 
     baseline_reg.regimen AS baselineRegimen,
+    (select display from base_application_codeset where code = baseline_reg.prep_type) as prepType,
+    (select display from base_application_codeset where code = baseline_pc.prep_distribution_setting) AS prepDistributionSetting,
     baseline_pc.systolic AS baselineSystolicBP,
     baseline_pc.diastolic AS baselineDiastolicBP,
     baseline_pc.weight AS baselineWeight,

@@ -27,6 +27,8 @@ public interface PrepReportDto {
     LocalDate getDateOfRegistration();
     String getBaseLineRegimen();
 
+    String getPrepType();
+    String getPrepDistributionSetting();
     Integer getBaselineSystolicBp();
     Integer getBaselineDiastolicBp();
     String getBaselineWeight();
