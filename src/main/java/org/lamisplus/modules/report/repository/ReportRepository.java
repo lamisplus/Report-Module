@@ -91,8 +91,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "  THEN 'Positive' ELSE 'Negative' END) AS hepatitisCTestResult,      " +
             " hc.cd4->>'cd4Count' AS CD4Type,      " +
             " hc.cd4->>'cd4SemiQuantitative' AS CD4TestResult,      " +
-            " (CASE WHEN hc.test1->>'result' ILIKE 'Yes' THEN 'Positive' ELSE 'Negative' END)AS hivTestResult,      " +
-            " hc.hiv_test_result AS finalHIVTestResult,      " +
+//            " (CASE WHEN hc.test1->>'result' ILIKE 'Yes' THEN 'Positive' ELSE 'Negative' END)AS hivTestResult,      " +
+            "(CASE WHEN hc.hiv_test_result2 = 'Positive' THEN 'Positive' " +
+            "WHEN  hc.hiv_test_result ='Negative' THEN 'Negative' " +
+            "WHEN  hc.hiv_test_result ='Positive' AND hc.hiv_test_result2='Negative' THEN 'Negative' "+
+            "WHEN  hc.hiv_test_result ='Positive' AND hc.hiv_test_result2 IS NULL THEN 'Positive' "+
+            "WHEN hc.test1->>'result' ILIKE 'Yes' THEN 'Positive' ELSE 'Negative' END) AS finalHIVTestResult,      " +
             " (CASE WHEN LENGTH(hc.test1->>'date') > 0 AND hc.test1->>'date' !=''   " +
             "             THEN CAST(NULLIF(hc.test1->>'date', '') AS DATE)      " +
             " WHEN hc.date_visit IS NOT NULL THEN hc.date_visit       " +

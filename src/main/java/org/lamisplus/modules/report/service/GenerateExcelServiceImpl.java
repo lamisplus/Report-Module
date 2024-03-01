@@ -240,7 +240,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			List<String> headers = resultSetExtract.getHeaders(resultSet);
 			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
 			LOG.info("query size is : {}" + fullData.size());
+
 			return excelService.generate(Constants.PATIENT_LINE_LIST, fullData, headers);
+
 		} catch (Exception e) {
 			LOG.error("Error Occurred when generating INDEX LINE LIST!!!");
 			e.printStackTrace();
