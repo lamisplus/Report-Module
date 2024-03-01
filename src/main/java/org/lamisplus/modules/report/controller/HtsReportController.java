@@ -55,4 +55,18 @@ public class HtsReportController {
 		outputStream.close();
 		response.flushBuffer();
 	}
+
+	@PostMapping(REPORT_URL_VERSION_ONE + "/index-elicitation-reporting")
+	public void indexElicitationLineList(HttpServletResponse response, @RequestParam("facilityId") Long facility,
+							@RequestParam("startDate") LocalDate start,
+							@RequestParam("endDate") LocalDate end) throws IOException {
+
+		//messagingTemplate.convertAndSend("/topic/hts", "start");
+
+		ByteArrayOutputStream baos = generateExcelService.generateIndexQueryLine(facility, start, end);
+
+		setStream(baos, response);
+
+		//messagingTemplate.convertAndSend("/topic/hts", "end");
+	}
 }

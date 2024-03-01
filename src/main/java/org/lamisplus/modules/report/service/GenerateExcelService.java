@@ -16,4 +16,7 @@ public interface GenerateExcelService {
  String getFacilityName(Long facilityId);
  ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, LocalDate end);
  ByteArrayOutputStream generatePrep(Long facilityId, LocalDate start, LocalDate end);
+
+ ByteArrayOutputStream generateIndexQueryLine(Long facilityId, LocalDate start, LocalDate end);
+
 }
