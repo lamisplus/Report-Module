@@ -17,6 +17,10 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 @Component
@@ -100,7 +104,6 @@ public class GenerateExcelDataHelper {
 		Log.info("result: " + result.size()); // going to be one
 		return result;
 	}
-
 
 	public  List<Map<Integer, Object>> fillRadetDataMapper(@NonNull List<RADETDTOProjection> reportDtos, LocalDate endDate) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
@@ -243,16 +246,14 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getDateOfLastEACSessionCompleted());
 				map.put(index++, radetReportDto.getDateOfExtendEACCompletion());
 				map.put(index++, radetReportDto.getDateOfRepeatViralLoadEACSampleCollection());
-				map.put(index++, repeatVl);
+				map.put(index++, radetReportDto.getRepeatViralLoadResult());
 				map.put(index++, radetReportDto.getDateOfRepeatViralLoadResult());
 
 				//DSD MOdel
-				map.put(index++, radetReportDto.getDsdModel());
-				if (radetReportDto.getDsdModel() != null) {
-					map.put(index++, radetReportDto.getDateOfCurrentRegimen());
-				} else {
-					map.put(index++, null);
-				}
+				map.put(index++, radetReportDto.getDateOfDevolvement());
+				map.put(index++, radetReportDto.getModelDevolvedTo());
+				map.put(index++, radetReportDto.getDateOfCurrentDSD());
+				map.put(index++, radetReportDto.getCurrentDSDModel());
 				map.put(index++, null);
 
 				//chronic care

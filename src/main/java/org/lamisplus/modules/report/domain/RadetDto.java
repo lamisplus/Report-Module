@@ -51,6 +51,7 @@ public class RadetDto {
 	private LocalDate dateOf3rdEACCompletion;
 	private LocalDate dateOfExtendedEACCompletion;
 	private LocalDate dateOfRepeatViralLoad;
+	private LocalDate dateOfEacSampleCollected;
 	private LocalDate dateOfReturnOfDMOC;
 	private LocalDate dateOfCommencementOfEAC;
 	private LocalDate dateBiometricsEnrolled;
