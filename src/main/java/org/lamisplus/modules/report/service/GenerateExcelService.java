@@ -19,4 +19,6 @@ public interface GenerateExcelService {
 
  ByteArrayOutputStream generateIndexQueryLine(Long facilityId, LocalDate start, LocalDate end);
 
+
+ ByteArrayOutputStream generateClientServiceList(HttpServletResponse response, Long facility);
 }

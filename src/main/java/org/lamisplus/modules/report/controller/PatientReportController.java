@@ -45,6 +45,14 @@ public class PatientReportController {
 		setStream(baos, response);
 		messagingTemplate.convertAndSend("/topic/patient-line-list/status", "end");
 	}
+
+	@GetMapping("/client-service-list/{facilityId}")
+	public void clientServiceList(HttpServletResponse response, @PathVariable("facilityId") Long facility) throws IOException {
+		messagingTemplate.convertAndSend("/topic/client-service-list", "start");
+		ByteArrayOutputStream baos = generateExcelService.generateClientServiceList(response, facility);
+		setStream(baos, response);
+		messagingTemplate.convertAndSend("/topic/client-service-list", "end");
+	}
 	
 	@GetMapping("/patient-line-list/{facilityId}")
 	public void patientLineList1(HttpServletResponse response, @PathVariable("facilityId") Long facility) {

@@ -11,6 +11,9 @@ public class Constants {
 	
 	// Sheet name
 	public static final String PATIENT_LINE_LIST = "patient_line__list";
+
+	public static final String CLIENT_SERVICE_LIST = "client_service_list";
+
 	public static final String RADET_SHEET = "radet";
 
 	public static final String HTS_SHEET = "hts";
@@ -141,6 +144,8 @@ public class Constants {
 					"Date of Viral Load Eligibility Status",
 					"Current ART Status",
 					"Date of Current ART Status",
+					"Client Verification Outcome",
+					"Client Verification Status",
 					"Biometric Status",
 					"Cause of Death",
 					"VA Cause of Death",
@@ -249,6 +254,7 @@ public class Constants {
 			Arrays.asList(
 					"S/No",
 					"Facility Id (Datim)",
+
 					"Facility",
 					"Client Code",
 					"First Name",
@@ -273,30 +279,33 @@ public class Constants {
 					"Previously Tested",
 					"Referred From",
 					"Testing Setting",
+					"Modality",
 					"Counseling Type",
-					"Pregnancy Status",
-					"Breastfeeding",
+					"Pregnancy/Breastfeeding Status",
+//					"Breastfeeding",
 					"Index Type",
+					"HIV Test Result",
+					"Final HIV Test Result",
+					"Date Of HIV Testing (yyyy-mm-dd)",
 					"If Recency Testing Opt In",
 					"Recency Id",
 					"Recency Test Type",
 					"Recency Test Date (yyyy-mm-dd)",
 					"Recency Interpretation",
-					"Final Recency Result",
+
 					"Viral Load Sample Collection Date",
 					"Viral Load Result Classification",
 					"Viral Load Confirmation Result",
+					"Viral Load Result Received Date (yyyy-mm-dd)",
 					"Viral Load Confirmation Date (yyyy-mm-dd)",
+					"Final Recency Result",
 					"Assessment Code",
-					"Modality",
 					"Syphilis Test Result",
 					"Hepatitis B Result",
 					"Hepatitis C Result",
 					"CD4 Type",
 					"CD4 Test Result",
-					"HIV Test Result",
-					"Final HIV Test Result",
-					"Date Of HIV Testing (yyyy-mm-dd)",
+
 					"Prep Offered",
 					"Prep Accepted",
 					"Number of condoms given",
@@ -332,6 +341,8 @@ public class Constants {
 					"Date Of Registration (yyyy-mm-dd)",
 					"Date Of Commencement (yyyy-mm-dd)",
 					"Baseline Regimen",
+					"Prep Type",
+					"Prep Distribution Setting",
 					"Baseline Systolic bp",
 					"Baseline Diastolic bp",
 					"Baseline Weight (kg)",
@@ -382,4 +393,25 @@ public class Constants {
 			);
 	
 	public static final String CLINIC_NAME = "clinic";
+
+	public static final List<String> CLIENT_SERVICE_HEADER =
+			Arrays.asList(
+					"State",
+					"Facility Name",
+					"Serial Enrollment No",
+					"Patient Id",
+					"Date of Observation",
+					"Indication For Client Verification",
+					"Date Of Attempt",
+					"Verification Attempts",
+					"Verification Status",
+					"Outcome",
+					"DSD Model",
+					"Comment",
+					"Date Returned To Care",
+					"Referred To",
+					"Discontinued",
+					"Date of Discontinuation",
+					"Reason For Discontinuation"
+			);
 }

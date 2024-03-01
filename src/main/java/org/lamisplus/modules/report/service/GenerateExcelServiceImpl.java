@@ -8,6 +8,8 @@ import org.lamisplus.modules.hiv.domain.dto.LabReport;
 import org.lamisplus.modules.hiv.domain.dto.PharmacyReport;
 import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
 import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
+
+import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.report.config.Application;
 import org.lamisplus.modules.report.domain.BiometricReportDto;
 import org.lamisplus.modules.report.domain.HtsReportDto;
@@ -23,10 +25,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -55,9 +57,8 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	private final HIVEacRepository hivEacRepository;
 	
 	private final GenerateExcelDataHelper excelDataHelper;
-
-	private final ResultSetExtract resultSetExtract;
-
+	
+	
 	@Override
 	public ByteArrayOutputStream generatePatientLine(HttpServletResponse response, Long facilityId) {
 		LOG.info("Start generating patient line list for facility: " + getFacilityName(facilityId));
@@ -80,7 +81,24 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("End generate patient line list ");
 		return null;
 	}
-	
+
+	@Override
+	public ByteArrayOutputStream generateClientServiceList(HttpServletResponse response, Long facilityId) {
+		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
+		try {
+			List<ClientServiceDto> data = reportRepository.generateClientServiceList(facilityId);
+			LOG.info("fullData 1: " + Arrays.toString(data.toArray()));
+			List<Map<Integer, Object>> fullData = GenerateExcelDataHelper.fillClientServiceListDataMapper(data);
+			LOG.info("fullData 2: " + data.size());
+			return excelService.generate(Constants.CLIENT_SERVICE_LIST, fullData, Constants.CLIENT_SERVICE_HEADER);
+		} catch (Exception e) {
+			LOG.error("Error Occurred when generating CLIENT SERVICE LIST!!!");
+			e.printStackTrace();
+		}
+		LOG.info("End generate client service list ");
+		return null;
+	}
+
 	@Override
 	public ByteArrayOutputStream generateRadet(Long facilityId, LocalDate start, LocalDate end) {
 		LOG.info("Start generating patient RADET for facility:" + getFacilityName(facilityId));

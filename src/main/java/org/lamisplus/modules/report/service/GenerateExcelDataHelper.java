@@ -8,10 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.audit4j.core.util.Log;
 import org.lamisplus.modules.hiv.domain.dto.*;
-import org.lamisplus.modules.report.domain.BiometricReportDto;
-import org.lamisplus.modules.report.domain.HtsReportDto;
-import org.lamisplus.modules.report.domain.PrepReportDto;
-import org.lamisplus.modules.report.domain.RADETDTOProjection;
+import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.springframework.stereotype.Component;
 
@@ -203,6 +200,8 @@ public class GenerateExcelDataHelper {
 				//current status
 				map.put(index++, currentStatus);
 				map.put(index++, radetReportDto.getCurrentStatusDate());
+				map.put(index++, radetReportDto.getClientVerificationOutCome());
+				map.put(index++, radetReportDto.getClientVerificationStatus());
 				map.put(index++, radetReportDto.getBiometricStatus());
 
 				map.put(index++, radetReportDto.getCauseOfDeath());
@@ -366,30 +365,31 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPreviouslyTested())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getReferredFrom())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getTestingSetting())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getModality())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getCounselingType())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPregnancyStatus())));
-					map.put(index++, getStringValue(String.valueOf(htsReportDto.getBreastFeeding())));
+//					map.put(index++, getStringValue(String.valueOf(htsReportDto.getBreastFeeding())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getIndexType())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getHivTestResult())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFinalHivTestResult())));
+					map.put(index++, htsReportDto.getDateOfHivTesting());
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getIfRecencyTestingOptIn())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getRecencyId())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getRecencyTestType())));
 					map.put(index++, htsReportDto.getRecencyTestDate());
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getRecencyInterpretation())));
-					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFinalRecencyResult())));
 					map.put(index++, htsReportDto.getViralLoadSampleCollectionDate());
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getViralLoadConfirmationResult())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getViralLoadResult())));
 					map.put(index++, htsReportDto.getViralLoadConfirmationDate());
+					map.put(index++, htsReportDto.getViralLoadReceivedResultDate());
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFinalRecencyResult())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getAssessmentCode())));
-					map.put(index++, getStringValue(String.valueOf(htsReportDto.getModality())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getSyphilisTestResult())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getHepatitisBTestResult())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getHepatitisCTestResult())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getCd4Type())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getCd4TestResult())));
-					map.put(index++, getStringValue(String.valueOf(htsReportDto.getHivTestResult())));
-					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFinalHivTestResult())));
-					map.put(index++, htsReportDto.getDateOfHivTesting());
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPrepOffered())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPrepAccepted())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfCondomsGiven())));
@@ -445,6 +445,8 @@ public class GenerateExcelDataHelper {
 					map.put(index++, prepReportDto.getDateOfRegistration());
 					map.put(index++, prepReportDto.getPrepCommencementDate());
 					map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaseLineRegimen())));
+					map.put(index++, getStringValue(String.valueOf(prepReportDto.getPrepType())));
+					map.put(index++, getStringValue(String.valueOf(prepReportDto.getPrepDistributionSetting())));
 					map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineSystolicBp())));
 					map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineDiastolicBp())));
 					map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineWeight())));
@@ -630,6 +632,38 @@ public class GenerateExcelDataHelper {
 		}
 		return result;
 	}
+
+	public static List<Map<Integer, Object>> fillClientServiceListDataMapper(@NonNull List<ClientServiceDto> listFinalResult) {
+		List<Map<Integer, Object>> result = new ArrayList<>();
+		for (ClientServiceDto clientService : listFinalResult) {
+			if (clientService != null) {
+				Map<Integer, Object> map = new HashMap<>();
+				int index = 0;
+				map.put(index++, getStringValue(clientService.getFacilityState()));
+				map.put(index++, getStringValue(clientService.getFacilityName()));
+				map.put(index++, getStringValue(clientService.getSerialEnrollmentNo()));
+				map.put(index++, getStringValue(clientService.getPersonUuid()));
+				map.put(index++, getStringValue(String.valueOf(clientService.getDateOfObservation())));
+				map.put(index++, getStringValue(clientService.getAnyOfTheFollowingList()));
+				map.put(index++, getStringValue(clientService.getDateOfAttempt()));
+				map.put(index++, getStringValue(clientService.getVerificationAttempts()));
+				map.put(index++, getStringValue(clientService.getVerificationStatus()));
+				map.put(index++, getStringValue(clientService.getOutcome()));
+				map.put(index++, getStringValue(clientService.getDsdModel()));
+				map.put(index++, getStringValue(clientService.getComment()));
+				map.put(index++, getStringValue(clientService.getReturnedToCare()));
+				map.put(index++, getStringValue(clientService.getReferredTo()));
+				map.put(index++, getStringValue(clientService.getDiscontinuation()));
+				map.put(index++, getStringValue(clientService.getDateOfDiscontinuation()));
+				map.put(index++, getStringValue(clientService.getReasonForDiscontinuation()));
+
+				result.add(map);
+			}
+		}
+		Log.info("result: " + result.size()); // going to be one
+		return result;
+	}
+
 
 
 }
