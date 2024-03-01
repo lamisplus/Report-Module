@@ -57,6 +57,8 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	private final HIVEacRepository hivEacRepository;
 	
 	private final GenerateExcelDataHelper excelDataHelper;
+
+	private final ResultSetExtract resultSetExtract;
 	
 	
 	@Override
