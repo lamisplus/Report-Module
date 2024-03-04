@@ -22,4 +22,5 @@ public interface BiometricReport {
     String getAddress();
 
     String getPhone();
+    String getBiometricStatus();
 }
