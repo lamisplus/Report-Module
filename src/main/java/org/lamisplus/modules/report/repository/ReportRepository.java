@@ -173,7 +173,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "              END) AS currentHivStatus,      \n" +
             "              current_pc.encounter_date AS DateOfCurrentHIVStatus, \n" +
             "              (CASE WHEN p.sex='Male' THEN NULL \n" +
-            "            WHEN current_pc.pregnant IS NOT NULL AND current_pc.pregnant='true' THEN 'Pregnant'      \n" +
+            "            WHEN current_pc.pregnant IS NOT NULL AND current_pc.pregnant='true' THEN (SELECT display FROM base_application_codeset WHERE code = current_pc.pregnant)      \n" +
             "                        ELSE 'Not Pregnant' END) AS pregnancyStatus, \n" +
             "             (CASE  \n" +
             "             WHEN prepi.interruption_date  > prepc.encounter_date THEN bac.display \n" +

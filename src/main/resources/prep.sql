@@ -54,7 +54,7 @@ SELECT DISTINCT ON (p.uuid)p.uuid AS PersonUuid, p.id, p.uuid,p.hospital_number 
     END) AS currentHivStatus,
     current_pc.encounter_date AS DateOfCurrentHIVStatus,
     (CASE WHEN p.sex='Male' THEN NULL
-    WHEN current_pc.pregnant IS NOT NULL AND current_pc.pregnant='true' THEN 'Pregnant'
+    WHEN current_pc.pregnant IS NOT NULL AND current_pc.pregnant='true' THEN (SELECT display FROM base_application_codeset WHERE code = current_pc.pregnant)
     ELSE 'Not Pregnant' END) AS pregnancyStatus,
     (CASE
     WHEN prepi.interruption_date  > prepc.encounter_date THEN bac.display
