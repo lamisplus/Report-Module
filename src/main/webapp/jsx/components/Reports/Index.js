@@ -17,6 +17,7 @@ import HTSReport from "./HTSReport";
 import PrepReport from "./PrepReport";
 import ClinicData from "./ClinicData";
 import ClientVerification from "./ClientVerification";
+import TbReport from "./TbReport";
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -179,6 +180,20 @@ const Reports = (props) => {
 
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
+
+                  <Menu.Item
+                    name="inbox"
+                    active={activeItem === "tb-report"}
+                    onClick={() => handleItemClick("tb-report")}
+                    style={{
+                      backgroundColor:
+                        activeItem === "client-verification" ? "#000" : "",
+                    }}
+                  >
+                    <span style={{ color: "#fff" }}>TB REPORT</span>
+
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
                 </Menu>
               </div>
               <div
@@ -255,8 +270,15 @@ const Reports = (props) => {
                     setCompleted={setCompleted}
                     completed={completed}
                   />
-                )
-                }
+                )}
+
+                {activeItem === "tb-report" && (
+                  <TbReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
               </div>
             </form>
           </div>
