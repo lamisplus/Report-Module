@@ -86,7 +86,24 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("End generate client service list ");
 		return null;
 	}
-	
+
+	@Override
+	public ByteArrayOutputStream generateTBReport(Long facilityId, LocalDate start, LocalDate end) {
+		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
+		try {
+			List<TBReportProjection> tbReportProjections = reportRepository.generateTBReport(facilityId, start, end);
+			LOG.info("RADET Size {}", tbReportProjections.size());
+			List<Map<Integer, Object>> data = excelDataHelper.fillRadetDataMapper(radetDtos,end);
+			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
+		} catch (Exception e) {
+			LOG.error("An error Occurred when generating TB report...");
+			LOG.error("Error message: " + e.getMessage());
+			e.printStackTrace();
+		}
+		LOG.info("End generate patient TB report");
+		return null;
+	}
+
 	@Override
 	public ByteArrayOutputStream generateRadet(Long facilityId, LocalDate start, LocalDate end) {
 		LOG.info("Start generating patient RADET for facility:" + getFacilityName(facilityId));

@@ -79,6 +79,22 @@ public class PatientReportController {
 		
 		messagingTemplate.convertAndSend("/topic/radet", "end");
 	}
+
+	@GetMapping("/tb-report")
+	public void getTBReport(
+			HttpServletResponse response,
+			@RequestParam("facilityId") Long facilityId,
+			@RequestParam("start") LocalDate start,
+			@RequestParam("end") LocalDate end) throws IOException {
+
+		messagingTemplate.convertAndSend("/topic/tb-report", "start");
+
+		ByteArrayOutputStream baos = generateExcelService.generateTBReport(facilityId, start, end);
+
+		setStream(baos, response);
+
+		messagingTemplate.convertAndSend("/topic/tb-report", "end");
+	}
 	
 	@GetMapping("/pharmacy/{facilityId}")
 	public void generatePharmacy(HttpServletResponse response, @PathVariable("facilityId") Long facility) throws IOException {
