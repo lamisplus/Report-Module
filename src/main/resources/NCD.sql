@@ -204,6 +204,7 @@ select * from (SELECT
     distinct on (h.person_uuid)h.person_uuid AS pUuid,
     h.data->'physicalExamination'->>'bodyWeight' AS baselineWeight,
     h.data->'physicalExamination'->>'height' AS baselineHeight,
+    round(((cast(h.data->'physicalExamination'->>'bodyWeight' as decimal(5,0))/cast(h.data->'physicalExamination'->>'height' AS decimal(5,0))) * 100), 2) as baselineBMI,
     h.data->'physicalExamination'->>'systolic' AS baselineSystolic,
     h.data->'physicalExamination'->>'diastolic' AS baselineDiastolic
     FROM
