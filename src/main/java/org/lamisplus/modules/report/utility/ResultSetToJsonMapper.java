@@ -46,7 +46,7 @@ public class ResultSetToJsonMapper {
 
 
                     Object value = resultSet.getObject(column);
-                    if (value == null) {
+                    /*if (value == null) {
                         value = "";
                         jsonObject.put(column, value);
                     } else if (value instanceof Integer) {
@@ -73,7 +73,7 @@ public class ResultSetToJsonMapper {
                         jsonObject.put(column, value);
                     } else {
                         throw new IllegalArgumentException("Unmappable object type: " + value.getClass());
-                    }
+                    }*/
                     map.put(index, value);
                 }
             //}

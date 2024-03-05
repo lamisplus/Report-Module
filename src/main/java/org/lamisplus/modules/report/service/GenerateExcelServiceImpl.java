@@ -30,7 +30,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -134,12 +133,19 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	@Override
 	public ByteArrayOutputStream generateBiometricReport(Long facilityId, LocalDate start, LocalDate end) {
 		try {
-			LOG.info("start to generate biometric report");
-			List<BiometricReportDto> biometricReportDtoList = biometricReportService.getBiometricReportDtoList(facilityId, start, end);
-			LOG.info("biometric Report List retrieved");
-			List<Map<Integer, Object>> biometricData = GenerateExcelDataHelper.fillBiometricDataMapper(biometricReportDtoList);
-			LOG.info("biometric report size {}", biometricData.size());
-			return excelService.generate(Constants.BIOMETRIC_SHEET_SHEET, biometricData, Constants.BIOMETRIC_HEADER);
+			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
+			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
+			LOG.info("start date {}", startDate);
+			LOG.info("end date {}", endDate);
+
+			String query = String.format(Application.biometric, facilityId, startDate, endDate);
+
+			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
+			LOG.info("query size is : {}" + fullData.size());
+
+			return excelService.generate(Application.biometricName, fullData, headers);
 		} catch (Exception e) {
 			LOG.info("Error Occurred when generating biometric data", e);
 		}
@@ -234,14 +240,14 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			LOG.info("start date {}", startDate);
 			LOG.info("end date {}", endDate);
 
-			String query = String.format(Application.iq, facilityId, startDate, endDate);
+			String query = String.format(Application.indexElicitation, facilityId, startDate, endDate);
 
 			ResultSet resultSet = resultSetExtract.getResultSet(query);
 			List<String> headers = resultSetExtract.getHeaders(resultSet);
 			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
 			LOG.info("query size is : {}" + fullData.size());
 
-			return excelService.generate(Constants.PATIENT_LINE_LIST, fullData, headers);
+			return excelService.generate(Application.indexElicitationName, fullData, headers);
 
 		} catch (Exception e) {
 			LOG.error("Error Occurred when generating INDEX LINE LIST!!!");
