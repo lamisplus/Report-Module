@@ -90,9 +90,10 @@ const TbReport = (props) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
+   
     axios
       .get(
-        `${baseUrl}reporting/biometric?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
+        `${baseUrl}reporting/tb-report?facilityId=${objValues.organisationUnitId}&start=${objValues.startDate}&end=${objValues.endDate}`,
         { headers: { Authorization: `Bearer ${token}` }, responseType: "blob" }
       )
       .then((response) => {

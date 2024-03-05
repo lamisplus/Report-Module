@@ -1852,11 +1852,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        AND hac.visit_date >= ?2 " +
             "        AND hac.visit_date < ?3 " +
             "), " +
-            "tbstatus as ( " +
+            "tb_status as ( " +
             "    with tbscreening_cs as ( " +
             "        with cs as ( " +
             "            SELECT id, person_uuid, date_of_observation AS date_of_tb_Screened, data->'tbIptScreening'->>'status' AS tb_status, " +
-            "                data->'tbIptScreening'->>'tbScreeningType' AS tb_screening_type, data->'tbIptScreening'->>'eligibleForTPT' as eligible_for_tpt " +
+            "                data->'tbIptScreening'->>'tbScreeningType' AS tb_screening_type, data->'tbIptScreening'->>'eligibleForTPT' as eligible_for_tpt, " +
             "                ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS rowNums " +
             "        FROM hiv_observation " +
             "        WHERE type = 'Chronic Care' and data is not null and archived = 0 " +
@@ -1879,14 +1879,14 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    select " +
             "         tcs.person_uuid, " +
             "         case " +
-            "             when tcs.tbStatus is not null then tcs.tbStatus " +
-            "             when tcs.tbStatus is null and th.h_status is not null then th.h_status " +
-            "         end as tbStatus, " +
+            "             when tcs.tb_status is not null then tcs.tb_status " +
+            "             when tcs.tb_status is null and th.h_status is not null then th.h_status " +
+            "         end as tb_status, " +
             "         case " +
-            "             when tcs.tbStatus is not null then tcs.dateOfTbScreened " +
-            "             when tcs.tbStatus is null and th.h_status is not null then th.visit_date " +
-            "         end as dateOfTbScreened, " +
-            "        tcs.tbScreeningType " +
+            "             when tcs.tb_status is not null then tcs.date_of_tb_screened" +
+            "             when tcs.tb_status is null and th.h_status is not null then th.visit_date " +
+            "         end as date_of_tb_screened, " +
+            "        tcs.tb_screening_type " +
             "        from tbscreening_cs tcs " +
             "             left join tbscreening_hac th on th.person_uuid = tcs.person_uuid " +
             ")," +
@@ -1955,7 +1955,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    select * from (select hap.person_uuid, TO_DATE(NULLIF(NULLIF(TRIM(hap.ipt->>'dateCompleted'), ''), 'null'), 'YYYY-MM-DD') AS date_completed_ipt, " +
             "           COALESCE(NULLIF(CAST(hap.ipt->>'completionStatus' AS text), ''), '') AS ipt_completion_status " +
             "    from hiv_art_pharmacy hap where hap.archived = 0 and (ipt->>'dateCompleted' IS NOT NULL or ipt->>'dateCompleted' != '')) as t " +
-            "             where date_completed is not null " +
+            "             where date_completed_ipt is not null " +
             ")," +
             "weight as (\n" +
             "    select * from (select CAST(ho.data -> 'tbIptScreening' ->> 'weightAtStartTPT' AS text) AS weight_at_start_tpt, ho.person_uuid\n" +
@@ -1969,7 +1969,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    bio.uuid AS person_uuid, bio.lga, bio.state, bio.hospital_number, " +
             "    bio.uniqueId, bio.age, bio.gender, bio.date_of_birth, " +
             "    bio.facility_name, bio.datimId, bio.targetGroup, " +
-            "    bio.enrollment_setting, bio.art_start_date AS dateOfIptStart, " +
+            "    bio.enrollment_setting, bio.art_start_date AS artDateOfIptStart, " +
             "    bio.regimen_at_start AS iptType, bio.date_of_registration, " +
             "    tb.tb_status AS tbStatus, tb.tb_screening_type AS tbScreeningType, " +
             "    tb_treatement_start.tb_treatment_start_date AS tbTreatmentStartDate, " +
@@ -1980,8 +1980,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    current_tb_result.date_of_tb_diagnostic_result_received AS dateOfTbDiagnosticResultReceived, " +
             "    current_tb_result.tb_diagnostic_test_type AS tbDiagnosticTestType, " +
             "    ipt_start.date_of_ipt_start AS dateOfIptStart, " +
-            "    ipt_c.date_completed AS iptCompletionDate, " +
-            "    ipt_c.ipt_completion_status AS iptCompletionStatus , weight.weight_at_start_tpt" +
+            "    ipt_c.date_completed_ipt AS iptCompletionDate, " +
+            "    ipt_c.ipt_completion_status AS iptCompletionStatus , weight.weight_at_start_tpt " +
             "FROM " +
             "    bio_data bio " +
             "LEFT JOIN tb_status tb ON bio.uuid = tb.person_uuid " +
@@ -1989,7 +1989,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "LEFT JOIN tb_treatement_completion ON bio.uuid = tb_treatement_completion.person_uuid " +
             "LEFT JOIN current_tb_result ON bio.uuid = current_tb_result.patient_uuid " +
             "LEFT JOIN ipt_start ON bio.uuid = ipt_start.person_uuid " +
-            "LEFT JOIN ipt_start ON bio.uuid = weight.person_uuid " +
+            "LEFT JOIN weight ON bio.uuid = weight.person_uuid " +
             "LEFT JOIN ipt_c on ipt_c.person_uuid = bio.uuid", nativeQuery = true)
     List<TBReportProjection> generateTBReport(Long facilityId, LocalDate start, LocalDate end);
 }
