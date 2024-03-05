@@ -198,6 +198,209 @@ SELECT * FROM (
     person_uuid,
     date_newly_hypertensive desc
     ) AS nh
+    ),
+    baseline_weight_and_pressure as (
+select * from (SELECT
+    distinct on (h.person_uuid)h.person_uuid AS pUuid,
+    h.data->'physicalExamination'->>'bodyWeight' AS baselineWeight,
+    h.data->'physicalExamination'->>'height' AS baselineHeight,
+    h.data->'physicalExamination'->>'systolic' AS baselineSystolic,
+    h.data->'physicalExamination'->>'diastolic' AS baselineDiastolic
+    FROM
+    hiv_observation h
+    JOIN (
+    SELECT
+    person_uuid,
+    MIN(date_of_observation) AS min_date
+    FROM
+    hiv_observation
+    WHERE
+    hiv_observation.date_of_observation IS NOT NULL
+    GROUP BY
+    person_uuid
+    ) AS min_dates ON h.person_uuid = min_dates.person_uuid AND h.date_of_observation = min_dates.min_date
+    WHERE
+    h.date_of_observation = min_dates.min_date and h.archived = 0) as bwp
+    ),
+    current_weight_and_pressure as (
+SELECT DISTINCT ON (tvs.person_uuid)
+    tvs.person_uuid,
+    tvs.body_weight,
+    CASE WHEN tvs.body_weight IS NOT NULL THEN tvs.capture_date ELSE NULL END AS currentWeightDate,
+    tvs.height,
+    CASE WHEN tvs.height IS NOT NULL THEN tvs.capture_date ELSE NULL END AS currentHeightDate,
+    tvs.diastolic,
+    CASE WHEN tvs.diastolic IS NOT NULL THEN tvs.capture_date ELSE NULL END AS currentDiastolicDate,
+    tvs.systolic,
+    CASE WHEN tvs.systolic IS NOT NULL THEN tvs.capture_date ELSE NULL END AS currentSystolicDate
+FROM triage_vital_sign tvs
+    JOIN (
+    SELECT person_uuid, MAX(capture_date) AS max_date
+    FROM triage_vital_sign
+    GROUP BY person_uuid
+    ) max_dates ON tvs.person_uuid = max_dates.person_uuid
+WHERE tvs.capture_date = max_dates.max_date
+    ),
+    baseline_tests as (
+with base as (select lt.*, llt.lab_test_name, lr.result_report, lr.date_result_received from laboratory_test lt
+    join laboratory_labtest llt on lt.lab_test_id = llt.id
+    join laboratory_result lr on lr.patient_uuid = lt.patient_uuid and lr.test_id = lt.id where lt.archived = 0 and lr.archived = 0 and lr.date_result_received < ?3)
+
+select patient_uuid,
+    (select t2.result_report from base t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 31
+    and t2.lab_test_id is not null
+    order by t2.date_result_received limit 1) as baselineFastingBloodSugar,
+    (select t2.result_report from base t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 13
+    and t2.lab_test_id is not null
+    order by t2.date_result_received limit 1) as baselineRandomBloodSugar,
+    (select t2.result_report from base t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 23
+    and t2.lab_test_id is not null
+    order by t2.date_result_received limit 1) as baselineBloodTotalCholesterol,
+    (select t2.result_report from base t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 25
+    and t2.lab_test_id is not null
+    order by t2.date_result_received limit 1) as baselineHDL,
+    (select t2.result_report from base t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 24
+    and t2.lab_test_id is not null
+    order by t2.date_result_received limit 1) as baselineLDL,
+    (select t2.result_report from base t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 17
+    and t2.lab_test_id is not null
+    order by t2.date_result_received limit 1) as baselineSodium,
+    (select t2.result_report from base t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 11
+    and t2.lab_test_id is not null
+    order by t2.date_result_received limit 1) as baselinePotassium,
+    (select t2.result_report from base t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 12
+    and t2.lab_test_id is not null
+    order by t2.date_result_received limit 1) as baselineCreatinine
+from base t1
+group by patient_uuid
+    ),
+    current_tests as (
+with current as (select lt.*, llt.lab_test_name, lr.result_report, lr.date_result_received from laboratory_test lt
+    join laboratory_labtest llt on lt.lab_test_id = llt.id
+    join laboratory_result lr on lr.patient_uuid = lt.patient_uuid and lr.test_id = lt.id where lt.archived = 0 and lr.archived = 0 and lr.date_result_received < ?3)
+
+select patient_uuid,
+    (select t2.result_report from current t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 31
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as currentFastingBloodSugar,
+    (select t2.date_result_received from current t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 31
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as dateCurrentFastingBloodSugar,
+    (select t2.result_report from current t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 13
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as currentRandomBloodSugar,
+    (select t2.date_result_received from current t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 13
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as dateCurrentRandomBloodSugar,
+    (select t2.result_report from current t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 23
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as currentBloodTotalCholesterol,
+    (select t2.date_result_received from current t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 23
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as dateCurrentBloodTotalCholesterol,
+    (select t2.result_report from current t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 25
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as currentHDL,
+    (select t2.date_result_received from current t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 25
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as dateCurrentHDL,
+    (select t2.result_report from current t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 24
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as currentLDL,
+    (select t2.date_result_received from current t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 24
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as dateCurrentLDL,
+    (select t2.result_report from current t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 17
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as currentSodium,
+    (select t2.date_result_received from current t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 17
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as dateCurrentSodium,
+    (select t2.result_report from current t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 11
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as currentPotassium,
+    (select t2.date_result_received from current t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 11
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as dateCurrentPotassium,
+    (select t2.result_report from current t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 12
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as currentCreatinine,
+    (select t2.date_result_received from current t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 12
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as dateCurrentCreatinine
+from current t1
+group by patient_uuid
+    ),
+    current_vl_result AS (SELECT * FROM
+    (SELECT CAST(ls.date_sample_collected AS DATE ) AS dateOfViralLoadSample,
+    sm.patient_uuid AS person_uuid130 ,
+    sm.facility_id AS vlFacility,
+    sm.archived AS vlArchived,
+    acode.display AS viralLoadIndication,
+    sm.result_reported AS currentViralLoad,
+    CAST(sm.date_result_reported AS DATE) AS dateOfCurrentViralLoad,
+    ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) AS rank2
+    FROM public.laboratory_result  sm
+    INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id
+    INNER JOIN public.laboratory_sample ls on ls.test_id = lt.id
+    INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication
+    WHERE lt.lab_test_id = 16
+    AND  lt.viral_load_indication !=719
+    AND sm. date_result_reported IS NOT NULL
+    AND sm.date_result_reported <= ?3
+    AND sm.result_reported IS NOT NULL
+    ) AS vl_result
+WHERE vl_result.rank2 = 1
+  AND (vl_result.vlArchived = 0 OR vl_result.vlArchived IS null)
+  AND  vl_result.vlFacility = ?1
     )
 select * from bio_data bd
                   left join patient_residence pr on bd.personUuid = pr.personUuid11
@@ -205,4 +408,9 @@ select * from bio_data bd
                   left join pharmacy_details_regimen pdr on pdr.person_uuid40 = bd.personUuid
                   left join current_status cs on cs.cuPersonUuid = bd.personUuid
                   left join prev_hypertensive prev_hyp on prev_hyp.personUuid = bd.personUuid
-                  left join new_hypertensive new_hyp on new_hyp.personUuid = bd.personUuid;
+                  left join new_hypertensive new_hyp on new_hyp.personUuid = bd.personUuid
+                  left join baseline_weight_and_pressure bp on bp.pUuid = bd.personUuid
+                  left join current_weight_and_pressure cp on cp.person_uuid = bd.personUuid
+                  left join baseline_tests blt on blt.patient_uuid = bd.personUuid
+                  left join current_tests cut on cut.patient_uuid = bd.personUuid
+                  left join current_vl_result cvl on cvl.person_uuid130 = bd.personUuid;
