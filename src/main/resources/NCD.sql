@@ -199,15 +199,18 @@ SELECT * FROM (
     date_newly_hypertensive desc
     ) AS nh
     ),
-    baseline_weight_and_pressure as (
-select * from (SELECT
-    distinct on (h.person_uuid)h.person_uuid AS pUuid,
+    baseline_weight_and_pressure AS (
+SELECT
+    DISTINCT ON (h.person_uuid) h.person_uuid AS pUuid,
     h.data->'physicalExamination'->>'bodyWeight' AS baselineWeight,
     h.data->'physicalExamination'->>'height' AS baselineHeight,
-    round(((cast(h.data->'physicalExamination'->>'bodyWeight' as decimal(5,0))/cast(h.data->'physicalExamination'->>'height' AS decimal(5,0))) * 100), 2) as baselineBMI,
+    ROUND(
+    CAST(h.data->'physicalExamination'->>'bodyWeight' AS DECIMAL(5, 0)) /
+    POWER(CAST(h.data->'physicalExamination'->>'height' AS DECIMAL(5, 0)) / 100, 2), 2
+    ) AS baselineBMI,
     h.data->'physicalExamination'->>'systolic' AS baselineSystolic,
     h.data->'physicalExamination'->>'diastolic' AS baselineDiastolic
-    FROM
+FROM
     hiv_observation h
     JOIN (
     SELECT
@@ -220,16 +223,21 @@ select * from (SELECT
     GROUP BY
     person_uuid
     ) AS min_dates ON h.person_uuid = min_dates.person_uuid AND h.date_of_observation = min_dates.min_date
-    WHERE
-    h.date_of_observation = min_dates.min_date and h.archived = 0) as bwp
+WHERE
+    h.date_of_observation = min_dates.min_date AND h.archived = 0
     ),
-    current_weight_and_pressure as (
+
+    current_weight_and_pressure AS (
 SELECT DISTINCT ON (tvs.person_uuid)
     tvs.person_uuid,
     tvs.body_weight,
-    CASE WHEN tvs.body_weight IS NOT NULL THEN tvs.capture_date ELSE NULL END AS currentWeightDate,
+    tvs.capture_date AS currentWeightDate,
     tvs.height,
-    CASE WHEN tvs.height IS NOT NULL THEN tvs.capture_date ELSE NULL END AS currentHeightDate,
+    ROUND(
+    CAST(tvs.body_weight AS DECIMAL(5, 0)) /
+    POWER(CAST(tvs.height AS DECIMAL(5, 0)) / 100, 2), 2
+    ) AS currentBMI,
+    CASE WHEN tvs.body_weight IS NOT NULL THEN tvs.capture_date ELSE NULL END AS currentBMIDate,
     tvs.diastolic,
     CASE WHEN tvs.diastolic IS NOT NULL THEN tvs.capture_date ELSE NULL END AS currentDiastolicDate,
     tvs.systolic,
