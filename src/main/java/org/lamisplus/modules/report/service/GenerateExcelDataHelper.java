@@ -105,6 +105,53 @@ public class GenerateExcelDataHelper {
 		return result;
 	}
 
+	public static List<Map<Integer, Object>> fillTBReportDataMapper(@NonNull List<TBReportProjection> tbReportProjections) {
+		List<Map<Integer, Object>> result = new ArrayList<>();
+		for (TBReportProjection tbReportProjection : tbReportProjections) {
+			if (tbReportProjection != null) {
+				Map<Integer, Object> map = new HashMap<>();
+				int index = 0;
+
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getState())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getLga())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getFacilityName())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getPersonUuid())));
+
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getSurname())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getFirstName())));
+				map.put(index++, tbReportProjection.getDateOfBirth());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getAge())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getGender())));
+				map.put(index++, "");
+				map.put(index++, tbReportProjection.getArtStartDate());
+
+				map.put(index++, null);
+
+				map.put(index++, tbReportProjection.getTbIptScreening());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbScreeningType())));
+
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbStatus())));
+				map.put(index++, "");
+				map.put(index++, tbReportProjection.getDateOfTbDiagnosticResultReceived());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticTestType())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticResult())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentStartDate())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentType())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentOutcome())));
+				map.put(index++, tbReportProjection.getTbTreatmentCompletionDate());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getEligibleForTPT())));
+				map.put(index++, tbReportProjection.getDateOfIptStart());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getRegimenName())));
+				map.put(index++, tbReportProjection.getDateCompletedIpt());
+				map.put(index, tbReportProjection.getWeightAtStartTpt());
+
+				result.add(map);
+			}
+		}
+		Log.info("result: " + result.size()); // going to be one
+		return result;
+	}
+
 	public  List<Map<Integer, Object>> fillRadetDataMapper(@NonNull List<RADETDTOProjection> reportDtos, LocalDate endDate) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		deleteErrorFile();
@@ -640,14 +687,14 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(clientService.getFacilityState()));
 				map.put(index++, getStringValue(clientService.getFacilityName()));
 				map.put(index++, getStringValue(clientService.getSerialEnrollmentNo()));
-				map.put(index++, getStringValue(String.valueOf(clientService.getPatientId())));
+				map.put(index++, getStringValue(clientService.getPersonUuid()));
 				map.put(index++, getStringValue(String.valueOf(clientService.getDateOfObservation())));
-				map.put(index++, getStringValue(clientService.getAnyOfTheFollowing()));
+				map.put(index++, getStringValue(clientService.getAnyOfTheFollowingList()));
 				map.put(index++, getStringValue(clientService.getDateOfAttempt()));
 				map.put(index++, getStringValue(clientService.getVerificationAttempts()));
 				map.put(index++, getStringValue(clientService.getVerificationStatus()));
-				map.put(index++, getStringValue(clientService.getDsdModel()));
 				map.put(index++, getStringValue(clientService.getOutcome()));
+				map.put(index++, getStringValue(clientService.getDsdModel()));
 				map.put(index++, getStringValue(clientService.getComment()));
 				map.put(index++, getStringValue(clientService.getReturnedToCare()));
 				map.put(index++, getStringValue(clientService.getReferredTo()));

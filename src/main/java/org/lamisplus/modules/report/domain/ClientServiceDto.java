@@ -1,16 +1,18 @@
 package org.lamisplus.modules.report.domain;
+
+
 public interface ClientServiceDto {
     String getFacilityState();
     String getFacilityName();
     String getSerialEnrollmentNo();
-    String getPatientId();
+    String getPersonUuid();
     String getDateOfObservation();
-    String getAnyOfTheFollowing();
+    String getAnyOfTheFollowingList();
     String getDateOfAttempt();
     String getVerificationAttempts();
     String getVerificationStatus();
-    String getDsdModel();
     String getOutcome();
+    String getDsdModel();
     String getComment();
     String getReturnedToCare();
     String getReferredTo();

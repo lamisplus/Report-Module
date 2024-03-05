@@ -404,13 +404,23 @@ public class Constants {
 					"Date Of Attempt",
 					"Verification Attempts",
 					"Verification Status",
-					"DSD Model",
 					"Outcome",
+					"DSD Model",
 					"Comment",
 					"Date Returned To Care",
 					"Referred To",
 					"Discontinued",
 					"Date of Discontinuation",
 					"Reason For Discontinuation"
+			);
+
+	public static final List<String> TB_REPORT_HEADER =
+			Arrays.asList(
+					"State", "LGA", "Facility", "Patient ID", "Surname", "Other Names",
+					"Sex", "Date of birth", "Age", "ART Start Date", "Date of Last Visit",
+					"Date of TB Screening", "Screening Type", "TB Screening Outcome", "TB Diagnostic Evaluation",
+					"Date of TB Diagnostic Evaluation", "TB Evaluation Method", "Date Result Received",
+					"TB Diagnostic Result", "Date of TB Treatment", "TB Treatment Outcome", "Date TB Treatment Outcome",
+					"Eligible for TPT", "TPT Type", "TPT Outcome", "Date of TPT Outcome", "Weight At Start TPT"
 			);
 }
