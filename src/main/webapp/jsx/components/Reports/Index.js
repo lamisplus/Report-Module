@@ -188,7 +188,7 @@ const Reports = (props) => {
                     onClick={() => handleItemClick("tb-report")}
                     style={{
                       backgroundColor:
-                        activeItem === "client-verification" ? "#000" : "",
+                        activeItem === "tb-report" ? "#000" : "",
                     }}
                   >
                     <span style={{ color: "#fff" }}>TB REPORT</span>
