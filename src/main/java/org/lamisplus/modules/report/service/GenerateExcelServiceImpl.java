@@ -1,7 +1,6 @@
 package org.lamisplus.modules.report.service;
 
 import lombok.AllArgsConstructor;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
@@ -12,13 +11,20 @@ import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
 import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 
 import org.lamisplus.modules.report.domain.*;
+import org.lamisplus.modules.report.config.Application;
+import org.lamisplus.modules.report.domain.BiometricReportDto;
+import org.lamisplus.modules.report.domain.HtsReportDto;
+import org.lamisplus.modules.report.domain.PrepReportDto;
+import org.lamisplus.modules.report.domain.RADETDTOProjection;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.repository.ReportRepository;
+import org.lamisplus.modules.report.utility.ResultSetExtract;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -52,8 +58,10 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	private final HIVEacRepository hivEacRepository;
 	
 	private final GenerateExcelDataHelper excelDataHelper;
-	
-	
+
+	private final ResultSetExtract resultSetExtract;
+
+
 	@Override
 	public ByteArrayOutputStream generatePatientLine(HttpServletResponse response, Long facilityId) {
 		LOG.info("Start generating patient line list for facility: " + getFacilityName(facilityId));
@@ -105,6 +113,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("End generate patient TB report");
 		return null;
 	}
+
 
 	@Override
 	public ByteArrayOutputStream generateRadet(Long facilityId, LocalDate start, LocalDate end) {
@@ -230,6 +239,26 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			e.printStackTrace();
 		}
 		LOG.info("End generate patient HTS");
+		return null;
+	}
+
+	@Override
+	public ByteArrayOutputStream generateIndexQueryLine(Long facilityId, LocalDate start, LocalDate end) {
+		LOG.info("Start generating Index line list for facility: " + getFacilityName(facilityId));
+		try {
+			//LOG.info("IQ - {}", Application.iq);
+			ResultSet resultSet = resultSetExtract.getResultSet(Application.iq);
+			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
+			LOG.info("query size is : {}" + fullData.size());
+
+			return excelService.generate(Constants.PATIENT_LINE_LIST, fullData, headers);
+
+		} catch (Exception e) {
+			LOG.error("Error Occurred when generating INDEX LINE LIST!!!");
+			e.printStackTrace();
+		}
+		LOG.info("End generate INDEX line list ");
 		return null;
 	}
 }

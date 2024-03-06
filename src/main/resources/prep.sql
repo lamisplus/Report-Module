@@ -12,6 +12,8 @@ SELECT DISTINCT ON (p.uuid)p.uuid AS PersonUuid, p.id, p.uuid,p.hospital_number 
     (CASE WHEN contact_point->'contactPoint'->0->>'type'='phone' THEN contact_point->'contactPoint'->0->>'value' ELSE null END) AS phone,
 
     baseline_reg.regimen AS baselineRegimen,
+    (select display from base_application_codeset where code = baseline_reg.prep_type) as prepType,
+    (select display from base_application_codeset where code = baseline_pc.prep_distribution_setting) AS prepDistributionSetting,
     baseline_pc.systolic AS baselineSystolicBP,
     baseline_pc.diastolic AS baselineDiastolicBP,
     baseline_pc.weight AS baselineWeight,
@@ -52,7 +54,7 @@ SELECT DISTINCT ON (p.uuid)p.uuid AS PersonUuid, p.id, p.uuid,p.hospital_number 
     END) AS currentHivStatus,
     current_pc.encounter_date AS DateOfCurrentHIVStatus,
     (CASE WHEN p.sex='Male' THEN NULL
-    WHEN current_pc.pregnant IS NOT NULL AND current_pc.pregnant='true' THEN 'Pregnant'
+    WHEN current_pc.pregnant IS NOT NULL AND current_pc.pregnant='true' THEN (SELECT display FROM base_application_codeset WHERE code = current_pc.pregnant)
     ELSE 'Not Pregnant' END) AS pregnancyStatus,
     (CASE
     WHEN prepi.interruption_date  > prepc.encounter_date THEN bac.display
