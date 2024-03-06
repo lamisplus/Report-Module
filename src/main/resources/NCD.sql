@@ -482,7 +482,7 @@ WITH regimen AS (
     INNER JOIN public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = p.id
     INNER JOIN public.hiv_regimen r ON r.id = pr.regimens_id
     INNER JOIN public.hiv_regimen_type rt ON rt.id = r.regimen_type_id
-    WHERE r.regimen_type_id IN (16)
+    WHERE r.regimen_type_id IN (61)
     AND p.archived = 0
     AND p.facility_id = ?1
     AND p.visit_date >= ?2
