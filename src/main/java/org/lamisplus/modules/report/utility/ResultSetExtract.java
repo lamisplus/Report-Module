@@ -23,7 +23,7 @@ public class ResultSetExtract {
         try {
             conn = dataSource.getConnection();
             Statement stmt = conn.createStatement();
-            LOG.info("query is - {}", query);
+            //LOG.info("query is - {}", query);
             resultSet = stmt.executeQuery(query);
         } catch (Exception e) {
             e.printStackTrace();
@@ -40,7 +40,7 @@ public class ResultSetExtract {
             int columnCount = rsmd.getColumnCount();
             for (int index = 1; index <= columnCount; index++) {
                 String column = rsmd.getColumnName(index);
-                LOG.info("column header is - {}", column);
+                //LOG.info("column header is - {}", column);
                 headers.add(column);
             }
             return headers;

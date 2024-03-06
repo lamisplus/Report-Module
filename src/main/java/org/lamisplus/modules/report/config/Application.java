@@ -6,15 +6,24 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
-@ConfigurationProperties(prefix = "query", ignoreUnknownFields = false)
+@ConfigurationProperties(prefix = "query", ignoreUnknownFields = true, ignoreInvalidFields = true)
 @Configuration
 @Data
 public class Application {
     private String indexQuery;
-    public static String iq;
+    private String indexQueryName;
+    private String biometricQuery;
+    private String biometricQueryName;
+    public static String indexElicitation;
+    public static String indexElicitationName;
+    public static String biometric;
+    public static String biometricName;
 
     @PostConstruct
-    public void setQuery(){
-        iq = getIndexQuery();
+    public void setParameters(){
+        indexElicitation = getIndexQuery();
+        indexElicitationName = getIndexQueryName();
+        biometric = getBiometricQuery();
+        biometricName = getBiometricQueryName();
     }
 }
