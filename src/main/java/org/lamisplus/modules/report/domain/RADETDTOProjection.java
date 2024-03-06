@@ -95,8 +95,9 @@ public interface RADETDTOProjection {
 	Integer getNumberOfEACSessionCompleted();
 	LocalDate  getDateOfLastEACSessionCompleted();
 	LocalDate getDateOfExtendEACCompletion();
-	LocalDateTime getDateOfRepeatViralLoadResult();
-	LocalDateTime getDateOfRepeatViralLoadEACSampleCollection();
+	LocalDate getDateOfRepeatViralLoadResult();
+	LocalDate getDateOfRepeatViralLoadEACSampleCollection();
+	// LocalDate getDateSampleCollected();
 	String getRepeatViralLoadResult();
 	String getTbStatus();
 	String getTbStatusOutCome();
@@ -128,7 +129,11 @@ public interface RADETDTOProjection {
 
 	String  getTbDiagnosticResult();
 
-	String getDsdModel();
+	String getModelDevolvedTo();
+	LocalDate getDateOfDevolvement();
+	String getCurrentDSDModel();
+	LocalDate getDateOfCurrentDSD();
+	// String getDsdModel();
 	LocalDate getDateofTbDiagnosticResultReceived();
 
 	//TB Treatment
@@ -137,10 +142,10 @@ public interface RADETDTOProjection {
 	LocalDate getTbTreatmentStartDate();
 	LocalDate getTbCompletionDate();
 	String getIptCompletionStatus();
-
+	String getTbScreeningType();
 	//Crytococal Antigen
-	Date getDateOfLastCrytococalAntigen();
-	String getLastCrytococalAntigen();
+	// Date getDateOfLastCrytococalAntigen();
+	// String getLastCrytococalAntigen();
 
 	String getCaseManager();
 	String getVaCauseOfDeath();

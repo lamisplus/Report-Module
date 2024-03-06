@@ -1,6 +1,7 @@
 package org.lamisplus.modules.report.service;
 
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
@@ -25,7 +26,6 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -94,6 +94,25 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			e.printStackTrace();
 		}
 		LOG.info("End generate client service list ");
+		return null;
+	}
+
+
+	@Override
+	public ByteArrayOutputStream generateTBReport(Long facilityId, LocalDate start, LocalDate end) {
+		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
+		try {
+			List<TBReportProjection> tbReportProjections = reportRepository.generateTBReport(facilityId, start, end);
+			LOG.info("RADET Size {}", tbReportProjections.size());
+
+			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillTBReportDataMapper(tbReportProjections);
+			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
+		} catch (Exception e) {
+			LOG.error("An error Occurred when generating TB report...");
+			LOG.error("Error message: " + e.getMessage());
+			e.printStackTrace();
+		}
+		LOG.info("End generate patient TB report");
 		return null;
 	}
 

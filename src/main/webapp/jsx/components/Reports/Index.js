@@ -17,7 +17,7 @@ import HTSReport from "./HTSReport";
 import PrepReport from "./PrepReport";
 import ClinicData from "./ClinicData";
 import ClientVerification from "./ClientVerification";
-import IndexElicitation from "./IndexElicitation";
+import TbReport from "./TbReport";
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -180,21 +180,21 @@ const Reports = (props) => {
 
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
+
                   <Menu.Item
-                      name="inbox"
-                      active={activeItem === "index-elicitation"}
-                      onClick={() => handleItemClick("index-elicitation")}
-                      style={{
-                        backgroundColor:
-                            activeItem === "index-elicitation" ? "#000" : "",
-                      }}
+                    name="inbox"
+                    active={activeItem === "tb-report"}
+                    onClick={() => handleItemClick("tb-report")}
+                    style={{
+                      backgroundColor:
+                        activeItem === "client-verification" ? "#000" : "",
+                    }}
                   >
-                    <span style={{ color: "#fff" }}>INDEX ELICITATION</span>
+                    <span style={{ color: "#fff" }}>TB REPORT</span>
 
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
                 </Menu>
-
               </div>
               <div
                 className="col-md-9 float-end"
@@ -270,16 +270,15 @@ const Reports = (props) => {
                     setCompleted={setCompleted}
                     completed={completed}
                   />
-                )
-                }
-                {activeItem === "index-elicitation" && (
-                    <IndexElicitation
-                        handleItemClick={handleItemClick}
-                        setCompleted={setCompleted}
-                        completed={completed}
-                    />
-                )
-                }
+                )}
+
+                {activeItem === "tb-report" && (
+                  <TbReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
               </div>
             </form>
           </div>

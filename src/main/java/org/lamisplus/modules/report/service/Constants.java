@@ -146,15 +146,16 @@ public class Constants {
 					"Date of Current ART Status",
 					"Client Verification Outcome",
 					"Client Verification Status",
-					"Biometric Status",
+					// "Biometric Status",
 					"Cause of Death",
 					"VA Cause of Death",
 					"Previous ART Status",
 					"Confirmed Date of Previous ART Status",
 					"ART Enrollment Setting",
 					"Date of TB Screening (yyyy-mm-dd)",
-					"TB status at Last Visit",
-					"TB Screening Outcome",
+					"TB Screening Type",
+					"TB status",
+					// "TB Screening Outcome",
 					"Date of TB Sample Collection (yyyy-mm-dd)",
 					"TB Diagnostic Test Type",
 					"Date of TB Diagnostic Result Received (yyyy-mm-dd)",
@@ -163,8 +164,8 @@ public class Constants {
 					"TB Treatment Type (new, relapsed etc)",
 					"Date of Completion of TB Treatment (yyyy-mm-dd)",
 					"TB Treatment Outcome",
-					"Date of TB-LAM",
-					"TB-LAM result",
+					// "Date of TB-LAM",
+					// "TB-LAM result",
 					"Date of TPT Start (yyyy-mm-dd)",
 					"TPT Type",
 					"TPT Completion date (yyyy-mm-dd)",
@@ -176,8 +177,12 @@ public class Constants {
 					"Date of Repeat Viral Load - Post EAC VL Sample collected (yyyy-mm-dd)",
 					"Repeat Viral load result (c/ml)- POST EAC",
 					"Date of Repeat Viral load result- POST EAC VL",
-					"DSD Model",
-					"Date Commenced DSD (yyyy-mm-dd)",
+					// "DSD Model",
+					"Date of devolvement",
+					"Model devolved to",
+					"Date of current DSD",
+					"Current DSD model",
+					// "Date Commenced DSD (yyyy-mm-dd)",
 					"Date of Return of DSD Client to Facility (yyyy-mm-dd)",
 					"Screening for Chronic Conditions",
 					"Co-morbidities",
@@ -187,13 +192,13 @@ public class Constants {
 					"Result of Cervical Cancer Screening",
 					"Date of Precancerous Lesions Treatment (yyyy-mm-dd)",
 					"Precancerous Lesions Treatment Methods",
-					"Last Cryptococcal Antigen",
-					"Date of Last Cryptococcal Antigen (yyyy-mm-dd)",
+					// "Last Cryptococcal Antigen",
+					// "Date of Last Cryptococcal Antigen (yyyy-mm-dd)",
 					"Date Biometrics Enrolled (yyyy-mm-dd)",
 					"Number of Fingers Captured",
 					"Date Biometrics Recapture (yyyy-mm-dd)",
 					"Number of Fingers Recaptured",
-					"Valid Biometrics(Hexadecimal/Base64 Unique Identifier)",
+					// "Valid Biometrics(Hexadecimal/Base64 Unique Identifier)",
 					"Case Manager"
 
 			);
@@ -232,7 +237,8 @@ public class Constants {
 					"Phone Number",
 					"Enrollment Date (yyyy-mm-dd)",
 					"Number of Fingers Captured",
-					"Fingers Valid"
+					"Fingers Valid",
+					"Biometric Status"
 			);
 	
 	public static final List<String> LAB_HEADER =
@@ -412,5 +418,15 @@ public class Constants {
 					"Discontinued",
 					"Date of Discontinuation",
 					"Reason For Discontinuation"
+			);
+
+	public static final List<String> TB_REPORT_HEADER =
+			Arrays.asList(
+					"State", "LGA", "Facility", "Patient ID", "Surname", "Other Names",
+					"Sex", "Date of birth", "Age", "ART Start Date", "Date of Last Visit",
+					"Date of TB Screening", "Screening Type", "TB Screening Outcome", "TB Diagnostic Evaluation",
+					"Date of TB Diagnostic Evaluation", "TB Evaluation Method", "Date Result Received",
+					"TB Diagnostic Result", "Date of TB Treatment", "TB Treatment Outcome", "Date TB Treatment Outcome",
+					"Eligible for TPT", "TPT Type", "TPT Outcome", "Date of TPT Outcome", "Weight At Start TPT"
 			);
 }

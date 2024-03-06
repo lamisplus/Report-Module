@@ -17,6 +17,10 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 @Component
@@ -101,6 +105,52 @@ public class GenerateExcelDataHelper {
 		return result;
 	}
 
+	public static List<Map<Integer, Object>> fillTBReportDataMapper(@NonNull List<TBReportProjection> tbReportProjections) {
+		List<Map<Integer, Object>> result = new ArrayList<>();
+		for (TBReportProjection tbReportProjection : tbReportProjections) {
+			if (tbReportProjection != null) {
+				Map<Integer, Object> map = new HashMap<>();
+				int index = 0;
+
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getState())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getLga())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getFacilityName())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getPersonUuid())));
+
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getSurname())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getFirstName())));
+				map.put(index++, tbReportProjection.getDateOfBirth());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getAge())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getGender())));
+				map.put(index++, "");
+				map.put(index++, tbReportProjection.getArtStartDate());
+
+				map.put(index++, null);
+
+				map.put(index++, tbReportProjection.getTbIptScreening());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbScreeningType())));
+
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbStatus())));
+				map.put(index++, "");
+				map.put(index++, tbReportProjection.getDateOfTbDiagnosticResultReceived());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticTestType())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticResult())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentStartDate())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentType())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentOutcome())));
+				map.put(index++, tbReportProjection.getTbTreatmentCompletionDate());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getEligibleForTPT())));
+				map.put(index++, tbReportProjection.getDateOfIptStart());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getRegimenName())));
+				map.put(index++, tbReportProjection.getDateCompletedIpt());
+				map.put(index, tbReportProjection.getWeightAtStartTpt());
+
+				result.add(map);
+			}
+		}
+		Log.info("result: " + result.size()); // going to be one
+		return result;
+	}
 
 	public  List<Map<Integer, Object>> fillRadetDataMapper(@NonNull List<RADETDTOProjection> reportDtos, LocalDate endDate) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
@@ -202,7 +252,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getCurrentStatusDate());
 				map.put(index++, radetReportDto.getClientVerificationOutCome());
 				map.put(index++, radetReportDto.getClientVerificationStatus());
-				map.put(index++, radetReportDto.getBiometricStatus());
+				// map.put(index++, radetReportDto.getBiometricStatus());
 
 				map.put(index++, radetReportDto.getCauseOfDeath());
 				map.put(index++, radetReportDto.getVaCauseOfDeath());
@@ -215,8 +265,9 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getEnrollmentSetting());
 				//TB
 				map.put(index++, radetReportDto.getDateOfTbScreened());
+				map.put(index++, radetReportDto.getTbScreeningType());
 				map.put(index++, radetReportDto.getTbStatus());
-				map.put(index++, radetReportDto.getTbStatusOutCome());
+				// map.put(index++, radetReportDto.getTbStatusOutCome());
 				//tb lab
 				map.put(index++, radetReportDto.getDateOfTbSampleCollection());
 				map.put(index++, radetReportDto.getTbDiagnosticTestType());
@@ -227,8 +278,8 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getTbTreatementType());
 				map.put(index++, radetReportDto.getTbCompletionDate());
 				map.put(index++, radetReportDto.getTbTreatmentOutcome());
-				map.put(index++, radetReportDto.getDateOfLastTbLam());
-				map.put(index++, radetReportDto.getTbLamResult());
+				// map.put(index++, radetReportDto.getDateOfLastTbLam());
+				// map.put(index++, radetReportDto.getTbLamResult());
 
 
 				//TPT
@@ -243,16 +294,14 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getDateOfLastEACSessionCompleted());
 				map.put(index++, radetReportDto.getDateOfExtendEACCompletion());
 				map.put(index++, radetReportDto.getDateOfRepeatViralLoadEACSampleCollection());
-				map.put(index++, repeatVl);
+				map.put(index++, radetReportDto.getRepeatViralLoadResult());
 				map.put(index++, radetReportDto.getDateOfRepeatViralLoadResult());
 
 				//DSD MOdel
-				map.put(index++, radetReportDto.getDsdModel());
-				if (radetReportDto.getDsdModel() != null) {
-					map.put(index++, radetReportDto.getDateOfCurrentRegimen());
-				} else {
-					map.put(index++, null);
-				}
+				map.put(index++, radetReportDto.getDateOfDevolvement());
+				map.put(index++, radetReportDto.getModelDevolvedTo());
+				map.put(index++, radetReportDto.getDateOfCurrentDSD());
+				map.put(index++, radetReportDto.getCurrentDSDModel());
 				map.put(index++, null);
 
 				//chronic care
@@ -268,15 +317,15 @@ public class GenerateExcelDataHelper {
 				map.put(index++, treatmentMethodDateValue);
 				map.put(index++, radetReportDto.getCervicalCancerTreatmentScreened());
 
-				map.put(index++, radetReportDto.getLastCrytococalAntigen());
-				map.put(index++, radetReportDto.getDateOfLastCrytococalAntigen());
+				// map.put(index++, radetReportDto.getLastCrytococalAntigen());
+				// map.put(index++, radetReportDto.getDateOfLastCrytococalAntigen());
 
 				//biometrics
 				map.put(index++, radetReportDto.getDateBiometricsEnrolled());
 				map.put(index++, radetReportDto.getNumberOfFingersCaptured());
 				map.put(index++, radetReportDto.getDateBiometricsRecaptured());
 				map.put(index++, radetReportDto.getNumberOfFingersRecaptured());
-				map.put(index++, null);
+				// map.put(index++, null);
 
 				//case manager
 				map.put(index, radetReportDto.getCaseManager());
