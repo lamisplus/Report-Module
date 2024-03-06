@@ -1,7 +1,6 @@
 package org.lamisplus.modules.report.service;
 
 import lombok.AllArgsConstructor;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
@@ -19,7 +18,6 @@ import org.lamisplus.modules.report.domain.PrepReportDto;
 import org.lamisplus.modules.report.domain.RADETDTOProjection;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.repository.ReportRepository;
-import org.lamisplus.modules.report.utility.DateUtil;
 import org.lamisplus.modules.report.utility.ResultSetExtract;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +29,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -116,6 +115,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("End generate patient TB report");
 		return null;
 	}
+
 
 	@Override
 	public ByteArrayOutputStream generateRadet(Long facilityId, LocalDate start, LocalDate end) {

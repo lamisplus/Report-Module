@@ -18,6 +18,7 @@ import PrepReport from "./PrepReport";
 import ClinicData from "./ClinicData";
 import ClientVerification from "./ClientVerification";
 import TbReport from "./TbReport";
+import IndexElicitation from "./IndexElicitation";
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -194,7 +195,21 @@ const Reports = (props) => {
 
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
+                  <Menu.Item
+                      name="inbox"
+                      active={activeItem === "index-elicitation"}
+                      onClick={() => handleItemClick("index-elicitation")}
+                      style={{
+                        backgroundColor:
+                            activeItem === "index-elicitation" ? "#000" : "",
+                      }}
+                  >
+                    <span style={{ color: "#fff" }}>INDEX ELICITATION</span>
+
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
                 </Menu>
+
               </div>
               <div
                 className="col-md-9 float-end"
@@ -270,7 +285,16 @@ const Reports = (props) => {
                     setCompleted={setCompleted}
                     completed={completed}
                   />
-                )}
+                )
+                }
+                {activeItem === "index-elicitation" && (
+                    <IndexElicitation
+                        handleItemClick={handleItemClick}
+                        setCompleted={setCompleted}
+                        completed={completed}
+                    />
+                )
+                }
 
                 {activeItem === "tb-report" && (
                   <TbReport
