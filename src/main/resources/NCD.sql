@@ -202,6 +202,7 @@ SELECT * FROM (
     baseline_weight_and_pressure AS (
 SELECT
     DISTINCT ON (h.person_uuid) h.person_uuid AS pUuid,
+    NULL AS baselineWaistCircumference,
     h.data->'physicalExamination'->>'bodyWeight' AS baselineWeight,
     h.data->'physicalExamination'->>'height' AS baselineHeight,
     ROUND(
@@ -233,6 +234,11 @@ SELECT DISTINCT ON (tvs.person_uuid)
     tvs.body_weight,
     tvs.capture_date AS currentWeightDate,
     tvs.height,
+    tvs.capture_date AS currentHeightDate,
+    NULL AS currentWaistCircumference,
+    NULL AS currentWaistCircumferenceDate,
+    NULL AS waistHipRatio,
+    NULL AS WaistHipRatioDate,
     ROUND(
     CAST(tvs.body_weight AS DECIMAL(5, 0)) /
     POWER(CAST(tvs.height AS DECIMAL(5, 0)) / 100, 2), 2
@@ -291,6 +297,11 @@ select patient_uuid,
     and t2.lab_test_id = 11
     and t2.lab_test_id is not null
     order by t2.date_result_received limit 1) as baselinePotassium,
+    (select t2.result_report from base t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 20
+    and t2.lab_test_id is not null
+    order by t2.date_result_received limit 1) as baselineUrea,
     (select t2.result_report from base t2
     where t2.patient_uuid = t1.patient_uuid
     and t2.lab_test_id = 12
@@ -377,6 +388,16 @@ select patient_uuid,
     order by t2.date_result_received desc limit 1) as dateCurrentPotassium,
     (select t2.result_report from current t2
     where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 20
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as currentUrea,
+    (select t2.date_result_received from current t2
+    where t2.patient_uuid = t1.patient_uuid
+    and t2.lab_test_id = 20
+    and t2.lab_test_id is not null
+    order by t2.date_result_received desc limit 1) as dateCurrentUrea,
+    (select t2.result_report from current t2
+    where t2.patient_uuid = t1.patient_uuid
     and t2.lab_test_id = 12
     and t2.lab_test_id is not null
     order by t2.date_result_received desc limit 1) as currentCreatinine,
@@ -430,7 +451,10 @@ WHERE vl_result.rank2 = 1
     ) AS pr2
 WHERE pr2.rnk3 = 1
     ),
-    current_htn_regimen AS (SELECT * FROM
+    current_htn_regimen AS (SELECT person_uuid41, lastHTNPickupDate, currentHTNRegimen,
+    NULL AS currentHTNStatus,
+    NULL AS dateCurrentHTNStatus,
+    NULL AS reasonsLTFU_IIT FROM
     (SELECT *, ROW_NUMBER() OVER (PARTITION BY pr1.person_uuid41 ORDER BY pr1.lastHTNPickupDate DESC) AS rnk41
     FROM
     (SELECT p.person_uuid AS person_uuid41,
@@ -448,19 +472,49 @@ WHERE pr2.rnk3 = 1
     AND  p.visit_date  < ?3) AS pr1
     ) AS pr2
 WHERE pr2.rnk41 = 1
+    ),
+    regimenSwitchSubstitutionDate AS (
+WITH regimen AS (
+    SELECT p.person_uuid AS person_uuid40,
+    p.visit_date AS lastPickupDate,
+    r.description AS currentARTRegimen
+    FROM public.hiv_art_pharmacy p
+    INNER JOIN public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = p.id
+    INNER JOIN public.hiv_regimen r ON r.id = pr.regimens_id
+    INNER JOIN public.hiv_regimen_type rt ON rt.id = r.regimen_type_id
+    WHERE r.regimen_type_id IN (1,2,3,4,14)
+    AND p.archived = 0
+    AND p.facility_id = ?1
+    AND p.visit_date >= ?2
+    AND p.visit_date < ?3
+    ),
+    changes AS (
+    SELECT person_uuid40,
+    lastPickupDate,
+    currentARTRegimen,
+    CASE
+    WHEN lag(currentARTRegimen) OVER (PARTITION BY person_uuid40 ORDER BY lastPickupDate) = currentARTRegimen THEN null
+    ELSE lastPickupDate
+    END AS change_date,
+    ROW_NUMBER() OVER (PARTITION BY person_uuid40 ORDER BY lastPickupDate DESC) AS change_rank
+    FROM regimen
     )
-
+SELECT person_uuid40, change_date AS dateRegimenSwitch
+FROM changes
+WHERE change_rank = 1 AND change_date IS NOT NULL
+    )
 select * from bio_data bd
                   left join patient_residence pr on bd.personUuid = pr.personUuid11
                   left join pregnancy_status ps on bd.personUuid = ps.person_uuid
-                  left join pharmacy_details_regimen pdr on pdr.person_uuid40 = bd.personUuid
                   left join current_status cs on cs.cuPersonUuid = bd.personUuid
+                  left join regimenSwitchSubstitutionDate rSSD on rSSD.person_uuid40 = bd.personUuid
+                  left join pharmacy_details_regimen pdr on pdr.person_uuid40 = bd.personUuid
                   left join prev_hypertensive prev_hyp on prev_hyp.personUuid = bd.personUuid
                   left join new_hypertensive new_hyp on new_hyp.personUuid = bd.personUuid
                   left join baseline_weight_and_pressure bp on bp.pUuid = bd.personUuid
-                  left join current_weight_and_pressure cp on cp.person_uuid = bd.personUuid
                   left join baseline_tests blt on blt.patient_uuid = bd.personUuid
-                  left join current_tests cut on cut.patient_uuid = bd.personUuid
-                  left join current_vl_result cvl on cvl.person_uuid130 = bd.personUuid
                   left join start_htn_regimen shr on shr.person_uuid40 = bd.personUuid
-                  left join current_htn_regimen chr on chr.person_uuid41 = bd.personUuid;
+                  left join current_htn_regimen chr on chr.person_uuid41 = bd.personUuid
+                  left join current_weight_and_pressure cp on cp.person_uuid = bd.personUuid
+                  left join current_tests cut on cut.patient_uuid = bd.personUuid
+                  left join current_vl_result cvl on cvl.person_uuid130 = bd.personUuid;
