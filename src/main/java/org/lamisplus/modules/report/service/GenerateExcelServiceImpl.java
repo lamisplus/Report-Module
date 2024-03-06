@@ -18,6 +18,7 @@ import org.lamisplus.modules.report.domain.PrepReportDto;
 import org.lamisplus.modules.report.domain.RADETDTOProjection;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.repository.ReportRepository;
+import org.lamisplus.modules.report.utility.DateUtil;
 import org.lamisplus.modules.report.utility.ResultSetExtract;
 import org.springframework.stereotype.Service;
 
