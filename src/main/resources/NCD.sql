@@ -410,7 +410,46 @@ group by patient_uuid
 WHERE vl_result.rank2 = 1
   AND (vl_result.vlArchived = 0 OR vl_result.vlArchived IS null)
   AND  vl_result.vlFacility = ?1
+    ),
+    start_htn_regimen AS (SELECT * FROM
+    (SELECT *, ROW_NUMBER() OVER (PARTITION BY pr1.person_uuid40 ORDER BY pr1.htnStartDate) AS rnk3
+    FROM
+    (SELECT p.person_uuid AS person_uuid40,
+    p.visit_date AS htnStartDate,
+    r.description AS htnStartRegimen
+    FROM hiv_art_pharmacy p
+    INNER JOIN hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = p.id
+    INNER JOIN hiv_regimen r on r.id = pr.regimens_id
+    INNER JOIN hiv_regimen_type rt on rt.id = r.regimen_type_id
+    WHERE r.regimen_type_id in (61)
+    AND  p.archived = 0
+    AND  p.facility_id = ?1
+    AND  p.visit_date >= ?2
+    AND  p.visit_date  < ?3
+    ) AS pr1
+    ) AS pr2
+WHERE pr2.rnk3 = 1
+    ),
+    current_htn_regimen AS (SELECT * FROM
+    (SELECT *, ROW_NUMBER() OVER (PARTITION BY pr1.person_uuid41 ORDER BY pr1.lastHTNPickupDate DESC) AS rnk41
+    FROM
+    (SELECT p.person_uuid AS person_uuid41,
+    p.visit_date AS lastHTNPickupDate,
+    r.description AS currentHTNRegimen,
+    CAST(p.refill_period /30.0 AS DECIMAL(10,1)) AS monthsOfHTNRefill
+    FROM hiv_art_pharmacy p
+    INNER JOIN hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = p.id
+    INNER JOIN hiv_regimen r on r.id = pr.regimens_id
+    INNER JOIN hiv_regimen_type rt on rt.id = r.regimen_type_id
+    WHERE r.regimen_type_id in (61)
+    AND  p.archived = 0
+    AND  p.facility_id = ?1
+    AND  p.visit_date >= ?2
+    AND  p.visit_date  < ?3) AS pr1
+    ) AS pr2
+WHERE pr2.rnk41 = 1
     )
+
 select * from bio_data bd
                   left join patient_residence pr on bd.personUuid = pr.personUuid11
                   left join pregnancy_status ps on bd.personUuid = ps.person_uuid
@@ -422,4 +461,6 @@ select * from bio_data bd
                   left join current_weight_and_pressure cp on cp.person_uuid = bd.personUuid
                   left join baseline_tests blt on blt.patient_uuid = bd.personUuid
                   left join current_tests cut on cut.patient_uuid = bd.personUuid
-                  left join current_vl_result cvl on cvl.person_uuid130 = bd.personUuid;
+                  left join current_vl_result cvl on cvl.person_uuid130 = bd.personUuid
+                  left join start_htn_regimen shr on shr.person_uuid40 = bd.personUuid
+                  left join current_htn_regimen chr on chr.person_uuid41 = bd.personUuid;
