@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -276,6 +277,35 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		}
 		LOG.info("End generate INDEX line list ");
 		return null;
+	}
+
+
+	public ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException {
+		String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
+		String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
+		LOG.info("start date {}", startDate);
+		LOG.info("end date {}", endDate);
+		String query = "";
+		String reportName = "";
+		//pmtct hts - 82d80564-6d3e-433e-8441-25db7fe1f2af
+		//pmtct maternal cohort - 2b6fe1b9-9af0-4af7-9f59-b9cfcb906158
+		if(reportId.equals("82d80564-6d3e-433e-8441-25db7fe1f2af")){
+			query = String.format(Application.pmtctHts, facilityId, startDate, endDate);
+			reportName = Application.pmtctHtsName;
+		} else if(reportId.equals("2b6fe1b9-9af0-4af7-9f59-b9cfcb906158")){
+			query = String.format(Application.pmtctMaternalCohort, facilityId, startDate, endDate);
+			reportName = Application.pmtctMaternalCohortName;
+
+		} else {
+			LOG.info("Report not available...");
+			return null;
+		}
+		//LOG.info("Query is {}", query);
+		ResultSet resultSet = resultSetExtract.getResultSet(query);
+		List<String> headers = resultSetExtract.getHeaders(resultSet);
+		List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
+		LOG.info("query size is : {}" + fullData.size());
+		return excelService.generate(reportName, fullData, headers);
 	}
 }
 
