@@ -237,7 +237,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		return null;
 	}
 
-	@Override
+	/*@Override
 	public ByteArrayOutputStream generatePrep(Long facilityId, LocalDate start, LocalDate end) {
 		LOG.info("Start generating prep for facility:" + getFacilityName(facilityId));
 		try {
@@ -250,6 +250,29 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			e.printStackTrace();
 		}
 		LOG.info("End generate patient HTS");
+		return null;
+	}*/
+
+	@Override
+	public ByteArrayOutputStream generatePrep(Long facilityId, LocalDate start, LocalDate end) {
+		try {
+			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
+			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
+			LOG.info("start date {}", startDate);
+			LOG.info("end date {}", endDate);
+
+			String query = String.format(Application.prep, facilityId, startDate, endDate);
+
+			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
+			LOG.info("query size is : {}" + fullData.size());
+
+			return excelService.generate(Application.prepName, fullData, headers);
+		} catch (Exception e) {
+			LOG.info("Error Occurred when generating prep data", e);
+		}
+		LOG.info("End generate prep report");
 		return null;
 	}
 
