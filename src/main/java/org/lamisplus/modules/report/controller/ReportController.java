@@ -26,7 +26,7 @@ public class ReportController {
 	
 
 	@PostMapping(REPORT_URL_VERSION_ONE + "/reporting")
-	public void htsLineList(HttpServletResponse response,
+	public void reporting(HttpServletResponse response,
 							@RequestParam("reportId") String reportId,
 							@RequestParam("facilityId") Long facility,
 							@RequestParam("startDate") LocalDate start,
