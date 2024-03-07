@@ -19,6 +19,8 @@ import ClinicData from "./ClinicData";
 import ClientVerification from "./ClientVerification";
 import TbReport from "./TbReport";
 import IndexElicitation from "./IndexElicitation";
+import PmtctHtsReport from "./PmtctHtsReport";
+import PmtctMaternalCohortReport from "./PmtctMaternalCohortReport";
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -208,6 +210,32 @@ const Reports = (props) => {
 
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
+                  <Menu.Item
+                      name="inbox"
+                      active={activeItem === "pmtct-hts"}
+                      onClick={() => handleItemClick("pmtct-hts")}
+                      style={{
+                        backgroundColor:
+                            activeItem === "pmtct-hts" ? "#000" : "",
+                      }}
+                  >
+                    <span style={{ color: "#fff" }}>PMTCT HTS</span>
+
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
+                  <Menu.Item
+                      name="inbox"
+                      active={activeItem === "pmtct-maternal-cohort"}
+                      onClick={() => handleItemClick("pmtct-maternal-cohort")}
+                      style={{
+                        backgroundColor:
+                            activeItem === "pmtct-maternal-cohort" ? "#000" : "",
+                      }}
+                  >
+                    <span style={{ color: "#fff" }}>PMTCT MATERNAL COHORT</span>
+
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
                 </Menu>
 
               </div>
@@ -295,14 +323,22 @@ const Reports = (props) => {
                     />
                 )
                 }
-
-                {activeItem === "tb-report" && (
-                  <TbReport
-                    handleItemClick={handleItemClick}
-                    setCompleted={setCompleted}
-                    completed={completed}
-                  />
-                )}
+                {activeItem === "pmtct-hts" && (
+                    <PmtctHtsReport
+                        handleItemClick={handleItemClick}
+                        setCompleted={setCompleted}
+                        completed={completed}
+                    />
+                )
+                }
+                {activeItem === "pmtct-maternal-cohort" && (
+                    <PmtctMaternalCohortReport
+                        handleItemClick={handleItemClick}
+                        setCompleted={setCompleted}
+                        completed={completed}
+                    />
+                )
+                }
               </div>
             </form>
           </div>
