@@ -108,7 +108,7 @@ const PmtctMaternalCohortReport = (props) => {
         )
           .then(response => {
             setLoading(false)
-            const fileName = `${objValues.organisationUnitName} HTS ${currentDate}`
+            const fileName = `${objValues.organisationUnitName} PMTCT Prematernal Cohort ${currentDate}`
             const responseData = response.data
             let blob = new Blob([responseData], {type: "application/octet-stream"});
 
