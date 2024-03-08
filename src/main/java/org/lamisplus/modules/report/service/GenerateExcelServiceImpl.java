@@ -11,22 +11,13 @@ import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
 import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 
 import org.lamisplus.modules.report.domain.*;
-import org.lamisplus.modules.report.config.Application;
-import org.lamisplus.modules.report.domain.BiometricReportDto;
-import org.lamisplus.modules.report.domain.HtsReportDto;
-import org.lamisplus.modules.report.domain.PrepReportDto;
-import org.lamisplus.modules.report.domain.RADETDTOProjection;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.repository.ReportRepository;
-import org.lamisplus.modules.report.utility.DateUtil;
-import org.lamisplus.modules.report.utility.ResultSetExtract;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -60,11 +51,8 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	private final HIVEacRepository hivEacRepository;
 	
 	private final GenerateExcelDataHelper excelDataHelper;
-
-	private final ResultSetExtract resultSetExtract;
-	private final DateUtil dateUtil;
-
-
+	
+	
 	@Override
 	public ByteArrayOutputStream generatePatientLine(HttpServletResponse response, Long facilityId) {
 		LOG.info("Start generating patient line list for facility: " + getFacilityName(facilityId));
@@ -99,16 +87,14 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		return null;
 	}
 
-
 	@Override
 	public ByteArrayOutputStream generateTBReport(Long facilityId, LocalDate start, LocalDate end) {
 		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
 		try {
 			List<TBReportProjection> tbReportProjections = reportRepository.generateTBReport(facilityId, start, end);
-			LOG.info("RADET Size {}", tbReportProjections.size());
-
-			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillTBReportDataMapper(tbReportProjections);
-			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
+			LOG.info("TB Size {}", tbReportProjections.size());
+			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillTBReportDataMapper(tbReportProjections, end);
+			return excelService.generate(Constants.TB_SHEET, data, Constants.TB_REPORT_HEADER);
 		} catch (Exception e) {
 			LOG.error("An error Occurred when generating TB report...");
 			LOG.error("Error message: " + e.getMessage());
@@ -118,6 +104,22 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		return null;
 	}
 
+	@Override
+	public ByteArrayOutputStream generateEACReport(Long facilityId, LocalDate start, LocalDate end) {
+		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
+		try {
+			List<EACReportProjection> eacReportProjections = reportRepository.generateEACReport(facilityId, start, end);
+			LOG.info("EAC Size {}", eacReportProjections.size());
+			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillEACReportDataMapper(eacReportProjections, end);
+			return excelService.generate(Constants.EAC_SHEET, data, Constants.EAC_REPORT_HEADER);
+		} catch (Exception e) {
+			LOG.error("An error Occurred when generating TB report...");
+			LOG.error("Error message: " + e.getMessage());
+			e.printStackTrace();
+		}
+		LOG.info("End generate patient TB report");
+		return null;
+	}
 
 	@Override
 	public ByteArrayOutputStream generateRadet(Long facilityId, LocalDate start, LocalDate end) {
@@ -155,19 +157,12 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	@Override
 	public ByteArrayOutputStream generateBiometricReport(Long facilityId, LocalDate start, LocalDate end) {
 		try {
-			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
-			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
-			LOG.info("start date {}", startDate);
-			LOG.info("end date {}", endDate);
-
-			String query = String.format(Application.biometric, facilityId, startDate, endDate);
-
-			ResultSet resultSet = resultSetExtract.getResultSet(query);
-			List<String> headers = resultSetExtract.getHeaders(resultSet);
-			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
-			LOG.info("query size is : {}" + fullData.size());
-
-			return excelService.generate(Application.biometricName, fullData, headers);
+			LOG.info("start to generate biometric report");
+			List<BiometricReportDto> biometricReportDtoList = biometricReportService.getBiometricReportDtoList(facilityId, start, end);
+			LOG.info("biometric Report List retrieved");
+			List<Map<Integer, Object>> biometricData = GenerateExcelDataHelper.fillBiometricDataMapper(biometricReportDtoList);
+			LOG.info("biometric report size {}", biometricData.size());
+			return excelService.generate(Constants.BIOMETRIC_SHEET_SHEET, biometricData, Constants.BIOMETRIC_HEADER);
 		} catch (Exception e) {
 			LOG.info("Error Occurred when generating biometric data", e);
 		}
@@ -237,7 +232,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		return null;
 	}
 
-	/*@Override
+	@Override
 	public ByteArrayOutputStream generatePrep(Long facilityId, LocalDate start, LocalDate end) {
 		LOG.info("Start generating prep for facility:" + getFacilityName(facilityId));
 		try {
@@ -251,89 +246,6 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		}
 		LOG.info("End generate patient HTS");
 		return null;
-	}*/
-
-	@Override
-	public ByteArrayOutputStream generatePrep(Long facilityId, LocalDate start, LocalDate end) {
-		try {
-			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
-			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
-			LOG.info("start date {}", startDate);
-			LOG.info("end date {}", endDate);
-			String query = Application.prep;
-			query = query.replace("?1", String.valueOf(facilityId))
-					.replace("?2", startDate)
-					.replace("?3", endDate);
-
-			//query = String.format(query, facilityId, startDate, endDate);
-			//LOG.info("Query is {}", query);
-
-			ResultSet resultSet = resultSetExtract.getResultSet(query);
-			List<String> headers = resultSetExtract.getHeaders(resultSet);
-			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
-			LOG.info("query size is : {}" + fullData.size());
-
-			return excelService.generate(Application.prepName, fullData, headers);
-		} catch (Exception e) {
-			LOG.info("Error Occurred when generating prep data", e);
-		}
-		LOG.info("End generate prep report");
-		return null;
-	}
-
-	@Override
-	public ByteArrayOutputStream generateIndexQueryLine(Long facilityId, LocalDate start, LocalDate end) {
-		LOG.info("Start generating Index line list for facility: " + getFacilityName(facilityId));
-		try {
-			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
-			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
-			LOG.info("start date {}", startDate);
-			LOG.info("end date {}", endDate);
-
-			String query = String.format(Application.indexElicitation, facilityId, startDate, endDate);
-
-			ResultSet resultSet = resultSetExtract.getResultSet(query);
-			List<String> headers = resultSetExtract.getHeaders(resultSet);
-			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
-			LOG.info("query size is : {}" + fullData.size());
-
-			return excelService.generate(Application.indexElicitationName, fullData, headers);
-
-		} catch (Exception e) {
-			LOG.error("Error Occurred when generating INDEX LINE LIST!!!");
-			e.printStackTrace();
-		}
-		LOG.info("End generate INDEX line list ");
-		return null;
-	}
-
-
-	public ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException {
-		String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
-		String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
-		LOG.info("start date {}", startDate);
-		LOG.info("end date {}", endDate);
-		String query = "";
-		String reportName = "";
-		//pmtct hts - 82d80564-6d3e-433e-8441-25db7fe1f2af
-		//pmtct maternal cohort - 2b6fe1b9-9af0-4af7-9f59-b9cfcb906158
-		if(reportId.equals("82d80564-6d3e-433e-8441-25db7fe1f2af")){
-			query = String.format(Application.pmtctHts, facilityId, startDate, endDate);
-			reportName = Application.pmtctHtsName;
-		} else if(reportId.equals("2b6fe1b9-9af0-4af7-9f59-b9cfcb906158")){
-			query = String.format(Application.pmtctMaternalCohort, facilityId, startDate, endDate);
-			reportName = Application.pmtctMaternalCohortName;
-
-		} else {
-			LOG.info("Report not available...");
-			return null;
-		}
-		//LOG.info("Query is {}", query);
-		ResultSet resultSet = resultSetExtract.getResultSet(query);
-		List<String> headers = resultSetExtract.getHeaders(resultSet);
-		List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
-		LOG.info("query size is : {}" + fullData.size());
-		return excelService.generate(reportName, fullData, headers);
 	}
 }
 

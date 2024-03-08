@@ -3,7 +3,6 @@ package org.lamisplus.modules.report.service;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.time.LocalDate;
 
 public interface GenerateExcelService {
@@ -18,13 +17,8 @@ public interface GenerateExcelService {
  ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, LocalDate end);
  ByteArrayOutputStream generatePrep(Long facilityId, LocalDate start, LocalDate end);
 
- ByteArrayOutputStream generateIndexQueryLine(Long facilityId, LocalDate start, LocalDate end);
-
-
  ByteArrayOutputStream generateClientServiceList(HttpServletResponse response, Long facility);
 
  ByteArrayOutputStream generateTBReport(Long facilityId, LocalDate start, LocalDate end);
-
- ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException;
-
- }
+ ByteArrayOutputStream generateEACReport(Long facilityId, LocalDate start, LocalDate end);
+}

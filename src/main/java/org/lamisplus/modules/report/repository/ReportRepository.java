@@ -1,10 +1,10 @@
 package org.lamisplus.modules.report.repository;
 
-import lombok.extern.java.Log;
 import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.hiv.domain.dto.PatientLineDto;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.domain.entity.Report;
+import org.lamisplus.modules.report.repository.queries.EACReportQuery;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -653,27 +653,19 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    left join post_eac_vl pvl on pvl.patient_uuid = fe.person_uuid " +
             "), " +
             "dsd1 as ( " +
-            "        with d1 as ( select p.person_uuid as person_uuid_dsd_1, p.visit_date, p.dsd_model_type, " +
-            "                   ROW_NUMBER() OVER (PARTITION BY p.person_uuid ORDER BY p.visit_date ASC ) AS row " +
-            "                   from hiv_art_pharmacy p " +
-            "            where p.archived = 0 and p.dsd_model_type is not null and p.dsd_model_type != '' " +
-            "            and p.visit_date between ?2 and ?3 " +
-            "        ) " +
-            "        select d1.person_uuid_dsd_1, d1.visit_date as dateOfDevolvement, bmt1.display as modelDevolvedTo from d1 " +
-            "        left join base_application_codeset bmt1 on bmt1.code = d1.dsd_model_type " +
-            "        where d1.row = 1 " +
-            "   ), " +
+            "select person_uuid, dateOfDevolvement, modelDevolvedTo " +
+            "from (select d.person_uuid, d.date_devolved as dateOfDevolvement, bmt.display as modelDevolvedTo, " +
+            "       ROW_NUMBER() OVER (PARTITION BY d.person_uuid ORDER BY d.date_devolved ASC ) AS row from dsd_devolvement d " +
+            "    left join base_application_codeset bmt on bmt.code = d.dsd_type " +
+            "where d.archived = 0 and d.date_devolved between  ?2 and ?3) d1 where row = 1 " +
+            " ), " +
             "dsd2 as ( " +
-            "        with d2 as ( select p.person_uuid as person_uuid_dsd_2, p.visit_date, p.dsd_model_type, " +
-            "                   ROW_NUMBER() OVER (PARTITION BY p.person_uuid ORDER BY p.visit_date DESC ) AS row " +
-            "                   from hiv_art_pharmacy p " +
-            "            where p.archived = 0 and p.dsd_model_type is not null and p.dsd_model_type != '' " +
-            "            and p.visit_date between ?2 and ?3 " +
-            "        ) " +
-            "        select d2.person_uuid_dsd_2, d2.visit_date as dateOfCurrentDSD, bmt2.display as currentDSDModel from d2 " +
-            "        left join base_application_codeset bmt2 on bmt2.code = d2.dsd_model_type " +
-            "        where d2.row = 1 " +
-            "    )," +
+            "select person_uuid, dateOfCurrentDSD, currentDSDModel " +
+            "from (select d.person_uuid, d.date_devolved as dateOfCurrentDSD, bmt.display as currentDSDModel, " +
+            "       ROW_NUMBER() OVER (PARTITION BY d.person_uuid ORDER BY d.date_devolved DESC ) AS row from dsd_devolvement d " +
+            "    left join base_application_codeset bmt on bmt.code = d.dsd_type " +
+            "where d.archived = 0 and d.date_devolved between  ?2 and ?3) d2 where row = 1 " +
+            ")," +
             "biometric AS (\n" +
             "            SELECT \n" +
             "              DISTINCT ON (he.person_uuid) he.person_uuid AS person_uuid60, \n" +
@@ -2002,4 +1994,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "LEFT JOIN weight ON bio.uuid = weight.person_uuid " +
             "LEFT JOIN ipt_c on ipt_c.person_uuid = bio.uuid", nativeQuery = true)
     List<TBReportProjection> generateTBReport(Long facilityId, LocalDate start, LocalDate end);
+
+    @Query(value = EACReportQuery.EAC_REPORT_QUERY, nativeQuery = true)
+    List<EACReportProjection> generateEACReport(Long facilityId, LocalDate start, LocalDate end);
 }
