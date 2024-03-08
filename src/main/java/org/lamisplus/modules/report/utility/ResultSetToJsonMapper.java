@@ -35,10 +35,11 @@ public class ResultSetToJsonMapper {
         while(resultSet.next())
         {
             Map<Integer, Object> map = new HashMap<>();
-            jsonObject = new JSONObject();
+            //jsonObject = new JSONObject();
             //if(resultSet.next()) {
                 for (int index = 1; index <= columnCount; index++) {
                     String column = rsmd.getColumnName(index);
+                    //LOG.info("column is {}", column);
                     //exclude column
                     if (excludedColumn != null && excludedColumn.contains(column)) {
                         continue;
@@ -46,6 +47,7 @@ public class ResultSetToJsonMapper {
 
 
                     Object value = resultSet.getObject(column);
+                    //LOG.info("Object is {}", value);
                     /*if (value == null) {
                         value = "";
                         jsonObject.put(column, value);
