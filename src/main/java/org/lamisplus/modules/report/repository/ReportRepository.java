@@ -1,10 +1,10 @@
 package org.lamisplus.modules.report.repository;
 
-import lombok.extern.java.Log;
 import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.hiv.domain.dto.PatientLineDto;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.domain.entity.Report;
+import org.lamisplus.modules.report.repository.queries.EACReportQuery;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -2003,6 +2003,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "LEFT JOIN ipt_c on ipt_c.person_uuid = bio.uuid", nativeQuery = true)
     List<TBReportProjection> generateTBReport(Long facilityId, LocalDate start, LocalDate end);
 
-    @Query(value = "", nativeQuery = true)
+    @Query(value = EACReportQuery.EAC_REPORT_QUERY, nativeQuery = true)
     List<EACReportProjection> generateEACReport(Long facilityId, LocalDate start, LocalDate end);
 }
