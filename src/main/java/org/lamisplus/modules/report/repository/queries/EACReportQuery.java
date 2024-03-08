@@ -12,7 +12,7 @@ public class EACReportQuery {
             "        facility.name AS facility_name, boui.code AS datimId, " +
             "        tgroup.display AS targetGroup, eSetting.display AS enrollment_setting, " +
             "        hac.visit_date AS art_start_date, hr.description AS regimen_at_art_start, " +
-            "        p.date_of_registration, p.surname, p.first_name " +
+            "        p.date_of_registration, p.surname, p.first_name,  boo.name as lgaOfResidence " +
             "    FROM " +
             "        patient_person p " +
             "    INNER JOIN " +
@@ -37,6 +37,11 @@ public class EACReportQuery {
             "           AND hac.visit_date < ?3 " +
             "    LEFT JOIN " +
             "        hiv_regimen hr ON hr.id = hac.regimen_id " +
+            "    LEFT JOIN base_organisation_unit boo on boo.id = " +
+            "        CASE " +
+            "            WHEN (string_to_array(p.address->'address'->0->>'district', ','))[1] ~ '^\\d+$'THEN cast(p.address->'address'->0->>'district' as bigint) " +
+            "            ELSE NULL " +
+            "        END " +
             "    WHERE " +
             "        p.archived = 0 " +
             "        AND p.facility_id = ?1 " +
