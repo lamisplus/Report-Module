@@ -1988,4 +1988,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "LEFT JOIN ipt_start ON bio.uuid = weight.person_uuid " +
             "LEFT JOIN ipt_c on ipt_c.person_uuid = bio.uuid", nativeQuery = true)
     List<TBReportProjection> generateTBReport(Long facilityId, LocalDate start, LocalDate end);
+
+    @Query(value = "", nativeQuery = true)
+    List<EACReportProjection> generateEACReport(Long facilityId, LocalDate start, LocalDate end);
 }

@@ -15,7 +15,8 @@ public class Constants {
 	public static final String CLIENT_SERVICE_LIST = "client_service_list";
 
 	public static final String RADET_SHEET = "radet";
-
+	public static final String TB_SHEET = "tb";
+	public static final String EAC_SHEET = "eac";
 	public static final String HTS_SHEET = "hts";
 
 	public static final String PREP_SHEET = "prep";
@@ -422,5 +423,30 @@ public class Constants {
 					"Date of TB Diagnostic Evaluation", "TB Evaluation Method", "Date Result Received",
 					"TB Diagnostic Result", "Date of TB Treatment", "TB Treatment Outcome", "Date TB Treatment Outcome",
 					"Eligible for TPT", "TPT Type", "TPT Outcome", "Date of TPT Outcome", "Weight At Start TPT"
+			);
+
+	public static final List<String> EAC_REPORT_HEADER =
+			Arrays.asList(
+					"State", "L.G.A", "LGA Of Residence", "Facility Name", "DatimId", "Patient ID", "Hospital Number",
+					"Unique Id", "Sex", "Target group", "Date Birth (yyyy-mm-dd)", "ART Start Date (yyyy-mm-dd)", "Regimen at ART Start",
+					"{Date of start of Regimen before unsuppressed VLR}", "{Regimen Line before  unsuppression}",
+					"{Regimen before unsuppression}", "{Last Pickup Date before  unsuppressed VLR}", "{Month of ARV Refill of the last pick up date before  unsuppressed VLR}",
+					"{Date of VLSC of unsuppressed VLR}", "{Most Recent Unsuppressed VLR}", "{Date of Unsuppressed VLR}", "{Unsuppressed VLR Indication}",
+					"Current ART Status", "Date of Current ART Status", "Date of commencement of 1st EAC (yyyy-mm-dd)", "Date of  1st EAC Session Completed",
+					"Method of 1st  EAC Session", "Date of commencement of 2nd  EAC (yyyy-mm-dd)", "Date of  2nd EAC Session Completed", "Method of 2nd  EAC Session",
+					"Date of commencement of 3rd   EAC (yyyy-mm-dd)", "Date of  3rd EAC Session Completed", "Method of 3rd EAC Session",
+					"Date of commencement of 4th  (Extended) EAC (yyyy-mm-dd)", "Date of  4th (Extended) EAC Session Completed",
+					"Method of 4th (Extended) EAC Session", "Date of commencement of 5th  (Extended) EAC (yyyy-mm-dd)", "Date of  5th (Extended) EAC Session Completed",
+					"Method of 5th (Extended) EAC Session", "Date of commencement of 6th  (Extended) EAC (yyyy-mm-dd)", "Date of  6th (Extended) EAC Session Completed",
+					"Method of 6th (Extended) EAC Session", "Number of EAC Sessions Completed", "Date of Repeat Viral Load - Post EAC VL Sample collected (yyyy-mm-dd)",
+					"Repeat Viral load result (c/ml)- POST EAC", "Date of Repeat Viral load result- POST EAC VL", "Referred to Switch Committee? 	r",
+					"Eligible for Switch?", "Date of commencement of 7th (Post switch) committee) EAC (yyyy-mm-dd)", "Date of 7th (post switch committee) EAC Session Completed",
+					"Method of 7th (post switch committe) EAC Session", "Date of commencement of 8th (Post switch) committee) EAC (yyyy-mm-dd)",
+					"Date of 8th (post switch committee) EAC Session Completed", "Method of 8th (post switch committe) EAC Session",
+					"Date of commencement of 9th (Post switch) committee) EAC (yyyy-mm-dd)", "Date of 9th (post switch committee) EAC Session Completed",
+					"Method of 9th (post switch committe) EAC Session", "Date of Repeat Viral Load - Post switch EAC VL Sample collected (yyyy-mm-dd)",
+					"Repeat Viral load result (c/ml)- Post Switch EAC", "Date of Repeat Viral load result- Post Switch EAC VL", "Method of post switch EAC Session",
+					"Referred to Switch Committee? (Post switch EAC)", "Date Referred to Switch Committed (Post switch EAC)", "Eligible for Switch? (Post switch EAC)",
+					"Date Switched", "Start date of Switched Regimen", "Switched ART Regimen Line", "Switched ART Regimen", "Case Manager"
 			);
 }

@@ -95,6 +95,22 @@ public class PatientReportController {
 
 		messagingTemplate.convertAndSend("/topic/tb-report", "end");
 	}
+
+	@GetMapping("/eac-report")
+	public void getEACReport(
+			HttpServletResponse response,
+			@RequestParam("facilityId") Long facilityId,
+			@RequestParam("start") LocalDate start,
+			@RequestParam("end") LocalDate end) throws IOException {
+
+		messagingTemplate.convertAndSend("/topic/eac-report", "start");
+
+		ByteArrayOutputStream baos = generateExcelService.generateEACReport(facilityId, start, end);
+
+		setStream(baos, response);
+
+		messagingTemplate.convertAndSend("/topic/eac-report", "end");
+	}
 	
 	@GetMapping("/pharmacy/{facilityId}")
 	public void generatePharmacy(HttpServletResponse response, @PathVariable("facilityId") Long facility) throws IOException {

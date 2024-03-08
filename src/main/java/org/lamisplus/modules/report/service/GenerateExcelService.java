@@ -20,4 +20,5 @@ public interface GenerateExcelService {
  ByteArrayOutputStream generateClientServiceList(HttpServletResponse response, Long facility);
 
  ByteArrayOutputStream generateTBReport(Long facilityId, LocalDate start, LocalDate end);
+ ByteArrayOutputStream generateEACReport(Long facilityId, LocalDate start, LocalDate end);
 }
