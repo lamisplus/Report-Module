@@ -302,7 +302,7 @@ public class Constants {
 					"Recency Viral Load Result Classification",
 					"Recency Viral Load Confirmation Result",
 					"Recency Viral Load Result Received Date (yyyy-mm-dd)",
-					"Recency Viral Load Confirmation Date (yyyy-mm-dd)",
+//					"Recency Viral Load Confirmation Date (yyyy-mm-dd)",
 					"Final Recency Result",
 					"Assessment Code",
 					"Syphilis Test Result",
