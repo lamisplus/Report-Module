@@ -260,8 +260,13 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
 			LOG.info("start date {}", startDate);
 			LOG.info("end date {}", endDate);
+			String query = Application.prep;
+			query = query.replace("?1", String.valueOf(facilityId))
+					.replace("?2", startDate)
+					.replace("?3", endDate);
 
-			String query = String.format(Application.prep, facilityId, startDate, endDate);
+			//query = String.format(query, facilityId, startDate, endDate);
+			//LOG.info("Query is {}", query);
 
 			ResultSet resultSet = resultSetExtract.getResultSet(query);
 			List<String> headers = resultSetExtract.getHeaders(resultSet);
