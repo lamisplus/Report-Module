@@ -17,6 +17,10 @@ import HTSReport from "./HTSReport";
 import PrepReport from "./PrepReport";
 import ClinicData from "./ClinicData";
 import ClientVerification from "./ClientVerification";
+import TbReport from "./TbReport";
+import IndexElicitation from "./IndexElicitation";
+import PmtctHtsReport from "./PmtctHtsReport";
+import PmtctMaternalCohortReport from "./PmtctMaternalCohortReport";
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -179,7 +183,61 @@ const Reports = (props) => {
 
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
+
+                  <Menu.Item
+                    name="inbox"
+                    active={activeItem === "tb-report"}
+                    onClick={() => handleItemClick("tb-report")}
+                    style={{
+                      backgroundColor:
+                        activeItem === "tb-report" ? "#000" : "",
+                    }}
+                  >
+                    <span style={{ color: "#fff" }}>TB REPORT</span>
+
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
+                  <Menu.Item
+                      name="inbox"
+                      active={activeItem === "index-elicitation"}
+                      onClick={() => handleItemClick("index-elicitation")}
+                      style={{
+                        backgroundColor:
+                            activeItem === "index-elicitation" ? "#000" : "",
+                      }}
+                  >
+                    <span style={{ color: "#fff" }}>INDEX ELICITATION</span>
+
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
+                  <Menu.Item
+                      name="inbox"
+                      active={activeItem === "pmtct-hts"}
+                      onClick={() => handleItemClick("pmtct-hts")}
+                      style={{
+                        backgroundColor:
+                            activeItem === "pmtct-hts" ? "#000" : "",
+                      }}
+                  >
+                    <span style={{ color: "#fff" }}>PMTCT HTS</span>
+
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
+                  <Menu.Item
+                      name="inbox"
+                      active={activeItem === "pmtct-maternal-cohort"}
+                      onClick={() => handleItemClick("pmtct-maternal-cohort")}
+                      style={{
+                        backgroundColor:
+                            activeItem === "pmtct-maternal-cohort" ? "#000" : "",
+                      }}
+                  >
+                    <span style={{ color: "#fff" }}>PMTCT MATERNAL COHORT</span>
+
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
                 </Menu>
+
               </div>
               <div
                 className="col-md-9 float-end"
@@ -255,6 +313,30 @@ const Reports = (props) => {
                     setCompleted={setCompleted}
                     completed={completed}
                   />
+                )
+                }
+                {activeItem === "index-elicitation" && (
+                    <IndexElicitation
+                        handleItemClick={handleItemClick}
+                        setCompleted={setCompleted}
+                        completed={completed}
+                    />
+                )
+                }
+                {activeItem === "pmtct-hts" && (
+                    <PmtctHtsReport
+                        handleItemClick={handleItemClick}
+                        setCompleted={setCompleted}
+                        completed={completed}
+                    />
+                )
+                }
+                {activeItem === "pmtct-maternal-cohort" && (
+                    <PmtctMaternalCohortReport
+                        handleItemClick={handleItemClick}
+                        setCompleted={setCompleted}
+                        completed={completed}
+                    />
                 )
                 }
               </div>

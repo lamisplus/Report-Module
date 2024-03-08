@@ -101,11 +101,14 @@ public class ExcelService {
 			cell.setCellStyle(style);
 			return 7;
 		}else {
-		    cell.setCellValue((String) value);
+		    cell.setCellValue(replaceNull(value));
 			cell.setCellStyle(style);
 			return 8;
 		}
-		
+	}
+
+	private String replaceNull(Object value){
+		return String.valueOf(value).replace("null", "").replace("NULL", "");
 	}
 	
 	
