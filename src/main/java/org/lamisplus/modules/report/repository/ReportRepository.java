@@ -1,11 +1,10 @@
 package org.lamisplus.modules.report.repository;
 
+import lombok.extern.java.Log;
 import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.hiv.domain.dto.PatientLineDto;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.domain.entity.Report;
-import org.lamisplus.modules.report.repository.queries.EACReportQuery;
-import org.lamisplus.modules.report.repository.queries.NCDReportQuery;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -654,14 +653,14 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    left join post_eac_vl pvl on pvl.patient_uuid = fe.person_uuid " +
             "), " +
             "dsd1 as ( " +
-            "select person_uuid, dateOfDevolvement, modelDevolvedTo " +
+            "select person_uuid as person_uuid_dsd_1, dateOfDevolvement, modelDevolvedTo " +
             "from (select d.person_uuid, d.date_devolved as dateOfDevolvement, bmt.display as modelDevolvedTo, " +
             "       ROW_NUMBER() OVER (PARTITION BY d.person_uuid ORDER BY d.date_devolved ASC ) AS row from dsd_devolvement d " +
             "    left join base_application_codeset bmt on bmt.code = d.dsd_type " +
             "where d.archived = 0 and d.date_devolved between  ?2 and ?3) d1 where row = 1 " +
             " ), " +
             "dsd2 as ( " +
-            "select person_uuid, dateOfCurrentDSD, currentDSDModel " +
+            "select person_uuid as person_uuid_dsd_2, dateOfCurrentDSD, currentDSDModel " +
             "from (select d.person_uuid, d.date_devolved as dateOfCurrentDSD, bmt.display as currentDSDModel, " +
             "       ROW_NUMBER() OVER (PARTITION BY d.person_uuid ORDER BY d.date_devolved DESC ) AS row from dsd_devolvement d " +
             "    left join base_application_codeset bmt on bmt.code = d.dsd_type " +
@@ -1995,9 +1994,4 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "LEFT JOIN weight ON bio.uuid = weight.person_uuid " +
             "LEFT JOIN ipt_c on ipt_c.person_uuid = bio.uuid", nativeQuery = true)
     List<TBReportProjection> generateTBReport(Long facilityId, LocalDate start, LocalDate end);
-
-    @Query(value = EACReportQuery.EAC_REPORT_QUERY, nativeQuery = true)
-    List<EACReportProjection> generateEACReport(Long facilityId, LocalDate start, LocalDate end);
-    @Query(value = NCDReportQuery.NCD_REPORT_QUERY, nativeQuery = true)
-    List<NCDReportProjection> generateNCDReport(Long facilityId, LocalDate start, LocalDate end);
 }
