@@ -121,91 +121,104 @@ const BiometricReport = (props) => {
     
 
     return (
-        <>
-            
-            <Card >
-                <CardBody>
-    
-                <h2 style={{color:'#000'}}>BIOMETRIC REPORT</h2>
-                <br/>
-                    <form >
-                        <div className="row">
-                        <div className="form-group  col-md-6">
-                                <FormGroup>
-                                    <Label>Start Date*</Label>
-                                    <input
-                                        type="date"
-                                        className="form-control"
-                                        name="startDate"
-                                        id="startDate"
-                                        value={objValues.startDate}
-                                        onChange={handleInputChange}
-                                        style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
-                                    />
-                                    
-                                </FormGroup>
-                            </div>
-                            <div className="form-group  col-md-6">
-                                <FormGroup>
-                                    <Label>End Date*</Label>
-                                    <input
-                                        type="date"
-                                        className="form-control"
-                                        name="endDate"
-                                        id="endDate"
-                                        min={objValues.startDate}
-                                        value={objValues.endDate}
-                                        onChange={handleInputChange}
-                                        style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
-                                    />
-                                     
-                                    
-                                </FormGroup>
-                            </div>
-                            <div className="form-group  col-md-6">
-                                <FormGroup>
-                                    <Label>Facility*</Label>
-                                    <select
-                                        className="form-control"
-                                        name="organisationUnitId"
-                                        id="organisationUnitId"
-                                        value={objValues.organisationUnitId}
-                                        onChange={handleInputChange}
-                                        style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
-                                    >
-                                        <option value={""}></option>
-                                        {facilities.map((value) => (
-                                            <option key={value.id} value={value.organisationUnitId}>
-                                                {value.organisationUnitName}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    
-                                </FormGroup>
-                            </div>
+      <>
+        <Card>
+          <CardBody>
+            <h2 style={{ color: "#000" }}>BIOMETRIC REPORT</h2>
+            <br />
+            <form>
+              <div className="row">
+                <div className="form-group  col-md-6">
+                  <FormGroup>
+                    <Label>Start Date*</Label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      name="startDate"
+                      id="startDate"
+                      value={objValues.startDate}
+                      onChange={handleInputChange}
+                      style={{
+                        border: "1px solid #014D88",
+                        borderRadius: "0.2rem",
+                      }}
+                    />
+                  </FormGroup>
+                </div>
+                <div className="form-group  col-md-6">
+                  <FormGroup>
+                    <Label>End Date*</Label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      name="endDate"
+                      id="endDate"
+                      min={objValues.startDate}
+                      max={currentDate}
+                      value={objValues.endDate}
+                      onChange={handleInputChange}
+                      style={{
+                        border: "1px solid #014D88",
+                        borderRadius: "0.2rem",
+                      }}
+                    />
+                  </FormGroup>
+                </div>
+                <div className="form-group  col-md-6">
+                  <FormGroup>
+                    <Label>Facility*</Label>
+                    <select
+                      className="form-control"
+                      name="organisationUnitId"
+                      id="organisationUnitId"
+                      value={objValues.organisationUnitId}
+                      onChange={handleInputChange}
+                      style={{
+                        border: "1px solid #014D88",
+                        borderRadius: "0.2rem",
+                      }}
+                    >
+                      <option value={""}></option>
+                      {facilities.map((value) => (
+                        <option key={value.id} value={value.organisationUnitId}>
+                          {value.organisationUnitName}
+                        </option>
+                      ))}
+                    </select>
+                  </FormGroup>
+                </div>
 
-                            <br />
-                            <div className="row">
-                            <div className="form-group mb-3 col-md-6">
-                            <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={handleSubmit} disabled={objValues.organisationUnitId==="" ? true : false}/>
-                            </div>
-                            </div>
+                <br />
+                <div className="row">
+                  <div className="form-group mb-3 col-md-6">
+                    <Button
+                      type="submit"
+                      content="Generate Report"
+                      icon="right arrow"
+                      labelPosition="right"
+                      style={{ backgroundColor: "#014d88", color: "#fff" }}
+                      onClick={handleSubmit}
+                      disabled={
+                        objValues.organisationUnitId === "" ? true : false
+                      }
+                    />
+                  </div>
+                </div>
 
-                            {loading && (
-                                <Message icon>
-                                    <Icon name='circle notched' loading />
-                                <Message.Content>
-                                <Message.Header>Just one second</Message.Header>
-                                    We are fetching that content for you.
-                                </Message.Content>
-                                </Message>
-                            )}
-                        </div>
-                    </form>
-
-                </CardBody>
-            </Card>                                 
-        </>
+                {loading && (
+                  <Message icon>
+                    <Icon name="circle notched" loading />
+                    <Message.Content>
+                      <Message.Header>Just one second</Message.Header>
+                      We are fetching that content for you.
+                    </Message.Content>
+                  </Message>
+                )}
+              </div>
+            </form>
+          </CardBody>
+        </Card>
+      </>
     );
 };
 

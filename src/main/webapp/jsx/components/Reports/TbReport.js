@@ -157,6 +157,7 @@ const TbReport = (props) => {
                     name="endDate"
                     id="endDate"
                     min={objValues.startDate}
+                    max={currentDate}
                     value={objValues.endDate}
                     onChange={handleInputChange}
                     style={{
