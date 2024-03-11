@@ -285,6 +285,13 @@ const Reports = (props) => {
                     completed={completed}
                   />
                 )}
+                {activeItem === "tb-report" && (
+                  <TbReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
                 {activeItem === "hts-report" && (
                   <HTSReport
                     handleItemClick={handleItemClick}
