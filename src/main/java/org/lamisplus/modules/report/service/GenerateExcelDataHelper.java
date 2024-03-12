@@ -182,8 +182,8 @@ public class GenerateExcelDataHelper {
 				map.put(index++, eacReportProjection.getDateOfUnsuppressedVLR());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getUnsuppressedVLRIndication())));
 
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getCurrentArtStatus())));
-				map.put(index++, eacReportProjection.getDateOfCurrentArtStatus());
+				// map.put(index++, getStringValue(String.valueOf(eacReportProjection.getCurrentArtStatus())));
+				// map.put(index++, eacReportProjection.getDateOfCurrentArtStatus());
 
 				map.put(index++, eacReportProjection.getDateOfCommencementOfFirstEAC());
 				map.put(index++, eacReportProjection.getDateOfFirstEACSessionCompleted());

@@ -438,7 +438,7 @@ public class Constants {
 					"{Date of start of Regimen before unsuppressed VLR}", "{Regimen Line before  unsuppression}",
 					"{Regimen before unsuppression}", "{Last Pickup Date before  unsuppressed VLR}", "{Month of ARV Refill of the last pick up date before  unsuppressed VLR}",
 					"{Date of VLSC of unsuppressed VLR}", "{Most Recent Unsuppressed VLR}", "{Date of Unsuppressed VLR}", "{Unsuppressed VLR Indication}",
-					"Current ART Status", "Date of Current ART Status", "Date of commencement of 1st EAC (yyyy-mm-dd)", "Date of  1st EAC Session Completed",
+					/*"Current ART Status", "Date of Current ART Status",*/ "Date of commencement of 1st EAC (yyyy-mm-dd)", "Date of  1st EAC Session Completed",
 					"Method of 1st  EAC Session", "Date of commencement of 2nd  EAC (yyyy-mm-dd)", "Date of  2nd EAC Session Completed", "Method of 2nd  EAC Session",
 					"Date of commencement of 3rd   EAC (yyyy-mm-dd)", "Date of  3rd EAC Session Completed", "Method of 3rd EAC Session",
 					"Date of commencement of 4th  (Extended) EAC (yyyy-mm-dd)", "Date of  4th (Extended) EAC Session Completed",
