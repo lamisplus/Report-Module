@@ -105,6 +105,23 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	}
 
 	@Override
+	public ByteArrayOutputStream generateNCDReport(Long facilityId, LocalDate start, LocalDate end) {
+		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
+		try {
+			List<NCDReportProjection> ncdReportProjections = reportRepository.generateNCDReport(facilityId, start, end);
+			LOG.info("TB Size {}", ncdReportProjections.size());
+			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillNCDReportDataMapper(ncdReportProjections, end);
+			return excelService.generate(Constants.NCD_SHEET, data, Constants.NCD_REPORT_HEADER);
+		} catch (Exception e) {
+			LOG.error("An error Occurred when generating NCD report...");
+			LOG.error("Error message: " + e.getMessage());
+			e.printStackTrace();
+		}
+		LOG.info("End generate patient NCD report");
+		return null;
+	}
+
+	@Override
 	public ByteArrayOutputStream generateEACReport(Long facilityId, LocalDate start, LocalDate end) {
 		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
 		try {
@@ -113,11 +130,11 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillEACReportDataMapper(eacReportProjections, end);
 			return excelService.generate(Constants.EAC_SHEET, data, Constants.EAC_REPORT_HEADER);
 		} catch (Exception e) {
-			LOG.error("An error Occurred when generating TB report...");
+			LOG.error("An error Occurred when generating EAC report...");
 			LOG.error("Error message: " + e.getMessage());
 			e.printStackTrace();
 		}
-		LOG.info("End generate patient TB report");
+		LOG.info("End generate patient EAC report");
 		return null;
 	}
 

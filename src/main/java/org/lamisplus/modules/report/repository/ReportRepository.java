@@ -5,6 +5,7 @@ import org.lamisplus.modules.hiv.domain.dto.PatientLineDto;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.domain.entity.Report;
 import org.lamisplus.modules.report.repository.queries.EACReportQuery;
+import org.lamisplus.modules.report.repository.queries.NCDReportQuery;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -1997,4 +1998,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
     @Query(value = EACReportQuery.EAC_REPORT_QUERY, nativeQuery = true)
     List<EACReportProjection> generateEACReport(Long facilityId, LocalDate start, LocalDate end);
+    @Query(value = NCDReportQuery.NCD_REPORT_QUERY, nativeQuery = true)
+    List<NCDReportProjection> generateNCDReport(Long facilityId, LocalDate start, LocalDate end);
 }

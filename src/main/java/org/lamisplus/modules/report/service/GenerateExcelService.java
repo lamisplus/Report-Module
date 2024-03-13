@@ -21,4 +21,5 @@ public interface GenerateExcelService {
 
  ByteArrayOutputStream generateTBReport(Long facilityId, LocalDate start, LocalDate end);
  ByteArrayOutputStream generateEACReport(Long facilityId, LocalDate start, LocalDate end);
+ ByteArrayOutputStream generateNCDReport(Long facilityId, LocalDate start, LocalDate end);
 }

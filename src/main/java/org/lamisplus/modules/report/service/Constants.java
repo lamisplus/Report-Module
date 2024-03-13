@@ -16,6 +16,7 @@ public class Constants {
 
 	public static final String RADET_SHEET = "radet";
 	public static final String TB_SHEET = "tb";
+	public static final String NCD_SHEET = "ncd";
 	public static final String EAC_SHEET = "eac";
 	public static final String HTS_SHEET = "hts";
 
@@ -455,4 +456,38 @@ public class Constants {
 					"Referred to Switch Committee? (Post switch EAC)", "Date Referred to Switch Committed (Post switch EAC)", "Eligible for Switch? (Post switch EAC)",
 					"Date Switched", "Start date of Switched Regimen", "Switched ART Regimen Line", "Switched ART Regimen", "Case Manager"
 			);
+
+	public static final List<String> NCD_REPORT_HEADER = Arrays.asList(
+			"State", "LGA", "Facility ID", "Facility Name", "Patient ID", "Hospital Number", "Unique ID",
+			"Surname", "Other Names", "Date Birth (yyyy-mm-dd)", "Age", "Sex", "Marital status", "Education",
+			"Occupation", "State of Residence", "LGA of Residence", "Address", "Phone", "Pregnancy Status",
+			"ART Start date (yyyy-mm-dd)", "ART Regimen Line at Start", "ART Regimen at Start",
+			"Current Regimen Line", "Current Regimen", "Date of Regimen Switch/Substitution (yyyy-mm-dd)",
+			"Last ART Pickup date (yyyy-mm-dd)", "Months of ARV Refill", "Current ART Status",
+			"Date of Current ART Status (yyyy-mm-dd)", "ART Enrollment Setting", "DDD Type",
+			"Date Previously Known Hypertensive (yyyy-mm-dd)", "Date Newly Diagnosed Hypertensive (yyyy-mm-dd)",
+			"Baseline Waist Circumference (cm)", "Baseline Weight (kg)", "Baseline Height (cm)", "Baseline BMI (kg/m2)",
+			"Baseline Systolic (mmHg)", "Baseline Diastolic (mmHg)", "Baseline Fasting Blood Sugar (mmol/L)",
+			"Baseline Random Blood Sugar (mmol/L)", "Baseline Blood Total Cholesterol (mmol/L)", "Baseline HDL (mmol/L)",
+			"Baseline LDL (mmol/L)", "Baseline Sodium - Na (mmol/L)", "Baseline Potassium - K (mmol/L)",
+			"Baseline Urea (mmol/L)", "Baseline Creatinine - Cr (mmol/L)", "Date of start of HTN Treatment (yyyy-mm-dd)",
+			"HTN Regimen at Start", "Current HTN Regimen", "Last HTN Medication Pickup Date (yyyy-mm-dd)",
+			"Months of HTN Medication Refill", "Current HTN Status", "Date of Current HTN Status (yyyy-mm-dd)",
+			"Reasons for LTFU/IIT", "Current Weight (kg)", "Date of Current Weight (yyyy-mm-dd)",
+			"Current Height (cm)", "Date of Current Height (yyyy-mm-dd)", "Current BMI (kg/m2)",
+			"Date of Current BMI (yyyy-mm-dd)", "Current Waist Circumference (cm)",
+			"Date of Current Waist Circumference (yyyy-mm-dd)", "Waist-Hip Ratio",
+			"Date of Waist-Hip Ratio (yyyy-mm-dd)", "Current Systolic (mmHg)",
+			"Date of Current Systolic (yyyy-mm-dd)", "Current Diastolic (mmHg)",
+			"Date of Current Diastolic (yyyy-mm-dd)", "Current Fasting Blood Sugar (mmol/L)",
+			"Date of Current Fasting Blood Sugar (yyyy-mm-dd)", "Current Random Blood Sugar (mmol/L)",
+			"Date of Current Random Blood Sugar (yyyy-mm-dd)", "Current Blood Total Cholesterol (mmol/L)",
+			"Date of Current Blood Total Cholesterol (yyyy-mm-dd)", "Current HDL (mmol/L)",
+			"Date of Current HDL (yyyy-mm-dd)", "Current LDL (mmol/L)", "Date of Current LDL (yyyy-mm-dd)",
+			"Current Sodium - Na (mmol/L)", "Date of Current Sodium  (yyyy-mm-dd)",
+			"Current Potassium - K (mmol/L)", "Date of Current Potassium (yyyy-mm-dd)", "Current Urea (mmol/L)",
+			"Date of Current Urea (yyyy-mm-dd)", "Current Creatinine - Cr (mmol/L)",
+			"Date of Current Creatinine (yyyy-mm-dd)", "Date of Viral Load Sample Collection (yyyy-mm-dd)",
+			"Current Viral Load (c/ml)", "Date of Current Viral Load (yyyy-mm-dd)", "Viral Load Indication"
+	);
 }
