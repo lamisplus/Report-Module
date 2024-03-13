@@ -21,6 +21,7 @@ import TbReport from "./TbReport";
 import IndexElicitation from "./IndexElicitation";
 import PmtctHtsReport from "./PmtctHtsReport";
 import PmtctMaternalCohortReport from "./PmtctMaternalCohortReport";
+import MhpssReport from "./MhpssReport";
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -236,6 +237,21 @@ const Reports = (props) => {
 
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
+
+                  <Menu.Item
+                        name="inbox"
+                        active={activeItem === "mhpss-report"}
+                        onClick={() => handleItemClick("mhpss-report")}
+                        style={{
+                          backgroundColor:
+                              activeItem === "mhpss-report" ? "#000" : "",
+                        }}
+                    >
+                      <span style={{ color: "#fff" }}>MHPSS Report</span>
+
+                      {/* <Label color='teal'>5</Label> */}
+                   </Menu.Item>
+
                 </Menu>
 
               </div>
@@ -340,6 +356,14 @@ const Reports = (props) => {
                 }
                 {activeItem === "pmtct-maternal-cohort" && (
                     <PmtctMaternalCohortReport
+                        handleItemClick={handleItemClick}
+                        setCompleted={setCompleted}
+                        completed={completed}
+                    />
+                )
+                }
+                {activeItem === "mhpss-report" && (
+                    <MhpssReport
                         handleItemClick={handleItemClick}
                         setCompleted={setCompleted}
                         completed={completed}

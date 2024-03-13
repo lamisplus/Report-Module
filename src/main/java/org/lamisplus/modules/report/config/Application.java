@@ -20,6 +20,9 @@ public class Application {
     private String pmtctMaternalCohortQuery;
     private String prepQueryName;
     private String prepQuery;
+    private String mhpssQuery;
+    private String mhpssQueryName;
+
     public static String indexElicitation;
     public static String indexElicitationName;
     public static String biometric;
@@ -33,6 +36,9 @@ public class Application {
     public static String prepName;
     public static String prep;
 
+    public static String mhpssName;
+    public static String mhpss;
+
     @PostConstruct
     public void mapQueryYmlParameters(){
         indexElicitation = getIndexQuery();
@@ -45,5 +51,7 @@ public class Application {
         pmtctMaternalCohort = getPmtctMaternalCohortQuery();
         prep = getPrepQuery();
         prepName = getPrepQueryName();
+        mhpssName = getMhpssQueryName();
+        mhpss = getMhpssQuery();
     }
 }
