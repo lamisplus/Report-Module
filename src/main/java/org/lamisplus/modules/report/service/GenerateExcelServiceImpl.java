@@ -317,25 +317,29 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		String reportName = "";
 		//pmtct hts - 82d80564-6d3e-433e-8441-25db7fe1f2af
 		//pmtct maternal cohort - 2b6fe1b9-9af0-4af7-9f59-b9cfcb906158
-		if (reportId.equals("82d80564-6d3e-433e-8441-25db7fe1f2af")) {
-			query = String.format(Application.pmtctHts, facilityId, startDate, endDate);
-			reportName = Application.pmtctHtsName;
-		} else if (reportId.equals("2b6fe1b9-9af0-4af7-9f59-b9cfcb906158")) {
-			query = String.format(Application.pmtctMaternalCohort, facilityId, startDate, endDate);
-			reportName = Application.pmtctMaternalCohortName;
+		switch (reportId) {
+			case "82d80564-6d3e-433e-8441-25db7fe1f2af":
+				query = String.format(Application.pmtctHts, facilityId, startDate, endDate);
+				reportName = Application.pmtctHtsName;
+				break;
+			case "2b6fe1b9-9af0-4af7-9f59-b9cfcb906158":
+				query = String.format(Application.pmtctMaternalCohort, facilityId, startDate, endDate);
+				reportName = Application.pmtctMaternalCohortName;
 
-		} else if (reportId.equals("e5f5685b-d355-498f-bc71-191b4037726c")) {
+				break;
+			case "e5f5685b-d355-498f-bc71-191b4037726c":
 
-			query = Application.mhpss;
-			query = query.replace("?1", "'" + String.valueOf(facilityId) + "'")
-					.replace("?2", "'" + startDate + "'")
-					.replace("?3", "'" + endDate + "'");
-			reportName = Application.mhpssName;
-			System.out.println(query);
-			System.out.println(reportName);
-		} else {
-			LOG.info("Report not available...");
-			return null;
+				query = Application.mhpss;
+				query = query.replace("?1", "'" + String.valueOf(facilityId) + "'")
+						.replace("?2", "'" + startDate + "'")
+						.replace("?3", "'" + endDate + "'");
+				reportName = Application.mhpssName;
+				System.out.println(query);
+				System.out.println(reportName);
+				break;
+			default:
+				LOG.info("Report not available...");
+				return null;
 		}
 		//LOG.info("Query is {}", query);
 		ResultSet resultSet = resultSetExtract.getResultSet(query);
