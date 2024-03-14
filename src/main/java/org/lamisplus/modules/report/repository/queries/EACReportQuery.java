@@ -1,7 +1,7 @@
 package org.lamisplus.modules.report.repository.queries;
 
 public class EACReportQuery {
-    
+
     public static final String EAC_REPORT_QUERY = "with eac_clients as ( " +
             "    WITH bio_data AS ( " +
             "    SELECT " +
@@ -20,9 +20,11 @@ public class EACReportQuery {
             "    INNER JOIN " +
             "        base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id " +
             "    INNER JOIN " +
-            "        base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id " +
+            "        base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id "
+            +
             "    INNER JOIN " +
-            "        base_organisation_unit_identifier boui ON boui.organisation_unit_id = p.facility_id AND boui.name='DATIM_ID' " +
+            "        base_organisation_unit_identifier boui ON boui.organisation_unit_id = p.facility_id AND boui.name='DATIM_ID' "
+            +
             "    INNER JOIN " +
             "        hiv_enrollment h ON h.person_uuid = p.uuid " +
             "    LEFT JOIN " +
@@ -39,7 +41,8 @@ public class EACReportQuery {
             "        hiv_regimen hr ON hr.id = hac.regimen_id " +
             "    LEFT JOIN base_organisation_unit boo on boo.id = " +
             "        CASE " +
-            "            WHEN (string_to_array(p.address->'address'->0->>'district', ','))[1] ~ '^\\d+$'THEN cast(p.address->'address'->0->>'district' as bigint) " +
+            "            WHEN (string_to_array(p.address->'address'->0->>'district', ','))[1] ~ '^\\d+$'THEN cast(p.address->'address'->0->>'district' as bigint) "
+            +
             "            ELSE NULL " +
             "        END " +
             "    WHERE " +
@@ -58,7 +61,8 @@ public class EACReportQuery {
             "), " +
             "first_eac as ( " +
             "    with current_eac as ( " +
-            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
+            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row "
+            +
             "                from hiv_eac where archived = 0 -- and status != 'COMPLETED' " +
             "            ) " +
             "    select ce.person_uuid, hes.eac_session_date as dateOfCommencementOfFirstEAC from current_eac ce " +
@@ -67,7 +71,8 @@ public class EACReportQuery {
             "), " +
             "second_eac as ( " +
             "    with current_eac as ( " +
-            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
+            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row "
+            +
             "                from hiv_eac where archived = 0 -- and status != 'COMPLETED' " +
             "            ) " +
             "    select ce.person_uuid, hes.eac_session_date as dateOfCommencementOfSecondEAC from current_eac ce " +
@@ -76,7 +81,8 @@ public class EACReportQuery {
             "), " +
             "third_eac as ( " +
             "    with current_eac as ( " +
-            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
+            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row "
+            +
             "                from hiv_eac where archived = 0 -- and status != 'COMPLETED' " +
             "            ) " +
             "    select ce.person_uuid, hes.eac_session_date as dateOfCommencementOfThirdEAC from current_eac ce " +
@@ -85,7 +91,8 @@ public class EACReportQuery {
             "), " +
             "fourth_eac as ( " +
             "    with current_eac as ( " +
-            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
+            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row "
+            +
             "                from hiv_eac where archived = 0 -- and status != 'COMPLETED' " +
             "            ) " +
             "    select ce.person_uuid, hes.eac_session_date as dateOfCommencementOfFourthEAC from current_eac ce " +
@@ -94,7 +101,8 @@ public class EACReportQuery {
             "), " +
             "fifth_eac as ( " +
             "    with current_eac as ( " +
-            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
+            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row "
+            +
             "                from hiv_eac where archived = 0 -- and status != 'COMPLETED' " +
             "            ) " +
             "    select ce.person_uuid, hes.eac_session_date as dateOfCommencementOfFifthEAC from current_eac ce " +
@@ -103,7 +111,8 @@ public class EACReportQuery {
             "), " +
             "sixth_eac as ( " +
             "    with current_eac as ( " +
-            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
+            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row "
+            +
             "                from hiv_eac where archived = 0 -- and status != 'COMPLETED' " +
             "            ) " +
             "    select ce.person_uuid, hes.eac_session_date as dateOfCommencementOfSixthEAC from current_eac ce " +
@@ -112,28 +121,34 @@ public class EACReportQuery {
             "), " +
             "seventh_eac as ( " +
             "    with current_eac as ( " +
-            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
+            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row "
+            +
             "                from hiv_eac where archived = 0 -- and status != 'COMPLETED' " +
             "            ) " +
-            "    select ce.person_uuid, hes.eac_session_date as dateOfCommencementOfSeventhPostSwitchCommitteeEAC from current_eac ce " +
+            "    select ce.person_uuid, hes.eac_session_date as dateOfCommencementOfSeventhPostSwitchCommitteeEAC from current_eac ce "
+            +
             "        join hiv_eac_session hes on hes.eac_id = ce.uuid " +
             "             where ce.row = 1 and hes.archived = 0 and hes.status = 'SEVENTH EAC' " +
             "), " +
             "eighth_eac as ( " +
             "    with current_eac as ( " +
-            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
+            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row "
+            +
             "                from hiv_eac where archived = 0 -- and status != 'COMPLETED' " +
             "            ) " +
-            "    select ce.person_uuid, hes.eac_session_date as dateOfEighthPostSwitchCommitteeEACSessionCompleted from current_eac ce " +
+            "    select ce.person_uuid, hes.eac_session_date as dateOfEighthPostSwitchCommitteeEACSessionCompleted from current_eac ce "
+            +
             "        join hiv_eac_session hes on hes.eac_id = ce.uuid " +
             "             where ce.row = 1 and hes.archived = 0 and hes.status = 'EIGHTH EAC' " +
             "), " +
             "ninth_eac as ( " +
             "    with current_eac as ( " +
-            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
+            "              select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row "
+            +
             "                from hiv_eac where archived = 0 -- and status != 'COMPLETED' " +
             "            ) " +
-            "    select ce.person_uuid, hes.eac_session_date as dateOfCommencementOfNinthPostSwitchCommitteeEAC from current_eac ce " +
+            "    select ce.person_uuid, hes.eac_session_date as dateOfCommencementOfNinthPostSwitchCommitteeEAC from current_eac ce "
+            +
             "        join hiv_eac_session hes on hes.eac_id = ce.uuid " +
             "             where ce.row = 1 and hes.archived = 0 and hes.status = 'NINTH EAC' " +
             "), " +
@@ -146,7 +161,8 @@ public class EACReportQuery {
             "    select hes.person_uuid from hiv_eac_session hes " +
             "        join current_eac ce on ce.uuid = hes.eac_id where ce.row = 1 and hes.archived = 0 " +
             "            and hes.eac_session_date between ?2 and ?3 " +
-            "            and hes.status in ('FIRST EAC', 'SECOND  EAC', 'THIRD EAC', 'FOURTH EAC', 'FIFTH EAC', 'SIXTH EAC') " +
+            "            and hes.status in ('FIRST EAC', 'SECOND  EAC', 'THIRD EAC', 'FOURTH EAC', 'FIFTH EAC', 'SIXTH EAC') "
+            +
             "       ) as c group by person_uuid " +
             "), " +
             "post_eac_vl1 as ( " +
@@ -163,7 +179,8 @@ public class EACReportQuery {
             "            ce.row = 1 " +
             "            AND hes.archived = 0 and hes.eac_session_date isnull " +
             "            AND hes.eac_session_date BETWEEN ?2 AND ?3 " +
-            "            AND hes.status IN ('FIRST EAC', 'SECOND EAC', 'THIRD EAC', 'FOURTH EAC', 'FIFTH EAC', 'SIXTH EAC') " +
+            "            AND hes.status IN ('FIRST EAC', 'SECOND EAC', 'THIRD EAC', 'FOURTH EAC', 'FIFTH EAC', 'SIXTH EAC') "
+            +
             "        GROUP BY " +
             "            hes.person_uuid " +
             "    ), " +
@@ -173,10 +190,12 @@ public class EACReportQuery {
             "            CAST(ls.date_sample_collected AS DATE) AS date_sample_collected, " +
             "            lr.result_reported, " +
             "            CAST(lr.date_result_reported AS DATE) AS date_result_reported, " +
-            "            ROW_NUMBER() OVER (PARTITION BY lt.patient_uuid ORDER BY lr.date_result_reported DESC) AS row " +
+            "            ROW_NUMBER() OVER (PARTITION BY lt.patient_uuid ORDER BY lr.date_result_reported DESC) AS row "
+            +
             "        FROM laboratory_test lt " +
             "        LEFT JOIN laboratory_sample ls ON ls.test_id = lt.id AND ls.archived = 0 " +
-            "        LEFT JOIN laboratory_result lr ON lr.test_id = lt.id AND lr.date_result_reported BETWEEN ?2 AND ?3 " +
+            "        LEFT JOIN laboratory_result lr ON lr.test_id = lt.id AND lr.date_result_reported BETWEEN ?2 AND ?3 "
+            +
             "        WHERE lt.viral_load_indication = 302 AND lt.archived = 0 " +
             "    ) " +
             "    SELECT " +
@@ -190,7 +209,8 @@ public class EACReportQuery {
             "            vl.date_result_reported AS dateOfRepeatViralLoadResultPostEACVL, " +
             "            vl.date_sample_collected AS dateOfRepeatViralLoadPostEACSampleCollected, " +
             "            vl.result_reported AS repeatViralLoadResultPostEAC, " +
-            "            ROW_NUMBER() OVER (PARTITION BY vl.patient_uuid ORDER BY vl.date_result_reported DESC) AS row " +
+            "            ROW_NUMBER() OVER (PARTITION BY vl.patient_uuid ORDER BY vl.date_result_reported DESC) AS row "
+            +
             "        FROM eac_session_date ed " +
             "        JOIN vl ON vl.patient_uuid = ed.person_uuid AND vl.date_result_reported <= ed.eac_session_date " +
             "    ) pev WHERE pev.row = 1 " +
@@ -219,10 +239,12 @@ public class EACReportQuery {
             "            CAST(ls.date_sample_collected AS DATE) AS date_sample_collected, " +
             "            lr.result_reported, " +
             "            CAST(lr.date_result_reported AS DATE) AS date_result_reported, " +
-            "            ROW_NUMBER() OVER (PARTITION BY lt.patient_uuid ORDER BY lr.date_result_reported DESC) AS row " +
+            "            ROW_NUMBER() OVER (PARTITION BY lt.patient_uuid ORDER BY lr.date_result_reported DESC) AS row "
+            +
             "        FROM laboratory_test lt " +
             "        LEFT JOIN laboratory_sample ls ON ls.test_id = lt.id AND ls.archived = 0 " +
-            "        LEFT JOIN laboratory_result lr ON lr.test_id = lt.id AND lr.date_result_reported BETWEEN ?2 AND ?3 " +
+            "        LEFT JOIN laboratory_result lr ON lr.test_id = lt.id AND lr.date_result_reported BETWEEN ?2 AND ?3 "
+            +
             "        WHERE lt.viral_load_indication = 302 AND lt.archived = 0 " +
             "    ) " +
             "    SELECT " +
@@ -236,7 +258,8 @@ public class EACReportQuery {
             "            vl.date_result_reported AS dateOfRepeatViralLoadResultPostSwitchEACVL, " +
             "            vl.date_sample_collected AS dateOfRepeatViralLoadPostSwitchEACSampleCollected, " +
             "            vl.result_reported AS repeatViralLoadResultPostSwitchEAC, " +
-            "            ROW_NUMBER() OVER (PARTITION BY vl.patient_uuid ORDER BY vl.date_result_reported DESC) AS row " +
+            "            ROW_NUMBER() OVER (PARTITION BY vl.patient_uuid ORDER BY vl.date_result_reported DESC) AS row "
+            +
             "        FROM eac_session_date ed " +
             "        JOIN vl ON vl.patient_uuid = ed.person_uuid AND vl.date_result_reported <= ed.eac_session_date " +
             "    ) pev WHERE pev.row = 1 " +
@@ -244,7 +267,8 @@ public class EACReportQuery {
             "regimen_at_start as ( " +
             "        select sr.person_uuid, sr.dateOfStartOfRegimenBeforeUnsuppressedVLR, " +
             "           sr.regimenBeforeUnsuppression, sr.regimenLineBeforeUnsuppression from (with current_eac as ( " +
-            "        select person_uuid, uuid, date_of_last_viral_load, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
+            "        select person_uuid, uuid, date_of_last_viral_load, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row "
+            +
             "                    from hiv_eac where archived = 0 " +
             "    ), " +
             "    regimen as ( " +
@@ -260,20 +284,24 @@ public class EACReportQuery {
             "    ) " +
             "    select ce.person_uuid, r.dateOfStartOfRegimenBeforeUnsuppressedVLR, " +
             "           r.regimenBeforeUnsuppression, r.regimenLineBeforeUnsuppression, " +
-            "           ROW_NUMBER() OVER (PARTITION BY r.person_uuid ORDER BY r.dateOfStartOfRegimenBeforeUnsuppressedVLR) AS row1 " +
+            "           ROW_NUMBER() OVER (PARTITION BY r.person_uuid ORDER BY r.dateOfStartOfRegimenBeforeUnsuppressedVLR) AS row1 "
+            +
             "    from current_eac ce " +
-            "    join regimen r on r.person_uuid = ce.person_uuid and r.dateOfStartOfRegimenBeforeUnsuppressedVLR < ce.date_of_last_viral_load where ce.row = 1 " +
+            "    join regimen r on r.person_uuid = ce.person_uuid and r.dateOfStartOfRegimenBeforeUnsuppressedVLR < ce.date_of_last_viral_load where ce.row = 1 "
+            +
             "    ) sr where sr.row1 = 1 " +
             "), " +
             "last_pick as ( " +
             "    select sr.person_uuid, sr.lastPickupDateBeforeUnsuppressedVLR, " +
             "           sr.monthOfARVRefillOfLastPickupDateBeforeUnsuppressedVLR from (with current_eac as ( " +
-            "        select person_uuid, uuid, date_of_last_viral_load, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
+            "        select person_uuid, uuid, date_of_last_viral_load, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row "
+            +
             "                    from hiv_eac where archived = 0 " +
             "    ), " +
             "    regimen as ( " +
             "       SELECT hap.person_uuid, hap.visit_date AS lastPickupDateBeforeUnsuppressedVLR, " +
-            "                    CAST(hap.refill_period /30.0 AS DECIMAL(10,1)) AS monthOfARVRefillOfLastPickupDateBeforeUnsuppressedVLR " +
+            "                    CAST(hap.refill_period /30.0 AS DECIMAL(10,1)) AS monthOfARVRefillOfLastPickupDateBeforeUnsuppressedVLR "
+            +
             "            FROM hiv_art_pharmacy hap " +
             "             INNER JOIN public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = hap.id " +
             "             INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id " +
@@ -283,9 +311,11 @@ public class EACReportQuery {
             "    ) " +
             "    select ce.person_uuid, r.lastPickupDateBeforeUnsuppressedVLR, " +
             "           r.monthOfARVRefillOfLastPickupDateBeforeUnsuppressedVLR, " +
-            "           ROW_NUMBER() OVER (PARTITION BY r.person_uuid ORDER BY r.lastPickupDateBeforeUnsuppressedVLR DESC) AS row1 " +
+            "           ROW_NUMBER() OVER (PARTITION BY r.person_uuid ORDER BY r.lastPickupDateBeforeUnsuppressedVLR DESC) AS row1 "
+            +
             "    from current_eac ce " +
-            "    join regimen r on r.person_uuid = ce.person_uuid and r.lastPickupDateBeforeUnsuppressedVLR < ce.date_of_last_viral_load where ce.row = 1 " +
+            "    join regimen r on r.person_uuid = ce.person_uuid and r.lastPickupDateBeforeUnsuppressedVLR < ce.date_of_last_viral_load where ce.row = 1 "
+            +
             "    ) sr where sr.row1 = 1 " +
             "), " +
             "vl_unsuppressed as ( " +
@@ -296,7 +326,8 @@ public class EACReportQuery {
             "        fuvl.indication as unsuppressedVLRIndication " +
             "        from (with date_first_eac as ( " +
             "        with current_eac as ( " +
-            "                  select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
+            "                  select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row "
+            +
             "                    from hiv_eac where archived = 0 -- and status != 'COMPLETED' " +
             "                ) " +
             "        select ce.person_uuid, hes.eac_session_date as dateOfCommencementOfFirstEAC from current_eac ce " +
@@ -312,16 +343,20 @@ public class EACReportQuery {
             "                bac.display as indication " +
             "            FROM laboratory_test lt " +
             "            LEFT JOIN laboratory_sample ls ON ls.test_id = lt.id AND ls.archived = 0 " +
-            "            LEFT JOIN laboratory_result lr ON lr.test_id = lt.id AND lr.date_result_reported BETWEEN ?2 AND ?3 and lr.archived = 0 " +
+            "            LEFT JOIN laboratory_result lr ON lr.test_id = lt.id AND lr.date_result_reported BETWEEN ?2 AND ?3 and lr.archived = 0 "
+            +
             "            LEFT JOIN base_application_codeset bac on bac.id = lt.viral_load_indication " +
-            "            WHERE lt.viral_load_indication not in (302, 719) and lt.viral_load_indication is not null AND lt.archived = 0 " +
+            "            WHERE lt.viral_load_indication not in (302, 719) and lt.viral_load_indication is not null AND lt.archived = 0 "
+            +
             "            and lr.archived = 0 and ls.archived = 0 " +
             "    ) " +
             "    select " +
-            "        dfe.person_uuid, vl.result_reported, vl.date_result_reported, vl.date_sample_collected, vl.indication, " +
+            "        dfe.person_uuid, vl.result_reported, vl.date_result_reported, vl.date_sample_collected, vl.indication, "
+            +
             "        ROW_NUMBER() OVER (PARTITION BY vl.patient_uuid ORDER BY vl.date_result_reported DESC) AS row1 " +
             "    from date_first_eac dfe " +
-            "    join vl on vl.patient_uuid = dfe.person_uuid and vl.date_result_reported <= dfe.dateOfCommencementOfFirstEAC) fuvl where row1 = 1 " +
+            "    join vl on vl.patient_uuid = dfe.person_uuid and vl.date_result_reported <= dfe.dateOfCommencementOfFirstEAC) fuvl where row1 = 1 "
+            +
             ") " +
             "SELECT * " +
             "FROM eac_clients " +

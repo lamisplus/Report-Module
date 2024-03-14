@@ -52,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const NcdReport = (props) => {
+const TbReport = (props) => {
   let currentDate = new Date().toISOString().split("T")[0];
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
@@ -93,12 +93,12 @@ const NcdReport = (props) => {
 
     axios
       .get(
-        `${baseUrl}reporting/ncd-report?facilityId=${objValues.organisationUnitId}&start=${objValues.startDate}&end=${objValues.endDate}`,
+        `${baseUrl}reporting/eac-report?facilityId=${objValues.organisationUnitId}&start=${objValues.startDate}&end=${objValues.endDate}`,
         { headers: { Authorization: `Bearer ${token}` }, responseType: "blob" }
       )
       .then((response) => {
         setLoading(false);
-        const fileName = `${objValues.organisationUnitName} NCD-Report ${currentDate}`;
+        const fileName = `${objValues.organisationUnitName} EAC-Report ${currentDate}`;
         const responseData = response.data;
         let blob = new Blob([responseData], {
           type: "application/octet-stream",
@@ -127,7 +127,7 @@ const NcdReport = (props) => {
     <>
       <Card>
         <CardBody>
-          <h2 style={{ color: "#000" }}>NCD REPORT</h2>
+          <h2 style={{ color: "#000" }}>EAC REPORT</h2>
           <br />
           <form>
             <div className="row">
@@ -225,4 +225,4 @@ const NcdReport = (props) => {
   );
 };
 
-export default NcdReport;
+export default TbReport;
