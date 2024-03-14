@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
+
+
 public interface GenerateExcelService {
  
  ByteArrayOutputStream generatePatientLine(HttpServletResponse response, Long facilityId);
@@ -16,15 +18,16 @@ public interface GenerateExcelService {
  ByteArrayOutputStream generateClinicReport(Long facilityId) throws IOException;
  String getFacilityName(Long facilityId);
  ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, LocalDate end);
+
  ByteArrayOutputStream generatePrep(Long facilityId, LocalDate start, LocalDate end);
-
+ 
  ByteArrayOutputStream generateIndexQueryLine(Long facilityId, LocalDate start, LocalDate end);
-
 
  ByteArrayOutputStream generateClientServiceList(HttpServletResponse response, Long facility);
 
  ByteArrayOutputStream generateTBReport(Long facilityId, LocalDate start, LocalDate end);
+ ByteArrayOutputStream generateEACReport(Long facilityId, LocalDate start, LocalDate end);
 
- ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException;
-
- }
+ ByteArrayOutputStream generateNCDReport(Long facilityId, LocalDate start, LocalDate end);
+  ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException;
+}
