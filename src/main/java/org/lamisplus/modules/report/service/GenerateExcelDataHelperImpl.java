@@ -1,7 +1,50 @@
 package org.lamisplus.modules.report.service;
 
-public class GenerateExcelDataHelperImpl implements  GenerateExcelService{
+
+
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
+import org.lamisplus.modules.base.service.OrganisationUnitService;
+import org.lamisplus.modules.hiv.domain.dto.LabReport;
+import org.lamisplus.modules.hiv.domain.dto.PatientLineDto;
+import org.lamisplus.modules.hiv.domain.dto.PharmacyReport;
+import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
+import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
+
+import org.lamisplus.modules.report.domain.*;
+import org.lamisplus.modules.report.config.Application;
+import org.lamisplus.modules.report.domain.BiometricReportDto;
+import org.lamisplus.modules.report.domain.HtsReportDto;
+import org.lamisplus.modules.report.domain.PrepReportDto;
+import org.lamisplus.modules.report.domain.RADETDTOProjection;
+import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
+import org.lamisplus.modules.report.repository.ReportRepository;
+import org.lamisplus.modules.report.utility.DateUtil;
+import org.lamisplus.modules.report.utility.ResultSetExtract;
+import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Slf4j
+@AllArgsConstructor
+@Service
+public class GenerateExcelDataHelperImpl implements  GenerateExcelService {
+    private final ReportRepository reportRepository;
+
+    private final PatientReportService patientReportService;
     private final OrganisationUnitService organisationUnitService;
+
+    private final RadetService radetService;
 
     private final ArtPharmacyRepository artPharmacyRepository;
 
