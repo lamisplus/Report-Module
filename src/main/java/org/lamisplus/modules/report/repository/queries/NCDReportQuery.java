@@ -433,3 +433,4 @@ public class NCDReportQuery {
             "        left join current_tests cut on cut.patient_uuid = bd.personUuid\n" +
             "        left join current_vl_result cvl on cvl.person_uuid130 = bd.personUuid;\n";
 }
+
