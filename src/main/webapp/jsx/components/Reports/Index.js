@@ -21,6 +21,7 @@ import TbReport from "./TbReport";
 import IndexElicitation from "./IndexElicitation";
 import PmtctHtsReport from "./PmtctHtsReport";
 import PmtctMaternalCohortReport from "./PmtctMaternalCohortReport";
+import NcdReport from "./NcdReport";
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -189,8 +190,7 @@ const Reports = (props) => {
                     active={activeItem === "tb-report"}
                     onClick={() => handleItemClick("tb-report")}
                     style={{
-                      backgroundColor:
-                        activeItem === "tb-report" ? "#000" : "",
+                      backgroundColor: activeItem === "tb-report" ? "#000" : "",
                     }}
                   >
                     <span style={{ color: "#fff" }}>TB REPORT</span>
@@ -198,46 +198,57 @@ const Reports = (props) => {
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
                   <Menu.Item
-                      name="inbox"
-                      active={activeItem === "index-elicitation"}
-                      onClick={() => handleItemClick("index-elicitation")}
-                      style={{
-                        backgroundColor:
-                            activeItem === "index-elicitation" ? "#000" : "",
-                      }}
+                    name="inbox"
+                    active={activeItem === "ncd-report"}
+                    onClick={() => handleItemClick("ncd-report")}
+                    style={{
+                      backgroundColor:
+                        activeItem === "ncd-report" ? "#000" : "",
+                    }}
+                  >
+                    <span style={{ color: "#fff" }}>TB REPORT</span>
+
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
+                  <Menu.Item
+                    name="inbox"
+                    active={activeItem === "index-elicitation"}
+                    onClick={() => handleItemClick("index-elicitation")}
+                    style={{
+                      backgroundColor:
+                        activeItem === "index-elicitation" ? "#000" : "",
+                    }}
                   >
                     <span style={{ color: "#fff" }}>INDEX ELICITATION</span>
 
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
                   <Menu.Item
-                      name="inbox"
-                      active={activeItem === "pmtct-hts"}
-                      onClick={() => handleItemClick("pmtct-hts")}
-                      style={{
-                        backgroundColor:
-                            activeItem === "pmtct-hts" ? "#000" : "",
-                      }}
+                    name="inbox"
+                    active={activeItem === "pmtct-hts"}
+                    onClick={() => handleItemClick("pmtct-hts")}
+                    style={{
+                      backgroundColor: activeItem === "pmtct-hts" ? "#000" : "",
+                    }}
                   >
                     <span style={{ color: "#fff" }}>PMTCT HTS</span>
 
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
                   <Menu.Item
-                      name="inbox"
-                      active={activeItem === "pmtct-maternal-cohort"}
-                      onClick={() => handleItemClick("pmtct-maternal-cohort")}
-                      style={{
-                        backgroundColor:
-                            activeItem === "pmtct-maternal-cohort" ? "#000" : "",
-                      }}
+                    name="inbox"
+                    active={activeItem === "pmtct-maternal-cohort"}
+                    onClick={() => handleItemClick("pmtct-maternal-cohort")}
+                    style={{
+                      backgroundColor:
+                        activeItem === "pmtct-maternal-cohort" ? "#000" : "",
+                    }}
                   >
                     <span style={{ color: "#fff" }}>PMTCT MATERNAL COHORT</span>
 
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
                 </Menu>
-
               </div>
               <div
                 className="col-md-9 float-end"
@@ -292,6 +303,13 @@ const Reports = (props) => {
                     completed={completed}
                   />
                 )}
+                {activeItem === "ncd-report" && (
+                  <NcdReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
                 {activeItem === "hts-report" && (
                   <HTSReport
                     handleItemClick={handleItemClick}
@@ -320,32 +338,28 @@ const Reports = (props) => {
                     setCompleted={setCompleted}
                     completed={completed}
                   />
-                )
-                }
+                )}
                 {activeItem === "index-elicitation" && (
-                    <IndexElicitation
-                        handleItemClick={handleItemClick}
-                        setCompleted={setCompleted}
-                        completed={completed}
-                    />
-                )
-                }
+                  <IndexElicitation
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
                 {activeItem === "pmtct-hts" && (
-                    <PmtctHtsReport
-                        handleItemClick={handleItemClick}
-                        setCompleted={setCompleted}
-                        completed={completed}
-                    />
-                )
-                }
+                  <PmtctHtsReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
                 {activeItem === "pmtct-maternal-cohort" && (
-                    <PmtctMaternalCohortReport
-                        handleItemClick={handleItemClick}
-                        setCompleted={setCompleted}
-                        completed={completed}
-                    />
-                )
-                }
+                  <PmtctMaternalCohortReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
               </div>
             </form>
           </div>
