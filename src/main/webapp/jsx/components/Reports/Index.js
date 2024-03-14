@@ -206,7 +206,20 @@ const Reports = (props) => {
                         activeItem === "ncd-report" ? "#000" : "",
                     }}
                   >
-                    <span style={{ color: "#fff" }}>TB REPORT</span>
+                    <span style={{ color: "#fff" }}>NCD Report</span>
+
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
+                  <Menu.Item
+                    name="inbox"
+                    active={activeItem === "eac-report"}
+                    onClick={() => handleItemClick("ncd-report")}
+                    style={{
+                      backgroundColor:
+                        activeItem === "ncd-report" ? "#000" : "",
+                    }}
+                  >
+                    <span style={{ color: "#fff" }}>NCD Report</span>
 
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
@@ -305,6 +318,14 @@ const Reports = (props) => {
                 )}
                 {activeItem === "ncd-report" && (
                   <NcdReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
+
+                {activeItem === "eac-report" && (
+                  <EACReport
                     handleItemClick={handleItemClick}
                     setCompleted={setCompleted}
                     completed={completed}
