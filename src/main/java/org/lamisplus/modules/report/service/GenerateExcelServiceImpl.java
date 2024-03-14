@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @AllArgsConstructor
 @Service
-public class gitGenerateExcelServiceImpl implements GenerateExcelService {
+public class GenerateExcelServiceImpl implements GenerateExcelService {
 	private final ReportRepository reportRepository;
 	
 	private final PatientReportService patientReportService;

@@ -20,8 +20,10 @@ public interface TBReportProjection {
     String getTargetGroup();
     String getEnrollmentSetting();
     LocalDate getDateOfIptStart();
-    String getIptType();
+    String getRegimenAtStart();
     LocalDate getDateOfRegistration();
+    LocalDate getDateOfTbScreened();
+    String getEligibleForTpt();
     String getTbStatus();
     String getTbScreeningType();
     LocalDate getTbTreatmentStartDate();
@@ -31,7 +33,6 @@ public interface TBReportProjection {
     String getTbDiagnosticResult();
     LocalDate getDateOfTbDiagnosticResultReceived();
     String getTbDiagnosticTestType();
-    // LocalDate getDateOfIptStart();
     LocalDate getIptCompletionDate();
     String getIptCompletionStatus();
     String getEligibleForTPT();

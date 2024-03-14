@@ -22,6 +22,7 @@ import IndexElicitation from "./IndexElicitation";
 import PmtctHtsReport from "./PmtctHtsReport";
 import PmtctMaternalCohortReport from "./PmtctMaternalCohortReport";
 import NcdReport from "./NcdReport";
+import EACReport from "./EACReport";
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -206,7 +207,20 @@ const Reports = (props) => {
                         activeItem === "ncd-report" ? "#000" : "",
                     }}
                   >
-                    <span style={{ color: "#fff" }}>TB REPORT</span>
+                    <span style={{ color: "#fff" }}>NCD REPORT</span>
+
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
+                  <Menu.Item
+                      name="inbox"
+                      active={activeItem === "eac-report"}
+                      onClick={() => handleItemClick("eac-report")}
+                      style={{
+                        backgroundColor:
+                            activeItem === "ncd-report" ? "#000" : "",
+                      }}
+                  >
+                    <span style={{ color: "#fff" }}>EAC REPORT</span>
 
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
@@ -309,6 +323,13 @@ const Reports = (props) => {
                     setCompleted={setCompleted}
                     completed={completed}
                   />
+                )}
+                {activeItem === "eac-report" && (
+                    <EACReport
+                        handleItemClick={handleItemClick}
+                        setCompleted={setCompleted}
+                        completed={completed}
+                    />
                 )}
                 {activeItem === "hts-report" && (
                   <HTSReport

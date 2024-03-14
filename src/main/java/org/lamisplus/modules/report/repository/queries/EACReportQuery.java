@@ -358,7 +358,7 @@ public class EACReportQuery {
             "    join vl on vl.patient_uuid = dfe.person_uuid and vl.date_result_reported <= dfe.dateOfCommencementOfFirstEAC) fuvl where row1 = 1 "
             +
             ") " +
-            "SELECT * " +
+            "SELECT eac_clients.first_name, eac_clients.surname, eac_clients.date_of_birth as dateOfBirth " +
             "FROM eac_clients " +
             "LEFT JOIN first_eac ON eac_clients.patientId = first_eac.person_uuid " +
             "LEFT JOIN second_eac ON eac_clients.patientId = second_eac.person_uuid " +
