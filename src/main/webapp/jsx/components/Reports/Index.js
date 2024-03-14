@@ -22,6 +22,7 @@ import IndexElicitation from "./IndexElicitation";
 import PmtctHtsReport from "./PmtctHtsReport";
 import PmtctMaternalCohortReport from "./PmtctMaternalCohortReport";
 import NcdReport from "./NcdReport";
+import EACReport from "./EACReport";
 
 const useStyles = makeStyles((theme) => ({
   error: {
