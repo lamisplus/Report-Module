@@ -10,14 +10,20 @@ import org.lamisplus.modules.hiv.domain.dto.PharmacyReport;
 import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
 import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 
+
 import org.lamisplus.modules.report.domain.*;
+import org.lamisplus.modules.report.config.Application;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.repository.ReportRepository;
+import org.lamisplus.modules.report.utility.DateUtil;
+import org.lamisplus.modules.report.utility.ResultSetExtract;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +34,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @AllArgsConstructor
 @Service
-public class GenerateExcelServiceImpl implements GenerateExcelService {
+public class gitGenerateExcelServiceImpl implements GenerateExcelService {
 	private final ReportRepository reportRepository;
 	
 	private final PatientReportService patientReportService;
@@ -51,7 +57,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	private final HIVEacRepository hivEacRepository;
 	
 	private final GenerateExcelDataHelper excelDataHelper;
-	
+
+	private final ResultSetExtract resultSetExtract;
+	private final DateUtil dateUtil;
 	
 	@Override
 	public ByteArrayOutputStream generatePatientLine(HttpServletResponse response, Long facilityId) {
@@ -263,6 +271,61 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		}
 		LOG.info("End generate patient HTS");
 		return null;
+	}
+
+
+	@Override
+	public ByteArrayOutputStream generateIndexQueryLine(Long facilityId, LocalDate start, LocalDate end) {
+		LOG.info("Start generating Index line list for facility: " + getFacilityName(facilityId));
+		try {
+			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
+			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
+			LOG.info("start date {}", startDate);
+			LOG.info("end date {}", endDate);
+
+			String query = String.format(Application.indexElicitation, facilityId, startDate, endDate);
+
+			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
+			LOG.info("query size is : {}" + fullData.size());
+
+			return excelService.generate(Application.indexElicitationName, fullData, headers);
+
+		} catch (Exception e) {
+			LOG.error("Error Occurred when generating INDEX LINE LIST!!!");
+			e.printStackTrace();
+		}
+		LOG.info("End generate INDEX line list ");
+		return null;
+	}
+
+	public ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException {
+		String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
+		String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
+		LOG.info("start date {}", startDate);
+		LOG.info("end date {}", endDate);
+		String query = "";
+		String reportName = "";
+		//pmtct hts - 82d80564-6d3e-433e-8441-25db7fe1f2af
+		//pmtct maternal cohort - 2b6fe1b9-9af0-4af7-9f59-b9cfcb906158
+		if(reportId.equals("82d80564-6d3e-433e-8441-25db7fe1f2af")){
+			query = String.format(Application.pmtctHts, facilityId, startDate, endDate);
+			reportName = Application.pmtctHtsName;
+		} else if(reportId.equals("2b6fe1b9-9af0-4af7-9f59-b9cfcb906158")){
+			query = String.format(Application.pmtctMaternalCohort, facilityId, startDate, endDate);
+			reportName = Application.pmtctMaternalCohortName;
+
+		} else {
+			LOG.info("Report not available...");
+			return null;
+		}
+		//LOG.info("Query is {}", query);
+		ResultSet resultSet = resultSetExtract.getResultSet(query);
+		List<String> headers = resultSetExtract.getHeaders(resultSet);
+		List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
+		LOG.info("query size is : {}" + fullData.size());
+		return excelService.generate(reportName, fullData, headers);
 	}
 }
 

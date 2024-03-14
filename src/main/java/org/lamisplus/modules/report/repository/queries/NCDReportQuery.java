@@ -32,13 +32,18 @@ public class NCDReportQuery {
             "                                    hrt.description AS regimenLineAtStart\n" +
             "                  FROM patient_person p\n" +
             "                        INNER JOIN base_organisation_unit facility ON facility.id = facility_id\n" +
-            "                        INNER JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id\n" +
-            "                        INNER JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id\n" +
-            "                        INNER JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id = facility_id AND boui.name='DATIM_ID'\n" +
+            "                        INNER JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id\n"
+            +
+            "                        INNER JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id\n"
+            +
+            "                        INNER JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id = facility_id AND boui.name='DATIM_ID'\n"
+            +
             "                        INNER JOIN hiv_enrollment h ON h.person_uuid = p.uuid\n" +
             "                        LEFT JOIN base_application_codeset tgroup ON tgroup.id = h.target_group_id\n" +
-            "                        LEFT JOIN base_application_codeset eSetting ON eSetting.id = h.enrollment_setting_id\n" +
-            "                        LEFT JOIN base_application_codeset ecareEntry ON ecareEntry.id = h.entry_point_id\n" +
+            "                        LEFT JOIN base_application_codeset eSetting ON eSetting.id = h.enrollment_setting_id\n"
+            +
+            "                        LEFT JOIN base_application_codeset ecareEntry ON ecareEntry.id = h.entry_point_id\n"
+            +
             "                        INNER JOIN hiv_art_clinical hac ON hac.hiv_enrollment_uuid = h.uuid\n" +
             "                                                               AND hac.archived = 0\n" +
             "                        INNER JOIN hiv_regimen hr ON hr.id = hac.regimen_id\n" +
@@ -56,40 +61,56 @@ public class NCDReportQuery {
             "    patient_residence AS (SELECT DISTINCT ON (personUuid)\n" +
             "                                   personUuid AS personUuid11,\n" +
             "                                   CASE WHEN (lgaAddr ~ '^[0-9\\\\.]+$') = TRUE\n" +
-            "                                       THEN (SELECT name FROM base_organisation_unit WHERE id = cast(lgaAddr AS INT))\n" +
-            "                                       ELSE (SELECT name FROM base_organisation_unit WHERE id = cast(facilityLga AS INT)) END AS lgaOfResidence,\n" +
+            "                                       THEN (SELECT name FROM base_organisation_unit WHERE id = cast(lgaAddr AS INT))\n"
+            +
+            "                                       ELSE (SELECT name FROM base_organisation_unit WHERE id = cast(facilityLga AS INT)) END AS lgaOfResidence,\n"
+            +
             "                                   CASE WHEN (stateAddr ~ '^[0-9\\\\.]+$') = TRUE\n" +
-            "                                       THEN (SELECT name FROM base_organisation_unit WHERE id = cast(stateAddr AS INT))\n" +
-            "                                       ELSE (SELECT name FROM base_organisation_unit WHERE id = cast(facilityLga AS INT)) END AS stateOfResidence\n" +
-            "                               FROM (SELECT pp.uuid AS personUuid, facility_lga.parent_organisation_unit_id AS facilityLga,\n" +
-            "                                            (jsonb_array_elements(pp.address->'address')->>'district') AS lgaAddr,\n" +
-            "                                            (jsonb_array_elements(pp.address->'address')->>'stateId') AS stateAddr\n" +
+            "                                       THEN (SELECT name FROM base_organisation_unit WHERE id = cast(stateAddr AS INT))\n"
+            +
+            "                                       ELSE (SELECT name FROM base_organisation_unit WHERE id = cast(facilityLga AS INT)) END AS stateOfResidence\n"
+            +
+            "                               FROM (SELECT pp.uuid AS personUuid, facility_lga.parent_organisation_unit_id AS facilityLga,\n"
+            +
+            "                                            (jsonb_array_elements(pp.address->'address')->>'district') AS lgaAddr,\n"
+            +
+            "                                            (jsonb_array_elements(pp.address->'address')->>'stateId') AS stateAddr\n"
+            +
             "                                     FROM patient_person pp\n" +
             "                                         LEFT JOIN base_organisation_unit facility_lga\n" +
-            "                                             ON facility_lga.id = CAST (pp.organization->'id' AS INTEGER))\n" +
+            "                                             ON facility_lga.id = CAST (pp.organization->'id' AS INTEGER))\n"
+            +
             "                                   dt),\n" +
             "    pregnancy_status as (\n" +
             "        select distinct on (person_uuid) person_uuid, visit_date,\n" +
             "                                         case\n" +
-            "                                             when pregnancy_status = 'PREGANACY_STATUS_PREGNANT' OR pregnancy_status = 'Pregnant' THEN 'Pregnant'\n" +
+            "                                             when pregnancy_status = 'PREGANACY_STATUS_PREGNANT' OR pregnancy_status = 'Pregnant' THEN 'Pregnant'\n"
+            +
             "                                             end as pregnancyStatus\n" +
             "        from hiv_art_clinical order by person_uuid, visit_date desc\n" +
             "    ),\n" +
             "    pharmacy_details_regimen AS (SELECT * FROM\n" +
-            "                                              (SELECT *, ROW_NUMBER() OVER (PARTITION BY pr1.person_uuid40 ORDER BY pr1.lastPickupDate DESC) AS rnk3\n" +
+            "                                              (SELECT *, ROW_NUMBER() OVER (PARTITION BY pr1.person_uuid40 ORDER BY pr1.lastPickupDate DESC) AS rnk3\n"
+            +
             "                                               FROM\n" +
             "                                                   (SELECT p.person_uuid AS person_uuid40,\n" +
-            "                                                            COALESCE(ds_model.display, p.dsd_model_type) AS dsdModel,\n" +
+            "                                                            COALESCE(ds_model.display, p.dsd_model_type) AS dsdModel,\n"
+            +
             "                                                            p.visit_date AS lastPickupDate,\n" +
             "                                                            r.description AS currentARTRegimen,\n" +
             "                                                            rt.description AS currentRegimenLine,\n" +
             "                                                            p.next_appointment AS nextPickupDate,\n" +
-            "                                                            CAST(p.refill_period /30.0 AS DECIMAL(10,1)) AS monthsOfARVRefill\n" +
+            "                                                            CAST(p.refill_period /30.0 AS DECIMAL(10,1)) AS monthsOfARVRefill\n"
+            +
             "                                                     FROM public.hiv_art_pharmacy p\n" +
-            "                                                         INNER JOIN public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = p.id\n" +
-            "                                                         INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id\n" +
-            "                                                         INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id\n" +
-            "                                                         LEFT JOIN base_application_codeset ds_model on ds_model.code = p.dsd_model_type\n" +
+            "                                                         INNER JOIN public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = p.id\n"
+            +
+            "                                                         INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id\n"
+            +
+            "                                                         INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id\n"
+            +
+            "                                                         LEFT JOIN base_application_codeset ds_model on ds_model.code = p.dsd_model_type\n"
+            +
             "                                                     WHERE r.regimen_type_id in (1,2,3,4,14)\n" +
             "                                                     AND  p.archived = 0\n" +
             "                                                     AND  p.facility_id = ?1\n" +
@@ -105,17 +126,22 @@ public class NCDReportQuery {
             "                CASE\n" +
             "                    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
             "                    WHEN (stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%'\n" +
-            "                                                                       OR stat.hiv_status ILIKE '%out%'\n" +
-            "                                                                       OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.hiv_status\n" +
+            "                                                                       OR stat.hiv_status ILIKE '%out%'\n"
+            +
+            "                                                                       OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.hiv_status\n"
+            +
             "                    ELSE pharmacy.status\n" +
             "                END\n" +
             "            ) AS status,\n" +
             "            (\n" +
             "                CASE\n" +
-            "                    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN stat.status_date\n" +
+            "                    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN stat.status_date\n"
+            +
             "                    WHEN (stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%'\n" +
-            "                                                                       OR stat.hiv_status ILIKE '%out%'\n" +
-            "                                                                       OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.status_date\n" +
+            "                                                                       OR stat.hiv_status ILIKE '%out%'\n"
+            +
+            "                                                                       OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.status_date\n"
+            +
             "                    ELSE pharmacy.visit_date\n" +
             "                END\n" +
             "            ) AS status_date\n" +
@@ -129,7 +155,8 @@ public class NCDReportQuery {
             "                ) status,\n" +
             "                (\n" +
             "                    CASE\n" +
-            "                        WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?3 THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
+            "                        WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?3 THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n"
+            +
             "                        ELSE hp.visit_date\n" +
             "                    END\n" +
             "                ) AS visit_date,\n" +
@@ -138,7 +165,8 @@ public class NCDReportQuery {
             "                hiv_art_pharmacy hp\n" +
             "            INNER JOIN (\n" +
             "                SELECT hap.person_uuid, hap.visit_date AS MAXDATE,\n" +
-            "                       ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n" +
+            "                       ROW_NUMBER() OVER (PARTITION BY hap.person_uuid ORDER BY hap.visit_date DESC) as rnkkk3\n"
+            +
             "                FROM public.hiv_art_pharmacy hap\n" +
             "                INNER JOIN public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = hap.id\n" +
             "                INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0\n" +
@@ -147,7 +175,8 @@ public class NCDReportQuery {
             "                WHERE r.regimen_type_id IN (1,2,3,4,14)\n" +
             "                AND hap.archived = 0\n" +
             "                AND hap.visit_date < ?3\n" +
-            "            ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid AND MAX.rnkkk3 = 1\n" +
+            "            ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid AND MAX.rnkkk3 = 1\n"
+            +
             "            WHERE hp.archived = 0 AND hp.visit_date < ?3\n" +
             "        ) pharmacy\n" +
             "        LEFT JOIN (\n" +
@@ -157,8 +186,10 @@ public class NCDReportQuery {
             "                hst.status_date\n" +
             "            FROM (\n" +
             "                SELECT * FROM (\n" +
-            "                    SELECT DISTINCT (person_id) person_id, status_date, cause_of_death, va_cause_of_death, hiv_status,\n" +
-            "                                    ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS row_number\n" +
+            "                    SELECT DISTINCT (person_id) person_id, status_date, cause_of_death, va_cause_of_death, hiv_status,\n"
+            +
+            "                                    ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC) AS row_number\n"
+            +
             "                    FROM hiv_status_tracker WHERE archived = 0 AND status_date <= ?3\n" +
             "                ) s\n" +
             "                WHERE s.row_number = 1\n" +
@@ -208,12 +239,14 @@ public class NCDReportQuery {
             "            NULL AS baselineWaistCircumference,\n" +
             "            h.data->'physicalExamination'->>'bodyWeight' AS baselineWeight,\n" +
             "            CASE\n" +
-            "                WHEN (h.data->'physicalExamination'->>'height') IS NOT NULL AND (h.data->'physicalExamination'->>'height') ~ '^\\\\d+\\\\.?\\\\d*$'\n" +
+            "                WHEN (h.data->'physicalExamination'->>'height') IS NOT NULL AND (h.data->'physicalExamination'->>'height') ~ '^\\\\d+\\\\.?\\\\d*$'\n"
+            +
             "                THEN CAST(h.data->'physicalExamination'->>'height' AS DECIMAL(5, 2))\n" +
             "                ELSE NULL\n" +
             "            END AS baselineHeight,\n" +
             "            CASE\n" +
-            "                WHEN (h.data->'physicalExamination'->>'height') IS NOT NULL AND (h.data->'physicalExamination'->>'height') ~ '^\\\\d+\\\\.?\\\\d*$' AND (h.data->'physicalExamination'->>'bodyWeight') IS NOT NULL AND (h.data->'physicalExamination'->>'bodyWeight') ~ '^\\\\d+\\\\.?\\\\d*$'\n" +
+            "                WHEN (h.data->'physicalExamination'->>'height') IS NOT NULL AND (h.data->'physicalExamination'->>'height') ~ '^\\\\d+\\\\.?\\\\d*$' AND (h.data->'physicalExamination'->>'bodyWeight') IS NOT NULL AND (h.data->'physicalExamination'->>'bodyWeight') ~ '^\\\\d+\\\\.?\\\\d*$'\n"
+            +
             "                THEN ROUND(\n" +
             "                    CAST(h.data->'physicalExamination'->>'bodyWeight' AS DECIMAL(5, 0)) /\n" +
             "                    POWER(CAST(h.data->'physicalExamination'->>'height' AS DECIMAL(5, 2)) / 100, 2), 2\n" +
@@ -234,7 +267,8 @@ public class NCDReportQuery {
             "                hiv_observation.date_of_observation IS NOT NULL\n" +
             "            GROUP BY\n" +
             "                person_uuid\n" +
-            "        ) AS min_dates ON h.person_uuid = min_dates.person_uuid AND h.date_of_observation = min_dates.min_date\n" +
+            "        ) AS min_dates ON h.person_uuid = min_dates.person_uuid AND h.date_of_observation = min_dates.min_date\n"
+            +
             "        WHERE\n" +
             "            h.date_of_observation = min_dates.min_date AND h.archived = 0\n" +
             "    ),\n" +
@@ -258,11 +292,14 @@ public class NCDReportQuery {
             "                   ELSE\n" +
             "                       NULL -- Handle division by zero by returning NULL for BMI\n" +
             "               END AS currentBMI,\n" +
-            "               CASE WHEN tvs.body_weight IS NOT NULL THEN tvs.capture_date ELSE NULL END AS currentBMIDate,\n" +
+            "               CASE WHEN tvs.body_weight IS NOT NULL THEN tvs.capture_date ELSE NULL END AS currentBMIDate,\n"
+            +
             "               tvs.diastolic,\n" +
-            "               CASE WHEN tvs.diastolic IS NOT NULL THEN tvs.capture_date ELSE NULL END AS currentDiastolicDate,\n" +
+            "               CASE WHEN tvs.diastolic IS NOT NULL THEN tvs.capture_date ELSE NULL END AS currentDiastolicDate,\n"
+            +
             "               tvs.systolic,\n" +
-            "               CASE WHEN tvs.systolic IS NOT NULL THEN tvs.capture_date ELSE NULL END AS currentSystolicDate\n" +
+            "               CASE WHEN tvs.systolic IS NOT NULL THEN tvs.capture_date ELSE NULL END AS currentSystolicDate\n"
+            +
             "        FROM triage_vital_sign tvs\n" +
             "        JOIN (\n" +
             "            SELECT person_uuid, MAX(capture_date) AS max_date\n" +
@@ -274,9 +311,12 @@ public class NCDReportQuery {
             "    baseline_tests as (\n" +
             "        WITH base AS (\n" +
             "            SELECT lt.patient_uuid,\n" +
-            "                   MAX(CASE WHEN lt.lab_test_id = 31 THEN lr.result_report END) AS baselineFastingBloodSugar,\n" +
-            "                   MAX(CASE WHEN lt.lab_test_id = 13 THEN lr.result_report END) AS baselineRandomBloodSugar,\n" +
-            "                   MAX(CASE WHEN lt.lab_test_id = 23 THEN lr.result_report END) AS baselineBloodTotalCholesterol,\n" +
+            "                   MAX(CASE WHEN lt.lab_test_id = 31 THEN lr.result_report END) AS baselineFastingBloodSugar,\n"
+            +
+            "                   MAX(CASE WHEN lt.lab_test_id = 13 THEN lr.result_report END) AS baselineRandomBloodSugar,\n"
+            +
+            "                   MAX(CASE WHEN lt.lab_test_id = 23 THEN lr.result_report END) AS baselineBloodTotalCholesterol,\n"
+            +
             "                   MAX(CASE WHEN lt.lab_test_id = 25 THEN lr.result_report END) AS baselineHDL,\n" +
             "                   MAX(CASE WHEN lt.lab_test_id = 24 THEN lr.result_report END) AS baselineLDL,\n" +
             "                   MAX(CASE WHEN lt.lab_test_id = 17 THEN lr.result_report END) AS baselineSodium,\n" +
@@ -294,24 +334,36 @@ public class NCDReportQuery {
             "    current_tests as (\n" +
             "        WITH current AS (\n" +
             "            SELECT lt.patient_uuid,\n" +
-            "                   MAX(CASE WHEN lt.lab_test_id = 31 THEN lr.result_report END) AS currentFastingBloodSugar,\n" +
-            "                   MAX(CASE WHEN lt.lab_test_id = 31 THEN lr.date_result_received END) AS dateCurrentFastingBloodSugar,\n" +
-            "                   MAX(CASE WHEN lt.lab_test_id = 13 THEN lr.result_report END) AS currentRandomBloodSugar,\n" +
-            "                   MAX(CASE WHEN lt.lab_test_id = 13 THEN lr.date_result_received END) AS dateCurrentRandomBloodSugar,\n" +
-            "                   MAX(CASE WHEN lt.lab_test_id = 23 THEN lr.result_report END) AS currentBloodTotalCholesterol,\n" +
-            "                   MAX(CASE WHEN lt.lab_test_id = 23 THEN lr.date_result_received END) AS dateCurrentBloodTotalCholesterol,\n" +
+            "                   MAX(CASE WHEN lt.lab_test_id = 31 THEN lr.result_report END) AS currentFastingBloodSugar,\n"
+            +
+            "                   MAX(CASE WHEN lt.lab_test_id = 31 THEN lr.date_result_received END) AS dateCurrentFastingBloodSugar,\n"
+            +
+            "                   MAX(CASE WHEN lt.lab_test_id = 13 THEN lr.result_report END) AS currentRandomBloodSugar,\n"
+            +
+            "                   MAX(CASE WHEN lt.lab_test_id = 13 THEN lr.date_result_received END) AS dateCurrentRandomBloodSugar,\n"
+            +
+            "                   MAX(CASE WHEN lt.lab_test_id = 23 THEN lr.result_report END) AS currentBloodTotalCholesterol,\n"
+            +
+            "                   MAX(CASE WHEN lt.lab_test_id = 23 THEN lr.date_result_received END) AS dateCurrentBloodTotalCholesterol,\n"
+            +
             "                   MAX(CASE WHEN lt.lab_test_id = 25 THEN lr.result_report END) AS currentHDL,\n" +
-            "                   MAX(CASE WHEN lt.lab_test_id = 25 THEN lr.date_result_received END) AS dateCurrentHDL,\n" +
+            "                   MAX(CASE WHEN lt.lab_test_id = 25 THEN lr.date_result_received END) AS dateCurrentHDL,\n"
+            +
             "                   MAX(CASE WHEN lt.lab_test_id = 24 THEN lr.result_report END) AS currentLDL,\n" +
-            "                   MAX(CASE WHEN lt.lab_test_id = 24 THEN lr.date_result_received END) AS dateCurrentLDL,\n" +
+            "                   MAX(CASE WHEN lt.lab_test_id = 24 THEN lr.date_result_received END) AS dateCurrentLDL,\n"
+            +
             "                   MAX(CASE WHEN lt.lab_test_id = 17 THEN lr.result_report END) AS currentSodium,\n" +
-            "                   MAX(CASE WHEN lt.lab_test_id = 17 THEN lr.date_result_received END) AS dateCurrentSodium,\n" +
+            "                   MAX(CASE WHEN lt.lab_test_id = 17 THEN lr.date_result_received END) AS dateCurrentSodium,\n"
+            +
             "                   MAX(CASE WHEN lt.lab_test_id = 11 THEN lr.result_report END) AS currentPotassium,\n" +
-            "                   MAX(CASE WHEN lt.lab_test_id = 11 THEN lr.date_result_received END) AS dateCurrentPotassium,\n" +
+            "                   MAX(CASE WHEN lt.lab_test_id = 11 THEN lr.date_result_received END) AS dateCurrentPotassium,\n"
+            +
             "                   MAX(CASE WHEN lt.lab_test_id = 20 THEN lr.result_report END) AS currentUrea,\n" +
-            "                   MAX(CASE WHEN lt.lab_test_id = 20 THEN lr.date_result_received END) AS dateCurrentUrea,\n" +
+            "                   MAX(CASE WHEN lt.lab_test_id = 20 THEN lr.date_result_received END) AS dateCurrentUrea,\n"
+            +
             "                   MAX(CASE WHEN lt.lab_test_id = 12 THEN lr.result_report END) AS currentCreatinine,\n" +
-            "                   MAX(CASE WHEN lt.lab_test_id = 12 THEN lr.date_result_received END) AS dateCurrentCreatinine\n" +
+            "                   MAX(CASE WHEN lt.lab_test_id = 12 THEN lr.date_result_received END) AS dateCurrentCreatinine\n"
+            +
             "            FROM laboratory_test lt\n" +
             "            JOIN laboratory_labtest llt ON lt.lab_test_id = llt.id\n" +
             "            JOIN laboratory_result lr ON lr.patient_uuid = lt.patient_uuid AND lr.test_id = lt.id\n" +
@@ -329,11 +381,13 @@ public class NCDReportQuery {
             "                    acode.display AS viralLoadIndication,\n" +
             "                    sm.result_reported AS currentViralLoad,\n" +
             "                    CAST(sm.date_result_reported AS DATE) AS dateOfCurrentViralLoad,\n" +
-            "                    ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) AS rank2\n" +
+            "                    ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) AS rank2\n"
+            +
             "            FROM public.laboratory_result  sm\n" +
             "                INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
             "                INNER JOIN public.laboratory_sample ls on ls.test_id = lt.id\n" +
-            "                INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication\n" +
+            "                INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication\n"
+            +
             "            WHERE lt.lab_test_id = 16\n" +
             "            AND  lt.viral_load_indication !=719\n" +
             "            AND sm. date_result_reported IS NOT NULL\n" +
@@ -346,13 +400,15 @@ public class NCDReportQuery {
             "    ),\n" +
             "    start_htn_regimen AS (\n" +
             "        SELECT * FROM\n" +
-            "              (SELECT *, ROW_NUMBER() OVER (PARTITION BY pr1.person_uuid40 ORDER BY pr1.htnStartDate) AS rnk3\n" +
+            "              (SELECT *, ROW_NUMBER() OVER (PARTITION BY pr1.person_uuid40 ORDER BY pr1.htnStartDate) AS rnk3\n"
+            +
             "                           FROM\n" +
             "                               (SELECT p.person_uuid AS person_uuid40,\n" +
             "                                        p.visit_date AS htnStartDate,\n" +
             "                                        r.description AS htnStartRegimen\n" +
             "                                 FROM hiv_art_pharmacy p\n" +
-            "                                     INNER JOIN hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = p.id\n" +
+            "                                     INNER JOIN hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = p.id\n"
+            +
             "                                     INNER JOIN hiv_regimen r on r.id = pr.regimens_id\n" +
             "                                     INNER JOIN hiv_regimen_type rt on rt.id = r.regimen_type_id\n" +
             "                                 WHERE r.regimen_type_id in (61)\n" +
@@ -369,7 +425,8 @@ public class NCDReportQuery {
             "           NULL AS currentHTNStatus,\n" +
             "           NULL AS dateCurrentHTNStatus,\n" +
             "           NULL AS reasonsLTFU_IIT FROM\n" +
-            "          (SELECT *, ROW_NUMBER() OVER (PARTITION BY pr1.person_uuid41 ORDER BY pr1.lastHTNPickupDate DESC) AS rnk41\n" +
+            "          (SELECT *, ROW_NUMBER() OVER (PARTITION BY pr1.person_uuid41 ORDER BY pr1.lastHTNPickupDate DESC) AS rnk41\n"
+            +
             "                       FROM\n" +
             "                           (SELECT p.person_uuid AS person_uuid41,\n" +
             "                                    p.visit_date AS lastHTNPickupDate,\n" +
@@ -407,10 +464,12 @@ public class NCDReportQuery {
             "                   lastPickupDate,\n" +
             "                   currentARTRegimen,\n" +
             "                   CASE\n" +
-            "                       WHEN lag(currentARTRegimen) OVER (PARTITION BY person_uuid40 ORDER BY lastPickupDate) = currentARTRegimen THEN null\n" +
+            "                       WHEN lag(currentARTRegimen) OVER (PARTITION BY person_uuid40 ORDER BY lastPickupDate) = currentARTRegimen THEN null\n"
+            +
             "                       ELSE lastPickupDate\n" +
             "                   END AS change_date,\n" +
-            "                   ROW_NUMBER() OVER (PARTITION BY person_uuid40 ORDER BY lastPickupDate DESC) AS change_rank\n" +
+            "                   ROW_NUMBER() OVER (PARTITION BY person_uuid40 ORDER BY lastPickupDate DESC) AS change_rank\n"
+            +
             "            FROM regimen\n" +
             "        )\n" +
             "        SELECT person_uuid40, change_date AS dateRegimenSwitch\n" +
@@ -433,4 +492,3 @@ public class NCDReportQuery {
             "        left join current_tests cut on cut.patient_uuid = bd.personUuid\n" +
             "        left join current_vl_result cvl on cvl.person_uuid130 = bd.personUuid;\n";
 }
-
