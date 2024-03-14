@@ -15,7 +15,9 @@ public class Constants {
 	public static final String CLIENT_SERVICE_LIST = "client_service_list";
 
 	public static final String RADET_SHEET = "radet";
-
+	public static final String TB_SHEET = "tb";
+	public static final String NCD_SHEET = "ncd";
+	public static final String EAC_SHEET = "eac";
 	public static final String HTS_SHEET = "hts";
 
 	public static final String PREP_SHEET = "prep";
@@ -429,4 +431,63 @@ public class Constants {
 					"TB Diagnostic Result", "Date of TB Treatment", "TB Treatment Outcome", "Date TB Treatment Outcome",
 					"Eligible for TPT", "TPT Type", "TPT Outcome", "Date of TPT Outcome", "Weight At Start TPT"
 			);
+
+	public static final List<String> EAC_REPORT_HEADER =
+			Arrays.asList(
+					"State", "L.G.A", "LGA Of Residence", "Facility Name", "DatimId", "Patient ID", "Hospital Number",
+					"Unique Id", "Sex", "Target group", "Date Birth (yyyy-mm-dd)", "ART Start Date (yyyy-mm-dd)", "Regimen at ART Start",
+					"{Date of start of Regimen before unsuppressed VLR}", "{Regimen Line before  unsuppression}",
+					"{Regimen before unsuppression}", "{Last Pickup Date before  unsuppressed VLR}", "{Month of ARV Refill of the last pick up date before  unsuppressed VLR}",
+					"{Date of VLSC of unsuppressed VLR}", "{Most Recent Unsuppressed VLR}", "{Date of Unsuppressed VLR}", "{Unsuppressed VLR Indication}",
+					/*"Current ART Status", "Date of Current ART Status",*/ "Date of commencement of 1st EAC (yyyy-mm-dd)", "Date of  1st EAC Session Completed",
+					"Method of 1st  EAC Session", "Date of commencement of 2nd  EAC (yyyy-mm-dd)", "Date of  2nd EAC Session Completed", "Method of 2nd  EAC Session",
+					"Date of commencement of 3rd   EAC (yyyy-mm-dd)", "Date of  3rd EAC Session Completed", "Method of 3rd EAC Session",
+					"Date of commencement of 4th  (Extended) EAC (yyyy-mm-dd)", "Date of  4th (Extended) EAC Session Completed",
+					"Method of 4th (Extended) EAC Session", "Date of commencement of 5th  (Extended) EAC (yyyy-mm-dd)", "Date of  5th (Extended) EAC Session Completed",
+					"Method of 5th (Extended) EAC Session", "Date of commencement of 6th  (Extended) EAC (yyyy-mm-dd)", "Date of  6th (Extended) EAC Session Completed",
+					"Method of 6th (Extended) EAC Session", "Number of EAC Sessions Completed", "Date of Repeat Viral Load - Post EAC VL Sample collected (yyyy-mm-dd)",
+					"Repeat Viral load result (c/ml)- POST EAC", "Date of Repeat Viral load result- POST EAC VL", "Referred to Switch Committee? 	r",
+					"Eligible for Switch?", "Date of commencement of 7th (Post switch) committee) EAC (yyyy-mm-dd)", "Date of 7th (post switch committee) EAC Session Completed",
+					"Method of 7th (post switch committe) EAC Session", "Date of commencement of 8th (Post switch) committee) EAC (yyyy-mm-dd)",
+					"Date of 8th (post switch committee) EAC Session Completed", "Method of 8th (post switch committe) EAC Session",
+					"Date of commencement of 9th (Post switch) committee) EAC (yyyy-mm-dd)", "Date of 9th (post switch committee) EAC Session Completed",
+					"Method of 9th (post switch committe) EAC Session", "Date of Repeat Viral Load - Post switch EAC VL Sample collected (yyyy-mm-dd)",
+					"Repeat Viral load result (c/ml)- Post Switch EAC", "Date of Repeat Viral load result- Post Switch EAC VL", "Method of post switch EAC Session",
+					"Referred to Switch Committee? (Post switch EAC)", "Date Referred to Switch Committed (Post switch EAC)", "Eligible for Switch? (Post switch EAC)",
+					"Date Switched", "Start date of Switched Regimen", "Switched ART Regimen Line", "Switched ART Regimen", "Case Manager"
+			);
+
+	public static final List<String> NCD_REPORT_HEADER = Arrays.asList(
+			"State", "LGA", "Facility ID", "Facility Name", "Patient ID", "Hospital Number", "Unique ID",
+			"Surname", "Other Names", "Date Birth (yyyy-mm-dd)", "Age", "Sex", "Marital status", "Education",
+			"Occupation", "State of Residence", "LGA of Residence", "Address", "Phone", "Pregnancy Status",
+			"ART Start date (yyyy-mm-dd)", "ART Regimen Line at Start", "ART Regimen at Start",
+			"Current Regimen Line", "Current Regimen", "Date of Regimen Switch/Substitution (yyyy-mm-dd)",
+			"Last ART Pickup date (yyyy-mm-dd)", "Months of ARV Refill", "Current ART Status",
+			"Date of Current ART Status (yyyy-mm-dd)", "ART Enrollment Setting", "DDD Type",
+			"Date Previously Known Hypertensive (yyyy-mm-dd)", "Date Newly Diagnosed Hypertensive (yyyy-mm-dd)",
+			"Baseline Waist Circumference (cm)", "Baseline Weight (kg)", "Baseline Height (cm)", "Baseline BMI (kg/m2)",
+			"Baseline Systolic (mmHg)", "Baseline Diastolic (mmHg)", "Baseline Fasting Blood Sugar (mmol/L)",
+			"Baseline Random Blood Sugar (mmol/L)", "Baseline Blood Total Cholesterol (mmol/L)", "Baseline HDL (mmol/L)",
+			"Baseline LDL (mmol/L)", "Baseline Sodium - Na (mmol/L)", "Baseline Potassium - K (mmol/L)",
+			"Baseline Urea (mmol/L)", "Baseline Creatinine - Cr (mmol/L)", "Date of start of HTN Treatment (yyyy-mm-dd)",
+			"HTN Regimen at Start", "Current HTN Regimen", "Last HTN Medication Pickup Date (yyyy-mm-dd)",
+			"Months of HTN Medication Refill", "Current HTN Status", "Date of Current HTN Status (yyyy-mm-dd)",
+			"Reasons for LTFU/IIT", "Current Weight (kg)", "Date of Current Weight (yyyy-mm-dd)",
+			"Current Height (cm)", "Date of Current Height (yyyy-mm-dd)", "Current BMI (kg/m2)",
+			"Date of Current BMI (yyyy-mm-dd)", "Current Waist Circumference (cm)",
+			"Date of Current Waist Circumference (yyyy-mm-dd)", "Waist-Hip Ratio",
+			"Date of Waist-Hip Ratio (yyyy-mm-dd)", "Current Systolic (mmHg)",
+			"Date of Current Systolic (yyyy-mm-dd)", "Current Diastolic (mmHg)",
+			"Date of Current Diastolic (yyyy-mm-dd)", "Current Fasting Blood Sugar (mmol/L)",
+			"Date of Current Fasting Blood Sugar (yyyy-mm-dd)", "Current Random Blood Sugar (mmol/L)",
+			"Date of Current Random Blood Sugar (yyyy-mm-dd)", "Current Blood Total Cholesterol (mmol/L)",
+			"Date of Current Blood Total Cholesterol (yyyy-mm-dd)", "Current HDL (mmol/L)",
+			"Date of Current HDL (yyyy-mm-dd)", "Current LDL (mmol/L)", "Date of Current LDL (yyyy-mm-dd)",
+			"Current Sodium - Na (mmol/L)", "Date of Current Sodium  (yyyy-mm-dd)",
+			"Current Potassium - K (mmol/L)", "Date of Current Potassium (yyyy-mm-dd)", "Current Urea (mmol/L)",
+			"Date of Current Urea (yyyy-mm-dd)", "Current Creatinine - Cr (mmol/L)",
+			"Date of Current Creatinine (yyyy-mm-dd)", "Date of Viral Load Sample Collection (yyyy-mm-dd)",
+			"Current Viral Load (c/ml)", "Date of Current Viral Load (yyyy-mm-dd)", "Viral Load Indication"
+	);
 }
