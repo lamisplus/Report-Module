@@ -217,7 +217,7 @@ const Reports = (props) => {
                       onClick={() => handleItemClick("eac-report")}
                       style={{
                         backgroundColor:
-                            activeItem === "ncd-report" ? "#000" : "",
+                            activeItem === "eac-report" ? "#000" : "",
                       }}
                   >
                     <span style={{ color: "#fff" }}>EAC REPORT</span>
