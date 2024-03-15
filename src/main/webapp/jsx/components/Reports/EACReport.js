@@ -52,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const TbReport = (props) => {
+const EACReport = (props) => {
   let currentDate = new Date().toISOString().split("T")[0];
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
@@ -225,4 +225,4 @@ const TbReport = (props) => {
   );
 };
 
-export default TbReport;
+export default EACReport;
