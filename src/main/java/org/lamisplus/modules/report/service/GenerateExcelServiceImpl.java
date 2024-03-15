@@ -260,13 +260,13 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
 			LOG.info("start date {}", startDate);
 			LOG.info("end date {}", endDate);
+			if(Application.prep != null){
+				LOG.info("PrEP query not available check query.yml file");
+			}
 			String query = Application.prep;
 			query = query.replace("?1", String.valueOf(facilityId))
 					.replace("?2", startDate)
 					.replace("?3", endDate);
-
-			//query = String.format(query, facilityId, startDate, endDate);
-			//LOG.info("Query is {}", query);
 
 			ResultSet resultSet = resultSetExtract.getResultSet(query);
 			List<String> headers = resultSetExtract.getHeaders(resultSet);
@@ -289,6 +289,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
 			LOG.info("start date {}", startDate);
 			LOG.info("end date {}", endDate);
+			if(Application.indexElicitation != null){
+				LOG.info("indexElicitation query not available check query.yml file");
+			}
 
 			String query = String.format(Application.indexElicitation, facilityId, startDate, endDate);
 
@@ -328,7 +331,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			LOG.info("Report not available...");
 			return null;
 		}
-		//LOG.info("Query is {}", query);
+		if(query != null || query.equals("")){
+			LOG.info("pmtct query not available check query.yml file");
+		}
 		ResultSet resultSet = resultSetExtract.getResultSet(query);
 		List<String> headers = resultSetExtract.getHeaders(resultSet);
 		List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
