@@ -13,7 +13,7 @@
 
 	<groupId>org.lamisplus.modules</groupId>
 	<artifactId>report</artifactId>
-	<version>2.0.10</version>
+	<version>2.1.0</version>
 	<packaging>jar</packaging>
 	<name>report-module</name>
 	<description>report-module</description>
@@ -65,7 +65,7 @@
 		<dependency>
 			<groupId>org.lamisplus.modules</groupId>
 			<artifactId>hiv</artifactId>
-			<version>2.1.4</version>
+			<version>2.1.10</version>
 		</dependency>
 
 		<dependency>
