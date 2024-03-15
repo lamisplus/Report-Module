@@ -20,7 +20,7 @@ public interface EACReportProjection {
     String getRegimenLineBeforeUnsuppression();
     String getRegimenBeforeUnsuppression();
     LocalDate getLastPickupDateBeforeUnsuppressedVLR();
-    int getMonthOfARVRefillOfLastPickupDateBeforeUnsuppressedVLR();
+    Integer getMonthOfARVRefillOfLastPickupDateBeforeUnsuppressedVLR();
     LocalDate getDateOfVLSCOfUnsuppressedVLR();
     String getMostRecentUnsuppressedVLR();
     LocalDate getDateOfUnsuppressedVLR();
@@ -45,9 +45,9 @@ public interface EACReportProjection {
     LocalDate getDateOfCommencementOfSixthEAC();
     LocalDate getDateOfSixthEACSessionCompleted();
     String getMethodOfSixthEACSession();
-    int getNumberOfEACSessionsCompleted();
+    Integer getNumberOfEACSessionsCompleted();
     LocalDate getDateOfRepeatViralLoadPostEACSampleCollected();
-    double getRepeatViralLoadResultPostEAC();
+    Double getRepeatViralLoadResultPostEAC();
     LocalDate getDateOfRepeatViralLoadResultPostEACVL();
     String getReferredToSwitchCommittee();
     LocalDate getDateReferredToSwitchCommitted();
@@ -62,7 +62,7 @@ public interface EACReportProjection {
     LocalDate getDateOfNinthPostSwitchCommitteeEACSessionCompleted();
     String getMethodOfNinthPostSwitchCommitteeEACSession();
     LocalDate getDateOfRepeatViralLoadPostSwitchEACSampleCollected();
-    double getRepeatViralLoadResultPostSwitchEAC();
+    Double getRepeatViralLoadResultPostSwitchEAC();
     LocalDate getDateOfRepeatViralLoadResultPostSwitchEACVL();
     String getMethodOfPostSwitchEACSession();
     String getReferredToSwitchCommitteePostSwitchEAC();

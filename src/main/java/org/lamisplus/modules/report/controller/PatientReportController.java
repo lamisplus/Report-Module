@@ -104,7 +104,7 @@ public class PatientReportController {
 			@RequestParam("end") LocalDate end) throws IOException {
 
 		messagingTemplate.convertAndSend("/topic/eac-report", "start");
-
+		LOG.info("Parameters {} ***** {} ******* {}", facilityId, start, end);
 		ByteArrayOutputStream baos = generateExcelService.generateEACReport(facilityId, start, end);
 
 		setStream(baos, response);
