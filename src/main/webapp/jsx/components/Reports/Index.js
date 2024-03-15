@@ -17,12 +17,12 @@ import HTSReport from "./HTSReport";
 import PrepReport from "./PrepReport";
 import ClinicData from "./ClinicData";
 import ClientVerification from "./ClientVerification";
-import TbReport from "./TbReport";
+//import TbReport from "./TbReport";
 import IndexElicitation from "./IndexElicitation";
 import PmtctHtsReport from "./PmtctHtsReport";
 import PmtctMaternalCohortReport from "./PmtctMaternalCohortReport";
-import NcdReport from "./NcdReport";
-import EACReport from "./EACReport";
+//import NcdReport from "./NcdReport";
+//import EACReport from "./EACReport";
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -186,41 +186,41 @@ const Reports = (props) => {
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
 
-                  <Menu.Item
-                    name="inbox"
-                    active={activeItem === "tb-report"}
-                    onClick={() => handleItemClick("tb-report")}
-                    style={{
-                      backgroundColor: activeItem === "tb-report" ? "#000" : "",
-                    }}
-                  >
-                    <span style={{ color: "#fff" }}>TB REPORT</span>
+//                  <Menu.Item
+//                    name="inbox"
+//                    active={activeItem === "tb-report"}
+//                    onClick={() => handleItemClick("tb-report")}
+//                    style={{
+//                      backgroundColor: activeItem === "tb-report" ? "#000" : "",
+//                    }}
+//                  >
+//                    <span style={{ color: "#fff" }}>TB REPORT</span>
 
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
-                  <Menu.Item
-                    name="inbox"
-                    active={activeItem === "ncd-report"}
-                    onClick={() => handleItemClick("ncd-report")}
-                    style={{
-                      backgroundColor:
-                        activeItem === "ncd-report" ? "#000" : "",
-                    }}
-                  >
-                    <span style={{ color: "#fff" }}>NCD Report</span>
+//                  <Menu.Item
+//                    name="inbox"
+//                    active={activeItem === "ncd-report"}
+//                    onClick={() => handleItemClick("ncd-report")}
+//                    style={{
+//                      backgroundColor:
+//                        activeItem === "ncd-report" ? "#000" : "",
+//                    }}
+//                  >
+//                    <span style={{ color: "#fff" }}>NCD Report</span>
 
                     {/* <Label color='teal'>5</Label> */}
-                  </Menu.Item>
-                  <Menu.Item
-                    name="inbox"
-                    active={activeItem === "eac-report"}
-                    onClick={() => handleItemClick("eac-report")}
-                    style={{
-                      backgroundColor:
-                        activeItem === "eac-report" ? "#000" : "",
-                    }}
-                  >
-                    <span style={{ color: "#fff" }}>EAC Report</span>
+//                  </Menu.Item>
+//                  <Menu.Item
+//                    name="inbox"
+//                    active={activeItem === "eac-report"}
+//                    onClick={() => handleItemClick("eac-report")}
+//                    style={{
+//                      backgroundColor:
+//                        activeItem === "eac-report" ? "#000" : "",
+//                    }}
+//                  >
+//                    <span style={{ color: "#fff" }}>EAC Report</span>
 
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
@@ -310,28 +310,28 @@ const Reports = (props) => {
                     completed={completed}
                   />
                 )}
-                {activeItem === "tb-report" && (
-                  <TbReport
-                    handleItemClick={handleItemClick}
-                    setCompleted={setCompleted}
-                    completed={completed}
-                  />
-                )}
-                {activeItem === "ncd-report" && (
-                  <NcdReport
-                    handleItemClick={handleItemClick}
-                    setCompleted={setCompleted}
-                    completed={completed}
-                  />
-                )}
-
-                {activeItem === "eac-report" && (
-                  <EACReport
-                    handleItemClick={handleItemClick}
-                    setCompleted={setCompleted}
-                    completed={completed}
-                  />
-                )}
+//                {activeItem === "tb-report" && (
+//                  <TbReport
+//                    handleItemClick={handleItemClick}
+//                    setCompleted={setCompleted}
+//                    completed={completed}
+//                  />
+//                )}
+//                {activeItem === "ncd-report" && (
+//                  <NcdReport
+//                    handleItemClick={handleItemClick}
+//                    setCompleted={setCompleted}
+//                    completed={completed}
+//                  />
+//                )}
+//
+//                {activeItem === "eac-report" && (
+//                  <EACReport
+//                    handleItemClick={handleItemClick}
+//                    setCompleted={setCompleted}
+//                    completed={completed}
+//                  />
+//                )}
                 {activeItem === "hts-report" && (
                   <HTSReport
                     handleItemClick={handleItemClick}

@@ -105,275 +105,308 @@ public class GenerateExcelDataHelper {
 		return result;
 	}
 
-	public static List<Map<Integer, Object>> fillTBReportDataMapper(@NonNull List<TBReportProjection> tbReportProjections, LocalDate end) {
-		List<Map<Integer, Object>> result = new ArrayList<>();
-		for (TBReportProjection tbReportProjection : tbReportProjections) {
-			if (tbReportProjection != null) {
-				Map<Integer, Object> map = new HashMap<>();
-				int index = 0;
-
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getState())));
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getLga())));
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getFacilityName())));
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getPersonUuid())));
-
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getSurname())));
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getFirstName())));
-				map.put(index++, tbReportProjection.getDateOfBirth());
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getAge())));
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getGender())));
-				map.put(index++, "");
-				map.put(index++, tbReportProjection.getArtStartDate());
-
-				map.put(index++, null);
-
-				map.put(index++, tbReportProjection.getTbIptScreening());
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbScreeningType())));
-
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbStatus())));
-				map.put(index++, "");
-				map.put(index++, tbReportProjection.getDateOfTbDiagnosticResultReceived());
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticTestType())));
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticResult())));
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentStartDate())));
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentType())));
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentOutcome())));
-				map.put(index++, tbReportProjection.getTbTreatmentCompletionDate());
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getEligibleForTPT())));
-				map.put(index++, tbReportProjection.getDateOfIptStart());
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getRegimenName())));
-				map.put(index++, tbReportProjection.getDateCompletedIpt());
-				map.put(index, tbReportProjection.getWeightAtStartTpt());
-
-				result.add(map);
-			}
-		}
-		Log.info("result: " + result.size()); // going to be one
-		return result;
-	}
-
-	public static List<Map<Integer, Object>> fillEACReportDataMapper(@NonNull List<EACReportProjection> eacReportProjections, LocalDate end) {
-		List<Map<Integer, Object>> result = new ArrayList<>();
-		for (EACReportProjection eacReportProjection : eacReportProjections) {
-			if (eacReportProjection != null) {
-				Map<Integer, Object> map = new HashMap<>();
-				int index = 0;
-
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getState())));
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getLga())));
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getLgaOfResidence())));
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getFacilityName())));
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getDatimId())));
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getPatientId())));
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getHospitalNumber())));
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getUniqueId())));
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getSex())));
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getTargetGroup())));
-				map.put(index++, eacReportProjection.getDateOfBirth());
-				map.put(index++, eacReportProjection.getArtStartDate());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getRegimenAtArtStart())));
-				map.put(index++, eacReportProjection.getDateOfStartOfRegimenBeforeUnsuppressedVLR());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getRegimenLineBeforeUnsuppression())));
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getRegimenBeforeUnsuppression())));
-				map.put(index++, eacReportProjection.getLastPickupDateBeforeUnsuppressedVLR());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMonthOfARVRefillOfLastPickupDateBeforeUnsuppressedVLR())));
-				map.put(index++, eacReportProjection.getDateOfVLSCOfUnsuppressedVLR());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMostRecentUnsuppressedVLR())));
-				map.put(index++, eacReportProjection.getDateOfUnsuppressedVLR());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getUnsuppressedVLRIndication())));
-
-				// map.put(index++, getStringValue(String.valueOf(eacReportProjection.getCurrentArtStatus())));
-				// map.put(index++, eacReportProjection.getDateOfCurrentArtStatus());
-
-				map.put(index++, eacReportProjection.getDateOfCommencementOfFirstEAC());
-				map.put(index++, eacReportProjection.getDateOfFirstEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfFirstEACSession())));
-
-				map.put(index++, eacReportProjection.getDateOfCommencementOfSecondEAC());
-				map.put(index++, eacReportProjection.getDateOfSecondEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfSecondEACSession())));
-
-				map.put(index++, eacReportProjection.getDateOfCommencementOfThirdEAC());
-				map.put(index++, eacReportProjection.getDateOfThirdEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfThirdEACSession())));
-
-				map.put(index++, eacReportProjection.getDateOfCommencementOfFourthEAC());
-				map.put(index++, eacReportProjection.getDateOfFourthEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfFourthEACSession())));
-
-				map.put(index++, eacReportProjection.getDateOfCommencementOfFifthEAC());
-				map.put(index++, eacReportProjection.getDateOfFifthEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfFifthEACSession())));
-
-				map.put(index++, eacReportProjection.getDateOfCommencementOfSixthEAC());
-				map.put(index++, eacReportProjection.getDateOfSixthEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfSixthEACSession())));
-
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getNumberOfEACSessionsCompleted())));
-				map.put(index++, eacReportProjection.getDateOfRepeatViralLoadPostEACSampleCollected());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getRepeatViralLoadResultPostEAC())));
-				map.put(index++, eacReportProjection.getDateOfRepeatViralLoadResultPostEACVL());
-
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getReferredToSwitchCommittee())));
-				map.put(index++, eacReportProjection.getDateReferredToSwitchCommitted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getEligibleForSwitch())));
-
-				map.put(index++, eacReportProjection.getDateOfCommencementOfSeventhPostSwitchCommitteeEAC());
-				map.put(index++, eacReportProjection.getDateOfSeventhPostSwitchCommitteeEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfSeventhPostSwitchCommitteeEACSession())));
-
-				map.put(index++, eacReportProjection.getDateOfCommencementOfEighthPostSwitchCommitteeEAC());
-				map.put(index++, eacReportProjection.getDateOfEighthPostSwitchCommitteeEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfEighthPostSwitchCommitteeEACSession())));
-
-				map.put(index++, eacReportProjection.getDateOfCommencementOfNinthPostSwitchCommitteeEAC());
-				map.put(index++, eacReportProjection.getDateOfNinthPostSwitchCommitteeEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfNinthPostSwitchCommitteeEACSession())));
-
-				map.put(index++, eacReportProjection.getDateOfRepeatViralLoadPostSwitchEACSampleCollected());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getRepeatViralLoadResultPostSwitchEAC())));
-				map.put(index++, eacReportProjection.getDateOfRepeatViralLoadResultPostSwitchEACVL());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfPostSwitchEACSession())));
-
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getReferredToSwitchCommitteePostSwitchEAC())));
-				map.put(index++, eacReportProjection.getDateReferredToSwitchCommittedPostSwitchEAC());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getEligibleForSwitchPostSwitchEAC())));
-
-				map.put(index++, eacReportProjection.getDateSwitched());
-				map.put(index++, eacReportProjection.getStartDateOfSwitchedRegimen());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getSwitchedARTRegimen())));
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getSwitchedARTRegimenLine())));
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getSwitchedARTRegimen())));
-
-				map.put(index, getStringValue(String.valueOf(eacReportProjection.getCaseManager())));
-
-
-				result.add(map);
-			}
-		}
-		Log.info("result: " + result.size()); // going to be one
-		return result;
-	}
-
-	public static List<Map<Integer, Object>> fillNCDReportDataMapper(@NonNull List<NCDReportProjection> ncdReportProjections, LocalDate end) {
-		List<Map<Integer, Object>> result = new ArrayList<>();
-		for (NCDReportProjection ncdReportProjection : ncdReportProjections) {
-			if (ncdReportProjection != null) {
-				Map<Integer, Object> map = new HashMap<>();
-				int index = 0;
-
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getState())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getLga())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getDatimId())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getFacilityName())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getPatientId())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getHospitalNumber())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getUniqueId())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getSurname())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getOtherName())));
-				map.put(index++, ncdReportProjection.getDateOfBirth());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getAge())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getSex())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getMaritalStatus())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getEducation())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getOccupation())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getStateOfResidence())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getLgaOfResidence())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getAddress())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getPhoneNumber())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getPregnancyStatus())));
-				map.put(index++, ncdReportProjection.getArtStartDate());
-
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getRegimenLineAtStart())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getReasonsLtfuIit())));
-
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentArtRegimen())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentRegimenLine())));
-
-				map.put(index++, ncdReportProjection.getDateRegimenSwitch());
-				map.put(index++, ncdReportProjection.getLastPickUpDate());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getMonthsOfArvRefill())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getStatus())));
-				map.put(index++, ncdReportProjection.getStatusDate());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getEnrollmentSetting())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getDsdModel())));
-
-				map.put(index++, ncdReportProjection.getDatePrevHypertensive());
-				map.put(index++, ncdReportProjection.getDateNewlyHypertensive());
-
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineWaistCircumference())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineWeight())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineHeight())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineBmi())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineSystolic())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineDiastolic())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineFastingBloodSugar())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineRandomBloodSugar())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineBloodTotalCholesterol())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineHdl())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineLdl())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineSodium())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselinePotassium())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineUrea())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineCreatinine())));
-
-				map.put(index++, ncdReportProjection.getHtnStartDate());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getHtnStartRegimen())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentHtnRegimen())));
-				map.put(index++, ncdReportProjection.getLastHtnPickUpDate());
-
-				// Months of HTN Medication Refill missing
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getMonthsOfHTNRefill())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentHtnStatus())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentHtnRegimen())));
-				map.put(index++, ncdReportProjection.getDateCurrentHtnStatus());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getReasonsLtfuIit())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBodyWeight())));
-				map.put(index++, ncdReportProjection.getCurrentWeightDate());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getHeight())));
-				map.put(index++, ncdReportProjection.getCurrentHeightDate());
-
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentBmi())));
-				map.put(index++, ncdReportProjection.getCurrentBmiDate());
-
-				map.put(index++, ncdReportProjection.getCurrentWaistCircumferenceDate());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getWaistHipRatio())));
-				map.put(index++, ncdReportProjection.getWaistHipRatioDate());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getSystolic())));
-				map.put(index++, ncdReportProjection.getCurrentSystolicDate());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getDiastolic())));
-				map.put(index++, ncdReportProjection.getCurrentDiastolicDate());
-
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentFastingBloodsSugar())));
-				map.put(index++, ncdReportProjection.getDateCurrentFastingBloodSugar());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentRandomBloodSugar())));
-				map.put(index++, ncdReportProjection.getDateCurrentRandomBloodSugar());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentBloodTotalCholesterol())));
-				map.put(index++, ncdReportProjection.getDateCurrentBloodTotalCholesterol());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentHdl())));
-				map.put(index++, ncdReportProjection.getDateCurrentHdl());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentLdl())));
-				map.put(index++, ncdReportProjection.getDateCurrentLdl());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentSodium())));
-				map.put(index++, ncdReportProjection.getDateCurrentSodium());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentPotassium())));
-				map.put(index++, ncdReportProjection.getDateCurrentPotassium());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentUrea())));
-				map.put(index++, ncdReportProjection.getDateCurrentUrea());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentCreatinine())));
-				map.put(index++, ncdReportProjection.getDateCurrentCreatinine());
-
-				map.put(index++, ncdReportProjection.getDateOfViralLoadSample());
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentViralLoad())));
-				map.put(index++, ncdReportProjection.getDateOfCurrentViralLoad());
-				map.put(index, getStringValue(String.valueOf(ncdReportProjection.getViralLoadIndication())));
-
-				result.add(map);
-			}
-		}
-		Log.info("result: " + result.size()); // going to be one
-		return result;
-	}
+//	public static List<Map<Integer, Object>> fillTBReportDataMapper(@NonNull List<TBReportProjection> tbReportProjections, LocalDate end) {
+//
+//		List<Map<Integer, Object>> result = new ArrayList<>();
+//
+//		for (TBReportProjection tbReportProjection : tbReportProjections) {
+//
+//			if (tbReportProjection != null) {
+//
+//				Map<Integer, Object> map = new HashMap<>();
+//
+//				int index = 0;
+//
+//				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getState())));
+//
+//				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getLga())));
+//
+//				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getFacilityName())));
+//
+//				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getPersonUuid())));
+//
+//				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getSurname())));
+//
+//				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getFirstName())));
+//
+//				map.put(index++, tbReportProjection.getDateOfBirth());
+//
+//				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getAge())));
+//
+//				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getGender())));
+//
+//				map.put(index++, "");
+//
+//				map.put(index++, tbReportProjection.getArtStartDate());
+//
+//				map.put(index++, null);
+//
+//				map.put(index++, tbReportProjection.getTbIptScreening());
+//
+//				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbScreeningType())));
+//
+//				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbStatus())));
+//
+//				map.put(index++, "");
+//
+//				map.put(index++, tbReportProjection.getDateOfTbDiagnosticResultReceived());
+//
+//				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticTestType())));
+//
+//				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticResult())));
+//
+//				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentStartDate())));
+//
+//				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentType())));
+//
+//				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentOutcome())));
+//
+//				map.put(index++, tbReportProjection.getTbTreatmentCompletionDate());
+//
+//				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getEligibleForTPT())));
+//
+//				map.put(index++, tbReportProjection.getDateOfIptStart());
+//
+//				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getRegimenName())));
+//
+//				map.put(index++, tbReportProjection.getDateCompletedIpt());
+//
+//				map.put(index, tbReportProjection.getWeightAtStartTpt());
+//
+//				result.add(map);
+//
+//			}
+//
+//		}
+//
+//		Log.info("result: " + result.size()); // going to be one
+//
+//		return result;
+//
+//	}
+//
+//	public static List<Map<Integer, Object>> fillEACReportDataMapper(@NonNull List<EACReportProjection> eacReportProjections, LocalDate end) {
+//		List<Map<Integer, Object>> result = new ArrayList<>();
+//		for (EACReportProjection eacReportProjection : eacReportProjections) {
+//			if (eacReportProjection != null) {
+//				Map<Integer, Object> map = new HashMap<>();
+//				int index = 0;
+//
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getState())));
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getLga())));
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getLgaOfResidence())));
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getFacilityName())));
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getDatimId())));
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getPatientId())));
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getHospitalNumber())));
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getUniqueId())));
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getSex())));
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getTargetGroup())));
+//				map.put(index++, eacReportProjection.getDateOfBirth());
+//				map.put(index++, eacReportProjection.getArtStartDate());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getRegimenAtArtStart())));
+//				map.put(index++, eacReportProjection.getDateOfStartOfRegimenBeforeUnsuppressedVLR());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getRegimenLineBeforeUnsuppression())));
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getRegimenBeforeUnsuppression())));
+//				map.put(index++, eacReportProjection.getLastPickupDateBeforeUnsuppressedVLR());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMonthOfARVRefillOfLastPickupDateBeforeUnsuppressedVLR())));
+//				map.put(index++, eacReportProjection.getDateOfVLSCOfUnsuppressedVLR());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMostRecentUnsuppressedVLR())));
+//				map.put(index++, eacReportProjection.getDateOfUnsuppressedVLR());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getUnsuppressedVLRIndication())));
+//
+//				// map.put(index++, getStringValue(String.valueOf(eacReportProjection.getCurrentArtStatus())));
+//				// map.put(index++, eacReportProjection.getDateOfCurrentArtStatus());
+//
+//				map.put(index++, eacReportProjection.getDateOfCommencementOfFirstEAC());
+//				map.put(index++, eacReportProjection.getDateOfFirstEACSessionCompleted());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfFirstEACSession())));
+//
+//				map.put(index++, eacReportProjection.getDateOfCommencementOfSecondEAC());
+//				map.put(index++, eacReportProjection.getDateOfSecondEACSessionCompleted());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfSecondEACSession())));
+//
+//				map.put(index++, eacReportProjection.getDateOfCommencementOfThirdEAC());
+//				map.put(index++, eacReportProjection.getDateOfThirdEACSessionCompleted());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfThirdEACSession())));
+//
+//				map.put(index++, eacReportProjection.getDateOfCommencementOfFourthEAC());
+//				map.put(index++, eacReportProjection.getDateOfFourthEACSessionCompleted());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfFourthEACSession())));
+//
+//				map.put(index++, eacReportProjection.getDateOfCommencementOfFifthEAC());
+//				map.put(index++, eacReportProjection.getDateOfFifthEACSessionCompleted());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfFifthEACSession())));
+//
+//				map.put(index++, eacReportProjection.getDateOfCommencementOfSixthEAC());
+//				map.put(index++, eacReportProjection.getDateOfSixthEACSessionCompleted());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfSixthEACSession())));
+//
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getNumberOfEACSessionsCompleted())));
+//				map.put(index++, eacReportProjection.getDateOfRepeatViralLoadPostEACSampleCollected());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getRepeatViralLoadResultPostEAC())));
+//				map.put(index++, eacReportProjection.getDateOfRepeatViralLoadResultPostEACVL());
+//
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getReferredToSwitchCommittee())));
+//				map.put(index++, eacReportProjection.getDateReferredToSwitchCommitted());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getEligibleForSwitch())));
+//
+//				map.put(index++, eacReportProjection.getDateOfCommencementOfSeventhPostSwitchCommitteeEAC());
+//				map.put(index++, eacReportProjection.getDateOfSeventhPostSwitchCommitteeEACSessionCompleted());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfSeventhPostSwitchCommitteeEACSession())));
+//
+//				map.put(index++, eacReportProjection.getDateOfCommencementOfEighthPostSwitchCommitteeEAC());
+//				map.put(index++, eacReportProjection.getDateOfEighthPostSwitchCommitteeEACSessionCompleted());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfEighthPostSwitchCommitteeEACSession())));
+//
+//				map.put(index++, eacReportProjection.getDateOfCommencementOfNinthPostSwitchCommitteeEAC());
+//				map.put(index++, eacReportProjection.getDateOfNinthPostSwitchCommitteeEACSessionCompleted());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfNinthPostSwitchCommitteeEACSession())));
+//
+//				map.put(index++, eacReportProjection.getDateOfRepeatViralLoadPostSwitchEACSampleCollected());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getRepeatViralLoadResultPostSwitchEAC())));
+//				map.put(index++, eacReportProjection.getDateOfRepeatViralLoadResultPostSwitchEACVL());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfPostSwitchEACSession())));
+//
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getReferredToSwitchCommitteePostSwitchEAC())));
+//				map.put(index++, eacReportProjection.getDateReferredToSwitchCommittedPostSwitchEAC());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getEligibleForSwitchPostSwitchEAC())));
+//
+//				map.put(index++, eacReportProjection.getDateSwitched());
+//				map.put(index++, eacReportProjection.getStartDateOfSwitchedRegimen());
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getSwitchedARTRegimen())));
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getSwitchedARTRegimenLine())));
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getSwitchedARTRegimen())));
+//
+//				map.put(index, getStringValue(String.valueOf(eacReportProjection.getCaseManager())));
+//
+//
+//				result.add(map);
+//			}
+//		}
+//		Log.info("result: " + result.size()); // going to be one
+//		return result;
+//	}
+//
+//	public static List<Map<Integer, Object>> fillNCDReportDataMapper(@NonNull List<NCDReportProjection> ncdReportProjections, LocalDate end) {
+//		List<Map<Integer, Object>> result = new ArrayList<>();
+//		for (NCDReportProjection ncdReportProjection : ncdReportProjections) {
+//			if (ncdReportProjection != null) {
+//				Map<Integer, Object> map = new HashMap<>();
+//				int index = 0;
+//
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getState())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getLga())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getDatimId())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getFacilityName())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getPatientId())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getHospitalNumber())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getUniqueId())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getSurname())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getOtherName())));
+//				map.put(index++, ncdReportProjection.getDateOfBirth());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getAge())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getSex())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getMaritalStatus())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getEducation())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getOccupation())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getStateOfResidence())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getLgaOfResidence())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getAddress())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getPhoneNumber())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getPregnancyStatus())));
+//				map.put(index++, ncdReportProjection.getArtStartDate());
+//
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getRegimenLineAtStart())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getReasonsLtfuIit())));
+//
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentArtRegimen())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentRegimenLine())));
+//
+//				map.put(index++, ncdReportProjection.getDateRegimenSwitch());
+//				map.put(index++, ncdReportProjection.getLastPickUpDate());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getMonthsOfArvRefill())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getStatus())));
+//				map.put(index++, ncdReportProjection.getStatusDate());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getEnrollmentSetting())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getDsdModel())));
+//
+//				map.put(index++, ncdReportProjection.getDatePrevHypertensive());
+//				map.put(index++, ncdReportProjection.getDateNewlyHypertensive());
+//
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineWaistCircumference())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineWeight())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineHeight())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineBmi())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineSystolic())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineDiastolic())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineFastingBloodSugar())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineRandomBloodSugar())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineBloodTotalCholesterol())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineHdl())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineLdl())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineSodium())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselinePotassium())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineUrea())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBaselineCreatinine())));
+//
+//				map.put(index++, ncdReportProjection.getHtnStartDate());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getHtnStartRegimen())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentHtnRegimen())));
+//				map.put(index++, ncdReportProjection.getLastHtnPickUpDate());
+//
+//				// Months of HTN Medication Refill missing
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getMonthsOfHTNRefill())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentHtnStatus())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentHtnRegimen())));
+//				map.put(index++, ncdReportProjection.getDateCurrentHtnStatus());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getReasonsLtfuIit())));
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBodyWeight())));
+//				map.put(index++, ncdReportProjection.getCurrentWeightDate());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getHeight())));
+//				map.put(index++, ncdReportProjection.getCurrentHeightDate());
+//
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentBmi())));
+//				map.put(index++, ncdReportProjection.getCurrentBmiDate());
+//
+//				map.put(index++, ncdReportProjection.getCurrentWaistCircumferenceDate());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getWaistHipRatio())));
+//				map.put(index++, ncdReportProjection.getWaistHipRatioDate());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getSystolic())));
+//				map.put(index++, ncdReportProjection.getCurrentSystolicDate());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getDiastolic())));
+//				map.put(index++, ncdReportProjection.getCurrentDiastolicDate());
+//
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentFastingBloodsSugar())));
+//				map.put(index++, ncdReportProjection.getDateCurrentFastingBloodSugar());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentRandomBloodSugar())));
+//				map.put(index++, ncdReportProjection.getDateCurrentRandomBloodSugar());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentBloodTotalCholesterol())));
+//				map.put(index++, ncdReportProjection.getDateCurrentBloodTotalCholesterol());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentHdl())));
+//				map.put(index++, ncdReportProjection.getDateCurrentHdl());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentLdl())));
+//				map.put(index++, ncdReportProjection.getDateCurrentLdl());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentSodium())));
+//				map.put(index++, ncdReportProjection.getDateCurrentSodium());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentPotassium())));
+//				map.put(index++, ncdReportProjection.getDateCurrentPotassium());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentUrea())));
+//				map.put(index++, ncdReportProjection.getDateCurrentUrea());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentCreatinine())));
+//				map.put(index++, ncdReportProjection.getDateCurrentCreatinine());
+//
+//				map.put(index++, ncdReportProjection.getDateOfViralLoadSample());
+//				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentViralLoad())));
+//				map.put(index++, ncdReportProjection.getDateOfCurrentViralLoad());
+//				map.put(index, getStringValue(String.valueOf(ncdReportProjection.getViralLoadIndication())));
+//
+//				result.add(map);
+//			}
+//		}
+//		Log.info("result: " + result.size()); // going to be one
+//		return result;
+//	}
 
 	public  List<Map<Integer, Object>> fillRadetDataMapper(@NonNull List<RADETDTOProjection> reportDtos, LocalDate endDate) {
 		List<Map<Integer, Object>> result = new ArrayList<>();

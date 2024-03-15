@@ -428,7 +428,8 @@ query:
     prep.sex AS "Sex",prep.targetgroup AS "Target Group", prep.age AS "Age", prep.dateofbirth AS "Date Of Birth (yyyy-mm-dd)",
     prep.phone AS "Phone Number", prep.maritalstatus AS "Marital Status", prep.address AS "Client Address",
     prep.residentiallga AS "LGA of Residence", prep.residentialstate AS "State Of Residence",
-    prep.education AS "Education", prep.occupation AS "Occupation",
+    prep.education AS "Education", prep.occupation AS "Occupation", prep.familyPlanning as "Family Planning",
+    prep.dateOfFamilyPlanning as "Date Of Family Planning (yyyy-mm-dd)",
     prep.dateofregistration AS "Date Of Registration (yyyy-mm-dd)", prep.prepcommencementdate AS "Date Of Commencement (yyyy-mm-dd)",
     prep.baselineregimen AS "Baseline Regimen", prep.prepType AS "Prep Type", prep.prepdistributionsetting AS "Prep Distribution Setting",
     prep.baselinesystolicbp AS "Baseline Systolic bp", prep.baselinediastolicbp AS "Baseline Diastolic bp", prep.baselineweight AS "Baseline Weight (kg)",
@@ -440,12 +441,12 @@ query:
     prep.currentDiastolicBP AS "Current Diastolic bp", prep.currentWeight AS "Current Weight (kg)", prep.currentHeight AS "Current Height (cm)",
     prep.currentHivStatus AS "Current HIV Status", prep.DateOfCurrentHIVStatus AS "Date of Current HIV Status (yyyy-mm-dd)",
     prep.currentUrinalysis AS "Current Urinalysis", prep.currentUrinalysisDate AS "Date of Current Urinalysis",
-    prep.pregnancyStatus AS "Pregnancy Status", prep.InterruptionReason AS "Reasons for discontinuation/Stopped",
+    prep.pregnancyStatus AS "Pregnancy Status", prep.InterruptionType as "PrEP Discontinuation Type", prep.InterruptionReason AS "Reasons for discontinuation/Stopped",
     prep.InterruptionDate AS "Date of Discontinuation/Stopped", prep.hivEnrollmentDate AS "Date Of HIV Enrollment (yyyy-mm-dd)"
     FROM (
     SELECT DISTINCT ON (p.uuid)p.uuid AS PersonUuid, p.id, p.uuid,p.hospital_number as hospitalNumber,
     INITCAP(p.surname) AS surname, INITCAP(p.first_name) as firstName,
-    CASE WHEN eli_hiv_result ILIKE '%neg%' THEN NULL ELSE he.date_started END AS hivEnrollmentDate,
+    he.date_of_registration AS hivEnrollmentDate,
     EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) as age,
     p.other_name as otherName, p.sex as sex, p.date_of_birth as dateOfBirth,
     p.date_of_registration as dateOfRegistration, p.marital_status->>'display' as maritalStatus,
@@ -456,22 +457,21 @@ query:
     baseline_reg.regimen AS baselineRegimen,
     (select display from base_application_codeset where code = baseline_reg.prep_type) as prepType,
     (select display from base_application_codeset where code = baseline_pc.prep_distribution_setting) AS prepDistributionSetting,
-    baseline_pc.systolic AS baselineSystolicBP,
-    baseline_pc.diastolic AS baselineDiastolicBP,
+    baseline_bp.systolic AS baselineSystolicBP,
+    baseline_bp.diastolic AS baselineDiastolicBP,
     baseline_pc.weight AS baselineWeight,
     baseline_pc.height AS baselineHeight,
     (CASE WHEN tg.display IS NULL THEN null ELSE tg.display END) AS targetGroup,
     baseline_pc.encounter_date AS prepCommencementDate,
-    baseline_pc.urinalysis->>'result' AS baseLineUrinalysis,
-    CAST(baseline_pc.urinalysis->>'testDate' AS DATE) AS baseLineUrinalysisDate,
-    (CASE WHEN baseline_creatinine.other_tests_done->>'name'='Creatinine'
-    THEN baseline_creatinine.other_tests_done->>'result' ELSE NULL END) AS baseLineCreatinine,
-    (CASE WHEN baseline_creatinine.other_tests_done->>'name'='Creatinine'
-    THEN baseline_creatinine.other_tests_done->>'testDate' ELSE NULL END) AS baseLineCreatinineTestDate,
+    baseline_urinalysis.result AS baseLineUrinalysis,
+    baseline_urinalysis.test_date AS baseLineUrinalysisDate,
+    baseline_creatinine.other_test_result AS baseLineCreatinine,
+    baseline_creatinine.other_test_date AS baseLineCreatinineTestDate,
     (CASE WHEN baseline_pc.hepatitis->>'result' LIKE 'Hepatitis B%'
     THEN baseline_pc.hepatitis->>'result' ELSE NULL END) AS baseLineHepatitisB,
     (CASE WHEN baseline_pc.hepatitis->>'result' LIKE 'Hepatitis C%'
     THEN baseline_pc.hepatitis->>'result' ELSE NULL END) AS baseLineHepatitisC,
+    (select display from base_application_codeset where code = current_pi.interruption_type) as InterruptionType,
     current_pi.reason_stopped AS InterruptionReason,
     current_pi.interruption_date AS InterruptionDate,
     (CASE WHEN baseline_hiv_status.display IS NULL AND base_eli_test.base_eli_hiv_result IS NOT NULL
@@ -486,6 +486,8 @@ query:
     current_pc.weight AS currentWeight,
     current_pc.height AS currentHeight,
     current_pc.urinalysis->>'result' AS currentUrinalysis,
+    (SELECT display from base_application_codeset where code = current_pc.family_planning) AS familyPlanning,
+    current_pc.date_of_family_planning AS dateOfFamilyPlanning,
     CAST(current_pc.urinalysis->>'testDate' AS DATE) AS currentUrinalysisDate,
     (CASE WHEN current_hiv_status.display IS NULL AND eli_hiv_result IS NOT NULL THEN eli_hiv_result
     WHEN current_hiv_status.display IS NOT NULL THEN REPLACE(current_hiv_status.display, 'HIV ', '')
@@ -537,20 +539,32 @@ query:
     INNER JOIN (SELECT DISTINCT MAX(encounter_date)encounter_date, person_uuid FROM prep_clinic
     GROUP BY person_uuid)max ON max.encounter_date=pc.encounter_date
     AND max.person_uuid=pc.person_uuid WHERE date_prep_start IS NULL)current_pc ON current_pc.person_uuid=p.uuid
-    LEFT JOIN (SELECT DISTINCT pi.* FROM prep_interruption pi
-    LEFT JOIN (SELECT DISTINCT MAX(encounter_date)encounter_date, person_uuid FROM prep_interruption
-    GROUP BY person_uuid)max ON max.encounter_date=pi.encounter_date
-    AND max.person_uuid=pi.person_uuid)current_pi ON current_pi.person_uuid=p.uuid
+    LEFT JOIN (SELECT DISTINCT pi.* FROM prep_interruption pi)current_pi ON current_pi.person_uuid=p.uuid
     LEFT JOIN prep_regimen current_reg ON current_reg.id = current_pc.regimen_id
     LEFT JOIN base_application_codeset current_hiv_status ON current_hiv_status.code = current_pc.hiv_test_result
     LEFT JOIN (SELECT pc.* FROM prep_clinic pc
     INNER JOIN (SELECT DISTINCT MIN(encounter_date)encounter_date, person_uuid FROM prep_clinic
     GROUP BY person_uuid)min ON min.encounter_date=pc.encounter_date
     AND min.person_uuid=pc.person_uuid WHERE date_prep_start IS NOT NULL)baseline_pc ON baseline_pc.person_uuid=p.uuid
-    LEFT JOIN (SELECT pc.* FROM prep_clinic pc
+    LEFT JOIN (SELECT
+    pc.systolic, pc.diastolic, min.person_uuid FROM prep_clinic pc
     INNER JOIN (SELECT DISTINCT MIN(encounter_date)encounter_date, person_uuid FROM prep_clinic
     GROUP BY person_uuid)min ON min.person_uuid=pc.person_uuid
-    WHERE pc.other_tests_done->>'name' = 'Creatinine' )baseline_creatinine ON baseline_creatinine.person_uuid=p.uuid
+    WHERE pc.systolic IS NOT NULL and pc.diastolic IS NOT NULL)baseline_bp ON baseline_bp.person_uuid=p.uuid
+    LEFT JOIN (SELECT
+    pc.urinalysis ->> 'result' as result, pc.urinalysis->>'testDate' as test_date, min.person_uuid
+    FROM prep_clinic pc JOIN (SELECT DISTINCT MIN(date(urinalysis->> 'testDate')) test_date, person_uuid
+    FROM prep_clinic where urinalysis is not null
+    GROUP BY person_uuid)min ON min.person_uuid=pc.person_uuid
+    WHERE pc.urinalysis IS NOT NULL)baseline_urinalysis ON baseline_urinalysis.person_uuid=p.uuid
+    LEFT JOIN (SELECT
+    arr.object->>'result' other_test_result,
+    arr.object->>'name' as other_test_name,
+    arr.object->>'testDate' as other_test_date, pc.person_uuid FROM prep_clinic pc
+    INNER JOIN (SELECT DISTINCT MIN(encounter_date)encounter_date, person_uuid FROM prep_clinic
+    GROUP BY person_uuid)min ON min.person_uuid=pc.person_uuid,
+    jsonb_array_elements(other_tests_done) with ordinality arr(object, position)
+    WHERE pc.other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_CREATININE')baseline_creatinine ON baseline_creatinine.person_uuid=p.uuid
     LEFT JOIN prep_regimen baseline_reg ON baseline_reg.id = baseline_pc.regimen_id
     LEFT JOIN base_application_codeset baseline_hiv_status ON baseline_hiv_status.code=baseline_pc.hiv_test_result
     LEFT JOIN hiv_enrollment he ON he.person_uuid = p.uuid
