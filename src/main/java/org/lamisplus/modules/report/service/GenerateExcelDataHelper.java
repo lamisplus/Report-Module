@@ -559,7 +559,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getDateOfCurrentDSD());
 				map.put(index++, radetReportDto.getCurrentDSDModel());
 				map.put(index++, radetReportDto.getDateReturnToSite());
-				map.put(index++, null);
+//				map.put(index++, null);
 
 				//chronic care
 				map.put(index++, null);

@@ -100,7 +100,7 @@ public interface RADETDTOProjection {
 	// LocalDate getDateSampleCollected();
 	String getRepeatViralLoadResult();
 	String getTbStatus();
-	String getTbStatusOutCome();
+//	String getTbStatusOutCome();
 	LocalDate getDateOfTbScreened();
 	LocalDate getDateOfCurrentRegimen();
 	LocalDate getDateOfIptStart();
