@@ -663,8 +663,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "where d.archived = 0 and d.date_devolved between  ?2 and ?3) d1 where row = 1 " +
             " ), " +
             "dsd2 as ( " +
-            "select person_uuid as person_uuid_dsd_2, dateOfCurrentDSD, currentDSDModel " +
-            "from (select d.person_uuid, d.date_devolved as dateOfCurrentDSD, bmt.display as currentDSDModel, " +
+            "select person_uuid as person_uuid_dsd_2, dateOfCurrentDSD, currentDSDModel, dateReturnToSite " +
+            "from (select d.person_uuid, d.date_devolved as dateOfCurrentDSD, bmt.display as currentDSDModel, d.date_return_to_site AS dateReturnToSite, " +
             "       ROW_NUMBER() OVER (PARTITION BY d.person_uuid ORDER BY d.date_devolved DESC ) AS row from dsd_devolvement d " +
             "    left join base_application_codeset bmt on bmt.code = d.dsd_type " +
             "where d.archived = 0 and d.date_devolved between  ?2 and ?3) d2 where row = 1 " +
@@ -1208,7 +1208,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " WHERE cmp.row_number=1 AND cm.facility_id=?1), " +
             "client_verification AS (\n" +
             "\t SELECT * FROM (\n" +
-            "select person_uuid,  data->'attempt'->0->>'outcome' AS clientVerificationStatus,\n" +
+            "select person_uuid,  data->'attempt'->0->>'outcome' AS clientVerificationOutCome, data->'attempt'->0->>'outcome' AS clientVerificationStatus,\n" +
             "CAST (data->'attempt'->0->>'dateOfAttempt' AS DATE) AS dateOfOutcome,\n" +
             "ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) DESC)\n" +
             "from public.hiv_observation where type = 'Client Verification' \n" +
@@ -1331,6 +1331,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "   )AS DATE) AS currentStatusDate,\n" +
 //            "  -- client verification column\n" +
             "       cvl.clientVerificationStatus, "+
+            "       cvl.clientVerificationOutCome, " +
             "           (\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN FALSE\n" +
