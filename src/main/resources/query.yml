@@ -106,21 +106,7 @@ query:
     GROUP BY person_uuid, count, replace_date
     ) AS second_recapture ON result.uuid = second_recapture.person_uuid
   pmtct-hts-query-name: pmtct-hts
-  pmtct-hts-query:  select pmtct.state as "State", pmtct.lga as "LGA", pmtct.facilityName AS "Facility",
-    pmtct.uuid AS "Patient ID", pmtct.anc_no AS "ANC number", pmtct.hospitalnumber AS "Mother''s Hospital Num",
-    pmtct.dateofbirth AS "Mother''s Date of Birth", pmtct.maritalstatus AS "Marital Status",
-    pmtct.anc_setting_anc AS "ANC Setting ( Facility,Community)",
-    pmtct.first_anc_date AS "Date of Index ANC Registration", pmtct.lmp AS "LMP Date",
-    pmtct.gaweeks_anc AS "Gestational Age (Weeks) @ First ANC visit", pmtct.gravida_anc AS "Gravida",
-    pmtct.parity_anc AS "Parity", pmtct.entry_point AS "Point of entry",
-    pmtct.hbstatus_delivery as "Hepatitis B Test Result",
-    pmtct.tested_syphilis_anc AS "Date tested for Sypillis",
-    pmtct.test_result_syphilis_anc AS "Syphillis Test Result", pmtct.acceptedHIVTesting,
-    pmtct.dateTestedHivPositive AS "Date tested for HIV", pmtct.hivTestResult AS "HIV Test result",
-    pmtct.hivRestested AS "Testing date", pmtct.hiv_status AS "Result",
-    pmtct.hivenrollmentDate AS "Mother''s ART Start Date", pmtct.date_of_registration AS "PCV/HB @ANC registration"
-    from (
-    SELECT DISTINCT ON (p.uuid)p.uuid AS PersonUuid,
+  pmtct-hts-query:  SELECT DISTINCT ON (p.uuid)p.uuid AS PersonUuid,
     facility_state.name as state,
     facility_lga.name as lga,
     facility.name as facilityName,
@@ -131,13 +117,13 @@ query:
     p.date_of_birth as dateOfBirth,
     EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) as age,
     p.marital_status->>'display' as maritalStatus,
-    anc.anc_setting_anc,
+    bac.display AS anc_setting_anc,
     anc.first_anc_date,
     pmtctenroll.lmp AS lmp,
     anc.gaweeks_anc,
     anc.gravida_anc,
     anc.parity_anc,
-    pmtctenroll.entry_point,
+    bacc.display AS entry_point,
     delivery.hbstatus_delivery,
     anc.tested_syphilis_anc,
     anc.test_result_syphilis_anc ,
@@ -200,12 +186,14 @@ query:
     ) AS delivery ON p.uuid = delivery.person_uuid_delivery
     LEFT JOIN pmtct_delivery panc ON p.uuid = panc.person_uuid AND panc.created_date = delivery.max_created_date_delivery
     LEFT JOIN base_organisation_unit facility ON facility.id=p.facility_id
+    LEFT JOIN base_application_codeset bac ON bac.code = anc.anc_setting_anc
     LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id=facility.parent_organisation_unit_id
     LEFT JOIN base_organisation_unit facility_state ON facility_state.id=facility_lga.parent_organisation_unit_id
     LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)
     LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)
     LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=p.facility_id AND boui.name='DATIM_ID'
     INNER JOIN pmtct_enrollment pmtctenroll ON pmtctenroll.person_uuid = p.uuid
+    LEFT JOIN base_application_codeset bacc ON bacc.code = pmtctenroll.entry_point
     LEFT JOIN hiv_enrollment he ON he.person_uuid = p.uuid
     WHERE p.archived=0 and p.sex='Female'
     AND p.facility_id=%d AND p.date_of_registration
