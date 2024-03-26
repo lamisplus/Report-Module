@@ -128,11 +128,25 @@ public class TBReportQuery {
             "    select person_uuid, date_of_ipt_start, regimen_name from tpt where rnk = 1 " +
             "), " +
             "ipt_c as ( " +
-            "    select * from (select hap.person_uuid, TO_DATE(NULLIF(NULLIF(TRIM(hap.ipt->>'dateCompleted'), ''), 'null'), 'YYYY-MM-DD') AS date_completed_ipt, " +
-            "           COALESCE(NULLIF(CAST(hap.ipt->>'completionStatus' AS text), ''), '') AS ipt_completion_status " +
-            "    from hiv_art_pharmacy hap where hap.archived = 0 and (ipt->>'dateCompleted' IS NOT NULL or ipt->>'dateCompleted' != '')) as t " +
-            "             where date_completed_ipt is not null " +
-            ")," +
+            "    with ipt_c as ( " +
+            "    select person_uuid, date_completed as iptCompletionDate, iptCompletionStatus from (select person_uuid, cast(ipt->>'dateCompleted' as date) as date_completed, " +
+            "    COALESCE(NULLIF(CAST(ipt->>'completionStatus' AS text), ''), '') AS iptCompletionStatus, " +
+            "    row_number () over (partition by person_uuid order by cast(ipt->>'dateCompleted' as  date) desc) as rnk " +
+            "    from hiv_art_pharmacy where cast(ipt->>'dateCompleted' as  date) is not null " +
+            "    and archived = 0) ic where ic.rnk = 1 " +
+            "    ), " +
+            "    ipt_c_cs as ( " +
+            "    select person_uuid, iptCompletionSCS, iptCompletionDSC from " +
+            "    (select person_uuid, data->'tptMonitoring'->>'outComeOfIpt' as iptCompletionSCS, " +
+            "    CAST(NULLIF(data->'tptMonitoring'->>'date', '') AS date) as iptCompletionDSC, " +
+            "    ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY CAST(NULLIF(data->'tptMonitoring'->>'date', '') AS date) DESC) AS ipt_c_sc_rnk " +
+            "    from hiv_observation where type = 'Chronic Care' and archived = 0 and CAST(NULLIF(data->'tptMonitoring'->>'date', '') AS date) is not null) " +
+            "    as ipt_ccs where ipt_c_sc_rnk = 1 " +
+            "    ) " +
+            "    select ipt_c.person_uuid as person_uuid, coalesce(ipt_c_cs.iptCompletionDSC, ipt_c.iptCompletionDate) as dateCompletedTpt, " +
+            "    coalesce(ipt_c_cs.iptCompletionSCS, ipt_c.iptCompletionStatus) as iptCompletionStatus " +
+            "    from ipt_c " +
+            "    left join ipt_c_cs on ipt_c.person_uuid = ipt_c_cs.person_uuid ), " +
             "weight as (\n" +
             "    select * from (select CAST(ho.data -> 'tbIptScreening' ->> 'weightAtStartTPT' AS text) AS weight_at_start_tpt, ho.person_uuid\n" +
             "                   from hiv_observation ho\n" +
@@ -157,8 +171,8 @@ public class TBReportQuery {
             "    current_tb_result.date_of_tb_diagnostic_result_received AS dateOfTbDiagnosticResultReceived, " +
             "    current_tb_result.tb_diagnostic_test_type AS tbDiagnosticTestType, " +
             "    ipt_start.date_of_ipt_start AS dateOfIptStart, ipt_start.regimen_name as regimenName, " +
-            "    ipt_c.date_completed_ipt AS iptCompletionDate, " +
-            "    ipt_c.ipt_completion_status AS iptCompletionStatus , weight.weight_at_start_tpt as weightAtStartTpt " +
+            "    ipt_c.dateCompletedTpt AS iptCompletionDate, " +
+            "    ipt_c.iptCompletionStatus AS iptCompletionStatus , weight.weight_at_start_tpt as weightAtStartTpt " +
             "FROM " +
             "    bio_data bio " +
             "LEFT JOIN tb_status tb ON bio.uuid = tb.person_uuid " +

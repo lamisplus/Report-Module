@@ -168,7 +168,7 @@ public class NCDReportQuery {
             "    SELECT * FROM ( " +
             "            SELECT DISTINCT ON (person_uuid) " +
             "                person_uuid AS personUuidPH, " +
-            "                MIN(date_of_observation) AS date_prev_hypertensive " +
+            "                MIN(date_of_observation) AS datePrevHypertensive " +
             "            FROM " +
             "                hiv_observation " +
             "            WHERE " +
@@ -186,7 +186,7 @@ public class NCDReportQuery {
             "        SELECT * FROM ( " +
             "            SELECT DISTINCT ON (person_uuid) " +
             "                person_uuid AS personUuidNH, " +
-            "                MAX(date_of_observation) AS date_newly_hypertensive " +
+            "                MAX(date_of_observation) AS dateNewlyHypertensive " +
             "            FROM " +
             "                hiv_observation " +
             "            WHERE " +

@@ -810,91 +810,46 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " regiment_table.regimen,\n" +
             " regiment_table.max_visit_date,\n" +
             " start_or_regimen\n" +
-            "     ),\n" +
-            "ipt AS (\n" +
-            "              SELECT\n" +
-            "             DISTINCT ON (hap.person_uuid) hap.person_uuid AS personUuid80,\n" +
-            "            ipt_type.regimen_name AS iptType,\n" +
-            "            hap.visit_date AS dateOfIptStart,\n" +
-            "            COALESCE(NULLIF(CAST(hap.ipt->>'completionStatus' AS text), ''), '') as iptCompletionStatus,\n" +
-            "            (\n" +
-            "                CASE\n" +
-            "               WHEN MAX(CAST(complete.date_completed AS DATE)) > NOW() THEN NULL\n" +
-            "               WHEN MAX(CAST(complete.date_completed AS DATE)) IS NULL\n" +
-            "            AND CAST((hap.visit_date + 168) AS DATE) < NOW() THEN CAST((hap.visit_date + 168) AS DATE)\n" +
-            "               ELSE MAX(CAST(complete.date_completed AS DATE))\n" +
-            "               END\n" +
-            "                ) AS iptCompletionDate\n" +
-            "              FROM\n" +
-            "             hiv_art_pharmacy hap\n" +
-            "                 INNER JOIN (\n" +
-            "                 SELECT\n" +
-            "              DISTINCT person_uuid,\n" +
-            "                  MAX(visit_date) AS MAXDATE\n" +
-            "                 FROM\n" +
-            "              hiv_art_pharmacy\n" +
-            "                 WHERE\n" +
-            "              (ipt ->> 'type' ilike '%INITIATION%' or ipt ->> 'type' ilike 'START_REFILL')\n" +
-            "            AND archived = 0\n" +
-            "                 GROUP BY\n" +
-            "              person_uuid\n" +
-            "                 ORDER BY\n" +
-            "              MAXDATE ASC\n" +
-            "             ) AS max_ipt ON max_ipt.MAXDATE = hap.visit_date\n" +
-            "                 AND max_ipt.person_uuid = hap.person_uuid\n" +
-            "                 INNER JOIN (\n" +
-            "                 SELECT\n" +
-            "              DISTINCT h.person_uuid,\n" +
-            "                  h.visit_date,\n" +
-            "                  CAST(pharmacy_object ->> 'regimenName' AS VARCHAR) AS regimen_name,\n" +
-            "                  CAST(pharmacy_object ->> 'duration' AS VARCHAR) AS duration,\n" +
-            "                  hrt.description\n" +
-            "                 FROM\n" +
-            "              hiv_art_pharmacy h,\n" +
-            "              jsonb_array_elements(h.extra -> 'regimens') WITH ORDINALITY p(pharmacy_object)\n" +
-            "             RIGHT JOIN hiv_regimen hr ON hr.description = CAST(pharmacy_object ->> 'regimenName' AS VARCHAR)\n" +
-            "             RIGHT JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id\n" +
-            "                 WHERE\n" +
-            "             hrt.id IN (15)\n" +
-            "             ) AS ipt_type ON ipt_type.person_uuid = max_ipt.person_uuid\n" +
-            "                 AND ipt_type.visit_date = max_ipt.MAXDATE\n" +
-            "                 LEFT JOIN (\n" +
-            "                 SELECT\n" +
-            "              hap.person_uuid,\n" +
-            "              hap.visit_date,\n" +
-            "             TO_DATE(NULLIF(NULLIF(TRIM(hap.ipt->>'dateCompleted'), ''), 'null'), 'YYYY-MM-DD') AS date_completed\n" +
-            "                 FROM\n" +
-            "              hiv_art_pharmacy hap\n" +
-            "             INNER JOIN (\n" +
-            "             SELECT\n" +
-            "                 DISTINCT person_uuid,\n" +
-            "              MAX(visit_date) AS MAXDATE\n" +
-            "             FROM\n" +
-            "                 hiv_art_pharmacy\n" +
-            "             WHERE\n" +
-            "              ipt ->> 'dateCompleted' IS NOT NULL\n" +
-            "             GROUP BY\n" +
-            "                 person_uuid\n" +
-            "             ORDER BY\n" +
-            "                 MAXDATE ASC\n" +
-            "              ) AS complete_ipt ON CAST(complete_ipt.MAXDATE AS DATE) = hap.visit_date\n" +
-            "             AND complete_ipt.person_uuid = hap.person_uuid\n" +
-            "             ) complete ON complete.person_uuid = hap.person_uuid\n" +
-            "              WHERE\n" +
-            "                 hap.archived = 0\n" +
-            "                 AND hap.visit_date < ?3 \n" +
-            "              GROUP BY\n" +
-            "             hap.person_uuid,\n" +
-            "             ipt_type.regimen_name,\n" +
-            "             hap.ipt,\n" +
-            "             hap.visit_date\n" +
-            "                ),\n" +
-            "cervical_cancer AS (select * from (select  ho.person_uuid AS person_uuid90, ho.date_of_observation AS dateOfCervicalCancerScreening, " +
+            "     ), " +
+            "ipt as ( " +
+            "    with ipt_c as ( " +
+            "    select person_uuid, date_completed as iptCompletionDate, iptCompletionStatus from (select person_uuid, cast(ipt->>'dateCompleted' as date) as date_completed, " +
+            "    COALESCE(NULLIF(CAST(ipt->>'completionStatus' AS text), ''), '') AS iptCompletionStatus, " +
+            "    row_number () over (partition by person_uuid order by cast(ipt->>'dateCompleted' as  date) desc) as rnk " +
+            "    from hiv_art_pharmacy where cast(ipt->>'dateCompleted' as  date) is not null " +
+            "    and archived = 0) ic where ic.rnk = 1 " +
+            "    ), " +
+            "    ipt_s as ( " +
+            "    SELECT person_uuid, visit_date as dateOfIptStart, regimen_name as iptType " +
+            "    FROM ( " +
+            "    SELECT h.person_uuid, h.visit_date, CAST(pharmacy_object ->> 'regimenName' AS VARCHAR) AS regimen_name, " +
+            "    ROW_NUMBER() OVER (PARTITION BY h.person_uuid ORDER BY h.visit_date DESC) AS rnk " +
+            "    FROM hiv_art_pharmacy h " +
+            "    INNER JOIN jsonb_array_elements(h.extra -> 'regimens') WITH ORDINALITY p(pharmacy_object) ON TRUE " +
+            "    INNER JOIN hiv_regimen hr ON hr.description = CAST(p.pharmacy_object ->> 'regimenName' AS VARCHAR) " +
+            "    INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id " +
+            "    WHERE hrt.id = 15 AND h.archived = 0 and h.ipt ->> 'type' ILIKE '%INITIATION%' OR ipt ->> 'type' ILIKE 'START_REFILL' " +
+            "    ) AS ic " +
+            "    WHERE ic.rnk = 1 ), " +
+            "    ipt_c_cs as ( " +
+            "    select person_uuid, iptCompletionSCS, iptCompletionDSC from " +
+            "    (select person_uuid, data->'tptMonitoring'->>'outComeOfIpt' as iptCompletionSCS, " +
+            "    CAST(NULLIF(data->'tptMonitoring'->>'date', '') AS date) as iptCompletionDSC, " +
+            "    ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY CAST(NULLIF(data->'tptMonitoring'->>'date', '') AS date) DESC) AS ipt_c_sc_rnk " +
+            "    from hiv_observation where type = 'Chronic Care' and archived = 0 and CAST(NULLIF(data->'tptMonitoring'->>'date', '') AS date) is not null) " +
+            "    as ipt_ccs where ipt_c_sc_rnk = 1 " +
+            "    ) " +
+            "    select ipt_c.person_uuid as personuuid80, coalesce(ipt_c_cs.iptCompletionDSC, ipt_c.iptCompletionDate) as iptCompletionDate, " +
+            "    coalesce(ipt_c_cs.iptCompletionSCS, ipt_c.iptCompletionStatus) as iptCompletionStatus, ipt_s.dateOfIptStart, ipt_s.iptType " +
+            "    from ipt_c " +
+            "    left join ipt_s on ipt_s.person_uuid = ipt_c.person_uuid " +
+            "    left join ipt_c_cs on ipt_s.person_uuid = ipt_c_cs.person_uuid ), " +
+            " cervical_cancer AS (select * from (select  ho.person_uuid AS person_uuid90, ho.date_of_observation AS dateOfCervicalCancerScreening, " +
             "    ho.data ->> 'screenTreatmentMethodDate' AS treatmentMethodDate,cc_type.display AS cervicalCancerScreeningType, " +
             "    cc_method.display AS cervicalCancerScreeningMethod, cc_trtm.display AS cervicalCancerTreatmentScreened, " +
             "    cc_result.display AS resultOfCervicalCancerScreening, " +
             "    ROW_NUMBER() OVER (PARTITION BY ho.person_uuid ORDER BY ho.date_of_observation DESC) AS row " +
-            "from hiv_observation ho\n" +
+            "from hiv_observation ho " +
             "LEFT JOIN base_application_codeset cc_type ON cc_type.code = CAST(ho.data ->> 'screenType' AS VARCHAR) " +
             "        LEFT JOIN base_application_codeset cc_method ON cc_method.code = CAST(ho.data ->> 'screenMethod' AS VARCHAR) " +
             "        LEFT JOIN base_application_codeset cc_result ON cc_result.code = CAST(ho.data ->> 'screeningResult' AS VARCHAR) " +

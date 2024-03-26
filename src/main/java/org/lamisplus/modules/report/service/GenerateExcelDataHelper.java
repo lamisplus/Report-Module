@@ -331,7 +331,6 @@ public class GenerateExcelDataHelper {
 				// Months of HTN Medication Refill missing
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getMonthsOfHTNRefill())));
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentHtnStatus())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentHtnRegimen())));
 				map.put(index++, ncdReportProjection.getDateCurrentHtnStatus());
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getReasonsLtfuIit())));
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getBodyWeight())));
@@ -343,10 +342,14 @@ public class GenerateExcelDataHelper {
 				map.put(index++, ncdReportProjection.getCurrentBmiDate());
 
 				map.put(index++, ncdReportProjection.getCurrentWaistCircumferenceDate());
+				map.put(index++, ncdReportProjection.getCurrentWaistCircumferenceDate());
+
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getWaistHipRatio())));
 				map.put(index++, ncdReportProjection.getWaistHipRatioDate());
+
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getSystolic())));
 				map.put(index++, ncdReportProjection.getCurrentSystolicDate());
+
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getDiastolic())));
 				map.put(index++, ncdReportProjection.getCurrentDiastolicDate());
 
