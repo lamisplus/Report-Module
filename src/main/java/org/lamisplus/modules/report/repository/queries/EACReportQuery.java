@@ -6,12 +6,12 @@ public class EACReportQuery {
             "    WITH bio_data AS ( " +
             "    SELECT " +
             "        facility_lga.name AS lga, facility_state.name AS state, " +
-            "        p.uuid as patientId, p.hospital_number, h.unique_id as uniqueId, " +
+            "        p.uuid as patientId, p.hospital_number as hospitalNumber, h.unique_id as uniqueId, " +
             "        EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS age, " +
-            "        INITCAP(p.sex) AS sex, p.date_of_birth, " +
+            "        INITCAP(p.sex) AS sex, p.date_of_birth as dateOfBirth, " +
             "        facility.name AS facility_name, boui.code AS datimId, " +
-            "        tgroup.display AS targetGroup, eSetting.display AS enrollment_setting, " +
-            "        hac.visit_date AS art_start_date, hr.description AS regimen_at_art_start, " +
+            "        tgroup.display AS targetGroup, eSetting.display AS enrollmentSetting, " +
+            "        hac.visit_date AS artStartDate, hr.description AS regimenAtArtStart, " +
             "        p.date_of_registration, p.surname, p.first_name,  boo.name as lgaOfResidence " +
             "    FROM " +
             "        patient_person p " +
