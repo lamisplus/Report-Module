@@ -196,7 +196,7 @@ const Reports = (props) => {
                   >
                     <span style={{ color: "#fff" }}>TB REPORT</span>
 
-                    {/* <Label color='teal'>5</Label> */}
+                     {/*<Label color='teal'>5</Label>*/}
                   </Menu.Item>
                   <Menu.Item
                     name="inbox"
@@ -209,7 +209,7 @@ const Reports = (props) => {
                   >
                     <span style={{ color: "#fff" }}>NCD REPORT</span>
 
-                    {/* <Label color='teal'>5</Label> */}
+                     {/*<Label color='teal'>5</Label>*/}
                   </Menu.Item>
                   <Menu.Item
                       name="inbox"
@@ -222,7 +222,7 @@ const Reports = (props) => {
                   >
                     <span style={{ color: "#fff" }}>EAC REPORT</span>
 
-                    {/* <Label color='teal'>5</Label> */}
+                     {/*<Label color='teal'>5</Label>*/}
                   </Menu.Item>
                   <Menu.Item
                     name="inbox"

@@ -129,19 +129,34 @@ public class TBReportQuery {
             "), " +
             "ipt_c as ( " +
             "    with ipt_c as ( " +
-            "    select person_uuid, date_completed as iptCompletionDate, iptCompletionStatus from (select person_uuid, cast(ipt->>'dateCompleted' as date) as date_completed, " +
-            "    COALESCE(NULLIF(CAST(ipt->>'completionStatus' AS text), ''), '') AS iptCompletionStatus, " +
-            "    row_number () over (partition by person_uuid order by cast(ipt->>'dateCompleted' as  date) desc) as rnk " +
-            "    from hiv_art_pharmacy where cast(ipt->>'dateCompleted' as  date) is not null " +
-            "    and archived = 0) ic where ic.rnk = 1 " +
+            "       select person_uuid, date_completed as iptCompletionDate, iptCompletionStatus from ( " +
+            "                select person_uuid, cast(ipt->>'dateCompleted' as date) as date_completed, " +
+            "                COALESCE(NULLIF(CAST(ipt->>'completionStatus' AS text), ''), '') AS iptCompletionStatus, " +
+            "                row_number () over (partition by person_uuid order by cast(ipt->>'dateCompleted' as  date) desc) as rnk " +
+            "                from hiv_art_pharmacy where (ipt->>'dateCompleted' is not null and ipt->>'dateCompleted' != 'null' and ipt->>'dateCompleted' != '') " +
+            "                and archived = 0) ic where ic.rnk = 1" +
             "    ), " +
             "    ipt_c_cs as ( " +
-            "    select person_uuid, iptCompletionSCS, iptCompletionDSC from " +
-            "    (select person_uuid, data->'tptMonitoring'->>'outComeOfIpt' as iptCompletionSCS, " +
-            "    CAST(NULLIF(data->'tptMonitoring'->>'date', '') AS date) as iptCompletionDSC, " +
-            "    ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY CAST(NULLIF(data->'tptMonitoring'->>'date', '') AS date) DESC) AS ipt_c_sc_rnk " +
-            "    from hiv_observation where type = 'Chronic Care' and archived = 0 and CAST(NULLIF(data->'tptMonitoring'->>'date', '') AS date) is not null) " +
-            "    as ipt_ccs where ipt_c_sc_rnk = 1 " +
+            "       SELECT person_uuid, iptCompletionSCS, iptCompletionDSC " +
+            "       FROM ( " +
+            "       SELECT person_uuid, " +
+            "           data->'tptMonitoring'->>'outComeOfIpt' as iptCompletionSCS, " +
+            "           CASE " +
+            "               WHEN (data->'tptMonitoring'->>'date') = 'null' OR (data->'tptMonitoring'->>'date') = '' OR (data->'tptMonitoring'->>'date') = ' '  THEN NULL " +
+            "               ELSE cast(data->'tptMonitoring'->>'date' as date) " +
+            "           END as iptCompletionDSC, " +
+            "           ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY " +
+            "               CASE  " +
+            "               WHEN (data->'tptMonitoring'->>'date') = 'null' OR (data->'tptMonitoring'->>'date') = '' OR (data->'tptMonitoring'->>'date') = ' '  THEN NULL " +
+            "               ELSE cast(data->'tptMonitoring'->>'date' as date) " +
+            "           END  DESC) AS ipt_c_sc_rnk " +
+            "           FROM hiv_observation " +
+            "           WHERE type = 'Chronic Care' " +
+            "           AND archived = 0 " +
+            "           AND (data->'tptMonitoring'->>'date') IS NOT NULL " +
+            "           AND (data->'tptMonitoring'->>'date') != 'null' " +
+            "           ) AS ipt_ccs " +
+            "          WHERE ipt_c_sc_rnk = 1"  +
             "    ) " +
             "    select ipt_c.person_uuid as person_uuid, coalesce(ipt_c_cs.iptCompletionDSC, ipt_c.iptCompletionDate) as dateCompletedTpt, " +
             "    coalesce(ipt_c_cs.iptCompletionSCS, ipt_c.iptCompletionStatus) as iptCompletionStatus " +
