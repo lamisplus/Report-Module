@@ -314,8 +314,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "eSetting.display AS enrollmentSetting,\n" +
             "hac.visit_date AS artStartDate,\n" +
             "hr.description AS regimenAtStart,\n" +
-            "p.date_of_registration as dateOfRegistration," +
-            "h.date_of_registration as dateOfEnrollment," +
+            "p.date_of_registration as dateOfRegistration,\n" +
+            "h.date_of_registration as dateOfEnrollment,\n" +
             "h.ovc_number AS ovcUniqueId,\n" +
             "h.house_hold_number AS householdUniqueNo,\n" +
             "ecareEntry.display AS careEntry,\n" +
@@ -335,7 +335,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "INNER JOIN hiv_regimen_type hrt ON hrt.id = hac.regimen_type_id\n" +
             "WHERE\n" +
             "h.archived = 0\n" +
-            "AND p.archived = 0\n"+
+            "AND p.archived = 0\n" +
             "AND h.facility_id = ?1\n" +
             "AND hac.is_commencement = TRUE\n" +
             "AND hac.visit_date >= ?2\n" +
@@ -343,28 +343,23 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "),\n" +
             "\n" +
             "patient_lga as (select DISTINCT ON (personUuid) personUuid as personUuid11, \n" +
-            "case when (addr ~ '^[0-9\\.]+$') =TRUE \n" +
+            "case when (addr ~ '^[0-9\\\\.]+$') =TRUE \n" +
             " then (select name from base_organisation_unit where id = cast(addr as int)) ELSE\n" +
-            "(select name from base_organisation_unit where id = cast(facilityLga as int)) end as lgaOfResidence " +
-//            "then (select name from base_organisation_unit where id = cast(addr as int)) end as lgaOfResidence \n" +
+            "(select name from base_organisation_unit where id = cast(facilityLga as int)) end as lgaOfResidence \n" +
             "from (\n" +
             " select pp.uuid AS personUuid, facility_lga.parent_organisation_unit_id AS facilityLga, (jsonb_array_elements(pp.address->'address')->>'district') as addr from patient_person pp\n" +
-            "LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = CAST (pp.organization->'id' AS INTEGER) " +
-//            "select uuid AS personUuid, (jsonb_array_elements(address->'address')->>'district') as addr from patient_person \n" +
-            ") dt),"+
+            "LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = CAST (pp.organization->'id' AS INTEGER) \n" +
+            ") dt),\n" +
             "\n" +
             "current_clinical AS (SELECT DISTINCT ON (tvs.person_uuid) tvs.person_uuid AS person_uuid10,\n" +
             "       body_weight AS currentWeight,\n" +
             "       tbs.display AS tbStatus1,\n" +
             "       bac.display AS currentClinicalStage,\n" +
             "       (CASE \n" +
-            "    \tWHEN INITCAP(pp.sex) = 'Male' THEN NULL\n" +
-            "    \tWHEN preg.display IS NOT NULL THEN preg.display\n" +
-            "    \tELSE hac.pregnancy_status\n" +
-            "\t\t   END ) AS pregnancyStatus, " +
-//            "       (CASE\n" +
-//            "WHEN preg.display IS NOT NULL THEN preg.display\n" +
-//            "ELSE hac.pregnancy_status  END ) AS pregnancyStatus,\n" +
+            "    WHEN INITCAP(pp.sex) = 'Male' THEN NULL\n" +
+            "    WHEN preg.display IS NOT NULL THEN preg.display\n" +
+            "    ELSE hac.pregnancy_status\n" +
+            "   END ) AS pregnancyStatus, \n" +
             "       CASE\n" +
             "           WHEN hac.tb_screen IS NOT NULL THEN hac.visit_date\n" +
             "           ELSE NULL\n" +
@@ -384,7 +379,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " ) AS current_triage ON current_triage.MAXDATE = tvs.capture_date\n" +
             "     AND current_triage.person_uuid = tvs.person_uuid\n" +
             "     INNER JOIN hiv_art_clinical hac ON tvs.uuid = hac.vital_sign_uuid\n" +
-            "       LEFT JOIN patient_person pp ON tvs.person_uuid = pp.uuid" +
+            "       LEFT JOIN patient_person pp ON tvs.person_uuid = pp.uuid\n" +
             "     INNER JOIN (\n" +
             "     SELECT\n" +
             "         person_uuid,\n" +
@@ -418,47 +413,47 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "       AND date_sample_collected IS NOT null\n" +
             "       AND date_sample_collected <= ?3\n" +
             " )as sample\n" +
-            "         WHERE sample.rnkk = 1 " +
-            "           AND (sample.archived is null OR sample.archived = 0) " +
-            "           AND sample.facility_id = ?1 ), " +
-            "tbstatus as ( " +
-            "    with tbscreening_cs as ( " +
-            "        with cs as ( " +
-            "            SELECT id, person_uuid, date_of_observation AS dateOfTbScreened, data->'tbIptScreening'->>'status' AS tbStatus, " +
-            "                data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, " +
-            "                ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS rowNums " +
-            "        FROM hiv_observation " +
-            "        WHERE type = 'Chronic Care' and data is not null and archived = 0 " +
-            "            and date_of_observation between ?2 and ?3 " +
-            "            and facility_id = ?1 " +
-            "        ) " +
-            "        select * from cs where rowNums = 1 " +
-            "    ), " +
-            "    tbscreening_hac as ( " +
-            "        with h as (" +
-            "            select h.id, h.person_uuid, h.visit_date, cast(h.tb_screen->>'tbStatusId' as bigint) as tb_status_id, " +
-            "               b.display as h_status, " +
-            "               ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY visit_date DESC) AS rowNums " +
-            "            from hiv_art_clinical h " +
-            "            join base_application_codeset b on b.id = cast(h.tb_screen->>'tbStatusId' as bigint) " +
-            "            where h.archived = 0 and h.visit_date between ?2 and ?3 and facility_id = ?1 " +
-            "        ) " +
-            "        select * from h where rowNums = 1 " +
-            "    ) " +
-            "    select " +
-            "         tcs.person_uuid, " +
-            "         case " +
-            "             when tcs.tbStatus is not null then tcs.tbStatus " +
-            "             when tcs.tbStatus is null and th.h_status is not null then th.h_status " +
-            "         end as tbStatus, " +
-            "         case " +
-            "             when tcs.tbStatus is not null then tcs.dateOfTbScreened " +
-            "             when tcs.tbStatus is null and th.h_status is not null then th.visit_date " +
-            "         end as dateOfTbScreened, " +
-            "        tcs.tbScreeningType " +
-            "        from tbscreening_cs tcs " +
-            "             left join tbscreening_hac th on th.person_uuid = tcs.person_uuid " +
-            ")," +
+            "         WHERE sample.rnkk = 1 \n" +
+            "           AND (sample.archived is null OR sample.archived = 0) \n" +
+            "           AND sample.facility_id = ?1 ), \n" +
+            "tbstatus as ( \n" +
+            "    with tbscreening_cs as ( \n" +
+            "        with cs as ( \n" +
+            "            SELECT id, person_uuid, date_of_observation AS dateOfTbScreened, data->'tbIptScreening'->>'status' AS tbStatus, \n" +
+            "                data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, \n" +
+            "                ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS rowNums \n" +
+            "        FROM hiv_observation \n" +
+            "        WHERE type = 'Chronic Care' and data is not null and archived = 0 \n" +
+            "            and date_of_observation between ?2 and ?3 \n" +
+            "            and facility_id = ?1 \n" +
+            "        ) \n" +
+            "        select * from cs where rowNums = 1 \n" +
+            "    ), \n" +
+            "    tbscreening_hac as ( \n" +
+            "        with h as (\n" +
+            "            select h.id, h.person_uuid, h.visit_date, cast(h.tb_screen->>'tbStatusId' as bigint) as tb_status_id, \n" +
+            "               b.display as h_status, \n" +
+            "               ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY visit_date DESC) AS rowNums \n" +
+            "            from hiv_art_clinical h \n" +
+            "            join base_application_codeset b on b.id = cast(h.tb_screen->>'tbStatusId' as bigint) \n" +
+            "            where h.archived = 0 and h.visit_date between ?2 and ?3 and facility_id = ?1 \n" +
+            "        ) \n" +
+            "        select * from h where rowNums = 1 \n" +
+            "    ) \n" +
+            "    select \n" +
+            "         tcs.person_uuid, \n" +
+            "         case \n" +
+            "             when tcs.tbStatus is not null then tcs.tbStatus \n" +
+            "             when tcs.tbStatus is null and th.h_status is not null then th.h_status \n" +
+            "         end as tbStatus, \n" +
+            "         case \n" +
+            "             when tcs.tbStatus is not null then tcs.dateOfTbScreened \n" +
+            "             when tcs.tbStatus is null and th.h_status is not null then th.visit_date \n" +
+            "         end as dateOfTbScreened, \n" +
+            "        tcs.tbScreeningType \n" +
+            "        from tbscreening_cs tcs \n" +
+            "             left join tbscreening_hac th on th.person_uuid = tcs.person_uuid \n" +
+            "),\n" +
             "tblam AS (\n" +
             "  SELECT \n" +
             "    * \n" +
@@ -487,13 +482,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    ) as tblam \n" +
             "  WHERE \n" +
             "    tblam.rank2333 = 1\n" +
-            ")," +
+            "),\n" +
             "current_vl_result AS (SELECT * FROM (\n" +
             "         SELECT CAST(ls.date_sample_collected AS DATE ) AS dateOfCurrentViralLoadSample, sm.patient_uuid as person_uuid130 , sm.facility_id as vlFacility, sm.archived as vlArchived, acode.display as viralLoadIndication, sm.result_reported as currentViralLoad,CAST(sm.date_result_reported AS DATE) as dateOfCurrentViralLoad,\n" +
             "     ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rank2\n" +
             "         FROM public.laboratory_result  sm\n" +
             "      INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
-            "\t  INNER JOIN public.laboratory_sample ls on ls.test_id = lt.id\n" +
+            "  INNER JOIN public.laboratory_sample ls on ls.test_id = lt.id\n" +
             "      INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication\n" +
             "         WHERE lt.lab_test_id = 16\n" +
             "           AND  lt.viral_load_indication !=719\n" +
@@ -504,7 +499,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "   WHERE vl_result.rank2 = 1\n" +
             "     AND (vl_result.vlArchived = 0 OR vl_result.vlArchived is null)\n" +
             "     AND  vl_result.vlFacility = ?1\n" +
-            "     ), " +
+            "     ), \n" +
             "     careCardCD4 AS (SELECT visit_date, coalesce(cast(cd_4 as varchar), cd4_semi_quantitative) as cd_4, person_uuid AS cccd4_person_uuid\n" +
             "         FROM public.hiv_art_clinical\n" +
             "         WHERE is_commencement is true\n" +
@@ -601,7 +596,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        ON pr.art_pharmacy_id = p.id\n" +
             "         INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id\n" +
             "         INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id\n" +
-            "left JOIN base_application_codeset ds_model on ds_model.code = p.dsd_model_type " +
+            "left JOIN base_application_codeset ds_model on ds_model.code = p.dsd_model_type \n" +
             "WHERE r.regimen_type_id in (1,2,3,4,14)\n" +
             "  AND  p.archived = 0\n" +
             "  AND  p.facility_id = ?1\n" +
@@ -611,101 +606,89 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           ) as pr2\n" +
             "         where pr2.rnk3 = 1\n" +
             "     ),\n" +
-            "eac as ( " +
-            "    with first_eac as ( " +
-            "        select * from (with current_eac as (" +
-            "          select id, person_uuid, uuid, status, " +
-            "               ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
-            "            from hiv_eac where archived = 0 " +
-            "        ) " +
-            "        select ce.id, ce.person_uuid, hes.eac_session_date, " +
-            "               ROW_NUMBER() OVER (PARTITION BY hes.person_uuid ORDER BY hes.eac_session_date ASC ) AS row from hiv_eac_session hes " +
-            "            join current_eac ce on ce.uuid = hes.eac_id where ce.row = 1 and hes.archived = 0 " +
-            "                and hes.eac_session_date between ?2 and ?3 " +
-            "                and hes.status in ('FIRST EAC')) as fes where row = 1 " +
-            "    ), " +
-            "    last_eac as ( " +
-            "        select * from (with current_eac as ( " +
-            "          select id, person_uuid, uuid, status, " +
-            "               ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
-            "            from hiv_eac where archived = 0 " +
-            "        ) " +
-            "        select ce.id, ce.person_uuid, hes.eac_session_date, " +
-            "               ROW_NUMBER() OVER (PARTITION BY hes.person_uuid ORDER BY hes.eac_session_date DESC ) AS row from hiv_eac_session hes " +
-            "            join current_eac ce on ce.uuid = hes.eac_id where ce.row = 1 and hes.archived = 0 " +
-            "                and hes.eac_session_date between ?2 and ?3 " +
-            "                and hes.status in ('FIRST EAC', 'SECOND  EAC', 'THIRD EAC')) as les where row = 1 " +
-            "    ), " +
-            "    eac_count as (" +
-            "        select person_uuid, count(*) as no_eac_session from ( " +
-            "        with current_eac as (" +
-            "          select id, person_uuid, uuid, status, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row from hiv_eac where archived = 0 " +
-            "        ) " +
-            "        select hes.person_uuid from hiv_eac_session hes " +
-            "            join current_eac ce on ce.uuid = hes.eac_id where ce.row = 1 and hes.archived = 0 " +
-            "                and hes.eac_session_date between ?2 and ?3 " +
-            "                and hes.status in ('FIRST EAC', 'SECOND  EAC', 'THIRD EAC') " +
-            "           ) as c group by person_uuid " +
-            "    ), " +
-            "    extended_eac as (" +
-            "        select * from (with current_eac as ( " +
-            "          select id, person_uuid, uuid, status, " +
-            "               ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
-            "            from hiv_eac where archived = 0 " +
-            "        ) " +
-            "        select ce.id, ce.person_uuid, hes.eac_session_date, " +
-            "               ROW_NUMBER() OVER (PARTITION BY hes.person_uuid ORDER BY hes.eac_session_date DESC ) AS row from hiv_eac_session hes " +
-            "            join current_eac ce on ce.uuid = hes.eac_id where ce.row = 1 and hes.archived = 0 and hes.status is not null and hes.eac_session_date between ?2 and ?3 " +
-            "                and hes.status not in ('FIRST EAC', 'SECOND  EAC', 'THIRD EAC')) as exe where row = 1 " +
-            "    ), " +
-            "    post_eac_vl as ( " +
-            "        select * from(select lt.patient_uuid, cast(ls.date_sample_collected as date), lr.result_reported, cast(lr.date_result_reported as date), " +
-            "            ROW_NUMBER() OVER (PARTITION BY lt.patient_uuid ORDER BY ls.date_sample_collected DESC) AS row " +
-            "        from laboratory_test lt " +
-            "        left join laboratory_sample ls on ls.test_id = lt.id " +
-            "        left join laboratory_result lr on lr.test_id = lt.id " +
-            "                 where lt.viral_load_indication = 302 and lt.archived = 0 and ls.archived = 0 " +
-            "        and ls.date_sample_collected between ?2 and ?3) pe where row = 1 " +
-            "    ) " +
-            "    select fe.person_uuid as person_uuid50, fe.eac_session_date as dateOfCommencementOfEAC, le.eac_session_date as dateOfLastEACSessionCompleted, " +
-            "           ec.no_eac_session as numberOfEACSessionCompleted, exe.eac_session_date as dateOfExtendEACCompletion, " +
-            "           pvl.result_reported as repeatViralLoadResult, pvl.date_result_reported as DateOfRepeatViralLoadResult, " +
-            "           pvl.date_sample_collected as dateOfRepeatViralLoadEACSampleCollection " +
-            "    from first_eac fe " +
-            "    left join last_eac le on le.person_uuid = fe.person_uuid " +
-            "    left join eac_count ec on ec.person_uuid = fe.person_uuid " +
-            "    left join extended_eac exe on exe.person_uuid = fe.person_uuid " +
-            "    left join post_eac_vl pvl on pvl.patient_uuid = fe.person_uuid " +
-            "), " +
-            "dsd1 as ( " +
-            "select person_uuid as person_uuid_dsd_1, dateOfDevolvement, modelDevolvedTo " +
-            "from (select d.person_uuid, d.date_devolved as dateOfDevolvement, bmt.display as modelDevolvedTo, " +
-            "       ROW_NUMBER() OVER (PARTITION BY d.person_uuid ORDER BY d.date_devolved ASC ) AS row from dsd_devolvement d " +
-            "    left join base_application_codeset bmt on bmt.code = d.dsd_type " +
-            "where d.archived = 0 and d.date_devolved between  ?2 and ?3) d1 where row = 1 " +
-            " ), " +
-            "dsd2 as ( " +
-            "select person_uuid as person_uuid_dsd_2, dateOfCurrentDSD, currentDSDModel, dateReturnToSite " +
-            "from (select d.person_uuid, d.date_devolved as dateOfCurrentDSD, bmt.display as currentDSDModel, d.date_return_to_site AS dateReturnToSite, " +
-            "       ROW_NUMBER() OVER (PARTITION BY d.person_uuid ORDER BY d.date_devolved DESC ) AS row from dsd_devolvement d " +
-            "    left join base_application_codeset bmt on bmt.code = d.dsd_type " +
-            "where d.archived = 0 and d.date_devolved between  ?2 and ?3) d2 where row = 1 " +
-            ")," +
+            "eac as ( \n" +
+            "    with first_eac as ( \n" +
+            "        select * from (with current_eac as (\n" +
+            "          select id, person_uuid, uuid, status, \n" +
+            "               ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row \n" +
+            "            from hiv_eac where archived = 0 \n" +
+            "        ) \n" +
+            "        select ce.id, ce.person_uuid, hes.eac_session_date, \n" +
+            "               ROW_NUMBER() OVER (PARTITION BY hes.person_uuid ORDER BY hes.eac_session_date ASC ) AS row from hiv_eac_session hes \n" +
+            "            join current_eac ce on ce.uuid = hes.eac_id where ce.row = 1 and hes.archived = 0 \n" +
+            "                and hes.eac_session_date between ?2 and ?3 \n" +
+            "                and hes.status in ('FIRST EAC')) as fes where row = 1 \n" +
+            "    ), \n" +
+            "    last_eac as ( \n" +
+            "        select * from (with current_eac as ( \n" +
+            "          select id, person_uuid, uuid, status, \n" +
+            "               ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row \n" +
+            "            from hiv_eac where archived = 0 \n" +
+            "        ) \n" +
+            "        select ce.id, ce.person_uuid, hes.eac_session_date, \n" +
+            "               ROW_NUMBER() OVER (PARTITION BY hes.person_uuid ORDER BY hes.eac_session_date DESC ) AS row from hiv_eac_session hes \n" +
+            "            join current_eac ce on ce.uuid = hes.eac_id where ce.row = 1 and hes.archived = 0 \n" +
+            "                and hes.eac_session_date between ?2 and ?3 \n" +
+            "                and hes.status in ('FIRST EAC', 'SECOND  EAC', 'THIRD EAC')) as les where row = 1 \n" +
+            "    ), \n" +
+            "    eac_count as (\n" +
+            "        select person_uuid, count(*) as no_eac_session from ( \n" +
+            "        with current_eac as (\n" +
+            "          select id, person_uuid, uuid, status, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row from hiv_eac where archived = 0 \n" +
+            "        ) \n" +
+            "        select hes.person_uuid from hiv_eac_session hes \n" +
+            "            join current_eac ce on ce.person_uuid = hes.person_uuid where ce.row = 1 and hes.archived = 0 \n" +
+            "                and hes.eac_session_date between ?2 and ?3 \n" +
+            "                and hes.status in ('FIRST EAC', 'SECOND  EAC', 'THIRD EAC') \n" +
+            "           ) as c group by person_uuid \n" +
+            "    ), \n" +
+            "    extended_eac as (\n" +
+            "        select * from (with current_eac as ( \n" +
+            "          select id, person_uuid, uuid, status, \n" +
+            "               ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row \n" +
+            "            from hiv_eac where archived = 0 \n" +
+            "        ) \n" +
+            "        select ce.id, ce.person_uuid, hes.eac_session_date, \n" +
+            "               ROW_NUMBER() OVER (PARTITION BY hes.person_uuid ORDER BY hes.eac_session_date DESC ) AS row from hiv_eac_session hes \n" +
+            "            join current_eac ce on ce.uuid = hes.eac_id where ce.row = 1 and hes.archived = 0 and hes.status is not null and hes.eac_session_date between ?2 and ?3 \n" +
+            "                and hes.status not in ('FIRST EAC', 'SECOND  EAC', 'THIRD EAC')) as exe where row = 1 \n" +
+            "    ), \n" +
+            "    post_eac_vl as ( \n" +
+            "        select * from(select lt.patient_uuid, cast(ls.date_sample_collected as date), lr.result_reported, cast(lr.date_result_reported as date), \n" +
+            "            ROW_NUMBER() OVER (PARTITION BY lt.patient_uuid ORDER BY ls.date_sample_collected DESC) AS row \n" +
+            "        from laboratory_test lt \n" +
+            "        left join laboratory_sample ls on ls.test_id = lt.id \n" +
+            "        left join laboratory_result lr on lr.test_id = lt.id \n" +
+            "                 where lt.viral_load_indication = 302 and lt.archived = 0 and ls.archived = 0 \n" +
+            "        and ls.date_sample_collected between ?2 and ?3) pe where row = 1 \n" +
+            "    ) \n" +
+            "    select fe.person_uuid as person_uuid50, fe.eac_session_date as dateOfCommencementOfEAC, le.eac_session_date as dateOfLastEACSessionCompleted, \n" +
+            "           ec.no_eac_session as numberOfEACSessionCompleted, exe.eac_session_date as dateOfExtendEACCompletion, \n" +
+            "           pvl.result_reported as repeatViralLoadResult, pvl.date_result_reported as DateOfRepeatViralLoadResult, \n" +
+            "           pvl.date_sample_collected as dateOfRepeatViralLoadEACSampleCollection \n" +
+            "    from first_eac fe \n" +
+            "    left join last_eac le on le.person_uuid = fe.person_uuid \n" +
+            "    left join eac_count ec on ec.person_uuid = fe.person_uuid \n" +
+            "    left join extended_eac exe on exe.person_uuid = fe.person_uuid \n" +
+            "    left join post_eac_vl pvl on pvl.patient_uuid = fe.person_uuid \n" +
+            "), \n" +
+            "dsd1 as ( \n" +
+            "select person_uuid as person_uuid_dsd_1, dateOfDevolvement, modelDevolvedTo \n" +
+            "from (select d.person_uuid, d.date_devolved as dateOfDevolvement, bmt.display as modelDevolvedTo, \n" +
+            "       ROW_NUMBER() OVER (PARTITION BY d.person_uuid ORDER BY d.date_devolved ASC ) AS row from dsd_devolvement d \n" +
+            "    left join base_application_codeset bmt on bmt.code = d.dsd_type \n" +
+            "where d.archived = 0 and d.date_devolved between  ?2 and ?3) d1 where row = 1 \n" +
+            " ), \n" +
+            "dsd2 as ( \n" +
+            "select person_uuid as person_uuid_dsd_2, dateOfCurrentDSD, currentDSDModel, dateReturnToSite \n" +
+            "from (select d.person_uuid, d.date_devolved as dateOfCurrentDSD, bmt.display as currentDSDModel, d.date_return_to_site AS dateReturnToSite, \n" +
+            "       ROW_NUMBER() OVER (PARTITION BY d.person_uuid ORDER BY d.date_devolved DESC ) AS row from dsd_devolvement d \n" +
+            "    left join base_application_codeset bmt on bmt.code = d.dsd_type \n" +
+            "where d.archived = 0 and d.date_devolved between  ?2 and ?3) d2 where row = 1 \n" +
+            "),\n" +
             "biometric AS (\n" +
             "            SELECT \n" +
             "              DISTINCT ON (he.person_uuid) he.person_uuid AS person_uuid60, \n" +
-//            "               CASE WHEN biometric_count.count > 5 THEN biometric_count.enrollment_date\n" +
-//            "               ELSE NULL\n" +
-//            "               END AS dateBiometricsEnrolled,\n" +
-//            "           CASE WHEN biometric_count.count > 5 THEN biometric_count.count\n" +
-//            "           ELSE NULL\n" +
-//            "           END AS numberOfFingersCaptured,\n" +
-//            "           CASE WHEN recapture_count.count > 5 THEN recapture_count.recapture_date\n" +
-//            "           ELSE NULL\n" +
-//            "           END AS dateBiometricsRecaptured,\n" +
-//            "           CASE WHEN recapture_count.count > 5 THEN recapture_count.count\n" +
-//            "           ELSE NULL\n" +
-//            "           END AS numberOfFingersRecaptured,\n" +
             "              biometric_count.enrollment_date AS dateBiometricsEnrolled, \n" +
             "              biometric_count.count AS numberOfFingersCaptured,\n" +
             "              recapture_count.recapture_date AS dateBiometricsRecaptured,\n" +
@@ -746,13 +729,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "--              (CASE WHEN biometric_status IS NULL OR biometric_status=''\n" +
             "--               THEN hiv_status ELSE biometric_status END) AS biometric_status, \n" +
             "            MAX(status_date) OVER (PARTITION BY person_id ORDER BY status_date DESC) AS status_date \n" +
-            "\t\t\tFROM hiv_status_tracker \n" +
+            "FROM hiv_status_tracker \n" +
             "            WHERE archived=0 AND facility_id=?1\n" +
             "            \n" +
             "              ) bst ON bst.person_id = he.person_uuid \n" +
             "            WHERE \n" +
             "              he.archived = 0\n" +
-            "            ), " +
+            "            ), \n" +
             "     current_regimen AS (\n" +
             "         SELECT\n" +
             " DISTINCT ON (regiment_table.person_uuid) regiment_table.person_uuid AS person_uuid70,\n" +
@@ -821,7 +804,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         DISTINCT MAX(visit_date) AS max_visit_date,\n" +
             "      person_uuid\n" +
             "     FROM hiv_art_pharmacy\n" +
-            "WHERE archived=0" +
+            "WHERE archived=0\n" +
             "     GROUP BY\n" +
             "         person_uuid\n" +
             " ) AS hap ON regiment_table.person_uuid = hap.person_uuid\n" +
@@ -832,96 +815,66 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " regiment_table.regimen,\n" +
             " regiment_table.max_visit_date,\n" +
             " start_or_regimen\n" +
-            "     ),\n" +
-            "ipt AS (\n" +
-            "              SELECT\n" +
-            "             DISTINCT ON (hap.person_uuid) hap.person_uuid AS personUuid80,\n" +
-            "            ipt_type.regimen_name AS iptType,\n" +
-            "            hap.visit_date AS dateOfIptStart,\n" +
-            "            COALESCE(NULLIF(CAST(hap.ipt->>'completionStatus' AS text), ''), '') as iptCompletionStatus,\n" +
-            "            (\n" +
-            "                CASE\n" +
-            "               WHEN MAX(CAST(complete.date_completed AS DATE)) > NOW() THEN NULL\n" +
-            "               WHEN MAX(CAST(complete.date_completed AS DATE)) IS NULL\n" +
-            "            AND CAST((hap.visit_date + 168) AS DATE) < NOW() THEN CAST((hap.visit_date + 168) AS DATE)\n" +
-            "               ELSE MAX(CAST(complete.date_completed AS DATE))\n" +
-            "               END\n" +
-            "                ) AS iptCompletionDate\n" +
-            "              FROM\n" +
-            "             hiv_art_pharmacy hap\n" +
-            "                 INNER JOIN (\n" +
-            "                 SELECT\n" +
-            "              DISTINCT person_uuid,\n" +
-            "                  MAX(visit_date) AS MAXDATE\n" +
-            "                 FROM\n" +
-            "              hiv_art_pharmacy\n" +
-            "                 WHERE\n" +
-            "              (ipt ->> 'type' ilike '%INITIATION%' or ipt ->> 'type' ilike 'START_REFILL')\n" +
-            "            AND archived = 0\n" +
-            "                 GROUP BY\n" +
-            "              person_uuid\n" +
-            "                 ORDER BY\n" +
-            "              MAXDATE ASC\n" +
-            "             ) AS max_ipt ON max_ipt.MAXDATE = hap.visit_date\n" +
-            "                 AND max_ipt.person_uuid = hap.person_uuid\n" +
-            "                 INNER JOIN (\n" +
-            "                 SELECT\n" +
-            "              DISTINCT h.person_uuid,\n" +
-            "                  h.visit_date,\n" +
-            "                  CAST(pharmacy_object ->> 'regimenName' AS VARCHAR) AS regimen_name,\n" +
-            "                  CAST(pharmacy_object ->> 'duration' AS VARCHAR) AS duration,\n" +
-            "                  hrt.description\n" +
-            "                 FROM\n" +
-            "              hiv_art_pharmacy h,\n" +
-            "              jsonb_array_elements(h.extra -> 'regimens') WITH ORDINALITY p(pharmacy_object)\n" +
-            "             RIGHT JOIN hiv_regimen hr ON hr.description = CAST(pharmacy_object ->> 'regimenName' AS VARCHAR)\n" +
-            "             RIGHT JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id\n" +
-            "                 WHERE\n" +
-            "             hrt.id IN (15)\n" +
-            "             ) AS ipt_type ON ipt_type.person_uuid = max_ipt.person_uuid\n" +
-            "                 AND ipt_type.visit_date = max_ipt.MAXDATE\n" +
-            "                 LEFT JOIN (\n" +
-            "                 SELECT\n" +
-            "              hap.person_uuid,\n" +
-            "              hap.visit_date,\n" +
-            "             TO_DATE(NULLIF(NULLIF(TRIM(hap.ipt->>'dateCompleted'), ''), 'null'), 'YYYY-MM-DD') AS date_completed\n" +
-            "                 FROM\n" +
-            "              hiv_art_pharmacy hap\n" +
-            "             INNER JOIN (\n" +
-            "             SELECT\n" +
-            "                 DISTINCT person_uuid,\n" +
-            "              MAX(visit_date) AS MAXDATE\n" +
-            "             FROM\n" +
-            "                 hiv_art_pharmacy\n" +
-            "             WHERE\n" +
-            "              ipt ->> 'dateCompleted' IS NOT NULL\n" +
-            "             GROUP BY\n" +
-            "                 person_uuid\n" +
-            "             ORDER BY\n" +
-            "                 MAXDATE ASC\n" +
-            "              ) AS complete_ipt ON CAST(complete_ipt.MAXDATE AS DATE) = hap.visit_date\n" +
-            "             AND complete_ipt.person_uuid = hap.person_uuid\n" +
-            "             ) complete ON complete.person_uuid = hap.person_uuid\n" +
-            "              WHERE\n" +
-            "                 hap.archived = 0\n" +
-            "                 AND hap.visit_date < ?3 \n" +
-            "              GROUP BY\n" +
-            "             hap.person_uuid,\n" +
-            "             ipt_type.regimen_name,\n" +
-            "             hap.ipt,\n" +
-            "             hap.visit_date\n" +
-            "                ),\n" +
-            "cervical_cancer AS (select * from (select  ho.person_uuid AS person_uuid90, ho.date_of_observation AS dateOfCervicalCancerScreening, " +
-            "    ho.data ->> 'screenTreatmentMethodDate' AS treatmentMethodDate,cc_type.display AS cervicalCancerScreeningType, " +
-            "    cc_method.display AS cervicalCancerScreeningMethod, cc_trtm.display AS cervicalCancerTreatmentScreened, " +
-            "    cc_result.display AS resultOfCervicalCancerScreening, " +
-            "    ROW_NUMBER() OVER (PARTITION BY ho.person_uuid ORDER BY ho.date_of_observation DESC) AS row " +
-            "from hiv_observation ho\n" +
-            "LEFT JOIN base_application_codeset cc_type ON cc_type.code = CAST(ho.data ->> 'screenType' AS VARCHAR) " +
-            "        LEFT JOIN base_application_codeset cc_method ON cc_method.code = CAST(ho.data ->> 'screenMethod' AS VARCHAR) " +
-            "        LEFT JOIN base_application_codeset cc_result ON cc_result.code = CAST(ho.data ->> 'screeningResult' AS VARCHAR) " +
-            "        LEFT JOIN base_application_codeset cc_trtm ON cc_trtm.code = CAST(ho.data ->> 'screenTreatment' AS VARCHAR) " +
-            "where ho.archived = 0 and type = 'Cervical cancer') as cc where row = 1), " +
+            "     ), \n" +
+            "ipt as ( \n" +
+            "    with ipt_c as ( \n" +
+            "       select person_uuid, date_completed as iptCompletionDate, iptCompletionStatus from ( \n" +
+            "                select person_uuid, cast(ipt->>'dateCompleted' as date) as date_completed, \n" +
+            "                COALESCE(NULLIF(CAST(ipt->>'completionStatus' AS text), ''), '') AS iptCompletionStatus, \n" +
+            "                row_number () over (partition by person_uuid order by cast(ipt->>'dateCompleted' as  date) desc) as rnk \n" +
+            "                from hiv_art_pharmacy where (ipt->>'dateCompleted' is not null and ipt->>'dateCompleted' != 'null' and ipt->>'dateCompleted' != '') \n" +
+            "                and archived = 0) ic where ic.rnk = 1 \n" +
+            "    ), \n" +
+            "    ipt_s as ( \n" +
+            "    SELECT person_uuid, visit_date as dateOfIptStart, regimen_name as iptType \n" +
+            "    FROM ( \n" +
+            "    SELECT h.person_uuid, h.visit_date, CAST(pharmacy_object ->> 'regimenName' AS VARCHAR) AS regimen_name, \n" +
+            "    ROW_NUMBER() OVER (PARTITION BY h.person_uuid ORDER BY h.visit_date DESC) AS rnk \n" +
+            "    FROM hiv_art_pharmacy h \n" +
+            "    INNER JOIN jsonb_array_elements(h.extra -> 'regimens') WITH ORDINALITY p(pharmacy_object) ON TRUE \n" +
+            "    INNER JOIN hiv_regimen hr ON hr.description = CAST(p.pharmacy_object ->> 'regimenName' AS VARCHAR) \n" +
+            "    INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id \n" +
+            "    WHERE hrt.id = 15 AND h.archived = 0 and h.ipt ->> 'type' ILIKE '%INITIATION%' OR ipt ->> 'type' ILIKE 'START_REFILL' \n" +
+            "    ) AS ic \n" +
+            "    WHERE ic.rnk = 1 ), \n" +
+            "    ipt_c_cs as ( \n" +
+            "       SELECT person_uuid, iptCompletionSCS, iptCompletionDSC \n" +
+            "       FROM ( \n" +
+            "       SELECT person_uuid, \n" +
+            "           data->'tptMonitoring'->>'outComeOfIpt' as iptCompletionSCS, \n" +
+            "           CASE \n" +
+            "               WHEN (data->'tptMonitoring'->>'date') = 'null' OR (data->'tptMonitoring'->>'date') = '' OR (data->'tptMonitoring'->>'date') = ' '  THEN NULL \n" +
+            "               ELSE cast(data->'tptMonitoring'->>'date' as date) \n" +
+            "           END as iptCompletionDSC, \n" +
+            "           ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY \n" +
+            "               CASE  \n" +
+            "               WHEN (data->'tptMonitoring'->>'date') = 'null' OR (data->'tptMonitoring'->>'date') = '' OR (data->'tptMonitoring'->>'date') = ' '  THEN NULL \n" +
+            "               ELSE cast(data->'tptMonitoring'->>'date' as date) \n" +
+            "           END  DESC) AS ipt_c_sc_rnk \n" +
+            "           FROM hiv_observation \n" +
+            "           WHERE type = 'Chronic Care' \n" +
+            "           AND archived = 0 \n" +
+            "           AND (data->'tptMonitoring'->>'date') IS NOT NULL \n" +
+            "           AND (data->'tptMonitoring'->>'date') != 'null' \n" +
+            "           ) AS ipt_ccs \n" +
+            "          WHERE ipt_c_sc_rnk = 1\n" +
+            "    ) \n" +
+            "    select ipt_c.person_uuid as personuuid80, coalesce(ipt_c_cs.iptCompletionDSC, ipt_c.iptCompletionDate) as iptCompletionDate, \n" +
+            "    coalesce(ipt_c_cs.iptCompletionSCS, ipt_c.iptCompletionStatus) as iptCompletionStatus, ipt_s.dateOfIptStart, ipt_s.iptType \n" +
+            "    from ipt_c \n" +
+            "    left join ipt_s on ipt_s.person_uuid = ipt_c.person_uuid \n" +
+            "    left join ipt_c_cs on ipt_s.person_uuid = ipt_c_cs.person_uuid ), \n" +
+            " cervical_cancer AS (select * from (select  ho.person_uuid AS person_uuid90, ho.date_of_observation AS dateOfCervicalCancerScreening, \n" +
+            "    ho.data ->> 'screenTreatmentMethodDate' AS treatmentMethodDate,cc_type.display AS cervicalCancerScreeningType, \n" +
+            "    cc_method.display AS cervicalCancerScreeningMethod, cc_trtm.display AS cervicalCancerTreatmentScreened, \n" +
+            "    cc_result.display AS resultOfCervicalCancerScreening, \n" +
+            "    ROW_NUMBER() OVER (PARTITION BY ho.person_uuid ORDER BY ho.date_of_observation DESC) AS row \n" +
+            "from hiv_observation ho \n" +
+            "LEFT JOIN base_application_codeset cc_type ON cc_type.code = CAST(ho.data ->> 'screenType' AS VARCHAR) \n" +
+            "        LEFT JOIN base_application_codeset cc_method ON cc_method.code = CAST(ho.data ->> 'screenMethod' AS VARCHAR) \n" +
+            "        LEFT JOIN base_application_codeset cc_result ON cc_result.code = CAST(ho.data ->> 'screeningResult' AS VARCHAR) \n" +
+            "        LEFT JOIN base_application_codeset cc_trtm ON cc_trtm.code = CAST(ho.data ->> 'screenTreatment' AS VARCHAR) \n" +
+            "where ho.archived = 0 and type = 'Cervical cancer') as cc where row = 1), \n" +
             " ovc AS (\n" +
             "         SELECT\n" +
             " DISTINCT ON (person_uuid) person_uuid AS personUuid100,\n" +
@@ -987,7 +940,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "            AND hap.archived = 0                \n" +
             "            AND hap.visit_date < ?3\n" +
             "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
-            "      AND MAX.rnkkk3 = 1" +
+            "      AND MAX.rnkkk3 = 1\n" +
             "     WHERE\n" +
             " hp.archived = 0\n" +
             "       AND hp.visit_date <= ?5\n" +
@@ -997,7 +950,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     SELECT\n" +
             "         hst.hiv_status,\n" +
             "         hst.person_id,\n" +
-            "         hst.cause_of_death," +
+            "         hst.cause_of_death,\n" +
             "          hst.va_cause_of_death,\n" +
             "         hst.status_date\n" +
             "     FROM\n" +
@@ -1071,7 +1024,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "            AND hap.archived = 0                \n" +
             "            AND hap.visit_date < ?4\n" +
             "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
-            "      AND MAX.rnkkk3 = 1" +
+            "      AND MAX.rnkkk3 = 1\n" +
             "     WHERE\n" +
             " hp.archived = 0\n" +
             "       AND hp.visit_date <= ?4\n" +
@@ -1081,7 +1034,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     SELECT\n" +
             "         hst.hiv_status,\n" +
             "         hst.person_id,\n" +
-            "         hst.cause_of_death, " +
+            "         hst.cause_of_death, \n" +
             "         hst.va_cause_of_death,\n" +
             "         hst.status_date\n" +
             "     FROM\n" +
@@ -1143,7 +1096,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "            AND hap.archived = 0                \n" +
             "            AND hap.visit_date < ?3\n" +
             "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
-            "      AND MAX.rnkkk3 = 1" +
+            "      AND MAX.rnkkk3 = 1\n" +
             "     WHERE\n" +
             "     hp.archived = 0\n" +
             "     AND hp.visit_date < ?3\n" +
@@ -1153,7 +1106,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         SELECT\n" +
             " hst.hiv_status,\n" +
             " hst.person_id,\n" +
-            " hst.cause_of_death," +
+            " hst.cause_of_death,\n" +
             " hst.va_cause_of_death,\n" +
             " hst.status_date\n" +
             "         FROM\n" +
@@ -1222,29 +1175,29 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    ) dt \n" +
             "  where \n" +
             "    rowNum = 1\n" +
-            "), " +
+            "), \n" +
             "case_manager AS (\n" +
             " SELECT DISTINCT ON (cmp.person_uuid)person_uuid AS caseperson, cmp.case_manager_id, CONCAT(cm.first_name, ' ', cm.last_name) AS caseManager FROM (SELECT person_uuid, case_manager_id,\n" +
             " ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY id DESC)\n" +
             " FROM case_manager_patients) cmp  INNER JOIN case_manager cm ON cm.id=cmp.case_manager_id\n" +
-            " WHERE cmp.row_number=1 AND cm.facility_id=?1), " +
+            " WHERE cmp.row_number=1 AND cm.facility_id=?1), \n" +
             "client_verification AS (\n" +
-            "SELECT * FROM (\n" +
-            "            select person_uuid,  data->'attempt'->0->>'outcome' AS clientVerificationOutCome,\n" +
-            "\t\t\tdata->'attempt'->0->>'verificationStatus' AS clientVerificationStatus,\n" +
-            "            CAST (data->'attempt'->0->>'dateOfAttempt' AS DATE) AS dateOfOutcome,\n" +
-            "            ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) DESC)\n" +
-            "            from public.hiv_observation where type = 'Client Verification'\n" +
-            "            AND archived = 0\n" +
-            "             AND CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) <= ?3 \n" +
-            "             AND CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) >= ?2\n" +
-            "            AND facility_id = ?1\n" +
-            "            ) clientVerification WHERE row_number = 1\n" +
-            "            AND dateOfOutcome IS NOT NULL " +
-            " ) "+
+            " SELECT * FROM (\n" +
+            "select person_uuid, data->'attempt'->0->>'outcome' AS clientVerificationOutCome,\n" +
+            "data->'attempt'->0->>'outcome' AS clientVerificationStatus,\n" +
+            "CAST (data->'attempt'->0->>'dateOfAttempt' AS DATE) AS dateOfOutcome,\n" +
+            "ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) DESC)\n" +
+            "from public.hiv_observation where type = 'Client Verification' \n" +
+            "AND archived = 0\n" +
+            " AND CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) <= ?3 \n" +
+            " AND CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) >= ?2 \n" +
+            "AND facility_id = ?1\n" +
+            ") clientVerification WHERE row_number = 1\n" +
+            "AND dateOfOutcome IS NOT NULL\n" +
+            " ) \n" +
             "SELECT DISTINCT ON (bd.personUuid) personUuid AS uniquePersonUuid,\n" +
             "           bd.*,\n" +
-            "CONCAT(bd.datimId, '_', bd.personUuid) AS ndrPatientIdentifier, " +
+            "CONCAT(bd.datimId, '_', bd.personUuid) AS ndrPatientIdentifier, \n" +
             "           p_lga.*,\n" +
             "           scd.*,\n" +
             "           cvlr.*,\n" +
@@ -1259,7 +1212,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           ipt.iptCompletionStatus,\n" +
             "           ipt.iptType,\n" +
             "           cc.*,\n" +
-            " dsd1.*, dsd2.*,  " +
+            " dsd1.*, dsd2.*,  \n" +
             "           ov.*,\n" +
             "           tbTment.*,\n" +
             "           tbSample.*,\n" +
@@ -1267,7 +1220,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           tbS.*,\n" +
             "           tbl.*,\n" +
             "           crypt.*, \n" +
-//            "           cvl.clientVerificationStatus, " +
             "           ct.cause_of_death AS causeOfDeath,\n" +
             "           ct.va_cause_of_death AS vaCauseOfDeath,\n" +
             "           (\n" +
@@ -1352,9 +1304,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "       ELSE ct.status_date\n" +
             "       END\n" +
             "   )AS DATE) AS currentStatusDate,\n" +
-//            "  -- client verification column\n" +
-            "       cvl.clientVerificationStatus, "+
-            "       cvl.clientVerificationOutCome, " +
+            "  -- client verification column\n" +
+            "       cvl.clientVerificationStatus, \n" +
+            "       cvl.clientVerificationOutCome,\n" +
             "           (\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN FALSE\n" +
@@ -1479,13 +1431,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "       ELSE NULL\n" +
             "       END\n" +
             "   ) AS dateOfVlEligibilityStatus,\n" +
-            "           (CASE WHEN cd.cd4lb IS NOT NULL THEN  cd.cd4lb" +
+            "           (CASE WHEN cd.cd4lb IS NOT NULL THEN  cd.cd4lb\n" +
             "                 WHEN  ccd.cd_4 IS NOT NULL THEN CAST(ccd.cd_4 as VARCHAR)\n" +
             "     ELSE NULL END) as lastCd4Count,\n" +
-            "           (CASE WHEN cd.dateOfCd4Lb IS NOT NULL THEN  CAST(cd.dateOfCd4Lb as DATE)" +
+            "           (CASE WHEN cd.dateOfCd4Lb IS NOT NULL THEN  CAST(cd.dateOfCd4Lb as DATE)\n" +
             "                   WHEN ccd.visit_date IS NOT NULL THEN CAST(ccd.visit_date as DATE)\n" +
             "     ELSE NULL END) as dateOfLastCd4Count, \n" +
-            "INITCAP(cm.caseManager) AS caseManager " +
+            "INITCAP(cm.caseManager) AS caseManager \n" +
             "FROM bio_data bd\n" +
             "        LEFT JOIN patient_lga p_lga on p_lga.personUuid11 = bd.personUuid \n" +
             "        LEFT JOIN pharmacy_details_regimen pdr ON pdr.person_uuid40 = bd.personUuid\n" +
@@ -1507,12 +1459,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        LEFT JOIN tb_sample_collection tbSample ON tbSample.personTbSample = bd.personUuid\n" +
             "        LEFT JOIN  tbTreatment tbTment ON tbTment.tbTreatmentPersonUuid = bd.personUuid\n" +
             "        LEFT JOIN  current_tb_result tbResult ON tbResult.personTbResult = bd.personUuid\n" +
-            "        LEFT JOIN crytococal_antigen crypt on crypt.personuuid12= bd.personUuid" +
-            "        LEFT JOIN  tbstatus tbS on tbS.person_uuid = bd.personUuid " +
-            "        LEFT JOIN  tblam tbl  on tbl.personuuidtblam = bd.personUuid " +
-            "        LEFT JOIN  dsd1 dsd1  on dsd1.person_uuid_dsd_1 = bd.personUuid " +
-            "        LEFT JOIN  dsd2 dsd2  on dsd2.person_uuid_dsd_2 = bd.personUuid " +
-            "       LEFT JOIN case_manager cm on cm.caseperson= bd.personUuid" +
+            "        LEFT JOIN crytococal_antigen crypt on crypt.personuuid12= bd.personUuid\n" +
+            "        LEFT JOIN  tbstatus tbS on tbS.person_uuid = bd.personUuid \n" +
+            "        LEFT JOIN  tblam tbl  on tbl.personuuidtblam = bd.personUuid \n" +
+            "        LEFT JOIN  dsd1 dsd1  on dsd1.person_uuid_dsd_1 = bd.personUuid \n" +
+            "        LEFT JOIN  dsd2 dsd2  on dsd2.person_uuid_dsd_2 = bd.personUuid \n" +
+            "       LEFT JOIN case_manager cm on cm.caseperson= bd.personUuid\n" +
             "       LEFT JOIN client_verification cvl on cvl.person_uuid = bd.personUuid "
             , nativeQuery = true)
     List<RADETDTOProjection> getRadetData(Long facilityId, LocalDate start, LocalDate end,
