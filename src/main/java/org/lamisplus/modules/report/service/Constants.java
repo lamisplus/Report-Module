@@ -424,21 +424,22 @@ public class Constants {
 
 	public static final List<String> TB_REPORT_HEADER =
 			Arrays.asList(
-					"State", "LGA", "Facility", "Patient ID", "Surname", "Other Names",
+					"State", "LGA", "Facility", "Patient ID", "Hospital Number",
+					"Unique Id", "Surname", "Other Names",
 					"Sex", "Date of birth", "Age", "ART Start Date", "Date of Last Visit",
 					"Date of TB Screening", "Screening Type", "TB Screening Outcome", "TB Diagnostic Evaluation",
 					"Date of TB Diagnostic Evaluation", "TB Evaluation Method", "Date Result Received",
-					"TB Diagnostic Result", "Date of TB Treatment", "TB Treatment Outcome", "Date TB Treatment Outcome",
-					"Eligible for TPT", "TPT Type", "TPT Outcome", "Date of TPT Outcome", "Weight At Start TPT"
+					"TB Diagnostic Result", "Date of TB Treatment", "TB Type (new, relapsed etc)", "TB Treatment Outcome", "Date TB Treatment Outcome",
+					"Eligible for TPT", "Date of TPT Start (yyyy-mm-dd)", "TPT Type", "TPT Outcome", "Date of TPT Outcome", "Weight At Start TPT"
 			);
 
 	public static final List<String> EAC_REPORT_HEADER =
 			Arrays.asList(
 					"State", "L.G.A", "LGA Of Residence", "Facility Name", "DatimId", "Patient ID", "Hospital Number",
 					"Unique Id", "Sex", "Target group", "Date Birth (yyyy-mm-dd)", "ART Start Date (yyyy-mm-dd)", "Regimen at ART Start",
-					"{Date of start of Regimen before unsuppressed VLR}", "{Regimen Line before  unsuppression}",
-					"{Regimen before unsuppression}", "{Last Pickup Date before  unsuppressed VLR}", "{Month of ARV Refill of the last pick up date before  unsuppressed VLR}",
-					"{Date of VLSC of unsuppressed VLR}", "{Most Recent Unsuppressed VLR}", "{Date of Unsuppressed VLR}", "{Unsuppressed VLR Indication}",
+					"Date of start of Regimen before unsuppressed VLR", "Regimen Line before  unsuppression",
+					"Regimen before unsuppression", "{Last Pickup Date before  unsuppressed VLR}", "Month of ARV Refill of the last pick up date before  unsuppressed VLR",
+					"Date of VLSC of unsuppressed VLR", "Most Recent Unsuppressed VLR", "Date of Unsuppressed VLR", "Unsuppressed VLR Indication",
 					/*"Current ART Status", "Date of Current ART Status",*/ "Date of commencement of 1st EAC (yyyy-mm-dd)", "Date of  1st EAC Session Completed",
 					"Method of 1st  EAC Session", "Date of commencement of 2nd  EAC (yyyy-mm-dd)", "Date of  2nd EAC Session Completed", "Method of 2nd  EAC Session",
 					"Date of commencement of 3rd   EAC (yyyy-mm-dd)", "Date of  3rd EAC Session Completed", "Method of 3rd EAC Session",
