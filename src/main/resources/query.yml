@@ -106,21 +106,7 @@ query:
     GROUP BY person_uuid, count, replace_date
     ) AS second_recapture ON result.uuid = second_recapture.person_uuid
   pmtct-hts-query-name: pmtct-hts
-  pmtct-hts-query:  select pmtct.state as "State", pmtct.lga as "LGA", pmtct.facilityName AS "Facility",
-    pmtct.uuid AS "Patient ID", pmtct.anc_no AS "ANC number", pmtct.hospitalnumber AS "Mother''s Hospital Num",
-    pmtct.dateofbirth AS "Mother''s Date of Birth", pmtct.maritalstatus AS "Marital Status",
-    pmtct.anc_setting_anc AS "ANC Setting ( Facility,Community)",
-    pmtct.first_anc_date AS "Date of Index ANC Registration", pmtct.lmp AS "LMP Date",
-    pmtct.gaweeks_anc AS "Gestational Age (Weeks) @ First ANC visit", pmtct.gravida_anc AS "Gravida",
-    pmtct.parity_anc AS "Parity", pmtct.entry_point AS "Point of entry",
-    pmtct.hbstatus_delivery as "Hepatitis B Test Result",
-    pmtct.tested_syphilis_anc AS "Date tested for Sypillis",
-    pmtct.test_result_syphilis_anc AS "Syphillis Test Result", pmtct.acceptedHIVTesting,
-    pmtct.dateTestedHivPositive AS "Date tested for HIV", pmtct.hivTestResult AS "HIV Test result",
-    pmtct.hivRestested AS "Testing date", pmtct.hiv_status AS "Result",
-    pmtct.hivenrollmentDate AS "Mother''s ART Start Date", pmtct.date_of_registration AS "PCV/HB @ANC registration"
-    from (
-    SELECT DISTINCT ON (p.uuid)p.uuid AS PersonUuid,
+  pmtct-hts-query:  SELECT DISTINCT ON (p.uuid)p.uuid AS PersonUuid,
     facility_state.name as state,
     facility_lga.name as lga,
     facility.name as facilityName,

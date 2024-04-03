@@ -71,6 +71,7 @@ public class TBReportQuery {
             "        SELECT " +
             "             COALESCE(NULLIF(CAST(data->'tptMonitoring'->>'treatementType' AS text), ''), '') AS tb_treatement_type, " +
             "             NULLIF(CAST(NULLIF(data->'tptMonitoring'->>'tbTreatmentStartDate', '') AS DATE), NULL) AS tb_treatment_start_date, " +
+
             "             data->'tbIptScreening'->>'eligibleForTPT' as eligible_for_tpt, person_uuid, " +
             "             ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS row_number " +
             "        FROM public.hiv_observation WHERE type = 'Chronic Care' AND facility_id = ?1 and archived = 0 " +
@@ -85,6 +86,7 @@ public class TBReportQuery {
             "FROM public.hiv_observation WHERE type = 'Chronic Care' AND facility_id = ?1 \n" +
             "and archived = 0) ttc where row_number = 1 \n" +
             "    and tb_completion_date is not null " +
+
             "), " +
             "current_tb_result AS ( " +
             "    with cur_tb as ( " +
@@ -128,6 +130,7 @@ public class TBReportQuery {
             "    ) " +
             "    select person_uuid, date_of_ipt_start, regimen_name from tpt where rnk = 1 " +
             "), " +
+
             "ipt_cA as ( " +
             "    with ipt_c as ( " +
             "       select person_uuid, date_completed as iptCompletionDate, iptCompletionStatus from ( " +
@@ -158,6 +161,7 @@ public class TBReportQuery {
             "           AND (data->'tptMonitoring'->>'date') != 'null' " +
             "           ) AS ipt_ccs " +
             "          WHERE ipt_c_sc_rnk = 1"  +
+
             "    ) " +
             "    select ipt_c.person_uuid as person_uuid, coalesce(ipt_c_cs.iptCompletionDSC, ipt_c.iptCompletionDate) as dateCompletedTpt, " +
             "    coalesce(ipt_c_cs.iptCompletionSCS, ipt_c.iptCompletionStatus) as iptCompletionStatus " +
@@ -187,8 +191,10 @@ public class TBReportQuery {
             "    current_tb_result.date_of_tb_diagnostic_result_received AS dateOfTbDiagnosticResultReceived, " +
             "    current_tb_result.tb_diagnostic_test_type AS tbDiagnosticTestType, " +
             "    ipt_start.date_of_ipt_start AS dateOfIptStart, ipt_start.regimen_name as regimenName, " +
+
             "    ipt_cA.dateCompletedTpt AS iptCompletionDate, " +
             "    ipt_cA.iptCompletionStatus AS iptCompletionStatus , weight.weight_at_start_tpt as weightAtStartTpt " +
+
             "FROM " +
             "    bio_data bio " +
             "LEFT JOIN tb_status tb ON bio.uuid = tb.person_uuid " +
@@ -197,5 +203,7 @@ public class TBReportQuery {
             "LEFT JOIN current_tb_result ON bio.uuid = current_tb_result.patient_uuid " +
             "LEFT JOIN ipt_start ON bio.uuid = ipt_start.person_uuid " +
             "LEFT JOIN weight ON bio.uuid = weight.person_uuid " +
+
             "LEFT JOIN ipt_cA on ipt_cA.person_uuid = bio.uuid";
+
 }

@@ -35,6 +35,7 @@ public interface TBReportProjection {
     String getTbDiagnosticTestType();
 
 //    LocalDate getIptCompletionDate();
+
     String getIptCompletionStatus();
     String getEligibleForTPT();
     String getRegimenName();
