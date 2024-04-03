@@ -100,25 +100,6 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	}
 
 
-//	@Override
-//	public ByteArrayOutputStream generateTBReport(Long facilityId, LocalDate start, LocalDate end) {
-//		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
-//		try {
-//			List<TBReportProjection> tbReportProjections = reportRepository.generateTBReport(facilityId, start, end);
-//			LOG.info("RADET Size {}", tbReportProjections.size());
-//
-//			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillTBReportDataMapper(tbReportProjections);
-//			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
-//		} catch (Exception e) {
-//			LOG.error("An error Occurred when generating TB report...");
-//			LOG.error("Error message: " + e.getMessage());
-//			e.printStackTrace();
-//		}
-//		LOG.info("End generate patient TB report");
-//		return null;
-//	}
-
-
 	@Override
 	public ByteArrayOutputStream generateTBReport(Long facilityId, LocalDate start, LocalDate end) {
 		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
@@ -331,6 +312,38 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("End generate prep report");
 		return null;
 	}
+
+
+	@Override
+	public ByteArrayOutputStream generateAhdReport (Long facilityId, LocalDate start, LocalDate end) {
+		try {
+			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
+			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
+			LOG.info("start date {}", startDate);
+			LOG.info("end date {}", endDate);
+			if(Application.ahd != null){
+				LOG.info("AHD query not available check query.yml file");
+			}
+			String query = Application.ahd;
+			query = query.replace("?1", String.valueOf(facilityId))
+					.replace("?2", startDate)
+					.replace("?3", endDate);
+
+			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
+			LOG.info("query size is : {}" + fullData.size());
+
+			return excelService.generate(Application.aHDName, fullData, headers);
+		} catch (Exception e) {
+			LOG.info("Error Occurred when generating AHD data", e);
+		}
+		LOG.info("End generate AHD report");
+		return null;
+	}
+
+
+
 
 	@Override
 	public ByteArrayOutputStream generateIndexQueryLine(Long facilityId, LocalDate start, LocalDate end) {

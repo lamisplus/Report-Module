@@ -1,6 +1,5 @@
 package org.lamisplus.modules.report.repository;
 
-import lombok.extern.java.Log;
 import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.hiv.domain.dto.PatientLineDto;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
@@ -1854,4 +1853,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
         @Query(value = NCDReportQuery.NCD_REPORT_QUERY, nativeQuery = true)
         List<NCDReportProjection> generateNCDReport(Long facilityId, LocalDate start, LocalDate end);
+
+//        @Query(value = AHDReportQuery.AHD_QUERY, nativeQuery = true)
+//        List<AHDDTOProjection> generateAHDReport (Long facilityId, LocalDate start, LocalDate end);
 }

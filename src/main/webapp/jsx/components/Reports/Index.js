@@ -23,6 +23,7 @@ import PmtctHtsReport from "./PmtctHtsReport";
 import PmtctMaternalCohortReport from "./PmtctMaternalCohortReport";
 import NcdReport from "./NcdReport";
 import EACReport from "./EACReport";
+import AhdReport from "./AhdReport";
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -263,6 +264,19 @@ const Reports = (props) => {
 
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
+
+                  <Menu.Item
+                     name="inbox"
+                     active={activeItem === "ahd-report"}
+                     onClick={() => handleItemClick("ahd-report")}
+                     style={{
+                       backgroundColor: activeItem === "ahd-report" ? "#000" : "",
+                     }}
+                   >
+                     <span style={{ color: "#fff" }}>AHD REPORT</span>
+
+                     {/* <Label color='teal'>5</Label> */}
+                   </Menu.Item>
                 </Menu>
               </div>
               <div
@@ -383,6 +397,13 @@ const Reports = (props) => {
                     completed={completed}
                   />
                 )}
+                {activeItem === "ahd-report" && (
+                 <AhdReport
+                   handleItemClick={handleItemClick}
+                   setCompleted={setCompleted}
+                   completed={completed}
+                 />
+               )}
               </div>
             </form>
           </div>

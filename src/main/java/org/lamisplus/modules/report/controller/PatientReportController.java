@@ -37,6 +37,8 @@ public class PatientReportController {
 	private final GenerateExcelService generateExcelService;
 	
 	private final StatusManagementService statusManagementService;
+
+
 	
 	@PostMapping("/patient-line-list")
 	public void patientLineList(HttpServletResponse response, @RequestParam("facilityId") Long facility) throws IOException {
