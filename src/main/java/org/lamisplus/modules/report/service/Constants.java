@@ -424,7 +424,8 @@ public class Constants {
 
 	public static final List<String> TB_REPORT_HEADER =
 			Arrays.asList(
-					"State", "LGA", "Facility", "Patient ID", "Surname", "Other Names",
+					"State", "LGA", "Facility", "Patient ID", "Hospital Number",
+					"Unique Id", "Surname", "Other Names",
 					"Sex", "Date of birth", "Age", "ART Start Date", "Date of Last Visit",
 					"Date of TB Screening", "Screening Type", "TB Screening Outcome", "TB Diagnostic Evaluation",
 					"Date of TB Diagnostic Evaluation", "TB Evaluation Method", "Date Result Received",
