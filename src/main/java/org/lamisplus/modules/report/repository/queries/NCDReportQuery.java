@@ -1,6 +1,7 @@
 package org.lamisplus.modules.report.repository.queries;
 
 public class NCDReportQuery {
+
         public static final String NCD_REPORT_QUERY = "WITH bio_data AS (SELECT DISTINCT (p.uuid) AS personUuid, " +
                 "                                    facility_state.name AS state, " +
                 "                                    facility_lga.name AS lga, " +
@@ -429,4 +430,5 @@ public class NCDReportQuery {
                 "        left join current_weight_and_pressure cp on cp.person_uuid_cw = bd.personUuid " +
                 "        left join current_tests cut on cut.patient_uuid_ct = bd.personUuid " +
                 "        left join current_vl_result cvl on cvl.person_uuid130 = bd.personUuid ";
+
 }

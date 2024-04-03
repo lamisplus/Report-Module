@@ -116,8 +116,10 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getLga())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getFacilityName())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getPersonUuid())));
+
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getHospitalNumber())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getUniqueId())));
+
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getSurname())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getFirstName())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getGender())));
@@ -136,7 +138,9 @@ public class GenerateExcelDataHelper {
 
 				map.put(index++, (tbReportProjection.getDateOfTbDiagnosticResultReceived() != null) ? "Yes" : "No");
 				// Date of TB Diagnostic Evaluation
+
 				map.put(index++, tbReportProjection.getDateOfTbDiagnosticResultReceived());
+
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticTestType())));
 				map.put(index++, tbReportProjection.getDateOfTbDiagnosticResultReceived());
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticResult())));
@@ -150,7 +154,9 @@ public class GenerateExcelDataHelper {
 				map.put(index++, tbReportProjection.getDateOfIptStart());
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getRegimenName())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getIptCompletionStatus())));
+
 				map.put(index++, tbReportProjection.getIptCompletionDate());
+
 				map.put(index, tbReportProjection.getWeightAtStartTpt());
 
 				result.add(map);
@@ -159,7 +165,6 @@ public class GenerateExcelDataHelper {
 		Log.info("result: " + result.size()); // going to be one
 		return result;
 	}
-
 
 	public static List<Map<Integer, Object>> fillEACReportDataMapper(@NonNull List<EACReportProjection> eacReportProjections, LocalDate end) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
@@ -186,6 +191,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getRegimenBeforeUnsuppression())));
 				map.put(index++, eacReportProjection.getLastPickupDateBeforeUnsuppressedVLR());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMonthOfARVRefillOfLastPickupDateBeforeUnsuppressedVLR())));
+
 
 				map.put(index++, eacReportProjection.getDateOfVLSCOfUnsuppressedVLR());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMostRecentUnsuppressedVLR())));
@@ -389,8 +395,6 @@ public class GenerateExcelDataHelper {
 		return result;
 	}
 
-
-
 	public  List<Map<Integer, Object>> fillRadetDataMapper(@NonNull List<RADETDTOProjection> reportDtos, LocalDate endDate) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		deleteErrorFile();
@@ -543,6 +547,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getCurrentDSDModel());
 				map.put(index++, radetReportDto.getDateReturnToSite());
 //				map.put(index++, null);
+
 
 				//chronic care
 				map.put(index++, null);

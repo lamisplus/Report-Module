@@ -225,6 +225,9 @@ const Reports = (props) => {
                     {/* <Label color='teal'>5</Label> */}
                  </Menu.Item>
 
+
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
                   <Menu.Item
                     name="inbox"
                     active={activeItem === "index-elicitation"}
@@ -311,6 +314,7 @@ const Reports = (props) => {
                     completed={completed}
                   />
                 )}
+
               {activeItem === "tb-report" && (
                  <TbReport
                    handleItemClick={handleItemClick}
@@ -333,6 +337,7 @@ const Reports = (props) => {
                    completed={completed}
                  />
                )}
+
                 {activeItem === "hts-report" && (
                   <HTSReport
                     handleItemClick={handleItemClick}

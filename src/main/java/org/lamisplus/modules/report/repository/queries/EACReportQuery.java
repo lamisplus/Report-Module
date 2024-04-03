@@ -146,7 +146,9 @@ public class EACReportQuery {
             "    select hes.person_uuid from hiv_eac_session hes " +
             "        join current_eac ce on ce.person_uuid = hes.person_uuid where ce.row = 1 and hes.archived = 0 " +
             "            and hes.eac_session_date between ?2 and ?3 " +
+
             "            and hes.status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC', 'FOURTH EAC', 'FIFTH EAC', 'SIXTH EAC') " +
+
             "       ) as c group by person_uuid " +
             "), " +
             "post_eac_vl1 as ( " +
