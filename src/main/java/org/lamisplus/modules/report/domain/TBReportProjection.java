@@ -33,10 +33,11 @@ public interface TBReportProjection {
     String getTbDiagnosticResult();
     LocalDate getDateOfTbDiagnosticResultReceived();
     String getTbDiagnosticTestType();
-    LocalDate getIptCompletionDate();
+
+//    LocalDate getIptCompletionDate();
     String getIptCompletionStatus();
     String getEligibleForTPT();
     String getRegimenName();
-    LocalDate getDateCompletedIpt();
+    LocalDate getIptCompletionDate();
     String getWeightAtStartTpt();
 }

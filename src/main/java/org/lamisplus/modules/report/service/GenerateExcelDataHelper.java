@@ -150,7 +150,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, tbReportProjection.getDateOfIptStart());
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getRegimenName())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getIptCompletionStatus())));
-				map.put(index++, tbReportProjection.getDateCompletedIpt());
+				map.put(index++, tbReportProjection.getIptCompletionDate());
 				map.put(index, tbReportProjection.getWeightAtStartTpt());
 
 				result.add(map);

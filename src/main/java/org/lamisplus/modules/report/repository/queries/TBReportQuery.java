@@ -128,7 +128,7 @@ public class TBReportQuery {
             "    ) " +
             "    select person_uuid, date_of_ipt_start, regimen_name from tpt where rnk = 1 " +
             "), " +
-            "ipt_c as ( " +
+            "ipt_cA as ( " +
             "    with ipt_c as ( " +
             "       select person_uuid, date_completed as iptCompletionDate, iptCompletionStatus from ( " +
             "                select person_uuid, cast(ipt->>'dateCompleted' as date) as date_completed, " +
@@ -143,19 +143,19 @@ public class TBReportQuery {
             "       SELECT person_uuid, " +
             "           data->'tptMonitoring'->>'outComeOfIpt' as iptCompletionSCS, " +
             "           CASE " +
-            "               WHEN (data->'tptMonitoring'->>'completionDate') = 'null' OR (data->'tptMonitoring'->>'completionDate') = '' OR (data->'tptMonitoring'->>'completionDate') = ' '  THEN NULL " +
-            "               ELSE cast(data->'tptMonitoring'->>'completionDate' as date) " +
+            "               WHEN (data->'tptMonitoring'->>'date') = 'null' OR (data->'tptMonitoring'->>'date') = '' OR (data->'tptMonitoring'->>'date') = ' '  THEN NULL " +
+            "               ELSE cast(data->'tptMonitoring'->>'date' as date) " +
             "           END as iptCompletionDSC, " +
             "           ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY " +
             "               CASE  " +
-            "               WHEN (data->'tptMonitoring'->>'completionDate') = 'null' OR (data->'tptMonitoring'->>'completionDate') = '' OR (data->'tptMonitoring'->>'completionDate') = ' '  THEN NULL " +
-            "               ELSE cast(data->'tptMonitoring'->>'completionDate' as date) " +
+            "               WHEN (data->'tptMonitoring'->>'date') = 'null' OR (data->'tptMonitoring'->>'date') = '' OR (data->'tptMonitoring'->>'date') = ' '  THEN NULL " +
+            "               ELSE cast(data->'tptMonitoring'->>'date' as date) " +
             "           END  DESC) AS ipt_c_sc_rnk " +
             "           FROM hiv_observation " +
             "           WHERE type = 'Chronic Care' " +
             "           AND archived = 0 " +
-            "           AND (data->'tptMonitoring'->>'completionDate') IS NOT NULL " +
-            "           AND (data->'tptMonitoring'->>'completionDate') != 'null' " +
+            "           AND (data->'tptMonitoring'->>'date') IS NOT NULL " +
+            "           AND (data->'tptMonitoring'->>'date') != 'null' " +
             "           ) AS ipt_ccs " +
             "          WHERE ipt_c_sc_rnk = 1"  +
             "    ) " +
@@ -187,8 +187,8 @@ public class TBReportQuery {
             "    current_tb_result.date_of_tb_diagnostic_result_received AS dateOfTbDiagnosticResultReceived, " +
             "    current_tb_result.tb_diagnostic_test_type AS tbDiagnosticTestType, " +
             "    ipt_start.date_of_ipt_start AS dateOfIptStart, ipt_start.regimen_name as regimenName, " +
-            "    ipt_c.dateCompletedTpt AS iptCompletionDate, " +
-            "    ipt_c.iptCompletionStatus AS iptCompletionStatus , weight.weight_at_start_tpt as weightAtStartTpt " +
+            "    ipt_cA.dateCompletedTpt AS iptCompletionDate, " +
+            "    ipt_cA.iptCompletionStatus AS iptCompletionStatus , weight.weight_at_start_tpt as weightAtStartTpt " +
             "FROM " +
             "    bio_data bio " +
             "LEFT JOIN tb_status tb ON bio.uuid = tb.person_uuid " +
@@ -197,5 +197,5 @@ public class TBReportQuery {
             "LEFT JOIN current_tb_result ON bio.uuid = current_tb_result.patient_uuid " +
             "LEFT JOIN ipt_start ON bio.uuid = ipt_start.person_uuid " +
             "LEFT JOIN weight ON bio.uuid = weight.person_uuid " +
-            "LEFT JOIN ipt_c on ipt_c.person_uuid = bio.uuid";
+            "LEFT JOIN ipt_cA on ipt_cA.person_uuid = bio.uuid";
 }
