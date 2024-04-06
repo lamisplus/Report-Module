@@ -103,12 +103,12 @@ const PrepLongitudinalReport = (props) => {
         setLoading(true)
         //console.log(token);
 
-        axios.post(`${baseUrl}prep-reporting?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,objValues.organisationUnitId,
+        axios.post(`${baseUrl}longitudinal-prep?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,objValues.organisationUnitId,
             { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
         )
           .then(response => {
             setLoading(false)
-            const fileName =`${objValues.organisationUnitName} Prep ${currentDate}`
+            const fileName =`${objValues.organisationUnitName} Longitudinal Prep ${currentDate}`
             const responseData = response.data
             let blob = new Blob([responseData], {type: "application/octet-stream"});
 

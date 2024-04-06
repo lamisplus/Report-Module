@@ -12,9 +12,7 @@ import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 
 import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.report.config.Application;
-import org.lamisplus.modules.report.domain.BiometricReportDto;
 import org.lamisplus.modules.report.domain.HtsReportDto;
-import org.lamisplus.modules.report.domain.PrepReportDto;
 import org.lamisplus.modules.report.domain.RADETDTOProjection;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.repository.ReportRepository;
@@ -31,7 +29,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -361,7 +358,33 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		return null;
 	}
 
+	@Override
+	public ByteArrayOutputStream generateLongitudinalPrepReport(Long facilityId, LocalDate start, LocalDate end) {
+		try {
+			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
+			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
+			LOG.info("start date {}", startDate);
+			LOG.info("end date {}", endDate);
+			if(Application.longitudinal != null){
+				LOG.info("Longitudinal PrEP query not available check query.yml file");
+			}
+			String query = Application.longitudinal;
+			query = query.replace("?1", String.valueOf(facilityId))
+					.replace("?2", startDate)
+					.replace("?3", endDate);
 
+			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
+			LOG.info("query size is : {}" + fullData.size());
+
+			return excelService.generate(Application.longitudinalPrepName, fullData, headers);
+		} catch (Exception e) {
+			LOG.info("Error Occurred when generating Longitudinal PrEP data", e);
+		}
+		LOG.info("End generate Longitudinal PrEP report");
+		return null;
+	}
 
 
 	@Override

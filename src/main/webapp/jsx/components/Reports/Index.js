@@ -292,6 +292,7 @@ const Reports = (props) => {
 
                      {/* <Label color='teal'>5</Label> */}
                    </Menu.Item>
+
                 </Menu>
               </div>
               <div

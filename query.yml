@@ -746,3 +746,139 @@ query:
     AND p.archived=0 AND p.facility_id=?1
     AND p.date_of_registration BETWEEN CAST('?2' AS DATE) AND CAST('?3' AS DATE)
     ) ahd
+  longitudinal-query-name: longitudinal
+  longitudinal-query: SELECT longitudinal.facility_id AS "Facility Id", longitudinal.facilityname AS "Facility Name", longitudinal.datimid AS "DATIM Id",
+      longitudinal.personuuid AS "Patient Identifier", longitudinal.hospitalNumber AS "Hospital Number",
+      longitudinal.firstname AS "First Name", longitudinal.surname AS "Surname", longitudinal.othername AS "Other Names",
+      longitudinal.sex AS "Sex",longitudinal.targetgroup AS "Target Group",longitudinal.age AS "Age", longitudinal.dateofbirth AS "Date Of Birth (yyyy-mm-dd)",
+      longitudinal.phone AS "Phone Number", longitudinal.maritalstatus AS "Marital Status",
+      longitudinal.state AS "State", longitudinal.lga AS "LGA", longitudinal.address AS "Client Address",
+      longitudinal.residentiallga AS "LGA of Residence", longitudinal.residentialstate AS "State Of Residence",
+      longitudinal.education AS "Education", longitudinal.occupation AS "Occupation", longitudinal.clientWeight AS "Weight", longitudinal.clientHeight AS "Height",
+      longitudinal.pulse AS "Pulse", longitudinal.temperature AS "Temperature", longitudinal.respiratory_rate AS "Respiratory Rate",
+      longitudinal.systolicBP AS "Systolic BP", longitudinal.diastolicBP AS "diastolic BP",  longitudinal.datePrepGiven AS "Date Prep Given",
+      longitudinal.prepType AS "Prep Type", longitudinal.regimenName AS "PrEP Regimen", longitudinal.regimenDuration AS "Regimen Duration" longitudinal.otherDrugs AS "Other Drugs",
+      longitudinal.adherenceLevel AS "Adherence Level", longitudinal.nextAppointment AS "Next Appointment", longitudinal.risk_reduction_services AS "Risk Reduction Services",
+      longitudinal.notedSideEffects AS "Noted Side Effects", longitudinal.hepatitisTestDate AS "Date of Hepatitis Test", longitudinal.hepatitisResult AS "Hepatitis Result",
+      longitudinal.syphilisTestDate AS "Date ot Syphilis Test", longitudinal.syphilisResult AS "Syphilis Result",
+      longitudinal.dateSti AS "Date of Syndromic STI", longitudinal.syndromicStiScreening AS "Syndromic STI Screening", longitudinal.altTestDate AS "Date of  ALT"  longitudinal.altTestResult AS " ALT Result",
+      longitudinal.hbsAgTestDate AS "Date of  HBsAG", longitudinal.hbsAgResult AS " HBsAG Result", longitudinal.hbpcvTestDate AS "Date of  HB/PCV", longitudinal.hbpcvResult AS " HB/PCV Result",
+      longitudinal.wbcTestDate AS "Date of  WBC", longitudinal.wbcResult AS "WBC Result", longitudinal.interruptionType AS "PrEP Discontinuation", longitudinal.reasonStopped AS "Reasons for discontinuation/Stopped",
+      longitudinal.hivEnrollmentDate AS "Date Of HIV Enrollment (yyyy-mm-dd)", longitudinal.otherTestResult AS "Other Tests Done", longitudinal.otherTestDate AS "Date of Other test Done"
+      FROM ( SELECT DISTINCT ON (clinic.uuid) p.uuid AS PersonUuid, p.id, p.uuid,p.hospital_number as hospitalNumber,
+      INITCAP(p.surname) AS surname, INITCAP(p.first_name) as firstName,
+      he.date_of_registration AS hivEnrollmentDate,p.facility_id,
+      EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) as age,
+      p.other_name as otherName, p.sex as sex, p.date_of_birth as dateOfBirth,
+      p.date_of_registration as dateOfRegistration, p.marital_status->>'display' as maritalStatus,
+      education->>'display' as education, p.employment_status->>'display' as occupation,
+      facility.name as facilityName, facility_lga.name as lga, facility_state.name as state,
+      boui.code as datimId,
+      (SELECT name FROM base_organisation_unit WHERE id = CAST(NULLIF(p.address->'address'->0 ->'stateId' ->> 0,'') AS BIGINT)) as residentialState,
+      (SELECT name FROM base_organisation_unit WHERE id = CAST(NULLIF(p.address->'address'->0 ->'district' ->> 0,'') AS BIGINT)) as residentialLga,
+      r.address as address, (CASE WHEN contact_point->'contactPoint'->0->>'type'='phone' THEN contact_point->'contactPoint'->0->>'value' ELSE null END) AS phone
+      ,clinic.uuid, clinic.encounter_date,
+      (SELECT display FROM base_application_codeset where code = baseline_reg.prep_type) AS prepType,
+      (select display from base_application_codeset where code = clinic.prep_distribution_setting) AS currentPrepDistributionSetting,
+      clinic.encounter_date AS DateOfLastPickup,
+      clinic.systolic AS systolicBP,
+      clinic.diastolic AS diastolicBP,
+      clinic.weight AS clientWeight,
+      clinic.height AS clientHeight,
+      clinic.urinalysis->>'result' AS currentUrinalysis,
+      (SELECT display from base_application_codeset where code = clinic.family_planning) AS familyPlanning,
+      clinic.date_of_family_planning AS dateOfFamilyPlanning,
+      CAST(clinic.urinalysis->>'testDate' AS DATE) AS currentUrinalysisDate,
+      clinic.encounter_date AS DateOfCurrentHIVStatus,
+      (CASE WHEN p.sex='Male' THEN NULL
+      WHEN clinic.pregnant IS NOT NULL AND clinic.pregnant='true' THEN (SELECT display FROM base_application_codeset WHERE code = clinic.pregnant)
+      ELSE 'Not Pregnant' END) AS pregnancyStatus,
+      clinic.next_appointment AS nextAppointment,
+      (CASE WHEN tg.display IS NULL THEN null ELSE tg.display END) AS targetGroup,
+      clinic.pulse AS pulse, clinic.respiratory_rate, clinic.temperature, baseline_reg.regimen AS regimenName, clinic.duration AS regimenDuration,
+      (SELECT display FROM base_application_codeset where code = clinic.adherence_level) AS adherenceLevel, clinic.date_prep_given AS datePrepGiven, clinic.risk_reduction_services,
+      (SELECT display FROM base_application_codeset where code = clinic.noted_side_effects) AS notedSideEffects,
+      clinic.syphilis->>'testDate' AS syphilisTestDate, clinic.syphilis->>'result' AS syphilisResult,
+      clinic.other_drugs AS otherDrugs, clinic.archived,
+      altTest.other_test_result AS altTestResult, altTest.other_test_date AS altTestDate, hbsAg.other_test_result AS hbsAgResult, hbsAg.other_test_date AS hbsAgTestDate, hbpcv.other_test_result AS hbpcvResult, hbpcv.other_test_date AS hbpcvTestDate,
+      wbc.other_test_result AS wbcResult, wbc.other_test_date AS wbcTestDate, otherTest.other_test_result AS otherTestResult, otherTest.other_test_date AS otherTestDate,
+      CASE WHEN clinic.syndromic_sti_screening IS NOT NULL THEN clinic.encounter_date ELSE NULL END AS dateSti,
+      (SELECT display FROM base_application_codeset where id = CAST(clinic.syndromic_sti_screening AS BIGINT)) AS syndromicStiScreening,
+      clinic.hepatitis->>'testDate' AS hepatitisTestDate,
+      (CASE WHEN clinic.hepatitis->>'testDate' IS NOT NULL THEN clinic.hepatitis->>'result' ILIKE 'Hepatitis ' ELSE NULL END) AS hepatitisResult,
+      (SELECT display FROM base_application_codeset where code = pi.interruption_type) AS interruptionType, pi.interruption_date AS interruptionDate, pi.reason_stopped AS reasonStopped
+      FROM patient_person p
+      INNER JOIN (
+      SELECT * FROM (SELECT p.id, REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '"', ''), ']', ''), '[', ''), 'null',''), '\\\\\\\', '') AS address,
+      CASE WHEN address_object->>'stateId'  ~ '^\\\\d(\\\\.\\\\d)?$' THEN address_object->>'stateId' ELSE null END  AS stateId,
+      CASE WHEN address_object->>'district'  ~ '^\\\\d(\\\\.\\\\d)?$' THEN address_object->>'district' ELSE null END  AS lgaId
+      FROM patient_person p,
+      jsonb_array_elements(p.address-> 'address') with ordinality l(address_object)) as resultAh
+      ) r ON r.id=p.id
+      LEFT JOIN base_organisation_unit facility ON facility.id=facility_id
+      LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id=facility.parent_organisation_unit_id
+      LEFT JOIN base_organisation_unit facility_state ON facility_state.id=facility_lga.parent_organisation_unit_id
+      LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)
+      LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)
+      LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=facility_id AND boui.name='DATIM_ID'
+      LEFT JOIN hiv_enrollment he ON he.person_uuid = p.uuid AND he.archived = 0
+      INNER JOIN prep_enrollment prepe ON prepe.person_uuid = p.uuid
+      LEFT JOIN base_application_codeset riskt ON riskt.code = prepe.risk_type
+      LEFT JOIN (SELECT target_group, person_uuid  FROM hts_client) penrol ON penrol.person_uuid=p.uuid
+      LEFT JOIN base_application_codeset tg ON tg.code = penrol.target_group
+      LEFT JOIN (
+      SELECT *,
+      row_number () over (partition by person_uuid order by encounter_date desc) as rnk
+      FROM prep_clinic pc
+      where pc.archived = 0
+      ) clinic ON clinic.person_uuid = p.uuid
+      LEFT JOIN (
+      SELECT
+      arr.object->>'result' AS other_test_result, arr.object->>'name' AS other_test_name, arr.object->>'testDate' AS other_test_date, person_uuid, uuid
+      FROM
+      prep_clinic pc
+      CROSS JOIN LATERAL
+      jsonb_array_elements(other_tests_done) WITH ORDINALITY arr(object, position)
+      WHERE other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_ALT'
+      ) altTest ON altTest.uuid = clinic.uuid
+      LEFT JOIN (
+      SELECT
+      arr.object->>'result' AS other_test_result, arr.object->>'name' AS other_test_name, arr.object->>'testDate' AS other_test_date, person_uuid, uuid
+      FROM
+      prep_clinic pc
+      CROSS JOIN LATERAL
+      jsonb_array_elements(other_tests_done) WITH ORDINALITY arr(object, position)
+      WHERE other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_HBSAG'
+      ) hbsAg ON hbsAg.uuid = clinic.uuid
+      LEFT JOIN (
+      SELECT
+      arr.object->>'result' AS other_test_result, arr.object->>'name' AS other_test_name, arr.object->>'testDate' AS other_test_date, person_uuid, uuid
+      FROM
+      prep_clinic pc
+      CROSS JOIN LATERAL
+      jsonb_array_elements(other_tests_done) WITH ORDINALITY arr(object, position)
+      WHERE other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_HB_PCV'
+      ) hbpcv ON hbpcv.uuid = clinic.uuid
+      LEFT JOIN (
+      SELECT
+      arr.object->>'result' AS other_test_result, arr.object->>'name' AS other_test_name, arr.object->>'testDate' AS other_test_date, person_uuid, uuid
+      FROM
+      prep_clinic pc
+      CROSS JOIN LATERAL
+      jsonb_array_elements(other_tests_done) WITH ORDINALITY arr(object, position)
+      WHERE other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_WBC_+_DIFF'
+      ) wbc ON wbc.uuid =clinic.uuid
+      LEFT JOIN (
+      SELECT
+      arr.object->>'result' AS other_test_result, arr.object->>'name' AS other_test_name, arr.object->>'testDate' AS other_test_date, person_uuid, uuid
+      FROM
+      prep_clinic pc
+      CROSS JOIN LATERAL
+      jsonb_array_elements(other_tests_done) WITH ORDINALITY arr(object, position)
+      WHERE other_tests_done is not null and  arr.object->>'name' NOT IN ('PREP_OTHER_TEST_WBC_+_DIFF', 'PREP_OTHER_TEST_HB_PCV', 'PREP_OTHER_TEST_HBSAG', 'PREP_OTHER_TEST_ALT')
+      ) otherTest ON otherTest.uuid =clinic.uuid
+      LEFT JOIN prep_interruption pi ON pi.person_uuid = p.uuid
+      LEFT JOIN prep_regimen baseline_reg ON baseline_reg.id = clinic.regimen_id
+      WHERE p.archived = 0 AND p.facility_id=?1
+      AND clinic.encounter_date BETWEEN CAST('?2' AS DATE) AND CAST('?3' AS DATE)
+      ) longitudinal

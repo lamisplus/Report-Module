@@ -24,6 +24,11 @@ public class Application {
     //AHD
     private String ahdQueryName;
     private String ahdQuery;
+
+    //longitudinal
+    private String longitudinalPrepQueryName;
+    private String longitudinalPrepQuery;
+
     public static String indexElicitation;
     public static String indexElicitationName;
     public static String biometric;
@@ -41,6 +46,12 @@ public class Application {
     public static String aHDName;
     public static String ahd;
 
+    //Longitudinal PrEP report
+    public static String longitudinalPrepName;
+    public static String longitudinal;
+
+
+
     @PostConstruct
     public void mapQueryYmlParameters(){
         indexElicitation = getIndexQuery();
@@ -56,5 +67,8 @@ public class Application {
         //AHD
         ahd = getAhdQuery();
         aHDName = getAhdQueryName();
+        //longitudinal
+        longitudinal = getLongitudinalPrepQuery();
+        longitudinalPrepName = getLongitudinalPrepQueryName();
     }
 }
