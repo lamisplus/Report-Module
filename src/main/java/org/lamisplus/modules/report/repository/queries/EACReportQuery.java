@@ -9,7 +9,7 @@ public class EACReportQuery {
             "        p.uuid as patientId, p.hospital_number as hospitalNumber, h.unique_id as uniqueId, " +
             "        EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS age, " +
             "        INITCAP(p.sex) AS sex, p.date_of_birth as dateOfBirth, " +
-            "        facility.name AS facility_name, boui.code AS datimId, " +
+            "        facility.name AS facilityName, boui.code AS datimId, " +
             "        tgroup.display AS targetGroup, eSetting.display AS enrollmentSetting, " +
             "        hac.visit_date AS artStartDate, hr.description AS regimenAtArtStart, " +
             "        p.date_of_registration, p.surname, p.first_name,  boo.name as lgaOfResidence " +

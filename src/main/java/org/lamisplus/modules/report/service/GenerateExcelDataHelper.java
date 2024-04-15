@@ -120,8 +120,8 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getHospitalNumber())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getUniqueId())));
 
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getSurname())));
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getFirstName())));
+				//map.put(index++, getStringValue(String.valueOf(tbReportProjection.getSurname())));
+				//map.put(index++, getStringValue(String.valueOf(tbReportProjection.getFirstName())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getGender())));
 				map.put(index++, tbReportProjection.getDateOfBirth());
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getAge())));
@@ -286,8 +286,8 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getPatientId())));
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getHospitalNumber())));
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getUniqueId())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getSurname())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getOtherName())));
+				//map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getSurname())));
+				//map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getOtherName())));
 				map.put(index++, ncdReportProjection.getDateOfBirth());
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getAge())));
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getSex())));
@@ -296,8 +296,8 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getOccupation())));
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getStateOfResidence())));
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getLgaOfResidence())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getAddress())));
-				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getPhoneNumber())));
+				//map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getAddress())));
+				//map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getPhoneNumber())));
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getPregnancyStatus())));
 				map.put(index++, ncdReportProjection.getArtStartDate());
 
@@ -637,16 +637,16 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getDatimCode())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFacility())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getClientCode())));
-					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFirstName())));
-					map.put(index++, getStringValue(String.valueOf(htsReportDto.getSurname())));
-					map.put(index++, getStringValue(String.valueOf(htsReportDto.getOtherName())));
+//					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFirstName())));
+//					map.put(index++, getStringValue(String.valueOf(htsReportDto.getSurname())));
+//					map.put(index++, getStringValue(String.valueOf(htsReportDto.getOtherName())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getSex())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getTargetGroup())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getAge())));
 					map.put(index++, htsReportDto.getDateOfBirth());
-					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPhoneNumber())));
+//					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPhoneNumber())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getMaritalStatus())));
-					map.put(index++, htsReportDto.getClientAddress() != null ? getStringValue(String.valueOf(htsReportDto.getClientAddress())).replace("\"", ""):"");
+//					map.put(index++, htsReportDto.getClientAddress() != null ? getStringValue(String.valueOf(htsReportDto.getClientAddress())).replace("\"", ""):"");
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getLgaOfResidence())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getStateOfResidence())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getEducation())));
