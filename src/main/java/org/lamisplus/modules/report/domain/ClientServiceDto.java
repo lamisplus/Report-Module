@@ -21,4 +21,6 @@ public interface ClientServiceDto {
     String getReasonForDiscontinuation();
     String getNoAttempts();
 
+    String getHospitalNumber();
+
 }

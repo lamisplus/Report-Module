@@ -1812,6 +1812,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     @Query(value = "WITH clientVerification AS (SELECT DISTINCT ON (h.person_uuid) h.person_uuid AS personUuid, \n" +
             "CASE WHEN facility_state.name IS NULL THEN '' ELSE facility_state.name END AS facilityState, \n" +
             "u.name AS facilityName, \n" +
+            "p.hospital_number AS hospitalNumber,"+
             "h.data->>'serialEnrollmentNo' AS serialEnrollmentNo, \n" +
             "h.date_of_observation AS dateOfObservation, \n" +
             "obj.value->>'dateOfAttempt' AS dateOfAttempt, \n" +
@@ -1851,7 +1852,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "h.id, h.person_uuid, h.date_of_observation, u.name, facility_state.name, pt.dsd_model, obj.value, \n" +
             "h.data->>'serialEnrollmentNo', h.data->>'referredTo', \n" +
             "h.data->>'discontinuation', h.data->>'returnedToCare', \n" +
-            "h.data->>'dateOfDiscontinuation', pt.reason_for_discountinuation)\n" +
+            "h.data->>'dateOfDiscontinuation', pt.reason_for_discountinuation, p.hospital_number)\n" +
             "SELECT * FROM clientVerification\n" +
             "where rnk = 1\n", nativeQuery = true)
     List<ClientServiceDto> generateClientServiceList(Long facilityId);

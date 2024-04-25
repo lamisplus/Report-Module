@@ -408,6 +408,7 @@ public class Constants {
 					"Facility Name",
 					"Serial Enrollment No",
 					"Patient Id",
+					"Hospital Number",
 					"Date of Observation",
 					"Indication For Client Verification",
 					"Date Of Attempt",
