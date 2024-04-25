@@ -411,6 +411,7 @@ public class Constants {
 					"Date of Observation",
 					"Indication For Client Verification",
 					"Date Of Attempt",
+					"No of Verfication Attempts",
 					"Verification Attempts",
 					"Verification Status",
 					"Outcome",

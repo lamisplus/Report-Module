@@ -461,8 +461,11 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		//pmtct hts - 82d80564-6d3e-433e-8441-25db7fe1f2af
 		//pmtct maternal cohort - 2b6fe1b9-9af0-4af7-9f59-b9cfcb906158
 		if(reportId.equals("82d80564-6d3e-433e-8441-25db7fe1f2af")){
-			query = String.format(Application.pmtctHts, facilityId, startDate, endDate);
+//			query = String.format(Application.pmtctHts, facilityId, startDate, endDate);
+			query = Application.pmtctHts.replace("?1", facilityId.toString()).replace("?2", startDate).replace("?3", endDate);
+
 			reportName = Application.pmtctHtsName;
+			LOG.info("Query = {}", query);
 		} else if(reportId.equals("2b6fe1b9-9af0-4af7-9f59-b9cfcb906158")){
 			query = String.format(Application.pmtctMaternalCohort, facilityId, startDate, endDate);
 			reportName = Application.pmtctMaternalCohortName;
@@ -474,6 +477,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		if(query != null || query.equals("")){
 			LOG.info("pmtct query not available check query.yml file");
 		}
+		LOG.info("Query = {}", query);
 		ResultSet resultSet = resultSetExtract.getResultSet(query);
 		List<String> headers = resultSetExtract.getHeaders(resultSet);
 		List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);

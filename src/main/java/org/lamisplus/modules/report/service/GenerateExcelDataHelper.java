@@ -939,6 +939,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(clientService.getDateOfObservation())));
 				map.put(index++, getStringValue(clientService.getAnyOfTheFollowingList()));
 				map.put(index++, getStringValue(clientService.getDateOfAttempt()));
+				map.put(index++, getStringValue(clientService.getNoAttempts()));
 				map.put(index++, getStringValue(clientService.getVerificationAttempts()));
 				map.put(index++, getStringValue(clientService.getVerificationStatus()));
 				map.put(index++, getStringValue(clientService.getOutcome()));

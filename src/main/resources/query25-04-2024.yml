@@ -1,0 +1,855 @@
+query:
+  index-query-name: index_elicitation
+  index-query:  SELECT boui.code as "Facility Id (Datim)", state.name AS "State", lga.name AS "LGA", facility.name AS "Facility" ,  hc.client_code AS "Client Code",
+    pp.uuid AS "Patient Id",
+    hc.uuid AS "Index HTS Uuid",
+    (CASE WHEN hc.test1->>'result' ILIKE 'Yes' THEN 'Positive' ELSE 'Negative' END) AS "HIV Status of Index",
+    hc.index_notification_services_elicitation ->> 'OfferedIns' AS "Offered INS",
+    hc.index_notification_services_elicitation ->> 'AcceptedIns' AS "Accepted INS",
+    hc.client_code AS "Index Code",
+    hie.dob AS "Date of Birth",
+    se.display AS "Sex",
+    noti_method.display AS "Notification Method",
+    sexually_un.display AS "Sexually uncomfortable",
+    CASE WHEN hie.currently_live_with_partner  IS TRUE THEN 'Yes' ELSE 'No' END AS "Currently living with partner",
+    relationship.display AS "Relationship with index client",
+    hie.date_partner_came_for_testing AS "Date Partner Came For Testing"
+    FROM hts_client hc
+    LEFT JOIN patient_person pp ON pp.uuid=hc.person_uuid
+    INNER JOIN hts_index_elicitation hie ON hie.hts_client_uuid = hc.uuid
+    LEFT JOIN base_application_codeset se ON se.id=hie.sex
+    LEFT JOIN base_application_codeset noti_method ON noti_method.id=hie.notification_method
+    LEFT JOIN base_application_codeset sexually_un ON sexually_un.id=hie.sexually_uncomfortable
+    LEFT JOIN base_application_codeset relationship ON relationship.id=hie.relationship_with_index_client
+    LEFT JOIN base_organisation_unit facility ON facility.id=hc.facility_id
+    LEFT JOIN base_organisation_unit state ON state.id=facility.parent_organisation_unit_id
+    LEFT JOIN base_organisation_unit lga ON lga.id=state.parent_organisation_unit_id
+    LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=hc.facility_id AND boui.name='DATIM_ID'
+    WHERE hc.archived=0 AND hc.facility_id=%d AND
+    hc.date_visit BETWEEN CAST('%s' AS DATE)
+    AND CAST('%s' AS DATE)
+  biometric-query-name: biometric
+  biometric-query:  SELECT result.state AS "State", result.lga AS "LGA", result.facility AS "Facility",
+                  result.uuid AS "Patient ID", result.hospitalNumber AS "Hospital Number",
+                  base.enrollment_date AS "Date Base Biometrics Enrolled (yyyy-mm-dd)",
+                  base.count AS "Number of Base Fingerprint Captured",
+                  first_recapture.enrollment_date AS "Date of 1st Biometric Recapture",
+                  first_recapture.count AS "Number of 1st Biometric Recaptured Fingerprints",
+                  first_recapture.perfectMatch AS "Baseline Match Perfect", first_recapture.imperfectMatch AS "Baseline Match Imperfect",
+                  first_recapture.noMatch AS "Baseline Match No-Match",
+                  second_recapture.enrollment_date AS "Date of 2nd Biometric Recapture",
+                  second_recapture.count AS "Number of 2nd Recapture Fingerprints Captured",
+                  second_recapture.perfectMatch AS "Recapture Match Perfect", second_recapture.imperfectMatch AS "Recapture Match Imperfect",
+                  second_recapture.noMatch AS "Recapture Match No-Match",
+                  (CASE WHEN second_recapture.replace_date IS NOT NULL THEN second_recapture.replace_date
+                  WHEN first_recapture.replace_date IS NOT NULL THEN first_recapture.replace_date
+                  WHEN base.replace_date IS NOT NULL THEN base.replace_date
+                  ELSE NULL END) AS "Date Base Fingerprint Replaced"
+                  FROM
+                  (SELECT pp.hospital_number AS hospitalNumber, pp.facility_id,
+                  pp.uuid, facility.name AS facility, state.name AS state, lga.name AS lga
+                  FROM patient_person pp
+                  INNER JOIN hiv_enrollment he ON he.person_uuid=pp.uuid AND he.archived=0
+                  LEFT JOIN base_organisation_unit facility ON facility.id=pp.facility_id
+                  LEFT JOIN base_organisation_unit state ON state.id=facility.parent_organisation_unit_id
+                  LEFT JOIN base_organisation_unit lga ON lga.id=state.parent_organisation_unit_id
+                  LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=pp.facility_id
+                  AND boui.name='DATIM_ID'
+                  WHERE pp.archived=0
+                  AND pp.facility_id=%d
+                   AND pp.date_of_registration BETWEEN CAST('%s' AS DATE) AND CAST('%s' AS DATE)
+                  ) AS result
+                  LEFT JOIN (
+                  SELECT
+                  person_uuid,
+                  MAX(enrollment_date) enrollment_date, replace_date,
+                  count
+                  FROM
+                  biometric
+                  WHERE
+                  recapture = 0
+                  AND archived=0
+                  AND count is not null
+                  AND enrollment_date is not null
+                  AND version_iso_20 IS TRUE
+                  GROUP BY person_uuid, count, replace_date
+                  ) base ON result.uuid = base.person_uuid
+                  LEFT JOIN (
+                  SELECT
+                  person_uuid,
+                  MAX(enrollment_date) AS enrollment_date,
+                  replace_date, 
+                  COUNT(CASE WHEN match_type = 'Perfect Match' THEN 1 ELSE NULL END) AS perfectMatch,
+                  COUNT(CASE WHEN match_type = 'Imperfect Match' THEN 1 ELSE NULL END) AS imperfectMatch,
+                  COUNT(CASE WHEN match_type = 'No Match' THEN 1 ELSE NULL END) AS noMatch,
+                  count FROM biometric WHERE
+                  (recapture = 1)
+                  AND archived = 0
+                  AND count IS NOT NULL
+                  AND enrollment_date IS NOT NULL
+                  AND version_iso_20 IS TRUE GROUP BY person_uuid, count, replace_date
+                  ) AS first_recapture ON result.uuid = first_recapture.person_uuid
+                  LEFT JOIN (
+                  SELECT
+                  person_uuid,
+                  MAX(enrollment_date) enrollment_date, replace_date,
+                  COUNT(CASE WHEN match_type = 'Perfect Match' THEN 1 ELSE NULL END) AS perfectMatch,
+                  COUNT(CASE WHEN match_type = 'Imperfect Match' THEN 1 ELSE NULL END) AS imperfectMatch,
+                  COUNT(CASE WHEN match_type = 'No Match' THEN 1 ELSE NULL END) AS noMatch,
+                  count
+                  FROM biometric WHERE
+                  (recapture = 2)
+                  AND archived=0
+                  AND count is not null
+                  AND enrollment_date is not null
+                  AND version_iso_20 IS TRUE
+                  GROUP BY person_uuid, count, replace_date
+                  ) AS second_recapture ON result.uuid = second_recapture.person_uuid
+  pmtct-hts-query-name: pmtct-hts
+  pmtct-hts-query:  SELECT pmtct.state as "State", pmtct.lga as "LGA", pmtct.facilityName AS "Facility",
+                    pmtct.uuid AS "Patient ID", pmtct.anc_no AS "ANC number", pmtct.motherCode AS "Mother''s Hospital Num",
+                    pmtct.dateofbirth AS "Mother''s Date of Birth", pmtct.age AS "Age", pmtct.maritalstatus AS "Marital Status",
+                    pmtct.entryPoint AS "Point of Entry", pmtct.modality AS "Modality", pmtct.gaweeks_anc AS "Gestational Age (Weeks) @ First ANC visit", 
+                    pmtct.hivTestDate AS "Date tested for HIV", pmtct.hiv_test_result AS "HIV Test result",
+                    pmtct.encounterDate1 AS "Date Tested for Hepatitis B", pmtct.hepatitisBTestResult AS "Hepatitis B Test Result", pmtct.encounterDate2 AS "Date Tested for Hepatitis C", pmtct.hepatitisCTestResult AS "Hepatitis C Test Result",
+                    pmtct.encounterDate3 AS "Date tested for Sypillis", pmtct.syphilisTestResult AS "Syphillis Test Result", pmtct.IfRecencyTestingOptIn AS "If Recency Testing Opt In",
+                    pmtct.recencyID AS "Recency Id", pmtct.recencyTestType AS "Recency Test Type", pmtct.recencyTestDate AS "Recency Test Date (yyyy-mm-dd)",
+                    pmtct.recencyInterpretation AS "Recency Interpretation", pmtct.viralLoadSampleCollectionDate AS "Viral Load Sample Collection Date", pmtct.viralLoadResult AS "Viral Load Result Classification",
+                    pmtct.viralLoadConfirmationResult AS "Viral Load Confirmation Result", pmtct.viralLoadConfirmationDate AS "Viral Load Confirmation Date (yyyy-mm-dd)", pmtct.finalRecencyResult AS "Final Recency Result",
+                    pmtct.hivEnrollment AS "Mother''s ART Start Date"
+                    from (
+                    SELECT DISTINCT ON (p.uuid)p.uuid AS PersonUuid,
+                    facility_state.name as state,
+                    facility_lga.name as lga,
+                    facility.name as facilityName,
+                    p.hospital_number as hospitalNumber,
+                    anc.anc_no,
+                    COALESCE(he.unique_id, hc.client_code) AS motherCode,
+                    p.date_of_birth as dateOfBirth,
+                    EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) as age,
+                    p.marital_status->>'display' as maritalStatus,
+                    p.uuid,
+                    modality_code.display AS modality,
+                    anc.gaweeks_anc,
+                    hc.test1->>'date' AS hivTestDate,
+                    hc.hiv_test_result,
+                    hc.date_visit AS encounterDate, hc.date_visit AS encounterDate1, hc.date_visit AS encounterDate2, hc.date_visit AS encounterDate3, hc.date_visit AS encounterDate4,
+                    (CASE WHEN hc.hepatitis_testing->>'hepatitisBTestResult' ILIKE 'Yes' THEN 'Positive' ELSE 'Negative' END) AS hepatitisBTestResult,      
+                    (CASE WHEN hc.hepatitis_testing->>'hepatitisCTestResult' ILIKE 'Yes' THEN 'Positive' ELSE 'Negative' END) AS hepatitisCTestResult,
+                    (CASE WHEN hc.syphilis_testing->>'syphilisTestResult' ILIKE 'Yes' THEN 'Reactive' ELSE 'Non-Reactive' END) As syphilisTestResult,      
+                    (CASE WHEN hc.recency->>'optOutRTRI' ILIKE 'true' THEN 'Yes' WHEN hc.recency->>'optOutRTRI' ILIKE 'false' THEN 'No' WHEN hc.recency->>'optOutRTRI' != NULL THEN hc.recency->>'optOutRTRI' ELSE NULL END) AS IfRecencyTestingOptIn,      
+                    hc.recency->>'rencencyId' AS recencyID, hc.recency->>'optOutRTRITestName' AS recencyTestType,      
+                    (CASE WHEN hc.recency->>'optOutRTRITestDate' IS NOT NULL AND hc.recency->>'optOutRTRITestDate' != '' AND LENGTH(hc.recency->>'optOutRTRITestDate') > 0 THEN CAST(NULLIF(hc.recency->>'optOutRTRITestDate', '') AS TEXT) WHEN hc.recency->>'sampleTestDate' IS NOT NULL     
+                    AND hc.recency->>'sampleTestDate' != '' AND LENGTH(hc.recency->>'sampleTestDate') > 0 THEN CAST(NULLIF(hc.recency->>'sampleTestDate', '') AS TEXT) ELSE NULL END) AS recencyTestDate,    
+                    (CASE WHEN hc.recency->>'receivedResultDate' IS NOT NULL AND hc.recency->>'receivedResultDate' != '' AND LENGTH(hc.recency->>'receivedResultDate') > 0 THEN CAST(NULLIF(hc.recency->>'receivedResultDate', '') AS TEXT) ELSE NULL END) AS viralLoadReceivedResultDate,    
+                    (CASE WHEN hc.recency->>'rencencyInterpretation' IS NOT NULL AND hc.recency->>'rencencyInterpretation' ILIKE '%Long%' THEN 'RTRI Longterm'  
+                    WHEN hc.recency->>'rencencyInterpretation' IS NOT NULL AND hc.recency->>'rencencyInterpretation' ILIKE '%Recent%' THEN 'RTRI Recent' ELSE hc.recency->>'rencencyInterpretation' END) AS recencyInterpretation,    
+                    hc.recency->>'finalRecencyResult' AS finalRecencyResult, hc.recency->>'viralLoadResultClassification' AS viralLoadResult,     
+                    CAST(NULLIF(hc.recency->>'sampleCollectedDate', '') AS TEXT) AS viralLoadSampleCollectionDate,  hc.recency->>'viralLoadConfirmationResult' AS viralLoadConfirmationResult,    
+                    CAST(NULLIF(hc.recency->>'viralLoadConfirmationTestDate', '') AS DATE) AS viralLoadConfirmationDate,               
+                    hrs.entry_point AS entryPoint,
+                    CAST(COALESCE(he.date_started, he.date_of_registration) AS TEXT) AS hivEnrollment
+                    FROM patient_person p
+                    LEFT JOIN hiv_enrollment he ON he.person_uuid = p.uuid 
+                    INNER JOIN hts_client hc ON hc.person_uuid = p.uuid
+                    INNER JOIN (
+                    SELECT * FROM (SELECT p.id, CONCAT(CAST(address_object->>'city' AS VARCHAR), ' ', REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '\\\\\\\\', ''), ']', ''), '[', ''), 'null',''), '\\\\\\\', '')) AS address,
+                    CASE WHEN address_object->>'stateId'  ~ '^\\\\d+(\\\\.\\\\d+)?$' THEN address_object->>'stateId' ELSE null END  AS stateId,
+                    CASE WHEN address_object->>'district'  ~ '^\\\\d+(\\\\.\\\\d+)?$' THEN address_object->>'district' ELSE null END  AS lgaId
+                    FROM patient_person p,
+                    jsonb_array_elements(p.address-> 'address') with ordinality l(address_object)) as result
+                    ) r ON r.id=p.id
+                    LEFT JOIN base_organisation_unit facility ON facility.id=p.facility_id
+                    LEFT JOIN hts_risk_stratification hrs ON hrs.person_uuid = p.uuid
+                    LEFT JOIN base_application_codeset tg ON tg.code = hc.target_group 
+                    LEFT JOIN base_application_codeset it ON it.id = hc.relation_with_index_client
+                    LEFT JOIN base_application_codeset rf ON rf.id = hc.referred_from
+                    LEFT JOIN base_application_codeset ts ON ts.code = hc.testing_setting
+                    LEFT JOIN base_application_codeset tc ON tc.id = hc.type_counseling
+                    LEFT JOIN base_application_codeset preg ON preg.id = hc.pregnant
+                    LEFT JOIN base_application_codeset modality_code ON modality_code.code = hrs.modality 
+                    LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id=facility.parent_organisation_unit_id
+                    LEFT JOIN base_organisation_unit facility_state ON facility_state.id=facility_lga.parent_organisation_unit_id
+                    LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)
+                    LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)
+                    LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=p.facility_id AND boui.name='DATIM_ID'
+                    LEFT JOIN (
+                    SELECT person_uuid AS person_uuid_anc,
+                    anc_setting AS anc_setting_anc,
+                    gaweeks AS gaweeks_anc,
+                    anc_no AS anc_no,
+                    static_hiv_status,
+                    MAX(created_date) AS max_created_date_anc
+                    FROM pmtct_anc
+                    GROUP BY person_uuid, anc_setting, first_anc_date, gaweeks, gravida, parity, tested_syphilis, test_result_syphilis, partner_information, anc_no, static_hiv_status,
+                    pmtct_hts_info
+                    ) AS anc ON p.uuid = anc.person_uuid_anc
+                    LEFT JOIN pmtct_enrollment pmtctenroll ON pmtctenroll.person_uuid = p.uuid
+                    WHERE p.archived=0 and p.sex='Female' AND EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) > 10
+                    AND p.facility_id='?1' AND hc.date_visit BETWEEN CAST('?2' AS DATE) AND CAST('?3' AS DATE)
+                    ) as pmtct
+  pmtct-maternal-cohort-query-name: pmtct-maternal-cohort
+  pmtct-maternal-cohort-query:  Select infant.state AS "State", infant.LGA AS "LGA", infant.Facility AS "Facility",
+                                infant.Personuuid AS "Patient ID", infant.Mothers_Hospital_Number AS "Mother''s Hospital Num",
+                                infant.Mothers_Date_of_Birth AS "Mother''s Date of Birth",
+                                infant.maritalstatus AS "Marital Status", infant.anc_setting_anc AS "ANC Setting ( Facility,Community)",
+                                infant.Date_of_Index_ANC_Registration AS "Date of Index ANC Registration",
+                                infant.LMP_Date AS "LMP Date", infant.Gestational_Age_Weeks_at_First_ANC_visit AS "Gestational Age (Weeks) @ First ANC visit",
+                                infant.gravida AS "Gravida", infant.parity AS "Parity", infant.entry_point AS "Point of entry",
+                                infant.hbstatus_delivery AS "Hepatitis B Test Result",infant.test_result_syphilis_anc AS "Syphillis Test Result",
+                                infant.Mother_dateConfirmedHivTest AS "Date tested for HIV", infant.hivstatus AS "HIV Test result",
+                                infant.art_start_time AS "Timing of ART initiation in mother",
+                                infant.art_start_date AS "Mother''s ART Start Date", infant.date_of_viral_load AS "Date of last Valid VL(If any)",
+                                infant.ga_of_viral_Load AS "GA at last visit??? (days)", infant.dateOfCurrentViralLoad,
+                                infant.currentViralLoad, infant.viralloadindication AS "VL Indication for last valid VL before  32 weeks GA",
+                                infant.expected_delivery_date AS "Expected Date of Delivery", infant.date_of_delivery AS "Date of Delivery (mm-dd-yyyy)",
+                                infant.infant_hospital_number AS "Child''s hospital ID number", infant.place_of_delivery AS "Place of Delivery",
+                                infant.mode_of_delivery AS "Mode of delivery", infant.child_status AS "Fetal outcome (Child status)", Infant.sex AS "Sex - Child",
+                                infant.body_weight AS "Birth Weight",
+                                infant.feeding_decision AS "Infant feeding Options",
+                                infant.test_type, infant.date_sample_collected, infant.date_sample_sent, infant.date_result_received_at_facility,
+                                infant.results, infant.infant_outcome_at18_months AS "Result (Child Final Outcome)"
+                                from (SELECT DISTINCT ON (pia.infant_hospital_number) p.uuid AS PersonUuid, p.id, p.uuid,p.hospital_number as Mothers_Hospital_Number,
+                                INITCAP(p.surname) AS surname, INITCAP(p.first_name) as firstName, he.date_started AS hivEnrollmentDate,
+                                EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) as Mother_age,
+                                p.other_name as otherName, p.sex as sex, p.date_of_birth as Mothers_Date_of_Birth,
+                                p.date_of_registration as dateOfRegistration, p.marital_status->>'display' as maritalStatus,
+                                education->>'display' as education, p.employment_status->>'display' as occupation,
+                                facility.name as Facility, facility_lga.name as LGA, facility_state.name as state,
+                                boui.code as datimId,
+                                pmtctenroll.lmp AS LMP_Date,
+                                bacEntry.display AS entry_point,
+                                person_uuid_anc,
+                                anc.max_created_date_anc,
+                                bacc.display AS anc_setting_anc,
+                                anc.Date_of_Index_ANC_Registration,
+                                anc.Gestational_Age_Weeks_at_First_ANC_visit,
+                                anc.gravida,
+                                anc.parity,
+                                anc.tested_syphilis_anc,
+                                anc.test_result_syphilis_anc,
+                                anc.syphillisStatus AS Partner_syphilis_status,
+                                anc.acceptHivTest AS Partner_acceptHivTest,
+                                anc.referredTo AS Partner_syphilis_status,
+                                anc.age AS Partner_age,
+                                delivery.hbstatus_delivery,
+                                delivery.hcstatus_delivery,
+                                delivery.date_of_delivery,
+                                bacModeOfDelivery.display AS mode_of_delivery,
+                                delivery.maternal_outcome,
+                                bacChildStatus.display AS child_status,
+                                delivery.number_of_infants_alive,
+                                delivery.number_of_infants_dead,
+                                delivery.delivery_time,
+                                bacFeedingOption.display AS feeding_decision,
+                                delivery.child_given_arv_with72,
+                                delivery.hiv_exposed_infant_given_hb_with24hrs,
+                                VlResult.dateOfCurrentViralLoad,
+                                VlResult.currentViralLoad,
+                                VlResult.viralLoadIndication,
+                                mother_visitation.ga_of_viral_load,
+                                mother_visitation.date_of_viral_load,
+                                pii.hospital_number,
+                                pii.infant_sex,
+                                pii.body_weight,
+                                piv.ctx_status,
+                                pip.age_at_test,
+                                pip.test_type,
+                                pip.date_sample_collected,
+                                pip.date_sample_sent,
+                                pip.date_result_received_at_facility,
+                                pip.date_result_received_by_caregiver,
+                                bacResult.display AS results,
+                                pii.infant_outcome_at18_months,
+                                anc.Mother_dateConfirmedHivTest AS Mother_dateConfirmedHivTest,
+                                anc.hivstatus AS hivstatus,
+                                bac.display AS art_start_time,
+                                pmtctenroll.art_start_date,
+                                anc.expected_delivery_date,
+                                pia.infant_hospital_number,
+                                bacDelivery.display AS place_of_delivery
+                                FROM patient_person p
+                                INNER JOIN (
+                                SELECT * FROM (SELECT p.id, REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '"', ''), ']', ''), '[', ''), 'null',''), '\\\\\\\', '') AS address,
+                                CASE WHEN address_object->>'stateId'  ~ '^\\\\d+(\\\\.\\\\d+)?$' THEN address_object->>'stateId' ELSE null END  AS stateId,
+                                CASE WHEN address_object->>'district'  ~ '^\\\\d+(\\\\.\\\\d+)?$' THEN address_object->>'district' ELSE null END  AS lgaId
+                                FROM patient_person p,
+                                jsonb_array_elements(p.address-> 'address') with ordinality l(address_object)) as result
+                                ) r ON r.id=p.id
+                                LEFT JOIN (
+                                SELECT mother_person_uuid AS mother_person_uuid,
+                                body_weight AS body_weight,
+                                hospital_number AS hospital_number,
+                                sex AS infant_sex,
+                                infant_outcome_at18_months AS infant_outcome_at18_months,
+                                MAX(created_date) AS max_created_date_pii
+                                FROM pmtct_infant_information
+                                GROUP BY mother_person_uuid, body_weight, hospital_number, infant_sex, infant_outcome_at18_months
+                                ) AS pii ON p.uuid = pii.mother_person_uuid
+                                LEFT JOIN (
+                                SELECT mother_person_uuid AS mother_person_uuid,
+                                ctx_status AS ctx_status,
+                                MAX(visit_date) AS max_created_date_piv
+                                FROM pmtct_infant_visit
+                                GROUP BY mother_person_uuid, ctx_status
+                                ) AS piv ON p.uuid = piv.mother_person_uuid
+                                LEFT JOIN (
+                                SELECT uuid AS uuid,
+                                infant_hospital_number AS infant_hospital_number,
+                                MAX(visit_date) AS max_created_date_piv
+                                FROM pmtct_infant_arv
+                                GROUP BY uuid, infant_hospital_number
+                                ) AS pia ON p.uuid = pia.uuid
+                                LEFT JOIN (
+                                SELECT uuid AS uuid,
+                                test_type AS test_type,
+                                age_at_test AS age_at_test,
+                                date_sample_collected AS date_sample_collected,
+                                date_sample_sent AS date_sample_sent,
+                                date_result_received_at_facility AS date_result_received_at_facility,
+                                date_result_received_by_caregiver AS date_result_received_by_caregiver,
+                                results AS results,
+                                MAX(visit_date) AS max_created_date_pip
+                                FROM pmtct_infant_pcr
+                                GROUP BY uuid, test_type, age_at_test, date_sample_collected, date_sample_sent, date_result_received_at_facility, date_result_received_by_caregiver, results
+                                ) AS pip ON p.uuid = pip.uuid
+                                LEFT JOIN (
+                                SELECT person_uuid AS person_uuid_anc,
+                                anc_setting AS anc_setting_anc,
+                                first_anc_date AS Date_of_Index_ANC_Registration,
+                                gaweeks AS Gestational_Age_Weeks_at_First_ANC_visit,
+                                gravida AS gravida,
+                                parity As parity,
+                                tested_syphilis AS tested_syphilis_anc,
+                                test_result_syphilis AS test_result_syphilis_anc,
+                                partner_information->>'age' AS age,
+                                partner_information->>'syphillisStatus' AS syphillisStatus,
+                                partner_information->>'acceptHivTest' AS acceptHivTest,
+                                partner_information->>'referredTo' AS referredTo,
+                                partner_information->>'hivStatus' AS hivStatus,
+                                partner_information->>'dateConfirmedHivTest' AS Mother_dateConfirmedHivTest,
+                                expected_delivery_date AS expected_delivery_date,
+                                MAX(created_date) AS max_created_date_anc
+                                FROM pmtct_anc
+                                GROUP BY person_uuid, anc_setting, first_anc_date, gaweeks, gravida, parity, tested_syphilis, test_result_syphilis, partner_information,hivStatus,
+                                Mother_dateConfirmedHivTest, hivstatus, expected_delivery_date
+                                ) AS anc ON p.uuid = anc.person_uuid_anc
+                                LEFT JOIN (
+                                SELECT person_uuid AS person_uuid_mother_visitation,
+                                ga_of_viral_load AS ga_of_viral_Load,
+                                date_of_viral_load AS date_of_viral_load,
+                                MAX(date_of_visit) AS max_created_date_mother_visitation
+                                FROM pmtct_mother_visitation
+                                GROUP BY person_uuid, ga_of_viral_load, date_of_viral_load
+                                ) AS mother_visitation ON p.uuid = mother_visitation.person_uuid_mother_visitation
+                                LEFT JOIN (
+                                SELECT person_uuid AS person_uuid_delivery,
+                                hbstatus AS hbstatus_delivery,
+                                hcstatus AS hcstatus_delivery,
+                                date_of_delivery AS date_of_delivery,
+                                mode_of_delivery AS mode_of_delivery,
+                                maternal_outcome AS maternal_outcome,
+                                child_status AS child_status,
+                                number_of_infants_alive AS number_of_infants_alive,
+                                number_of_infants_dead AS number_of_infants_dead,
+                                delivery_time AS delivery_time,
+                                feeding_decision AS feeding_decision,
+                                child_given_arv_within72 AS child_given_arv_with72,
+                                hiv_exposed_infant_given_hb_within24hrs AS hiv_exposed_infant_given_hb_with24hrs,
+                                place_of_delivery AS place_of_delivery,
+                                MAX(created_date) AS max_created_date_delivery
+                                FROM pmtct_delivery
+                                GROUP BY person_uuid, hbstatus, hcstatus, date_of_delivery, mode_of_delivery, maternal_outcome, child_status, number_of_infants_alive, number_of_infants_dead, delivery_time, feeding_decision, child_given_arv_with72, hiv_exposed_infant_given_hb_with24hrs,
+                                place_of_delivery
+                                ) AS delivery ON p.uuid = delivery.person_uuid_delivery
+                                LEFT JOIN pmtct_delivery panc ON p.uuid = panc.person_uuid AND panc.created_date = delivery.max_created_date_delivery
+                                LEFT JOIN base_organisation_unit facility ON facility.id=p.facility_id
+                                LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id=facility.parent_organisation_unit_id
+                                LEFT JOIN base_organisation_unit facility_state ON facility_state.id=facility_lga.parent_organisation_unit_id
+                                LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)
+                                LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)
+                                LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=p.facility_id AND boui.name='DATIM_ID'
+                                INNER JOIN pmtct_enrollment pmtctenroll ON pmtctenroll.person_uuid = p.uuid
+                                LEFT JOIN base_application_codeset bac ON bac.code = pmtctenroll.art_start_time 
+                                LEFT JOIN base_application_codeset bacc ON bacc.code = anc.anc_setting_anc
+                                LEFT JOIN base_application_codeset bacEntry ON bacEntry.code = pmtctenroll.entry_point
+                                LEFT JOIN base_application_codeset bacDelivery ON bacDelivery.code = delivery.place_of_delivery
+                                LEFT JOIN base_application_codeset bacModeOfDelivery ON bacModeOfDelivery.code = delivery.mode_of_delivery
+                                LEFT JOIN base_application_codeset bacFeedingOption ON bacFeedingOption.code = delivery.feeding_decision
+                                LEFT JOIN base_application_codeset bacResult ON bacResult.code = pip.results
+                                LEFT JOIN base_application_codeset bacChildStatus ON bacChildStatus.code = delivery.child_status
+                                LEFT JOIN (SELECT * FROM
+                                (SELECT CAST(ls.date_sample_collected AS DATE ) AS dateOfCurrentViralLoadSample,
+                                sm.patient_uuid AS person_uuid130 ,
+                                sm.facility_id AS vlFacility,
+                                sm.archived AS vlArchived,
+                                acode.display AS viralLoadIndication,
+                                sm.result_reported AS currentViralLoad,
+                                CAST(sm.date_result_reported AS DATE) AS dateOfCurrentViralLoad,
+                                ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) AS rank2
+                                FROM public.laboratory_result  sm
+                                INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id
+                                INNER JOIN public.laboratory_sample ls on ls.test_id = lt.id
+                                INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication
+                                WHERE lt.lab_test_id = 16
+                                AND  lt.viral_load_indication !=719
+                                AND sm. date_result_reported IS NOT NULL
+                                AND sm.date_result_reported <= '12-02-2024'
+                                AND sm.result_reported IS NOT NULL
+                                ) AS vl_result
+                                WHERE vl_result.rank2 = 1
+                                AND (vl_result.vlArchived = 0 OR vl_result.vlArchived IS null)
+                                ) AS VlResult ON p.uuid  =  VlResult.person_uuid130
+                                LEFT JOIN hiv_enrollment he ON he.person_uuid = p.uuid
+                                WHERE p.archived=0 and p.sex='Female'
+                                AND p.facility_id=%d AND p.date_of_registration
+                                BETWEEN CAST('%s' AS DATE) AND CAST('%s' AS DATE)
+                                )as infant
+  prep-query-name: prep
+  prep-query: SELECT prep.datimid AS "Facility Id (Datim)",
+              prep.state AS "State", prep.lga AS "LGA", prep.facilityname AS "Facility Name",
+              prep.personuuid AS "Patient Identifier", prep.hospitalNumber AS "Hospital Number",
+              prep.sex AS "Sex",prep.targetgroup AS "Target Group", prep.age AS "Age", prep.dateofbirth AS "Date Of Birth (yyyy-mm-dd)",
+              prep.phone AS "Phone Number", prep.maritalstatus AS "Marital Status",
+              prep.residentiallga AS "LGA of Residence", prep.residentialstate AS "State Of Residence",
+              prep.education AS "Education", prep.occupation AS "Occupation", prep.familyPlanning as "Family Planning",
+              prep.dateOfFamilyPlanning as "Date Of Family Planning (yyyy-mm-dd)",
+              prep.dateofregistration AS "Date Of Registration (yyyy-mm-dd)", prep.prepcommencementdate AS "Date Of Commencement (yyyy-mm-dd)",
+              prep.baselineregimen AS "Baseline Regimen", prep.prepType AS "Prep Type", prep.prepdistributionsetting AS "Prep Distribution Setting",
+              prep.baselinesystolicbp AS "Baseline Systolic bp", prep.baselinediastolicbp AS "Baseline Diastolic bp", prep.baselineweight AS "Baseline Weight (kg)",
+              prep.baselineheight AS "Baseline Height (cm)", prep.baseLinecreatinine AS "Baseline Creatinine", prep.baselinehepatitisb AS "Baseline Hepatitis B",
+              prep.baselinehepatitisc AS "Baseline Hepatitis C", prep.hivstatusatprepinitiation AS "HIV status at PrEP Initiation",
+              prep.baselineurinalysis AS "Baseline Urinalysis", prep.baselineurinalysisdate AS "Baseline Urinalysis Date",
+              prep.baseLineAlt AS "Baseline ALT", prep.baseLineHbsag AS "Baseline HBsAG", prep.baseLineHbPcv AS "Baseline HB/PCV", prep.baseLineWbc AS "Baseline WBC",
+              prep.indicationforprep AS "Indication for PrEP", prep.currentregimen AS "Current Regimen", prep.currentPrepType AS "Current Prep Type", prep.currentPrepDistributionSetting AS "Current Prep Distribution Setting", prep.DateOfLastPickup AS "Date Of Last Pickup (yyyy-mm-dd)",
+              prep.CurrentStatus AS "Current Status", prep.DateOfCurrentStatus AS "Date Of Current Status (yyyy-mm-dd)", prep.currentSystolicBP AS "Current Systolic bp",
+              prep.currentDiastolicBP AS "Current Diastolic bp", prep.currentWeight AS "Current Weight (kg)", prep.currentHeight AS "Current Height (cm)",
+              prep.currentHivStatus AS "Current HIV Status", prep.DateOfCurrentHIVStatus AS "Date of Current HIV Status (yyyy-mm-dd)",
+              prep.currentUrinalysis AS "Current Urinalysis", prep.currentUrinalysisDate AS "Date of Current Urinalysis",
+              prep.currentAltDate AS "Date of Current ALT", prep.currentAlt AS "Current ALT",
+              prep.currentHbsagDate AS "Date of Current HBsAG", prep.currentHbsag AS "Current HBsAG",
+              prep.currentHbpcvDate AS "Date of Current HB/PCV", prep.currentHbpcv AS "Current HB/PCV",
+              prep.currentWbcDate AS "Date of Current WBC", prep.currentWbc AS "Current WBC",
+              prep.pregnancyStatus AS "Pregnancy Status", prep.InterruptionType as "PrEP Discontinuation Type", prep.InterruptionReason AS "Reasons for discontinuation/Stopped",
+              prep.InterruptionDate AS "Date of Discontinuation/Stopped", prep.hivEnrollmentDate AS "Date Of HIV Enrollment (yyyy-mm-dd)"
+              FROM (
+              SELECT DISTINCT ON (p.uuid)p.uuid AS PersonUuid, p.id, p.uuid,p.hospital_number as hospitalNumber,
+              INITCAP(p.surname) AS surname, INITCAP(p.first_name) as firstName,
+              he.date_of_registration AS hivEnrollmentDate,
+              EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) as age,
+              p.other_name as otherName, p.sex as sex, p.date_of_birth as dateOfBirth,
+              p.date_of_registration as dateOfRegistration, p.marital_status->>'display' as maritalStatus,
+              education->>'display' as education, p.employment_status->>'display' as occupation,
+              facility.name as facilityName, facility_lga.name as lga, facility_state.name as state,
+              boui.code as datimId, (SELECT name FROM base_organisation_unit WHERE id = CAST(NULLIF(p.address->'address'->0 ->'stateId' ->> 0,'') AS BIGINT)) as residentialState, (SELECT name FROM base_organisation_unit WHERE id = CAST(CASE WHEN p.address->'address'->0->'district'->>0 ~ '^\\d+$' THEN NULLIF(p.address->'address'->0->'district'->>0, '') ELSE NULL END AS BIGINT)) AS residentialLga,
+              r.address as address, (CASE WHEN contact_point->'contactPoint'->0->>'type'='phone' THEN contact_point->'contactPoint'->0->>'value' ELSE null END) AS phone,
+              baseline_reg.regimen AS baselineRegimen,
+              (select display from base_application_codeset where code = baseline_reg.prep_type) as prepType,
+              (select display from base_application_codeset where code = baseline_pc.prep_distribution_setting) AS prepDistributionSetting,
+              baseline_bp.systolic AS baselineSystolicBP,
+              baseline_bp.diastolic AS baselineDiastolicBP,
+              baseline_pc.weight AS baselineWeight,
+              baseline_pc.height AS baselineHeight,
+              (CASE WHEN tg.display IS NULL THEN null ELSE tg.display END) AS targetGroup,
+              baseline_pc.encounter_date AS prepCommencementDate,
+              baseline_urinalysis.result AS baseLineUrinalysis,
+              baseline_urinalysis.test_date AS baseLineUrinalysisDate,
+              baseline_creatinine.other_test_result AS baseLineCreatinine,
+              baseline_creatinine.other_test_date AS baseLineCreatinineTestDate,
+              baseline_alt.other_test_result AS baseLineAlt,
+              baseline_hbsag.other_test_result AS baseLineHbsag,
+              baseline_hbpcv.other_test_result AS baseLineHbPcv,
+              baseline_wbc.other_test_result AS baseLineWbc,
+              current_alt.other_test_result as currentAlt,
+              current_alt.other_test_date as currentAltDate,
+              current_hbsag.other_test_result as currentHbsag,
+              current_hbsag.other_test_date as currentHbsagDate,
+              current_hbpcv.other_test_result as currentHbpcv,
+              current_hbpcv.other_test_date as currentHbpcvDate,
+              current_wbc.other_test_result as currentWbc,
+              current_wbc.other_test_date as currentWbcDate,
+              (CASE WHEN baseline_pc.hepatitis->>'result' LIKE 'Hepatitis B%'
+              THEN baseline_pc.hepatitis->>'result' ELSE NULL END) AS baseLineHepatitisB,
+              (CASE WHEN baseline_pc.hepatitis->>'result' LIKE 'Hepatitis C%'
+              THEN baseline_pc.hepatitis->>'result' ELSE NULL END) AS baseLineHepatitisC,
+              (select display from base_application_codeset where code = current_pi.interruption_type) as InterruptionType,
+              current_pi.reason_stopped AS InterruptionReason,
+              current_pi.interruption_date AS InterruptionDate,
+              (CASE WHEN baseline_hiv_status.display IS NULL AND base_eli_test.base_eli_hiv_result IS NOT NULL
+              THEN base_eli_test.base_eli_hiv_result ELSE
+              REPLACE(baseline_hiv_status.display, 'HIV ', '') END) AS HIVStatusAtPrEPInitiation,
+              (CASE WHEN prepe.extra->'prep'->>'onDemandIndication' IS NOT NULL THEN prepe.extra->>'onDemandIndication'
+              WHEN riskt.display IS NOT NULL THEN riskt.display ELSE NULL END) AS indicationForPrEP,
+              current_reg.regimen AS currentRegimen,
+              (SELECT display FROM base_application_codeset where code = current_reg.prep_type) as currentPrepType,
+              (select display from base_application_codeset where code = current_pc.prep_distribution_setting) AS currentPrepDistributionSetting,
+              current_pc.encounter_date AS DateOfLastPickup,
+              current_pc.systolic AS currentSystolicBP,
+              current_pc.diastolic AS currentDiastolicBP,
+              current_pc.weight AS currentWeight,
+              current_pc.height AS currentHeight,
+              current_pc.urinalysis->>'result' AS currentUrinalysis,
+              (SELECT display from base_application_codeset where code = current_pc.family_planning) AS familyPlanning,
+              current_pc.date_of_family_planning AS dateOfFamilyPlanning,
+              CAST(current_pc.urinalysis->>'testDate' AS DATE) AS currentUrinalysisDate,
+              (CASE WHEN current_hiv_status.display IS NULL AND eli_hiv_result IS NOT NULL THEN eli_hiv_result
+              WHEN current_hiv_status.display IS NOT NULL THEN REPLACE(current_hiv_status.display, 'HIV ', '')
+              WHEN he.date_started IS NOT NULL THEN 'Positive' ELSE NULL
+              END) AS currentHivStatus,
+              current_pc.encounter_date AS DateOfCurrentHIVStatus,
+              (CASE WHEN p.sex='Male' THEN NULL
+              WHEN current_pc.pregnant IS NOT NULL AND current_pc.pregnant='true' THEN (SELECT display FROM base_application_codeset WHERE code = current_pc.pregnant)
+              ELSE 'Not Pregnant' END) AS pregnancyStatus,
+              (CASE
+              WHEN prepi.interruption_date  > prepc.encounter_date THEN bac.display
+              WHEN prepc.status IS NOT NULL THEN prepc.status
+              ELSE NULL END) AS CurrentStatus,
+              (CASE
+              WHEN prepi.interruption_date  > prepc.encounter_date THEN prepi.interruption_date
+              WHEN prepc.status IS NOT NULL THEN prepc.encounter_date
+              ELSE NULL END) AS DateOfCurrentStatus
+              FROM patient_person p
+              INNER JOIN (
+              SELECT * FROM (SELECT p.id, REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '"', ''), ']', ''), '[', ''), 'null',''), '\\\\\\\', '') AS address,
+              CASE WHEN address_object->>'stateId'  ~ '^\\\\d(\\\\.\\\\d)?$' THEN address_object->>'stateId' ELSE null END  AS stateId,
+              CASE WHEN address_object->>'district'  ~ '^\\\\d(\\\\.\\\\d)?$' THEN address_object->>'district' ELSE null END  AS lgaId
+              FROM patient_person p,
+              jsonb_array_elements(p.address-> 'address') with ordinality l(address_object)) as result
+              ) r ON r.id=p.id
+              LEFT JOIN (SELECT target_group, person_uuid  FROM hts_client) penrol ON penrol.person_uuid=p.uuid
+              LEFT JOIN (SELECT MAX(visit_date) max_date, person_uuid,target_group AS eli_target  FROM prep_eligibility
+              GROUP BY person_uuid,target_group) e_target ON e_target.person_uuid=p.uuid
+              LEFT JOIN (SELECT pe.drug_use_history->>'hivTestResultAtvisit' AS eli_hiv_result, max.visit_date, max.person_uuid FROM prep_eligibility pe
+              INNER JOIN (SELECT DISTINCT MAX(visit_date)visit_date, person_uuid FROM prep_eligibility
+              GROUP BY person_uuid)max ON max.visit_date=pe.visit_date
+              AND max.person_uuid=pe.person_uuid)eli_test ON eli_test.person_uuid=p.uuid
+              LEFT JOIN (SELECT pe.drug_use_history->>'hivTestResultAtvisit' AS base_eli_hiv_result, min.visit_date, min.person_uuid
+              FROM prep_eligibility pe
+              INNER JOIN (SELECT DISTINCT MIN(visit_date)visit_date, person_uuid FROM prep_eligibility
+              GROUP BY person_uuid)min ON min.visit_date=pe.visit_date
+              AND min.person_uuid=pe.person_uuid)base_eli_test ON base_eli_test.person_uuid=p.uuid
+              LEFT JOIN base_organisation_unit facility ON facility.id=facility_id
+              LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id=facility.parent_organisation_unit_id
+              LEFT JOIN base_organisation_unit facility_state ON facility_state.id=facility_lga.parent_organisation_unit_id
+              LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)
+              LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)
+              LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=facility_id AND boui.name='DATIM_ID'
+              INNER JOIN prep_enrollment prepe ON prepe.person_uuid = p.uuid
+              LEFT JOIN base_application_codeset riskt ON riskt.code = prepe.risk_type
+              LEFT JOIN base_application_codeset tg ON tg.code = penrol.target_group
+              LEFT JOIN base_application_codeset etg ON etg.code = e_target.eli_target
+              LEFT JOIN (SELECT DISTINCT pc.* FROM prep_clinic pc
+              INNER JOIN (SELECT DISTINCT MAX(encounter_date)encounter_date, person_uuid FROM prep_clinic
+              GROUP BY person_uuid)max ON max.encounter_date=pc.encounter_date
+              AND max.person_uuid=pc.person_uuid WHERE date_prep_start IS NULL)current_pc ON current_pc.person_uuid=p.uuid
+              LEFT JOIN (SELECT DISTINCT pi.* FROM prep_interruption pi)current_pi ON current_pi.person_uuid=p.uuid
+              LEFT JOIN prep_regimen current_reg ON current_reg.id = current_pc.regimen_id
+              LEFT JOIN base_application_codeset current_hiv_status ON current_hiv_status.code = current_pc.hiv_test_result
+              LEFT JOIN (SELECT pc.* FROM prep_clinic pc
+              INNER JOIN (SELECT DISTINCT MIN(encounter_date)encounter_date, person_uuid FROM prep_clinic
+              GROUP BY person_uuid)min ON min.encounter_date=pc.encounter_date
+              AND min.person_uuid=pc.person_uuid WHERE date_prep_start IS NOT NULL)baseline_pc ON baseline_pc.person_uuid=p.uuid
+              LEFT JOIN (SELECT 
+              pc.systolic, pc.diastolic, min.person_uuid FROM prep_clinic pc
+              INNER JOIN (SELECT DISTINCT MIN(encounter_date)encounter_date, person_uuid FROM prep_clinic
+              GROUP BY person_uuid)min ON min.person_uuid=pc.person_uuid
+              WHERE pc.systolic IS NOT NULL and pc.diastolic IS NOT NULL)baseline_bp ON baseline_bp.person_uuid=p.uuid
+              LEFT JOIN (SELECT 
+              pc.urinalysis ->> 'result' as result, pc.urinalysis->>'testDate' as test_date, min.person_uuid 
+              FROM prep_clinic pc JOIN (SELECT DISTINCT MIN(date(urinalysis->> 'testDate')) test_date, person_uuid 
+              FROM prep_clinic where urinalysis is not null
+              GROUP BY person_uuid)min ON min.person_uuid=pc.person_uuid
+              WHERE pc.urinalysis IS NOT NULL)baseline_urinalysis ON baseline_urinalysis.person_uuid=p.uuid
+              LEFT JOIN (SELECT 
+              arr.object->>'result' other_test_result, 
+              arr.object->>'name' as other_test_name, 
+              arr.object->>'testDate' as other_test_date, pc.person_uuid FROM prep_clinic pc
+              INNER JOIN (SELECT DISTINCT MIN(encounter_date)encounter_date, person_uuid FROM prep_clinic
+              GROUP BY person_uuid)min ON min.person_uuid=pc.person_uuid, 
+              jsonb_array_elements(other_tests_done) with ordinality arr(object, position)
+              WHERE pc.other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_CREATININE')baseline_creatinine ON baseline_creatinine.person_uuid=p.uuid
+              LEFT JOIN (SELECT 
+              arr.object->>'result' other_test_result, 
+              arr.object->>'name' as other_test_name, 
+              arr.object->>'testDate' as other_test_date, pc.person_uuid FROM prep_clinic pc
+              INNER JOIN (SELECT DISTINCT MIN(encounter_date)encounter_date, person_uuid FROM prep_clinic
+              GROUP BY person_uuid)min ON min.person_uuid=pc.person_uuid, 
+              jsonb_array_elements(other_tests_done) with ordinality arr(object, position)
+              WHERE pc.other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_ALT')baseline_alt ON baseline_alt.person_uuid=p.uuid
+              LEFT JOIN (SELECT 
+              arr.object->>'result' other_test_result, 
+              arr.object->>'name' as other_test_name, 
+              arr.object->>'testDate' as other_test_date, pc.person_uuid FROM prep_clinic pc
+              INNER JOIN (SELECT DISTINCT MIN(encounter_date)encounter_date, person_uuid FROM prep_clinic
+              GROUP BY person_uuid)min ON min.person_uuid=pc.person_uuid, 
+              jsonb_array_elements(other_tests_done) with ordinality arr(object, position)
+              WHERE pc.other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_HBSAG')baseline_hbsag ON baseline_hbsag.person_uuid=p.uuid
+              LEFT JOIN (SELECT 
+              arr.object->>'result' other_test_result, 
+              arr.object->>'name' as other_test_name, 
+              arr.object->>'testDate' as other_test_date, pc.person_uuid FROM prep_clinic pc
+              INNER JOIN (SELECT DISTINCT MIN(encounter_date)encounter_date, person_uuid FROM prep_clinic
+              GROUP BY person_uuid)min ON min.person_uuid=pc.person_uuid, 
+              jsonb_array_elements(other_tests_done) with ordinality arr(object, position)
+              WHERE pc.other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_HB_PCV')baseline_hbpcv ON baseline_hbpcv.person_uuid=p.uuid
+              LEFT JOIN (SELECT 
+              arr.object->>'result' other_test_result, 
+              arr.object->>'name' as other_test_name, 
+              arr.object->>'testDate' as other_test_date, pc.person_uuid FROM prep_clinic pc
+              INNER JOIN (SELECT DISTINCT MIN(encounter_date)encounter_date, person_uuid FROM prep_clinic
+              GROUP BY person_uuid)min ON min.person_uuid=pc.person_uuid, 
+              jsonb_array_elements(other_tests_done) with ordinality arr(object, position)
+              WHERE pc.other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_WBC_+_DIFF')baseline_wbc ON baseline_wbc.person_uuid=p.uuid
+              LEFT JOIN (SELECT 
+              arr.object->>'result' other_test_result, 
+              arr.object->>'name' as other_test_name, 
+              arr.object->>'testDate' as other_test_date, pc.person_uuid FROM prep_clinic pc
+              INNER JOIN (SELECT DISTINCT MAX(encounter_date)encounter_date, person_uuid FROM prep_clinic
+              GROUP BY person_uuid)max ON max.person_uuid=pc.person_uuid, 
+              jsonb_array_elements(other_tests_done) with ordinality arr(object, position)
+              WHERE pc.other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_ALT')current_alt ON current_alt.person_uuid=p.uuid
+              LEFT JOIN (SELECT 
+              arr.object->>'result' other_test_result, 
+              arr.object->>'name' as other_test_name, 
+              arr.object->>'testDate' as other_test_date, pc.person_uuid FROM prep_clinic pc
+              INNER JOIN (SELECT DISTINCT MAX(encounter_date)encounter_date, person_uuid FROM prep_clinic
+              GROUP BY person_uuid)max ON max.person_uuid=pc.person_uuid, 
+              jsonb_array_elements(other_tests_done) with ordinality arr(object, position)
+              WHERE pc.other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_HBSAG')current_hbsag ON current_hbsag.person_uuid=p.uuid
+              LEFT JOIN (SELECT 
+              arr.object->>'result' other_test_result, 
+              arr.object->>'name' as other_test_name, 
+              arr.object->>'testDate' as other_test_date, pc.person_uuid FROM prep_clinic pc
+              INNER JOIN (SELECT DISTINCT MAX(encounter_date)encounter_date, person_uuid FROM prep_clinic
+              GROUP BY person_uuid)max ON max.person_uuid=pc.person_uuid, 
+              jsonb_array_elements(other_tests_done) with ordinality arr(object, position)
+              WHERE pc.other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_HB_PCV')current_hbpcv ON current_hbpcv.person_uuid=p.uuid
+              LEFT JOIN (SELECT 
+              arr.object->>'result' other_test_result, 
+              arr.object->>'name' as other_test_name, 
+              arr.object->>'testDate' as other_test_date, pc.person_uuid FROM prep_clinic pc
+              INNER JOIN (SELECT DISTINCT MAX(encounter_date)encounter_date, person_uuid FROM prep_clinic
+              GROUP BY person_uuid)max ON max.person_uuid=pc.person_uuid, 
+              jsonb_array_elements(other_tests_done) with ordinality arr(object, position)
+              WHERE pc.other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_WBC_+_DIFF')current_wbc ON current_wbc.person_uuid=p.uuid
+              LEFT JOIN prep_regimen baseline_reg ON baseline_reg.id = baseline_pc.regimen_id
+              LEFT JOIN base_application_codeset baseline_hiv_status ON baseline_hiv_status.code=baseline_pc.hiv_test_result
+              LEFT JOIN hiv_enrollment he ON he.person_uuid = p.uuid
+              LEFT JOIN (
+              SELECT pi.id, pi.person_uuid, pi.interruption_date , pi.interruption_type
+              FROM prep_interruption pi
+              INNER JOIN (SELECT DISTINCT pi.person_uuid, MAX(pi.interruption_date)interruption_date
+              FROM prep_interruption pi WHERE pi.archived=0
+              GROUP BY pi.person_uuid)pit ON pit.interruption_date=pi.interruption_date
+              AND pit.person_uuid=pi.person_uuid
+              WHERE pi.archived=0
+              GROUP BY pi.id, pi.person_uuid, pi.interruption_date, pi.interruption_type )prepi ON prepi.person_uuid=p.uuid
+              LEFT JOIN (SELECT pc.person_uuid, MAX(pc.encounter_date) as encounter_date, pc.duration,
+              (CASE WHEN (pc.encounter_date  + pc.duration) > CAST (NOW() AS DATE) THEN 'Active'
+              ELSE  'Defaulted' END) status FROM prep_clinic pc
+              INNER JOIN (SELECT DISTINCT MAX(pc.encounter_date) encounter_date, pc.person_uuid
+              FROM prep_clinic pc GROUP BY pc.person_uuid) max_p ON max_p.encounter_date=pc.encounter_date
+              AND max_p.person_uuid=pc.person_uuid
+              WHERE pc.archived=0
+              GROUP BY pc.person_uuid, pc.duration, status)prepc ON prepc.person_uuid=p.uuid
+              LEFT JOIN base_application_codeset bac ON bac.code=prepi.interruption_type
+              WHERE p.archived=0 AND p.facility_id=?1
+              AND p.date_of_registration BETWEEN CAST('?2' AS DATE) AND CAST('?3' AS DATE)
+              ) prep
+  ahd-query-name: ahd
+  ahd-query: SELECT ahd.state AS "State", ahd.lga AS "LGA", ahd.facilityname AS "Facility Name", ahd.datimid AS "Facility Id (Datim)",
+             ahd.personuuid AS "Patient Identifier", ahd.hospitalNumber AS "Hospital Number",
+             ahd.sex AS "Sex",  ahd.dateofbirth AS "Date Of Birth (yyyy-mm-dd)", ahd.age AS "Age", ahd.body_weight AS "Current Weight",
+             ahd.hivEnrollmentdate AS "ART start date", ahd.visit_date AS "Date of last visit", ahd.tb_diagnostic_test_type AS "Test Type", ahd.tb_diagnostic_result AS "Test Result",
+             ahd.date_of_tb_diagnostic_result_received AS "Date Test Done", ahd.staging AS "WHO Staging"
+             FROM (
+             SELECT DISTINCT ON (p.uuid)p.uuid AS PersonUuid, p.id, p.uuid,p.hospital_number as hospitalNumber,
+             INITCAP(p.surname) AS surname, INITCAP(p.first_name) as firstName,
+             coalesce(he.date_of_registration, he.date_started) AS hivEnrollmentDate,
+             EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) as age,
+             p.other_name as otherName, p.sex as sex, p.date_of_birth as dateOfBirth,
+             p.date_of_registration as dateOfRegistration, p.marital_status->>'display' as maritalStatus,
+             education->>'display' as education, p.employment_status->>'display' as occupation,
+             facility.name as facilityName, facility_lga.name as lga, facility_state.name as state, boui.code as datimId,
+             testType.date_of_tb_diagnostic_result_received, testType.tb_diagnostic_test_type, testType.tb_diagnostic_result,
+             lastVisit.visit_date, lastVisit.staging, weight.body_weight
+             FROM patient_person p
+             LEFT JOIN base_organisation_unit facility ON facility.id=facility_id
+             LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id=facility.parent_organisation_unit_id
+             LEFT JOIN base_organisation_unit facility_state ON facility_state.id=facility_lga.parent_organisation_unit_id
+             LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=facility_id AND boui.name='DATIM_ID'
+             LEFT JOIN hiv_enrollment he ON he.person_uuid = p.uuid
+             LEFT JOIN (
+             with cur_tb as ( 
+             select sm.patient_uuid, sm.result_reported AS tb_diagnostic_result, 
+             CAST(sm.date_result_reported AS DATE) AS date_of_tb_diagnostic_result_received, 
+             CASE lt.lab_test_id 
+             WHEN 65 THEN 'Gene Xpert' 
+             WHEN 51 THEN 'TB-LAM' 
+             WHEN 66 THEN 'Chest X-ray' 
+             WHEN 64 THEN 'AFB microscopy' 
+             WHEN 67 THEN 'Gene Xpert' 
+             WHEN 58 THEN 'TB-LAM'
+             WHEN 50 THEN 'Visitect CD4'
+             WHEN 71 THEN 'LF-LAM'
+             WHEN 52 THEN 'Cryptococcal Antigen'
+             WHEN 69 THEN 'Serum crAg'
+             WHEN 70 THEN 'CSF crAg'
+             END AS tb_diagnostic_test_type, 
+             ROW_NUMBER() OVER (PARTITION BY sm.patient_uuid ORDER BY sm.date_result_reported DESC) AS rnk 
+             FROM 
+             laboratory_result sm 
+             INNER JOIN public.laboratory_test lt ON sm.test_id = lt.id 
+             WHERE 
+             lt.lab_test_id IN (65, 51, 66, 64) 
+             AND sm.archived = 0 
+             AND sm.date_result_reported IS NOT NULL 
+             AND sm.facility_id = ?1 
+             AND sm.date_result_reported <= '?3'
+             ) 
+             select patient_uuid, tb_diagnostic_result, date_of_tb_diagnostic_result_received, tb_diagnostic_test_type from cur_tb where rnk = 1 
+             ) testType ON testType.patient_uuid = p.uuid
+             LEFT JOIN (
+             SELECT person_uuid, visit_date, bac.display AS staging, 
+             ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY visit_date DESC) AS rnk 
+             FROM hiv_art_clinical hac
+             LEFT JOIN base_application_codeset bac ON bac.id = hac.clinical_stage_id WHERE hac.visit_date
+             BETWEEN CAST('?2' AS DATE) AND CAST('?3' AS DATE)
+             ) lastVisit ON lastVisit.person_uuid = p.uuid AND lastVisit.rnk = 1
+             LEFT JOIN (
+             SELECT person_uuid, body_weight, capture_date,
+             ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY capture_date DESC) AS rnk1
+             FROM triage_vital_sign WHERE archived = 0 AND capture_date BETWEEN CAST('?2' AS DATE) AND CAST('?3' AS DATE)
+             ) weight ON weight.person_uuid = p.uuid WHERE weight.rnk1 = 1
+             AND p.archived=0 AND p.facility_id=?1
+             AND p.date_of_registration BETWEEN CAST('?2' AS DATE) AND CAST('?3' AS DATE)
+             ) ahd
+  longitudinal-prep-query-name: longitudinal
+  longitudinal-prep-query: SELECT longitudinal.facility_id AS "Facility Id", longitudinal.facilityname AS "Facility Name", longitudinal.datimid AS "DATIM Id",
+                           longitudinal.personuuid AS "Patient Identifier", longitudinal.hospitalNumber AS "Hospital Number",                           
+                           longitudinal.sex AS "Sex",longitudinal.targetgroup AS "Target Group",longitudinal.age AS "Age", longitudinal.dateofbirth AS "Date Of Birth (yyyy-mm-dd)",
+                           longitudinal.maritalstatus AS "Marital Status", longitudinal.pregnancyStatus AS "Pregnancy Status",
+                           longitudinal.state AS "State", longitudinal.lga AS "LGA",
+                           longitudinal.residentiallga AS "LGA of Residence", longitudinal.residentialstate AS "State Of Residence",
+                           longitudinal.education AS "Education", longitudinal.occupation AS "Occupation", longitudinal.clientWeight AS "Weight", longitudinal.clientHeight AS "Height",
+                           longitudinal.pulse AS "Pulse", longitudinal.temperature AS "Temperature", longitudinal.respiratory_rate AS "Respiratory Rate",
+                           longitudinal.systolicBP AS "Systolic BP", longitudinal.diastolicBP AS "diastolic BP",  longitudinal.datePrepGiven AS "Date Prep Given",
+                           longitudinal.prepType AS "PrEP Type", longitudinal.regimenName AS "PrEP Regimen", longitudinal.regimenDuration AS "Regimen Duration", longitudinal.otherDrugs AS "Other Drugs",
+                           longitudinal.adherenceLevel AS "Adherence Level", longitudinal.nextAppointment AS "Next Appointment", longitudinal.risk_reduction_services AS "Risk Reduction Services",
+                           longitudinal.notedSideEffects AS "Noted Side Effects", longitudinal.hepatitisTestDate AS "Date of Hepatitis Test", longitudinal.hepatitisResult AS "Hepatitis Result",
+                           longitudinal.syphilisTestDate AS "Date ot Syphilis Test", longitudinal.syphilisResult AS "Syphilis Result", longitudinal.datePrepCom AS "Date of PrEP commencement", longitudinal.hivTestResult AS "HIV Test Result",
+                           longitudinal.dateSti AS "Date of Syndromic STI", longitudinal.syndromicStiScreening AS "Syndromic STI Screening", longitudinal.altTestDate AS "Date of  ALT",  longitudinal.altTestResult AS "ALT Result",
+                           longitudinal.hbsAgTestDate AS "Date of  HBsAG", longitudinal.hbsAgResult AS "HBsAG Result", longitudinal.hbpcvTestDate AS "Date of  HB/PCV", longitudinal.hbpcvResult AS "HB/PCV Result", 
+                           longitudinal.wbcTestDate AS "Date of  WBC", longitudinal.wbcResult AS "WBC Result", longitudinal.interruptionType AS "PrEP Discontinuation Type", longitudinal.reasonStopped AS "Reasons for discontinuation/Stopped",
+                           longitudinal.interruptionDate AS "Date of Discontinuation/stopped", longitudinal.hivEnrollmentDate AS "Date Of HIV Enrollment (yyyy-mm-dd)", longitudinal.otherTestResult AS "Other Tests Done", longitudinal.otherTestDate AS "Date of Other test Done", longitudinal.status AS "Status"
+                           FROM ( 
+                           SELECT DISTINCT ON (clinic.uuid) p.uuid AS PersonUuid, p.id, p.uuid,p.hospital_number as hospitalNumber,
+                           INITCAP(p.surname) AS surname, INITCAP(p.first_name) as firstName,
+                           he.date_of_registration AS hivEnrollmentDate,p.facility_id,
+                           EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) as age,
+                           p.other_name as otherName, p.sex as sex, p.date_of_birth as dateOfBirth,
+                           p.date_of_registration as dateOfRegistration, p.marital_status->>'display' as maritalStatus,
+                           education->>'display' as education, p.employment_status->>'display' as occupation,
+                           facility.name as facilityName, facility_lga.name as lga, facility_state.name as state,
+                           boui.code as datimId, 
+                           (SELECT name FROM base_organisation_unit WHERE id = CAST(NULLIF(p.address->'address'->0 ->'stateId' ->> 0,'') AS BIGINT)) as residentialState, 
+                           (SELECT name FROM base_organisation_unit WHERE id = CAST(CASE WHEN p.address->'address'->0->'district'->>0 ~ '^\\d+$' THEN NULLIF(p.address->'address'->0->'district'->>0, '') ELSE NULL END AS BIGINT)) AS residentialLga,
+                           r.address as address, (CASE WHEN contact_point->'contactPoint'->0->>'type'='phone' THEN contact_point->'contactPoint'->0->>'value' ELSE null END) AS phone,
+                           clinic.uuid, clinic.encounter_date,
+                           (SELECT display FROM base_application_codeset where code = baseline_reg.prep_type) AS prepType,
+                           (select display from base_application_codeset where code = clinic.prep_distribution_setting) AS currentPrepDistributionSetting,
+                           CAST(clinic.encounter_date AS TEXT) AS DateOfLastPickup,
+                           clinic.systolic AS systolicBP,
+                           clinic.diastolic AS diastolicBP,
+                           clinic.weight AS clientWeight,
+                           clinic.height AS clientHeight,
+                           clinic.urinalysis->>'result' AS currentUrinalysis,
+                           CAST(clinic.urinalysis->>'testDate' AS text) AS currentUrinalysisDate,
+                           clinic.encounter_date AS DateOfCurrentHIVStatus, (SELECT display FROM base_application_codeset WHERE code = clinic.hiv_test_result) AS hivTestResult, COALESCE(prepe.date_started, date_enrolled) AS datePrepCom,
+                           (CASE WHEN p.sex='Male' THEN NULL
+                           WHEN clinic.pregnant IS NOT NULL AND clinic.pregnant='true' THEN (SELECT display FROM base_application_codeset WHERE code = clinic.pregnant)
+                           ELSE 'Not Pregnant' END) AS pregnancyStatus,
+                           CAST(clinic.next_appointment AS TEXT) AS nextAppointment,
+                           (CASE WHEN tg.display IS NULL THEN null ELSE tg.display END) AS targetGroup,
+                           clinic.pulse AS pulse, clinic.respiratory_rate, clinic.temperature, baseline_reg.regimen AS regimenName, CAST(clinic.duration AS TEXT) AS regimenDuration, (CASE WHEN (clinic.encounter_date  + clinic.duration) > CAST (NOW() AS DATE) THEN 'Active' ELSE  'Defaulted' END) status,
+                           (SELECT display FROM base_application_codeset where code = clinic.adherence_level) AS adherenceLevel, CAST(COALESCE(clinic.date_prep_given, clinic.encounter_date) AS TEXT) AS datePrepGiven, clinic.risk_reduction_services, 
+                           (SELECT display FROM base_application_codeset where code = clinic.noted_side_effects) AS notedSideEffects,
+                           clinic.syphilis->>'testDate' AS syphilisTestDate, clinic.syphilis->>'result' AS syphilisResult,
+                           clinic.other_drugs AS otherDrugs, clinic.archived,
+                           altTest.other_test_result AS altTestResult, altTest.other_test_date AS altTestDate, hbsAg.other_test_result AS hbsAgResult, hbsAg.other_test_date AS hbsAgTestDate, hbpcv.other_test_result AS hbpcvResult, hbpcv.other_test_date AS hbpcvTestDate,
+                           wbc.other_test_result AS wbcResult, wbc.other_test_date AS wbcTestDate, CAST(otherTest.other_test_name AS TEXT) AS otherTestResult, otherTest.other_test_date AS otherTestDate,
+                           CASE WHEN clinic.syndromic_sti_screening IS NOT NULL THEN CAST(clinic.encounter_date AS TEXT) ELSE NULL END AS dateSti,
+                           (SELECT display FROM base_application_codeset where id = CAST(clinic.syndromic_sti_screening AS BIGINT)) AS syndromicStiScreening,
+                           clinic.hepatitis->>'testDate' AS hepatitisTestDate,
+                           (CASE WHEN clinic.hepatitis->>'testDate' IS NOT NULL THEN clinic.hepatitis->>'result' ELSE NULL END) AS hepatitisResult,
+                           (SELECT display FROM base_application_codeset where code = pi.interruption_type) AS interruptionType, CAST(pi.interruption_date AS TEXT) AS interruptionDate, pi.reason_stopped AS reasonStopped
+                           FROM patient_person p
+                           INNER JOIN (
+                           SELECT * FROM (SELECT p.id, REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '"', ''), ']', ''), '[', ''), 'null',''), '\\\\\\\', '') AS address,
+                           CASE WHEN address_object->>'stateId'  ~ '^\\\\d(\\\\.\\\\d)?$' THEN address_object->>'stateId' ELSE null END  AS stateId,
+                           CASE WHEN address_object->>'district'  ~ '^\\\\d(\\\\.\\\\d)?$' THEN address_object->>'district' ELSE null END  AS lgaId
+                           FROM patient_person p,
+                           jsonb_array_elements(p.address-> 'address') with ordinality l(address_object)) as resultAh
+                           ) r ON r.id=p.id
+                           LEFT JOIN base_organisation_unit facility ON facility.id=facility_id
+                           LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id=facility.parent_organisation_unit_id
+                           LEFT JOIN base_organisation_unit facility_state ON facility_state.id=facility_lga.parent_organisation_unit_id
+                           LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)
+                           LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)
+                           LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=facility_id AND boui.name='DATIM_ID'
+                           LEFT JOIN hiv_enrollment he ON he.person_uuid = p.uuid AND he.archived = 0
+                           INNER JOIN prep_enrollment prepe ON prepe.person_uuid = p.uuid
+                           LEFT JOIN base_application_codeset riskt ON riskt.code = prepe.risk_type
+                           LEFT JOIN (SELECT target_group, person_uuid  FROM hts_client) penrol ON penrol.person_uuid=p.uuid
+                           LEFT JOIN base_application_codeset tg ON tg.code = penrol.target_group
+                           LEFT JOIN (
+                           SELECT *,
+                           row_number () over (partition by person_uuid order by encounter_date desc) as rnk
+                           FROM prep_clinic pc
+                           where pc.archived = 0
+                           ) clinic ON clinic.person_uuid = p.uuid
+                           LEFT JOIN (
+                           SELECT 
+                           arr.object->>'result' AS other_test_result, arr.object->>'name' AS other_test_name, arr.object->>'testDate' AS other_test_date, person_uuid, uuid
+                           FROM 
+                           prep_clinic pc
+                           CROSS JOIN LATERAL 
+                           jsonb_array_elements(other_tests_done) WITH ORDINALITY arr(object, position)
+                           WHERE other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_ALT'
+                           ) altTest ON altTest.uuid = clinic.uuid
+                           LEFT JOIN (
+                           SELECT 
+                           arr.object->>'result' AS other_test_result, arr.object->>'name' AS other_test_name, arr.object->>'testDate' AS other_test_date, person_uuid, uuid
+                           FROM 
+                           prep_clinic pc
+                           CROSS JOIN LATERAL 
+                           jsonb_array_elements(other_tests_done) WITH ORDINALITY arr(object, position)
+                           WHERE other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_HBSAG'
+                           ) hbsAg ON hbsAg.uuid = clinic.uuid
+                           LEFT JOIN (
+                           SELECT 
+                           arr.object->>'result' AS other_test_result, arr.object->>'name' AS other_test_name, arr.object->>'testDate' AS other_test_date, person_uuid, uuid
+                           FROM 
+                           prep_clinic pc
+                           CROSS JOIN LATERAL 
+                           jsonb_array_elements(other_tests_done) WITH ORDINALITY arr(object, position)
+                           WHERE other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_HB_PCV'
+                           ) hbpcv ON hbpcv.uuid = clinic.uuid
+                           LEFT JOIN (
+                           SELECT 
+                           arr.object->>'result' AS other_test_result, arr.object->>'name' AS other_test_name, arr.object->>'testDate' AS other_test_date, person_uuid, uuid
+                           FROM 
+                           prep_clinic pc
+                           CROSS JOIN LATERAL 
+                           jsonb_array_elements(other_tests_done) WITH ORDINALITY arr(object, position)
+                           WHERE other_tests_done is not null and arr.object->>'name' = 'PREP_OTHER_TEST_WBC_+_DIFF'
+                           ) wbc ON wbc.uuid =clinic.uuid
+                           LEFT JOIN (
+                           SELECT STRING_AGG(arr.object->>'result', ', ') AS other_test_result, STRING_AGG((SELECT display FROM base_application_codeset WHERE code = arr.object->>'name'), ', ') AS other_test_name,
+                           arr.object->>'testDate' AS other_test_date, pc.person_uuid, pc.uuid FROM prep_clinic pc CROSS JOIN LATERAL jsonb_array_elements(other_tests_done) WITH ORDINALITY arr(object, position) WHERE other_tests_done IS NOT NULL AND arr.object->>'name' NOT IN ('PREP_OTHER_TEST_WBC_+_DIFF', 'PREP_OTHER_TEST_HB_PCV', 'PREP_OTHER_TEST_HBSAG', 'PREP_OTHER_TEST_ALT') GROUP BY pc.person_uuid, pc.uuid, arr.object->>'testDate'
+                           ) otherTest ON otherTest.uuid =clinic.uuid
+                           LEFT JOIN prep_interruption pi ON pi.person_uuid = p.uuid
+                           LEFT JOIN prep_regimen baseline_reg ON baseline_reg.id = clinic.regimen_id
+                           WHERE p.archived = 0 AND clinic.uuid <> '' AND p.facility_id=?1
+                           AND clinic.encounter_date BETWEEN CAST('?2' AS DATE) AND CAST('?3' AS DATE)
+                           ) longitudinal
