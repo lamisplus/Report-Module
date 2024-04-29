@@ -818,12 +818,17 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "     ), \n" +
             "ipt as ( \n" +
             "    with ipt_c as ( \n" +
-            "       select person_uuid, date_completed as iptCompletionDate, iptCompletionStatus from ( \n" +
-            "                select person_uuid, cast(ipt->>'dateCompleted' as date) as date_completed, \n" +
-            "                COALESCE(NULLIF(CAST(ipt->>'completionStatus' AS text), ''), '') AS iptCompletionStatus, \n" +
-            "                row_number () over (partition by person_uuid order by cast(ipt->>'dateCompleted' as  date) desc) as rnk \n" +
-            "                from hiv_art_pharmacy where (ipt->>'dateCompleted' is not null and ipt->>'dateCompleted' != 'null' and ipt->>'dateCompleted' != '' AND TRIM(ipt->>'dateCompleted') <> '') \n" +
-            "                and archived = 0) ic where ic.rnk = 1 \n" +
+//            "       select person_uuid, date_completed as iptCompletionDate, iptCompletionStatus from ( \n" +
+//            "                select person_uuid, cast(ipt->>'dateCompleted' as date) as date_completed, \n" +
+//            "                COALESCE(NULLIF(CAST(ipt->>'completionStatus' AS text), ''), '') AS iptCompletionStatus, \n" +
+//            "                row_number () over (partition by person_uuid order by cast(ipt->>'dateCompleted' as  date) desc) as rnk \n" +
+//            "                from hiv_art_pharmacy where (ipt->>'dateCompleted' is not null and ipt->>'dateCompleted' != 'null' and ipt->>'dateCompleted' != '' AND TRIM(ipt->>'dateCompleted') <> '') \n" +
+//            "                and archived = 0) ic where ic.rnk = 1 \n" +
+            "SELECT person_uuid, date_completed AS iptCompletionDate, iptCompletionStatus FROM \n" +
+            "        (SELECT person_uuid, CASE WHEN (ipt->>'dateCompleted' is not null and ipt->>'dateCompleted' != 'null' and ipt->>'dateCompleted' != '' \n" +
+            "        AND TRIM(ipt->>'dateCompleted') <> '')THEN CAST(ipt ->> 'dateCompleted' AS DATE) ELSE NULL END AS date_completed,\n" +
+            "        COALESCE(NULLIF(CAST(ipt ->> 'completionStatus' AS text), ''), '') AS iptCompletionStatus,ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY visit_date DESC) AS rnk FROM \n" +
+            "        hiv_art_pharmacy WHERE archived = 0 ) ic WHERE ic.rnk = 1"+
             "    ), \n" +
             "    ipt_s as ( \n" +
             "    SELECT person_uuid, visit_date as dateOfIptStart, regimen_name as iptType \n" +
@@ -838,9 +843,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    ) AS ic \n" +
             "    WHERE ic.rnk = 1 ), \n" +
             "    ipt_c_cs as ( \n" +
-            "       SELECT person_uuid, iptCompletionSCS, iptCompletionDSC \n" +
+            "       SELECT person_uuid, iptStartDate, iptCompletionSCS, iptCompletionDSC \n" +
             "       FROM ( \n" +
-            "       SELECT person_uuid, \n" +
+            "       SELECT person_uuid, CAST(data->'tbIptScreening'->>'dateTPTStart' AS DATE) as iptStartDate, \n" +
             "           data->'tptMonitoring'->>'outComeOfIpt' as iptCompletionSCS, \n" +
             "           CASE \n" +
             "               WHEN (data->'tptMonitoring'->>'date') = 'null' OR (data->'tptMonitoring'->>'date') = '' OR (data->'tptMonitoring'->>'date') = ' '  THEN NULL \n" +
@@ -860,7 +865,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "          WHERE ipt_c_sc_rnk = 1\n" +
             "    ) \n" +
             "    select ipt_c.person_uuid as personuuid80, coalesce(ipt_c_cs.iptCompletionDSC, ipt_c.iptCompletionDate) as iptCompletionDate, \n" +
-            "    coalesce(ipt_c_cs.iptCompletionSCS, ipt_c.iptCompletionStatus) as iptCompletionStatus, ipt_s.dateOfIptStart, ipt_s.iptType \n" +
+            "    coalesce(ipt_c_cs.iptCompletionSCS, ipt_c.iptCompletionStatus) as iptCompletionStatus, COALESCE(ipt_c_cs.iptStartDate, ipt_s.dateOfIptStart) AS dateOfIptStart, ipt_s.iptType \n" +
             "    from ipt_c \n" +
             "    left join ipt_s on ipt_s.person_uuid = ipt_c.person_uuid \n" +
             "    left join ipt_c_cs on ipt_s.person_uuid = ipt_c_cs.person_uuid ), \n" +
@@ -1833,7 +1838,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "JOIN base_organisation_unit u ON h.facility_id = u.id \n" +
             "CROSS JOIN jsonb_array_elements(h.data->'attempt') as obj \n" +
             "LEFT JOIN jsonb_array_elements_text(h.data->'anyOfTheFollowing') any_element ON true \n" +
-            "LEFT JOIN patient_person p ON p.id = h.id \n" +
+            "LEFT JOIN patient_person p ON p.uuid = h.person_uuid \n" +
             "LEFT JOIN base_organisation_unit facility ON facility.id = p.facility_id \n" +
             "LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id \n" +
             "LEFT JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id \n" +
