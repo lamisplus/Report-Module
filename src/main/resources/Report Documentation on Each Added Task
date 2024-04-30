@@ -8,3 +8,6 @@ Date 25-04-2024
 Date 29-04-2024
 - rework ipt Query to pull existing and old client Records
     - pull with exception of completed date
+
+Date 30-04-2024
+- remove pii from patient Line List
