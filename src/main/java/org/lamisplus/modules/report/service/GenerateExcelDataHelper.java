@@ -44,8 +44,8 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(patient.getPersonUuid())));
 				map.put(index++, getStringValue(String.valueOf(patient.getHospitalNumber())));
 				map.put(index++, getStringValue(String.valueOf(patient.getUniqueId())));
-				map.put(index++, getStringValue(String.valueOf(patient.getSurname())));
-				map.put(index++, getStringValue(String.valueOf(patient.getFirstName())));
+//				map.put(index++, getStringValue(String.valueOf(patient.getSurname())));
+//				map.put(index++, getStringValue(String.valueOf(patient.getFirstName())));
 				map.put(index++, patient.getDateOfBirth());
 				map.put(index++, getStringValue(String.valueOf(patient.getAge())));
 				map.put(index++, getStringValue(String.valueOf(patient.getGender())));
@@ -54,8 +54,8 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(patient.getOccupation())));
 				map.put(index++, getStringValue(String.valueOf(patient.getResidentialState())));
 				map.put(index++, getStringValue(String.valueOf(patient.getResidentialLga())));
-				map.put(index++, getStringValue(String.valueOf(patient.getAddress() != null ? patient.getAddress().replace("\"", ""):null)));
-				map.put(index++, getStringValue(String.valueOf(patient.getPhone())));
+//				map.put(index++, getStringValue(String.valueOf(patient.getAddress() != null ? patient.getAddress().replace("\"", ""):null)));
+//				map.put(index++, getStringValue(String.valueOf(patient.getPhone())));
 				map.put(index++, getStringValue(String.valueOf(patient.getArchived())));
 				map.put(index++, getStringValue(String.valueOf(patient.getCareEntryPoint())));
 				map.put(index++, (patient.getDateOfConfirmedHIVTest()));
