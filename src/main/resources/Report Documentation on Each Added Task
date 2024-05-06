@@ -1,0 +1,16 @@
+Date 25-04-2024
+-- Added a Column on Client Verification Report
+    - no of Attempts counts
+    - refactor query to pick on latest record on report (Distinct)
+    - Added Hospital Number
+-- Rework PMTCT HTS Report to pull all pmtct HTS record from HTS table
+
+Date 29-04-2024
+- rework ipt Query to pull existing and old client Records
+    - pull with exception of completed date
+
+Date 30-04-2024
+- remove pii from patient Line List
+
+Date 06-05-2024
+- refactor recapture column to pick only latest recapture

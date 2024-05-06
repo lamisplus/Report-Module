@@ -58,4 +58,24 @@ public class HtsReportController {
 
 		//messagingTemplate.convertAndSend("/topic/hts", "end");
 	}
+
+	@PostMapping(REPORT_URL_VERSION_ONE + "/ahd-reporting")
+	public void generateAhdReport (HttpServletResponse response, @RequestParam("facilityId") Long facility,
+								   @RequestParam("startDate") LocalDate start,
+								   @RequestParam("endDate") LocalDate end) throws IOException {
+
+//		messagingTemplate.convertAndSend("/topic/ahd", "start");
+
+		ByteArrayOutputStream baos = generateExcelService.generateAhdReport( facility, start, end);
+
+		setStream(baos, response);
+
+//		messagingTemplate.convertAndSend("/topic/hts", "end");
+	}
+
+
+
+
+
+
 }

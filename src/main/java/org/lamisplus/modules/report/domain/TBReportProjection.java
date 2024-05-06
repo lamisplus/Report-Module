@@ -8,8 +8,8 @@ public interface TBReportProjection {
     String getState();
     String getHospitalNumber();
     LocalDate getArtStartDate();
-    String getSurname();
-    String getFirstName();
+//    String getSurname();
+//    String getFirstName();
     String getUniqueId();
     int getAge();
     String getGender();

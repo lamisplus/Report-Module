@@ -12,9 +12,7 @@ import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 
 import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.report.config.Application;
-import org.lamisplus.modules.report.domain.BiometricReportDto;
 import org.lamisplus.modules.report.domain.HtsReportDto;
-import org.lamisplus.modules.report.domain.PrepReportDto;
 import org.lamisplus.modules.report.domain.RADETDTOProjection;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.repository.ReportRepository;
@@ -31,7 +29,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -100,56 +97,23 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	}
 
 
-	@Override
-	public ByteArrayOutputStream generateTBReport(Long facilityId, LocalDate start, LocalDate end) {
-		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
-		try {
-			List<TBReportProjection> tbReportProjections = reportRepository.generateTBReport(facilityId, start, end);
-			LOG.info("TB Size {}", tbReportProjections.size());
-			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillTBReportDataMapper(tbReportProjections, end);
-			return excelService.generate(Constants.TB_SHEET, data, Constants.TB_REPORT_HEADER);
-		} catch (Exception e) {
-			LOG.error("An error Occurred when generating TB report...");
-			LOG.error("Error message: " + e.getMessage());
-			e.printStackTrace();
-		}
-		LOG.info("End generate patient TB report");
-		return null;
-	}
-
-	@Override
-	public ByteArrayOutputStream generateNCDReport(Long facilityId, LocalDate start, LocalDate end) {
-		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
-		try {
-			List<NCDReportProjection> ncdReportProjections = reportRepository.generateNCDReport(facilityId, start, end);
-			LOG.info("TB Size {}", ncdReportProjections.size());
-			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillNCDReportDataMapper(ncdReportProjections, end);
-			return excelService.generate(Constants.NCD_SHEET, data, Constants.NCD_REPORT_HEADER);
-		} catch (Exception e) {
-			LOG.error("An error Occurred when generating NCD report...");
-			LOG.error("Error message: " + e.getMessage());
-			e.printStackTrace();
-		}
-		LOG.info("End generate patient NCD report");
-		return null;
-	}
-
-	@Override
-	public ByteArrayOutputStream generateEACReport(Long facilityId, LocalDate start, LocalDate end) {
-		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
-		try {
-			List<EACReportProjection> eacReportProjections = reportRepository.generateEACReport(facilityId, start, end);
-			LOG.info("EAC Size {}", eacReportProjections.size());
-			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillEACReportDataMapper(eacReportProjections, end);
-			return excelService.generate(Constants.EAC_SHEET, data, Constants.EAC_REPORT_HEADER);
-		} catch (Exception e) {
-			LOG.error("An error Occurred when generating EAC report...");
-			LOG.error("Error message: " + e.getMessage());
-			e.printStackTrace();
-		}
-		LOG.info("End generate patient EAC report");
-		return null;
-	}
+//	@Override
+//	public ByteArrayOutputStream generateTBReport(Long facilityId, LocalDate start, LocalDate end) {
+//		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
+//		try {
+//			List<TBReportProjection> tbReportProjections = reportRepository.generateTBReport(facilityId, start, end);
+//			LOG.info("RADET Size {}", tbReportProjections.size());
+//
+//			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillTBReportDataMapper(tbReportProjections);
+//			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
+//		} catch (Exception e) {
+//			LOG.error("An error Occurred when generating TB report...");
+//			LOG.error("Error message: " + e.getMessage());
+//			e.printStackTrace();
+//		}
+//		LOG.info("End generate patient TB report");
+//		return null;
+//	}
 
 
 	@Override
@@ -365,6 +329,64 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		return null;
 	}
 
+
+	@Override
+	public ByteArrayOutputStream generateAhdReport (Long facilityId, LocalDate start, LocalDate end) {
+		try {
+			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
+			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
+			LOG.info("start date {}", startDate);
+			LOG.info("end date {}", endDate);
+			if(Application.ahd != null){
+				LOG.info("AHD query not available check query.yml file");
+			}
+			String query = Application.ahd;
+			query = query.replace("?1", String.valueOf(facilityId))
+					.replace("?2", startDate)
+					.replace("?3", endDate);
+
+			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
+			LOG.info("query size is : {}" + fullData.size());
+
+			return excelService.generate(Application.aHDName, fullData, headers);
+		} catch (Exception e) {
+			LOG.info("Error Occurred when generating AHD data", e);
+		}
+		LOG.info("End generate AHD report");
+		return null;
+	}
+
+	@Override
+	public ByteArrayOutputStream generateLongitudinalPrepReport(Long facilityId, LocalDate start, LocalDate end) {
+		try {
+			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
+			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
+			LOG.info("start date {}", startDate);
+			LOG.info("end date {}", endDate);
+			if(Application.longitudinal != null){
+				LOG.info("Longitudinal PrEP query not available check query.yml file");
+			}
+			String query = Application.longitudinal;
+			query = query.replace("?1", String.valueOf(facilityId))
+					.replace("?2", startDate)
+					.replace("?3", endDate);
+
+			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
+			LOG.info("query size is : {}" + fullData.size());
+
+			return excelService.generate(Application.longitudinalPrepName, fullData, headers);
+		} catch (Exception e) {
+			LOG.info("Error Occurred when generating Longitudinal PrEP data", e);
+		}
+		LOG.info("End generate Longitudinal PrEP report");
+		return null;
+	}
+
+
 	@Override
 	public ByteArrayOutputStream generateIndexQueryLine(Long facilityId, LocalDate start, LocalDate end) {
 		LOG.info("Start generating Index line list for facility: " + getFacilityName(facilityId));
@@ -439,7 +461,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		//pmtct hts - 82d80564-6d3e-433e-8441-25db7fe1f2af
 		//pmtct maternal cohort - 2b6fe1b9-9af0-4af7-9f59-b9cfcb906158
 		if(reportId.equals("82d80564-6d3e-433e-8441-25db7fe1f2af")){
-			query = String.format(Application.pmtctHts, facilityId, startDate, endDate);
+//			query = String.format(Application.pmtctHts, facilityId, startDate, endDate);
+			query = Application.pmtctHts.replace("?1", facilityId.toString()).replace("?2", startDate).replace("?3", endDate);
+
 			reportName = Application.pmtctHtsName;
 		} else if(reportId.equals("2b6fe1b9-9af0-4af7-9f59-b9cfcb906158")){
 			query = String.format(Application.pmtctMaternalCohort, facilityId, startDate, endDate);

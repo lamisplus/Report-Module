@@ -20,13 +20,17 @@ public interface GenerateExcelService {
  ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, LocalDate end);
 
  ByteArrayOutputStream generatePrep(Long facilityId, LocalDate start, LocalDate end);
- 
+
+ ByteArrayOutputStream generateLongitudinalPrepReport(Long facilityId, LocalDate start, LocalDate end);
+
  ByteArrayOutputStream generateIndexQueryLine(Long facilityId, LocalDate start, LocalDate end);
 
  ByteArrayOutputStream generateClientServiceList(HttpServletResponse response, Long facility);
 
  ByteArrayOutputStream generateTBReport(Long facilityId, LocalDate start, LocalDate end);
  ByteArrayOutputStream generateEACReport(Long facilityId, LocalDate start, LocalDate end);
+
+ ByteArrayOutputStream generateAhdReport(Long facilityId, LocalDate start, LocalDate end);
 
  ByteArrayOutputStream generateNCDReport(Long facilityId, LocalDate start, LocalDate end);
   ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException;
