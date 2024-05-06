@@ -711,17 +711,17 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                  b.person_uuid\n" +
             "              ) biometric_count ON biometric_count.person_uuid = he.person_uuid \n" +
             "              LEFT JOIN (\n" +
-            "                SELECT \n" +
-            "                  r.person_uuid, \n" +
-            "                  CASE WHEN COUNT(r.person_uuid) > 10 THEN 10 ELSE COUNT(r.person_uuid) END, \n" +
-            "                  MAX(enrollment_date) recapture_date \n" +
-            "                FROM \n" +
-            "                  biometric r \n" +
-            "                WHERE \n" +
-            "                  archived = 0 \n" +
-            "                  AND recapture = 1 \n" +
-            "                GROUP BY \n" +
-            "                  r.person_uuid\n" +
+            "               SELECT \n" +
+            "               r.person_uuid, MAX(recapture),\n" +
+            "               CASE WHEN COUNT(r.person_uuid) > 10 THEN 10 ELSE COUNT(r.person_uuid) END, \n" +
+            "               enrollment_date AS recapture_date \n" +
+            "               FROM \n" +
+            "               biometric r \n" +
+            "               WHERE \n" +
+            "               archived = 0  \n" +
+            "               AND recapture != 0 AND recapture is NOT null "+
+            "                   GROUP BY \n" +
+            "                   r.person_uuid, r.enrollment_date "+
             "              ) recapture_count ON recapture_count.person_uuid = he.person_uuid \n" +
             "              LEFT JOIN (\n" +
             "            \n" +
@@ -845,7 +845,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    ipt_c_cs as ( \n" +
             "       SELECT person_uuid, iptStartDate, iptCompletionSCS, iptCompletionDSC \n" +
             "       FROM ( \n" +
-            "       SELECT person_uuid, CAST(data->'tbIptScreening'->>'dateTPTStart' AS DATE) as iptStartDate, \n" +
+            "       SELECT person_uuid,  CASE\n" +
+            "                WHEN (data->'tbIptScreening'->>'dateTPTStart') IS NULL \n" +
+            "                     OR (data->'tbIptScreening'->>'dateTPTStart') = '' \n" +
+            "                     OR (data->'tbIptScreening'->>'dateTPTStart') = ' '  THEN NULL\n" +
+            "                ELSE CAST((data->'tbIptScreening'->>'dateTPTStart') AS DATE)\n" +
+            "            END as iptStartDate, \n" +
             "           data->'tptMonitoring'->>'outComeOfIpt' as iptCompletionSCS, \n" +
             "           CASE \n" +
             "               WHEN (data->'tptMonitoring'->>'date') = 'null' OR (data->'tptMonitoring'->>'date') = '' OR (data->'tptMonitoring'->>'date') = ' '  THEN NULL \n" +
@@ -865,7 +870,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "          WHERE ipt_c_sc_rnk = 1\n" +
             "    ) \n" +
             "    select ipt_c.person_uuid as personuuid80, coalesce(ipt_c_cs.iptCompletionDSC, ipt_c.iptCompletionDate) as iptCompletionDate, \n" +
-            "    coalesce(ipt_c_cs.iptCompletionSCS, ipt_c.iptCompletionStatus) as iptCompletionStatus, COALESCE(ipt_c_cs.iptStartDate, ipt_s.dateOfIptStart) AS dateOfIptStart, ipt_s.iptType \n" +
+            "    coalesce(ipt_c_cs.iptCompletionSCS, ipt_c.iptCompletionStatus) as iptCompletionStatus, COALESCE(ipt_s.dateOfIptStart, ipt_c_cs.iptStartDate) AS dateOfIptStart, ipt_s.iptType \n" +
             "    from ipt_c \n" +
             "    left join ipt_s on ipt_s.person_uuid = ipt_c.person_uuid \n" +
             "    left join ipt_c_cs on ipt_s.person_uuid = ipt_c_cs.person_uuid ), \n" +
