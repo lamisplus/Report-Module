@@ -1186,6 +1186,23 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "  where \n" +
             "    rowNum = 1\n" +
             "), \n" +
+            "vaCauseOfDeath AS (\n" +
+            "SELECT\n" +
+            " hst.hiv_status,\n" +
+            " hst.person_id,\n" +
+            " hst.cause_of_death,\n" +
+            " hst.va_cause_of_death,\n" +
+            " hst.status_date\n" +
+            "         FROM\n" +
+            " (\n" +
+            "     SELECT * FROM (SELECT DISTINCT (person_id) person_id, status_date, cause_of_death, va_cause_of_death,\n" +
+            "hiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
+            "        FROM hiv_status_tracker WHERE hiv_status ilike '%Died%' AND archived=0 AND status_date <= ?3 )s\n" +
+            "     WHERE s.row_number=1\n" +
+            " ) hst\n" +
+            "     INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+            "         WHERE hst.status_date < ?3\n" +
+            ")," +
             "case_manager AS (\n" +
             " SELECT DISTINCT ON (cmp.person_uuid)person_uuid AS caseperson, cmp.case_manager_id, CONCAT(cm.first_name, ' ', cm.last_name) AS caseManager FROM (SELECT person_uuid, case_manager_id,\n" +
             " ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY id DESC)\n" +
@@ -1230,8 +1247,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           tbS.*,\n" +
             "           tbl.*,\n" +
             "           crypt.*, \n" +
-            "           ct.cause_of_death AS causeOfDeath,\n" +
-            "           ct.va_cause_of_death AS vaCauseOfDeath,\n" +
+            "           COALESCE (vaod.cause_of_death, ct.cause_of_death) AS causeOfDeath,\n" +
+            "           COALESCE (vaod.va_cause_of_death, ct.va_cause_of_death) AS vaCauseOfDeath,\n" +
             "           (\n" +
             "   CASE\n" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN 'Died'\n" +
@@ -1329,46 +1346,46 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "       WHEN ct.status ILIKE '%stop%' THEN FALSE\n" +
             "       WHEN (nvd.age >= 15\n" +
             "           AND nvd.regimen ILIKE '%DTG%'\n" +
-            "           AND bd.artstartdate + 91 < ?3) THEN TRUE\n" +
+            "           AND bd.artstartdate + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%') THEN TRUE\n" +
             "       WHEN (nvd.age >= 15\n" +
             "           AND nvd.regimen NOT ILIKE '%DTG%'\n" +
-            "           AND bd.artstartdate + 181 < ?3) THEN TRUE\n" +
-            "       WHEN (nvd.age <= 15 AND bd.artstartdate + 181 < ?3) THEN TRUE\n" +
+            "           AND bd.artstartdate + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%') THEN TRUE\n" +
+            "       WHEN (nvd.age <= 15 AND bd.artstartdate + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%') THEN TRUE\n" +
             "\n" +
             "       WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL\n" +
             "           AND scd.dateofviralloadsamplecollection IS NULL AND\n" +
             "cvlr.dateofcurrentviralload IS NULL\n" +
-            "           AND CAST(bd.artstartdate AS DATE) + 181 < ?3 THEN TRUE\n" +
+            "           AND CAST(bd.artstartdate AS DATE) + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN TRUE\n" +
             "\n" +
             "       WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL\n" +
             "           AND scd.dateofviralloadsamplecollection IS NOT NULL AND\n" +
             "cvlr.dateofcurrentviralload IS NULL\n" +
-            "           AND CAST(bd.artstartdate AS DATE) + 91 < ?3 THEN TRUE\n" +
+            "           AND CAST(bd.artstartdate AS DATE) + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN TRUE\n" +
             "\n" +
             "\n" +
             "       WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000\n" +
             "           AND( scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload\n" +
             "   OR  scd.dateofviralloadsamplecollection IS NULL )\n" +
-            "           AND CAST(cvlr.dateofcurrentviralload AS DATE) + 181 < ?3 THEN TRUE\n" +
+            "           AND CAST(cvlr.dateofcurrentviralload AS DATE) + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN TRUE\n" +
             "\n" +
             "       WHEN  CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000\n" +
             "           AND (scd.dateofviralloadsamplecollection > cvlr.dateofcurrentviralload\n" +
             "   OR cvlr.dateofcurrentviralload IS NULL\n" +
             "     )\n" +
-            "           AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 THEN TRUE\n" +
+            "           AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN TRUE\n" +
             "\n" +
             "       WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) > 1000\n" +
             "           AND ( scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload\n" +
             "   OR\n" +
             "     scd.dateofviralloadsamplecollection IS NULL\n" +
             "    )\n" +
-            "           AND CAST(cvlr.dateofcurrentviralload AS DATE) + 91 < ?3 THEN TRUE\n" +
+            "           AND CAST(cvlr.dateofcurrentviralload AS DATE) + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN TRUE\n" +
             "\n" +
             "       WHEN\n" +
             "       CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) > 1000\n" +
             "   AND (scd.dateofviralloadsamplecollection > cvlr.dateofcurrentviralload\n" +
             "   OR cvlr.dateofcurrentviralload IS NULL)\n" +
-            "   AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 THEN TRUE\n" +
+            "   AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN TRUE\n" +
             "\n" +
             "       ELSE FALSE\n" +
             "       END\n" +
@@ -1387,31 +1404,31 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "       WHEN ct.status ILIKE '%stop%' THEN NULL\n" +
             "       WHEN (nvd.age >= 15\n" +
             "           AND nvd.regimen ILIKE '%DTG%'\n" +
-            "           AND bd.artstartdate + 91 < ?3)\n" +
+            "           AND bd.artstartdate + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%')\n" +
             "           THEN CAST(bd.artstartdate + 91 AS DATE)\n" +
             "       WHEN (nvd.age >= 15\n" +
             "           AND nvd.regimen NOT ILIKE '%DTG%'\n" +
-            "           AND bd.artstartdate + 181 < ?3)\n" +
+            "           AND bd.artstartdate + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%')\n" +
             "           THEN CAST(bd.artstartdate + 181 AS DATE)\n" +
-            "       WHEN (nvd.age <= 15 AND bd.artstartdate + 181 < ?3)\n" +
+            "       WHEN (nvd.age <= 15 AND bd.artstartdate + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%')\n" +
             "           THEN CAST(bd.artstartdate + 181 AS DATE)\n" +
             "\n" +
             "       WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL\n" +
             "           AND scd.dateofviralloadsamplecollection IS NULL AND\n" +
             "cvlr.dateofcurrentviralload IS NULL\n" +
-            "           AND CAST(bd.artstartdate AS DATE) + 181 < ?3 THEN\n" +
+            "           AND CAST(bd.artstartdate AS DATE) + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN\n" +
             "   CAST(bd.artstartdate AS DATE) + 181\n" +
             "\n" +
             "       WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL\n" +
             "           AND scd.dateofviralloadsamplecollection IS NOT NULL AND\n" +
             "cvlr.dateofcurrentviralload IS NULL\n" +
-            "           AND CAST(bd.artstartdate AS DATE) + 91 < ?3 THEN\n" +
+            "           AND CAST(bd.artstartdate AS DATE) + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN\n" +
             "   CAST(bd.artstartdate AS DATE) + 91\n" +
             "\n" +
             "       WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000\n" +
             "           AND( scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload\n" +
             "   OR  scd.dateofviralloadsamplecollection IS NULL )\n" +
-            "           AND CAST(cvlr.dateofcurrentviralload AS DATE) + 181 < ?3\n" +
+            "           AND CAST(cvlr.dateofcurrentviralload AS DATE) + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%'\n" +
             "           THEN CAST(cvlr.dateofcurrentviralload AS DATE) + 181\n" +
             "\n" +
             "\n" +
@@ -1420,7 +1437,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           AND (scd.dateofviralloadsamplecollection > cvlr.dateofcurrentviralload\n" +
             "   OR cvlr.dateofcurrentviralload IS NULL\n" +
             "     )\n" +
-            "           AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 THEN\n" +
+            "           AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN\n" +
             "   CAST(scd.dateofviralloadsamplecollection AS DATE) + 91\n" +
             "\n" +
             "       WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) > 1000\n" +
@@ -1428,14 +1445,14 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "   OR\n" +
             "     scd.dateofviralloadsamplecollection IS NULL\n" +
             "    )\n" +
-            "           AND CAST(cvlr.dateofcurrentviralload AS DATE) + 91 < ?3 THEN\n" +
+            "           AND CAST(cvlr.dateofcurrentviralload AS DATE) + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN\n" +
             "   CAST(cvlr.dateofcurrentviralload AS DATE) + 91\n" +
             "\n" +
             "       WHEN\n" +
             "       CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) > 1000\n" +
             "   AND (scd.dateofviralloadsamplecollection > cvlr.dateofcurrentviralload\n" +
             "   OR cvlr.dateofcurrentviralload IS NULL)\n" +
-            "   AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 THEN\n" +
+            "   AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN\n" +
             "   CAST(scd.dateofviralloadsamplecollection AS DATE) + 91\n" +
             "\n" +
             "       ELSE NULL\n" +
@@ -1475,7 +1492,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "        LEFT JOIN  dsd1 dsd1  on dsd1.person_uuid_dsd_1 = bd.personUuid \n" +
             "        LEFT JOIN  dsd2 dsd2  on dsd2.person_uuid_dsd_2 = bd.personUuid \n" +
             "       LEFT JOIN case_manager cm on cm.caseperson= bd.personUuid\n" +
-            "       LEFT JOIN client_verification cvl on cvl.person_uuid = bd.personUuid "
+            "       LEFT JOIN client_verification cvl on cvl.person_uuid = bd.personUuid " +
+            "       LEFT JOIN vaCauseOfDeath vaod ON vaod.person_id = bd.personUuid"
             , nativeQuery = true)
     List<RADETDTOProjection> getRadetData(Long facilityId, LocalDate start, LocalDate end,
                                           LocalDate previous, LocalDate previousPrevious, LocalDate dateOfStartOfCurrentQuarter);
@@ -1822,7 +1840,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     @Query(value = "WITH clientVerification AS (SELECT DISTINCT ON (h.person_uuid) h.person_uuid AS personUuid, \n" +
             "CASE WHEN facility_state.name IS NULL THEN '' ELSE facility_state.name END AS facilityState, \n" +
             "u.name AS facilityName, \n" +
-            "p.hospital_number AS hospitalNumber,"+
+            "p.hospital_number AS hospitalNumber,\n" +
             "h.data->>'serialEnrollmentNo' AS serialEnrollmentNo, \n" +
             "h.date_of_observation AS dateOfObservation, \n" +
             "obj.value->>'dateOfAttempt' AS dateOfAttempt, \n" +
@@ -1838,7 +1856,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "CASE WHEN pt.reason_for_discountinuation IS NULL THEN '' ELSE pt.reason_for_discountinuation END  AS reasonForDiscontinuation, \n" +
             "COALESCE(string_agg(CAST(any_element.value AS text), ', '), '') AS anyOfTheFollowingList, \n" +
             "ROW_NUMBER() OVER ( PARTITION BY h.person_uuid ORDER BY CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) DESC) AS rnk,\n" +
-            "MAX(attemptsCounts.rnkk) AS noAttempts\t\t\t\t\t\t\n" +
+            "MAX(attemptsCounts.rnkk) AS noAttempts, cvTriggers.*\n" +
             "FROM hiv_observation h \n" +
             "JOIN base_organisation_unit u ON h.facility_id = u.id \n" +
             "CROSS JOIN jsonb_array_elements(h.data->'attempt') as obj \n" +
@@ -1855,6 +1873,34 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "from public.hiv_observation where type = 'Client Verification' \n" +
             "AND archived = 0\n" +
             ") attemptsCounts ON attemptsCounts.person_uuid = h.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT person_uuid,\n" +
+            "MAX(CASE WHEN rn = 1 AND 'No initial fingerprint was captured' IN (SELECT jsonb_array_elements_text(anyThing)) THEN 'YES' ELSE 'NO' END) AS noInitBiometric,\n" +
+            "MAX(CASE WHEN rn = 1 AND 'Duplicated demographic and clinical variables' IN (SELECT jsonb_array_elements_text(anyThing)) THEN 'YES' ELSE 'NO' END) AS duplicatedDemographic,\n" +
+            "MAX(CASE WHEN rn = 1 AND 'Records of repeated clinical encounters, with no fingerprint recapture.' IN (SELECT jsonb_array_elements_text(anyThing)) THEN 'YES' ELSE 'NO' END) AS noRecapture,\n" +
+            "MAX(CASE WHEN rn = 1 AND 'Last clinical visit is over 15 months prior' IN (SELECT jsonb_array_elements_text(anyThing)) THEN 'YES' ELSE 'NO' END) AS lastVisitIsOver18M,\n" +
+            "MAX(CASE WHEN rn = 1 AND 'Incomplete visit data on the care card or pharmacy forms or EMR ' IN (SELECT jsonb_array_elements_text(anyThing)) THEN 'YES' ELSE 'NO' END) AS incompleteVisitData,\n" +
+            "MAX(CASE WHEN rn = 1 AND 'Records with same services e.g ART start date and at least 3 consecutive last ART pickup dats, VL result etc' IN (SELECT jsonb_array_elements_text(anyThing)) THEN 'YES' ELSE 'NO' END) AS repeatEncounterNoPrint,\n" +
+            "MAX(CASE WHEN rn = 1 AND 'Long intervals between ARV pick-ups (pick-ups more than one year apart in the same facility)' IN (SELECT jsonb_array_elements_text(anyThing)) THEN 'YES' ELSE 'NO' END) AS longIntervalsARVPickup,\n" +
+            "-- MAX(CASE WHEN rn = 1 AND 'Long intervals between ARV pick-ups (pick-ups more than one year apart in the same facility)' IN (SELECT jsonb_array_elements_text(anyThing)) THEN 'Long intervals between ARV pick-ups (pick-ups more than one year apart in the same facility' END) AS batchPickupDates,\n" +
+            "MAX(CASE WHEN rn = 1 AND 'Same sex, DOB and ART start date' IN (SELECT jsonb_array_elements_text(anyThing)) THEN 'YES' ELSE 'NO' END) AS sameSexDOBARTStartDate,\n" +
+            "MAX(CASE WHEN rn = 1 AND 'Consistently had drug pickup by proxy without viral load sample collection for two quarters' IN (SELECT jsonb_array_elements_text(anyThing)) THEN 'YES' ELSE 'NO' END) AS pickupByProxy,\n" +
+            "MAX(CASE WHEN rn = 1 AND 'Others' IN (SELECT jsonb_array_elements_text(anyThing)) THEN 'YES' ELSE 'NO' END) AS otherSpecifyForCV\n" +
+            "FROM (\n" +
+            "    SELECT person_uuid,\n" +
+            "    data->'anyOfTheFollowing' AS anyThing,\n" +
+            "    date_of_observation,\n" +
+            "    data,\n" +
+            "    ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) DESC) AS rn\n" +
+            "    FROM hiv_observation ho\n" +
+            "    LEFT JOIN patient_person pp ON pp.uuid = ho.person_uuid\n" +
+            "    WHERE type = 'Client Verification'\n" +
+            "AND pp.archived = 0\n" +
+            "AND ho.archived = 0\n" +
+            "AND pp.facility_id = ?1\n" +
+            ") cc\n" +
+            "GROUP BY person_uuid\n" +
+            ") cvTriggers ON cvTriggers.person_uuid = h.person_uuid\n" +
             "WHERE h.type = 'Client Verification'  \n" +
             "AND h.facility_id = ?1 \n" +
             "AND h.archived = 0 \n" +
@@ -1862,9 +1908,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "h.id, h.person_uuid, h.date_of_observation, u.name, facility_state.name, pt.dsd_model, obj.value, \n" +
             "h.data->>'serialEnrollmentNo', h.data->>'referredTo', \n" +
             "h.data->>'discontinuation', h.data->>'returnedToCare', \n" +
-            "h.data->>'dateOfDiscontinuation', pt.reason_for_discountinuation, p.hospital_number)\n" +
+            "h.data->>'dateOfDiscontinuation', pt.reason_for_discountinuation, p.hospital_number, cvTriggers.person_uuid,\n" +
+            "cvTriggers.noInitBiometric, cvTriggers.noRecapture, cvTriggers.duplicatedDemographic, cvTriggers.lastVisitIsOver18M,\n" +
+            "cvTriggers.incompleteVisitData, cvTriggers.repeatEncounterNoPrint,cvTriggers.longIntervalsARVPickup, cvTriggers.sameSexDOBARTStartDate,\n" +
+            "cvTriggers.pickupByProxy, cvTriggers.otherSpecifyForCV)\n" +
             "SELECT * FROM clientVerification\n" +
-            "where rnk = 1\n", nativeQuery = true)
+            "where rnk = 1", nativeQuery = true)
     List<ClientServiceDto> generateClientServiceList(Long facilityId);
 
 
