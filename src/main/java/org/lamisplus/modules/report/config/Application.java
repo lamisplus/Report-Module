@@ -29,6 +29,10 @@ public class Application {
     private String longitudinalPrepQueryName;
     private String longitudinalPrepQuery;
 
+    //Hts Register
+    private String htsRegisterQueryName;
+    private String htsRegisterQuery;
+
     public static String indexElicitation;
     public static String indexElicitationName;
     public static String biometric;
@@ -50,6 +54,10 @@ public class Application {
     public static String longitudinalPrepName;
     public static String longitudinal;
 
+    //Hts Register
+    public static String htsRegisterName;
+    public static String htsRegister;
+
 
 
     @PostConstruct
@@ -70,5 +78,9 @@ public class Application {
         //longitudinal
         longitudinal = getLongitudinalPrepQuery();
         longitudinalPrepName = getLongitudinalPrepQueryName();
+
+        // Hts Register
+        htsRegister = getHtsRegisterQuery();
+        htsRegisterName = getHtsRegisterQueryName();
     }
 }

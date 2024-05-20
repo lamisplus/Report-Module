@@ -14,6 +14,7 @@ import BiometricReport from "./BiometricReport";
 import PharmacyReport from "./PharmacyReport";
 import LaboratoryReport from "./LaboratoryReport";
 import HTSReport from "./HTSReport";
+import HtsRegister from "./HtsRegister";
 import PrepReport from "./PrepReport";
 import ClinicData from "./ClinicData";
 import ClientVerification from "./ClientVerification";
@@ -144,6 +145,19 @@ const Reports = (props) => {
                     }}
                   >
                     <span style={{ color: "#fff" }}>HTS REPORT</span>
+
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
+                  <Menu.Item
+                    name="inbox"
+                    active={activeItem === "hts-register"}
+                    onClick={() => handleItemClick("hts-register")}
+                    style={{
+                      backgroundColor:
+                        activeItem === "hts-register" ? "#000" : "",
+                    }}
+                  >
+                    <span style={{ color: "#fff" }}>HTS REGISTER</span>
 
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
@@ -367,6 +381,13 @@ const Reports = (props) => {
 
                 {activeItem === "hts-report" && (
                   <HTSReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
+                {activeItem === "hts-register" && (
+                  <HtsRegister
                     handleItemClick={handleItemClick}
                     setCompleted={setCompleted}
                     completed={completed}
