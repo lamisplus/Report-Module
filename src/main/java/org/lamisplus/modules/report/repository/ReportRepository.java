@@ -371,7 +371,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         person_uuid,\n" +
             "         MAX(capture_date) AS MAXDATE\n" +
             "     FROM\n" +
-            "         triage_vital_sign\n" +
+            "         triage_vital_sign WHERE archived = 0 \n" +
             "     GROUP BY\n" +
             "         person_uuid\n" +
             "     ORDER BY\n" +
@@ -714,7 +714,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "               SELECT \n" +
             "               r.person_uuid, MAX(recapture),\n" +
             "               CASE WHEN COUNT(r.person_uuid) > 10 THEN 10 ELSE COUNT(r.person_uuid) END, \n" +
-            "               enrollment_date AS recapture_date \n" +
+            "               MAX(enrollment_date) AS recapture_date \n" +
             "               FROM \n" +
             "               biometric r \n" +
             "               WHERE \n" +
@@ -722,6 +722,15 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "               AND recapture != 0 AND recapture is NOT null "+
             "                   GROUP BY \n" +
             "                   r.person_uuid, r.enrollment_date "+
+//            "                   SELECT * FROM (SELECT person_uuid, enrollment_date AS recapture_date, count, MAX(recapture) AS recentCapture, " +
+//            "                   ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY enrollment_date DESC) AS rank1\n" +
+//            "                  FROM biometric WHERE\n" +
+//            "                  archived=0\n" +
+//            "                  AND count is not null\n" +
+//            "                  AND enrollment_date is not null\n" +
+//            "                  AND version_iso_20 IS TRUE\n" +
+//            "                  AND recapture != 0 AND recapture IS NOT NULL\n" +
+//            "                  GROUP BY person_uuid, count, enrollment_date) recent where rank1 = 1" +
             "              ) recapture_count ON recapture_count.person_uuid = he.person_uuid \n" +
             "              LEFT JOIN (\n" +
             "            \n" +
@@ -1239,7 +1248,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           ipt.iptCompletionStatus,\n" +
             "           ipt.iptType,\n" +
             "           cc.*,\n" +
-            " dsd1.*, dsd2.*,  \n" +
+            "           dsd1.*, dsd2.*,  \n" +
             "           ov.*,\n" +
             "           tbTment.*,\n" +
             "           tbSample.*,\n" +
