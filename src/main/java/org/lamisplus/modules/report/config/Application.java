@@ -28,6 +28,12 @@ public class Application {
     //longitudinal
     private String longitudinalPrepQueryName;
     private String longitudinalPrepQuery;
+    //Mhpss
+    private String mhpssQuery;
+    private String mhpssQueryName;
+    //kp-prev
+    private String kpPrevQueryName;
+    private String kpPrevQuery;
 
     public static String indexElicitation;
     public static String indexElicitationName;
@@ -49,6 +55,13 @@ public class Application {
     //Longitudinal PrEP report
     public static String longitudinalPrepName;
     public static String longitudinal;
+    // MHpss Report
+    public static String mhpssName;
+    public static String mhpss;
+
+    // kp prev Report
+    public static String kpPrevName;
+    public static String kpPrev;
 
 
 
@@ -70,5 +83,12 @@ public class Application {
         //longitudinal
         longitudinal = getLongitudinalPrepQuery();
         longitudinalPrepName = getLongitudinalPrepQueryName();
+        //mhpss
+        mhpss = getMhpssQuery();
+        mhpssName = getMhpssQueryName();
+        //kp prev
+        kpPrev = getKpPrevQuery();
+        kpPrevName = getKpPrevQueryName();
+
     }
 }
