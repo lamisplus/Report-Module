@@ -25,6 +25,7 @@ public interface GenerateExcelService {
 
 
  ByteArrayOutputStream generateLongitudinalPrepReport(Long facilityId, LocalDate start, LocalDate end);
+ ByteArrayOutputStream generateHtsRegisterReport(Long facilityId, LocalDate start, LocalDate end);
 
  ByteArrayOutputStream generateIndexQueryLine(Long facilityId, LocalDate start, LocalDate end);
 

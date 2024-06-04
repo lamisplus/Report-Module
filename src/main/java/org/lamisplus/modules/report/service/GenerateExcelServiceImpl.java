@@ -2,6 +2,7 @@ package org.lamisplus.modules.report.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.audit4j.core.util.Log;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
 import org.lamisplus.modules.hiv.domain.dto.LabReport;
@@ -413,6 +414,38 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			return excelService.generate(Application.longitudinalPrepName, fullData, headers);
 		} catch (Exception e) {
 			LOG.info("Error Occurred when generating Longitudinal PrEP data", e);
+		}
+		LOG.info("End generate Longitudinal PrEP report");
+		return null;
+	}
+
+
+	@Override
+	public ByteArrayOutputStream generateHtsRegisterReport(Long facilityId, LocalDate start, LocalDate end) {
+		try {
+			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
+			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
+			LOG.info("start date {}", startDate);
+			LOG.info("end date {}", endDate);
+			if(Application.htsRegister != null){
+				LOG.info("HTS Register query found in query.yml file.");
+				String query = Application.htsRegister;
+				query = query.replace("?1", String.valueOf(facilityId))
+						.replace("?2", startDate)
+						.replace("?3", endDate);
+
+				ResultSet resultSet = resultSetExtract.getResultSet(query);
+				List<String> headers = resultSetExtract.getHeaders(resultSet);
+				List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
+				LOG.info("query size is : {}" + fullData.size());
+
+				return excelService.generate(Application.htsRegisterName, fullData, headers);
+			} else {
+				LOG.info("HTS Register query not available. Check query.yml file.");
+			}
+		} catch (Exception e) {
+			LOG.info("Error Occurred when generating HTS Register data", e);
+
 		}
 		LOG.info("End generate Longitudinal PrEP report");
 		return null;

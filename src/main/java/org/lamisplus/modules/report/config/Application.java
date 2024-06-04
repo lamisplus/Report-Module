@@ -35,6 +35,10 @@ public class Application {
     private String kpPrevQueryName;
     private String kpPrevQuery;
 
+    //Hts Register
+    private String htsRegisterQueryName;
+    private String htsRegisterQuery;
+
     public static String indexElicitation;
     public static String indexElicitationName;
     public static String biometric;
@@ -63,6 +67,10 @@ public class Application {
     public static String kpPrevName;
     public static String kpPrev;
 
+    //Hts Register
+    public static String htsRegisterName;
+    public static String htsRegister;
+
 
 
     @PostConstruct
@@ -90,5 +98,9 @@ public class Application {
         kpPrev = getKpPrevQuery();
         kpPrevName = getKpPrevQueryName();
 
+
+        // Hts Register
+        htsRegister = getHtsRegisterQuery();
+        htsRegisterName = getHtsRegisterQueryName();
     }
 }
