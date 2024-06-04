@@ -385,7 +385,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         person_uuid,\n" +
             "         MAX(hac.visit_date) AS MAXDATE\n" +
             "     FROM\n" +
-            "         hiv_art_clinical hac\n" +
+            "         hiv_art_clinical hac WHERE archived = 0\n" +
             "     GROUP BY\n" +
             "         person_uuid\n" +
             "     ORDER BY\n" +
@@ -687,7 +687,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "where d.archived = 0 and d.date_devolved between  ?2 and ?3) d2 where row = 1 \n" +
             "),\n" +
             "biometric AS (\n" +
-            "            SELECT \n" +
+            "           SELECT \n" +
             "              DISTINCT ON (he.person_uuid) he.person_uuid AS person_uuid60, \n" +
             "              biometric_count.enrollment_date AS dateBiometricsEnrolled, \n" +
             "              biometric_count.count AS numberOfFingersCaptured,\n" +
@@ -713,24 +713,26 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "              LEFT JOIN (\n" +
             "               SELECT \n" +
             "               r.person_uuid, MAX(recapture),\n" +
-            "               CASE WHEN COUNT(r.person_uuid) > 10 THEN 10 ELSE COUNT(r.person_uuid) END, \n" +
+            "--              CASE WHEN COUNT(r.person_uuid) > 10 THEN 10 ELSE COUNT(r.person_uuid) END, \n" +
+            "--                CASE WHEN MAX(count) > 10 THEN 10 ELSE MAX(count) END,\n" +
+            "\t\t\t   CASE WHEN MAX(r.count) > 10 THEN 10 ELSE r.count END, \n" +
             "               MAX(enrollment_date) AS recapture_date \n" +
             "               FROM \n" +
             "               biometric r \n" +
             "               WHERE \n" +
             "               archived = 0  \n" +
-            "               AND recapture != 0 AND recapture is NOT null "+
+            "               AND recapture != 0 AND recapture is NOT null \n" +
             "                   GROUP BY \n" +
-            "                   r.person_uuid, r.enrollment_date "+
-//            "                   SELECT * FROM (SELECT person_uuid, enrollment_date AS recapture_date, count, MAX(recapture) AS recentCapture, " +
-//            "                   ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY enrollment_date DESC) AS rank1\n" +
-//            "                  FROM biometric WHERE\n" +
-//            "                  archived=0\n" +
-//            "                  AND count is not null\n" +
-//            "                  AND enrollment_date is not null\n" +
-//            "                  AND version_iso_20 IS TRUE\n" +
-//            "                  AND recapture != 0 AND recapture IS NOT NULL\n" +
-//            "                  GROUP BY person_uuid, count, enrollment_date) recent where rank1 = 1" +
+            "                   r.person_uuid, r.enrollment_date, r.count \n" +
+//            "--                   SELECT * FROM (SELECT person_uuid, enrollment_date AS recapture_date, count, MAX(recapture) AS recentCapture, \n" +
+//            "--                   ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY enrollment_date DESC) AS rank1\n" +
+//            "--                  FROM biometric WHERE\n" +
+//            "--                  archived=0\n" +
+//            "--                  AND count is not null\n" +
+//            "--                  AND enrollment_date is not null\n" +
+//            "--                  AND version_iso_20 IS TRUE\n" +
+//            "--                  AND recapture != 0 AND recapture IS NOT NULL\n" +
+//            "--                   GROUP BY person_uuid, count, enrollment_date) recent where rank1 = 1\n" +
             "              ) recapture_count ON recapture_count.person_uuid = he.person_uuid \n" +
             "              LEFT JOIN (\n" +
             "            \n" +
@@ -739,11 +741,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "--               THEN hiv_status ELSE biometric_status END) AS biometric_status, \n" +
             "            MAX(status_date) OVER (PARTITION BY person_id ORDER BY status_date DESC) AS status_date \n" +
             "FROM hiv_status_tracker \n" +
-            "            WHERE archived=0 AND facility_id=?1\n" +
+            "            WHERE archived=0 AND facility_id=1959\n" +
             "            \n" +
             "              ) bst ON bst.person_id = he.person_uuid \n" +
             "            WHERE \n" +
-            "              he.archived = 0\n" +
+            "              he.archived = 0"+
             "            ), \n" +
             "     current_regimen AS (\n" +
             "         SELECT\n" +
@@ -847,7 +849,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    FROM hiv_art_pharmacy h \n" +
             "    INNER JOIN jsonb_array_elements(h.extra -> 'regimens') WITH ORDINALITY p(pharmacy_object) ON TRUE \n" +
             "    INNER JOIN hiv_regimen hr ON hr.description = CAST(p.pharmacy_object ->> 'regimenName' AS VARCHAR) \n" +
-            "    INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id \n" +
+            "    INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id  AND hrt.id = 15 AND hrt.id NOT IN (1,2,3,4,14) \n" +
             "    WHERE hrt.id = 15 AND h.archived = 0 and h.ipt ->> 'type' ILIKE '%INITIATION%' OR ipt ->> 'type' ILIKE 'START_REFILL' \n" +
             "    ) AS ic \n" +
             "    WHERE ic.rnk = 1 ), \n" +
@@ -878,7 +880,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           ) AS ipt_ccs \n" +
             "          WHERE ipt_c_sc_rnk = 1\n" +
             "    ) \n" +
-            "    select ipt_c.person_uuid as personuuid80, coalesce(ipt_c_cs.iptCompletionDSC, ipt_c.iptCompletionDate) as iptCompletionDate, \n" +
+            "    select ipt_c.person_uuid as personuuid80, CASE WHEN coalesce(ipt_c_cs.iptCompletionDSC, ipt_c.iptCompletionDate) > ?3 THEN NULL ELSE coalesce(ipt_c_cs.iptCompletionDSC, ipt_c.iptCompletionDate) END as iptCompletionDate, \n" +
             "    coalesce(ipt_c_cs.iptCompletionSCS, ipt_c.iptCompletionStatus) as iptCompletionStatus, COALESCE(ipt_s.dateOfIptStart, ipt_c_cs.iptStartDate) AS dateOfIptStart, ipt_s.iptType \n" +
             "    from ipt_c \n" +
             "    left join ipt_s on ipt_s.person_uuid = ipt_c.person_uuid \n" +
