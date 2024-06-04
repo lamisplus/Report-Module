@@ -50,6 +50,17 @@ public class PrepReportController {
 
 	}
 
+	@PostMapping(REPORT_URL_VERSION_ONE + "/kp-prev-report")
+	public void mhpssReport(HttpServletResponse response, @RequestParam("facilityId") Long facility,
+										 @RequestParam("startDate") LocalDate start,
+										 @RequestParam("endDate") LocalDate end) throws IOException {
+
+		ByteArrayOutputStream baos = generateExcelService.generateKpPrevReport (facility, start, end);
+
+		setStream(baos, response);
+
+	}
+
 
 	private void setStream(ByteArrayOutputStream baos, HttpServletResponse response) throws IOException {
 		response.setHeader("Content-Type", "application/octet-stream");

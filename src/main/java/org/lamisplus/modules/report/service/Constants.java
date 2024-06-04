@@ -414,7 +414,7 @@ public class Constants {
 					"Date Of Attempt",
 					"No of Verfication Attempts",
 					"Verification Attempts",
-					"Verification Status",
+//					"Verification Status",
 					"Outcome",
 					"DSD Model",
 					"Comment",
@@ -422,7 +422,18 @@ public class Constants {
 					"Referred To",
 					"Discontinued",
 					"Date of Discontinuation",
-					"Reason For Discontinuation"
+					"Reason For Discontinuation",
+					//Client Verification triggers
+					"No initial fingerprint was captured",
+					"Duplicated demographic and clinical variables",
+					"Last clinical visit is over 15 months prior",
+					"Incomplete visit data on the care card or pharmacy forms or EMR ",
+					"Records of repeated clinical encounters, with no fingerprint recapture.",
+					"Long intervals between ARV pick-ups (pick-ups more than one year apart in the same facility)",
+					"Same sex, DOB and ART start date",
+					"Consistently had drug pickup by proxy without viral load sample collection for two quarters",
+					"Records with same services e.g ART start date and at least 3 consecutive last ART pickup dats, VL result etc",
+					"Others"
 			);
 
 	public static final List<String> TB_REPORT_HEADER =

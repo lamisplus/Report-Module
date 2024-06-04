@@ -359,6 +359,38 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		return null;
 	}
 
+
+	@Override
+	public ByteArrayOutputStream generateKpPrevReport(Long facilityId, LocalDate start, LocalDate end) {
+		try {
+			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
+			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
+			LOG.info("start date {}", startDate);
+			LOG.info("end date {}", endDate);
+			LOG.info("facility Id {}", facilityId);
+			if(Application.mhpss != null){
+				LOG.info("MHPSS query not available check query.yml file");
+			}
+
+			String query = String.format(Application.mhpss, facilityId, startDate, endDate);
+
+			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
+			LOG.info("query size is : {}" + fullData.size());
+
+			return excelService.generate(Application.mhpssName, fullData, headers);
+		} catch (Exception e) {
+			LOG.info("Error Occurred when generating MHPSS data", e);
+		}
+		LOG.info("End generate MHPSS report");
+		return null;
+	}
+
+
+
+
+
 	@Override
 	public ByteArrayOutputStream generateLongitudinalPrepReport(Long facilityId, LocalDate start, LocalDate end) {
 		try {
@@ -493,18 +525,45 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		String reportName = "";
 		//pmtct hts - 82d80564-6d3e-433e-8441-25db7fe1f2af
 		//pmtct maternal cohort - 2b6fe1b9-9af0-4af7-9f59-b9cfcb906158
-		if(reportId.equals("82d80564-6d3e-433e-8441-25db7fe1f2af")){
-//			query = String.format(Application.pmtctHts, facilityId, startDate, endDate);
+//		if(reportId.equals("82d80564-6d3e-433e-8441-25db7fe1f2af")){
+////			query = String.format(Application.pmtctHts, facilityId, startDate, endDate);
+//			query = Application.pmtctHts.replace("?1", facilityId.toString()).replace("?2", startDate).replace("?3", endDate);
+//
+//			reportName = Application.pmtctHtsName;
+//		} else if(reportId.equals("2b6fe1b9-9af0-4af7-9f59-b9cfcb906158")){
+//			query = String.format(Application.pmtctMaternalCohort, facilityId, startDate, endDate);
+//			reportName = Application.pmtctMaternalCohortName;
+//
+//		} else {
+//			LOG.info("Report not available...");
+//			return null;
+//		}
+		switch (reportId) {
+			case "82d80564-6d3e-433e-8441-25db7fe1f2af":
 			query = Application.pmtctHts.replace("?1", facilityId.toString()).replace("?2", startDate).replace("?3", endDate);
+				reportName = Application.pmtctHtsName;
+				System.out.println(query);
+				break;
+			case "2b6fe1b9-9af0-4af7-9f59-b9cfcb906158":
+				query = String.format(Application.pmtctMaternalCohort, facilityId, startDate, endDate);
+				reportName = Application.pmtctMaternalCohortName;
+				System.out.println(query);
+				break;
+			case "e5f5685b-d355-498f-bc71-191b4037726c":
+				System.out.println("Got here***********************************" +facilityId);
+				query = Application.mhpss;
+				query = query.replace("?1", String.valueOf(facilityId)).replace("?2", startDate).replace("?3", endDate);
 
-			reportName = Application.pmtctHtsName;
-		} else if(reportId.equals("2b6fe1b9-9af0-4af7-9f59-b9cfcb906158")){
-			query = String.format(Application.pmtctMaternalCohort, facilityId, startDate, endDate);
-			reportName = Application.pmtctMaternalCohortName;
-
-		} else {
-			LOG.info("Report not available...");
-			return null;
+//						.replace("?1", "'" + String.valueOf(facilityId) + "'")
+//						.replace("?2", "'" + startDate + "'")
+//						.replace("?3", "'" + endDate + "'");
+				reportName = Application.mhpssName;
+				System.out.println(query);
+				System.out.println(reportName);
+				break;
+			default:
+				LOG.info("Report not available...");
+				return null;
 		}
 		if(query != null || query.equals("")){
 			LOG.info("pmtct query not available check query.yml file");

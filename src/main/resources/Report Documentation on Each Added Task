@@ -14,3 +14,11 @@ Date 30-04-2024
 
 Date 06-05-2024
 - refactor recapture column to pick only latest recapture
+
+DATE 14-05-2024
+fix the following issues from May feedback
+- The column “Date of viral load eligibility status” auto populates for
+-   Add column – Drug refill period (duration) on PrEP report.
+-   Expand the biometric report to include columns for recapture 3, number of recapture done, and date of last recapture done.
+-   Remove the client verification status from the client verification
+-
