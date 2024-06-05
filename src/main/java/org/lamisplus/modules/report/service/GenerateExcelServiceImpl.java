@@ -368,22 +368,27 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			LOG.info("start date {}", startDate);
 			LOG.info("end date {}", endDate);
 			LOG.info("facility Id {}", facilityId);
-			if(Application.mhpss != null){
-				LOG.info("MHPSS query not available check query.yml file");
+			if(Application.kpPrev != null){
+				LOG.info("Kp-Prev query not available check query.yml file");
 			}
 
-			String query = String.format(Application.mhpss, facilityId, startDate, endDate);
+//			String query = String.format(Application.kpPrev, facilityId, startDate, endDate);
+
+			String query = Application.kpPrev;
+			query = query.replace("?1", String.valueOf(facilityId))
+					.replace("?2", startDate)
+					.replace("?3", endDate);
 
 			ResultSet resultSet = resultSetExtract.getResultSet(query);
 			List<String> headers = resultSetExtract.getHeaders(resultSet);
 			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
 			LOG.info("query size is : {}" + fullData.size());
 
-			return excelService.generate(Application.mhpssName, fullData, headers);
+			return excelService.generate(Application.kpPrevName, fullData, headers);
 		} catch (Exception e) {
-			LOG.info("Error Occurred when generating MHPSS data", e);
+			LOG.info("Error Occurred when generating KP-Prev data", e);
 		}
-		LOG.info("End generate MHPSS report");
+		LOG.info("End generate Kp Prev report");
 		return null;
 	}
 
@@ -523,21 +528,6 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("end date {}", endDate);
 		String query = "";
 		String reportName = "";
-		//pmtct hts - 82d80564-6d3e-433e-8441-25db7fe1f2af
-		//pmtct maternal cohort - 2b6fe1b9-9af0-4af7-9f59-b9cfcb906158
-//		if(reportId.equals("82d80564-6d3e-433e-8441-25db7fe1f2af")){
-////			query = String.format(Application.pmtctHts, facilityId, startDate, endDate);
-//			query = Application.pmtctHts.replace("?1", facilityId.toString()).replace("?2", startDate).replace("?3", endDate);
-//
-//			reportName = Application.pmtctHtsName;
-//		} else if(reportId.equals("2b6fe1b9-9af0-4af7-9f59-b9cfcb906158")){
-//			query = String.format(Application.pmtctMaternalCohort, facilityId, startDate, endDate);
-//			reportName = Application.pmtctMaternalCohortName;
-//
-//		} else {
-//			LOG.info("Report not available...");
-//			return null;
-//		}
 		switch (reportId) {
 			case "82d80564-6d3e-433e-8441-25db7fe1f2af":
 			query = Application.pmtctHts.replace("?1", facilityId.toString()).replace("?2", startDate).replace("?3", endDate);
@@ -550,13 +540,8 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 				System.out.println(query);
 				break;
 			case "e5f5685b-d355-498f-bc71-191b4037726c":
-				System.out.println("Got here***********************************" +facilityId);
 				query = Application.mhpss;
 				query = query.replace("?1", String.valueOf(facilityId)).replace("?2", startDate).replace("?3", endDate);
-
-//						.replace("?1", "'" + String.valueOf(facilityId) + "'")
-//						.replace("?2", "'" + startDate + "'")
-//						.replace("?3", "'" + endDate + "'");
 				reportName = Application.mhpssName;
 				System.out.println(query);
 				System.out.println(reportName);
