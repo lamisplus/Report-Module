@@ -310,7 +310,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			LOG.info("start date {}", startDate);
 			LOG.info("end date {}", endDate);
 			if(Application.prep != null){
-				LOG.info("PrEP query not available check query.yml file");
+				LOG.info("PrEP query not available check query.yml file ");
 			}
 			String query = Application.prep;
 			query = query.replace("?1", String.valueOf(facilityId))
