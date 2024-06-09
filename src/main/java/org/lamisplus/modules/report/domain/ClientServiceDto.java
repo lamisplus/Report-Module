@@ -10,7 +10,7 @@ public interface ClientServiceDto {
     String getAnyOfTheFollowingList();
     String getDateOfAttempt();
     String getVerificationAttempts();
-    String getVerificationStatus();
+//    String getVerificationStatus();
     String getOutcome();
     String getDsdModel();
     String getComment();
@@ -21,5 +21,16 @@ public interface ClientServiceDto {
     String getReasonForDiscontinuation();
     String getNoAttempts();
     String getHospitalNumber();
+
+    String getNoInitBiometric();
+    String getNoRecapture();
+    String getDuplicatedDemographic();
+    String getLastVisitIsOver18M();
+    String getIncompleteVisitData();
+    String getRepeatEncounterNoPrint();
+    String getLongIntervalsARVPickup();
+    String getSameSexDOBARTStartDate();
+    String getPickupByProxy();
+    String getOtherSpecifyForCV();
 
 }

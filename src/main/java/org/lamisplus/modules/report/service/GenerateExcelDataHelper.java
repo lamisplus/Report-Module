@@ -943,7 +943,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(clientService.getDateOfAttempt()));
 				map.put(index++, getStringValue(clientService.getNoAttempts()));
 				map.put(index++, getStringValue(clientService.getVerificationAttempts()));
-				map.put(index++, getStringValue(clientService.getVerificationStatus()));
+//				map.put(index++, getStringValue(clientService.getVerificationStatus()));
 				map.put(index++, getStringValue(clientService.getOutcome()));
 				map.put(index++, getStringValue(clientService.getDsdModel()));
 				map.put(index++, getStringValue(clientService.getComment()));
@@ -952,6 +952,17 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(clientService.getDiscontinuation()));
 				map.put(index++, getStringValue(clientService.getDateOfDiscontinuation()));
 				map.put(index++, getStringValue(clientService.getReasonForDiscontinuation()));
+				//Client Verification triggers
+				map.put(index++, getStringValue(clientService.getNoInitBiometric()));
+				map.put(index++, getStringValue(clientService.getDuplicatedDemographic()));
+				map.put(index++, getStringValue(clientService.getLastVisitIsOver18M()));
+				map.put(index++, getStringValue(clientService.getIncompleteVisitData()));
+				map.put(index++, getStringValue(clientService.getNoRecapture()));
+				map.put(index++, getStringValue(clientService.getLongIntervalsARVPickup()));
+				map.put(index++, getStringValue(clientService.getSameSexDOBARTStartDate()));
+				map.put(index++, getStringValue(clientService.getPickupByProxy()));
+				map.put(index++, getStringValue(clientService.getRepeatEncounterNoPrint()));
+				map.put(index++, getStringValue(clientService.getOtherSpecifyForCV()));
 
 				result.add(map);
 			}

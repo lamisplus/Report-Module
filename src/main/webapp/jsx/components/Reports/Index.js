@@ -14,6 +14,7 @@ import BiometricReport from "./BiometricReport";
 import PharmacyReport from "./PharmacyReport";
 import LaboratoryReport from "./LaboratoryReport";
 import HTSReport from "./HTSReport";
+import HtsRegister from "./HtsRegister";
 import PrepReport from "./PrepReport";
 import ClinicData from "./ClinicData";
 import ClientVerification from "./ClientVerification";
@@ -25,6 +26,8 @@ import NcdReport from "./NcdReport";
 import EACReport from "./EACReport";
 import AhdReport from "./AhdReport";
 import PrepLongitudinalReport from "./PrepLongitudinalReport";
+import MhpssReport from "./MhpssReport";
+import KpPrevReport from "./KpPrevReport";
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -149,6 +152,19 @@ const Reports = (props) => {
                   </Menu.Item>
                   <Menu.Item
                     name="inbox"
+                    active={activeItem === "hts-register"}
+                    onClick={() => handleItemClick("hts-register")}
+                    style={{
+                      backgroundColor:
+                        activeItem === "hts-register" ? "#000" : "",
+                    }}
+                  >
+                    <span style={{ color: "#fff" }}>HTS REGISTER</span>
+
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
+                  <Menu.Item
+                    name="inbox"
                     active={activeItem === "prep-report"}
                     onClick={() => handleItemClick("prep-report")}
                     style={{
@@ -161,18 +177,18 @@ const Reports = (props) => {
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
                   <Menu.Item
-                     name="inbox"
-                     active={activeItem === "prep-longitudinal-report"}
-                     onClick={() => handleItemClick("prep-longitudinal-report")}
-                     style={{
-                       backgroundColor:
-                         activeItem === "prep-longitudinal-report" ? "#000" : "",
-                     }}
-                   >
-                     <span style={{ color: "#fff" }}>PrEP LONGITUDINAL REPORT</span>
+                    name="inbox"
+                    active={activeItem === "prep-longitudinal-report"}
+                    onClick={() => handleItemClick("prep-longitudinal-report")}
+                    style={{
+                      backgroundColor:
+                        activeItem === "prep-longitudinal-report" ? "#000" : "",
+                    }}
+                  >
+                    <span style={{ color: "#fff" }}>PrEP LONGITUDINAL REPORT</span>
 
-                     {/* <Label color='teal'>5</Label> */}
-                   </Menu.Item>
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
                   <Menu.Item
                     name="inbox"
                     active={activeItem === "clinic-data-report"}
@@ -201,44 +217,44 @@ const Reports = (props) => {
                     {/* <Label color='teal'>5</Label> */}
                   </Menu.Item>
 
-                 <Menu.Item
-                   name="inbox"
-                   active={activeItem === "tb-report"}
-                   onClick={() => handleItemClick("tb-report")}
-                   style={{
-                     backgroundColor: activeItem === "tb-report" ? "#000" : "",
-                   }}
-                 >
-                   <span style={{ color: "#fff" }}>TB REPORT</span>
-
-                    {/* <Label color='teal'>5</Label> */}
-                 </Menu.Item>
-                 <Menu.Item
-                   name="inbox"
-                   active={activeItem === "ncd-report"}
-                   onClick={() => handleItemClick("ncd-report")}
-                   style={{
-                     backgroundColor:
-                       activeItem === "ncd-report" ? "#000" : "",
-                   }}
-                 >
-                   <span style={{ color: "#fff" }}>NCD Report</span>
-
-                    {/* <Label color='teal'>5</Label> */}
-                 </Menu.Item>
                   <Menu.Item
-                   name="inbox"
-                   active={activeItem === "eac-report"}
-                   onClick={() => handleItemClick("eac-report")}
-                   style={{
-                     backgroundColor:
-                       activeItem === "eac-report" ? "#000" : "",
-                   }}
-                 >
-                   <span style={{ color: "#fff" }}>EAC Report</span>
+                    name="inbox"
+                    active={activeItem === "tb-report"}
+                    onClick={() => handleItemClick("tb-report")}
+                    style={{
+                      backgroundColor: activeItem === "tb-report" ? "#000" : "",
+                    }}
+                  >
+                    <span style={{ color: "#fff" }}>TB REPORT</span>
 
                     {/* <Label color='teal'>5</Label> */}
-                 </Menu.Item>
+                  </Menu.Item>
+                  <Menu.Item
+                    name="inbox"
+                    active={activeItem === "ncd-report"}
+                    onClick={() => handleItemClick("ncd-report")}
+                    style={{
+                      backgroundColor:
+                        activeItem === "ncd-report" ? "#000" : "",
+                    }}
+                  >
+                    <span style={{ color: "#fff" }}>NCD Report</span>
+
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
+                  <Menu.Item
+                    name="inbox"
+                    active={activeItem === "eac-report"}
+                    onClick={() => handleItemClick("eac-report")}
+                    style={{
+                      backgroundColor:
+                        activeItem === "eac-report" ? "#000" : "",
+                    }}
+                  >
+                    <span style={{ color: "#fff" }}>EAC Report</span>
+
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
 
 
                   <Menu.Item
@@ -281,17 +297,41 @@ const Reports = (props) => {
                   </Menu.Item>
 
                   <Menu.Item
-                     name="inbox"
-                     active={activeItem === "ahd-report"}
-                     onClick={() => handleItemClick("ahd-report")}
-                     style={{
-                       backgroundColor: activeItem === "ahd-report" ? "#000" : "",
-                     }}
-                   >
-                     <span style={{ color: "#fff" }}>AHD REPORT</span>
+                    name="inbox"
+                    active={activeItem === "ahd-report"}
+                    onClick={() => handleItemClick("ahd-report")}
+                    style={{
+                      backgroundColor: activeItem === "ahd-report" ? "#000" : "",
+                    }}
+                  >
+                    <span style={{ color: "#fff" }}>AHD REPORT</span>
 
-                     {/* <Label color='teal'>5</Label> */}
-                   </Menu.Item>
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
+                  <Menu.Item
+                    name="inbox"
+                    active={activeItem === "mhpss-report"}
+                    onClick={() => handleItemClick("mhpss-report")}
+                    style={{
+                      backgroundColor:
+                        activeItem === "mhpss-report" ? "#000" : "",
+                    }}
+                  >
+                    <span style={{ color: "#fff" }}>MHPSS Report</span>
+                    {/* <Label color='teal'>5</Label> */}
+                  </Menu.Item>
+                    <Menu.Item
+                      name="inbox"
+                       active={activeItem === "kp-prev-report"}
+                       onClick={() => handleItemClick("kp-prev-report")}
+                        style={{
+                        backgroundColor: activeItem === "kp-prev-report" ? "#000" : "",
+                         }}
+                     >
+                     <span style={{ color: "#fff" }}>KP PREV REPORT</span>
+                      {/* <Label color='teal'>5</Label> */}
+                      </Menu.Item>
+
 
                 </Menu>
               </div>
@@ -342,31 +382,38 @@ const Reports = (props) => {
                   />
                 )}
 
-              {activeItem === "tb-report" && (
-                 <TbReport
-                   handleItemClick={handleItemClick}
-                   setCompleted={setCompleted}
-                   completed={completed}
-                 />
-               )}
-               {activeItem === "ncd-report" && (
-                 <NcdReport
-                   handleItemClick={handleItemClick}
-                   setCompleted={setCompleted}
-                   completed={completed}
-                 />
-               )}
+                {activeItem === "tb-report" && (
+                  <TbReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
+                {activeItem === "ncd-report" && (
+                  <NcdReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
 
-             {activeItem === "eac-report" && (
-                 <EACReport
-                   handleItemClick={handleItemClick}
-                   setCompleted={setCompleted}
-                   completed={completed}
-                 />
-               )}
+                {activeItem === "eac-report" && (
+                  <EACReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
 
                 {activeItem === "hts-report" && (
                   <HTSReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
+                {activeItem === "hts-register" && (
+                  <HtsRegister
                     handleItemClick={handleItemClick}
                     setCompleted={setCompleted}
                     completed={completed}
@@ -423,12 +470,27 @@ const Reports = (props) => {
                   />
                 )}
                 {activeItem === "ahd-report" && (
-                 <AhdReport
-                   handleItemClick={handleItemClick}
-                   setCompleted={setCompleted}
-                   completed={completed}
-                 />
-               )}
+                  <AhdReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
+                {activeItem === "mhpss-report" && (
+                  <MhpssReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )
+                }
+                {activeItem === "kp-prev-report" && (
+                  <KpPrevReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
               </div>
             </form>
           </div>
