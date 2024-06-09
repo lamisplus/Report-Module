@@ -73,9 +73,15 @@ public class HtsReportController {
 //		messagingTemplate.convertAndSend("/topic/hts", "end");
 	}
 
+	@PostMapping(REPORT_URL_VERSION_ONE + "/hts-register")
+	public void longitudinalPrepLineList(HttpServletResponse response, @RequestParam("facilityId") Long facility,
+										 @RequestParam("startDate") LocalDate start,
+										 @RequestParam("endDate") LocalDate end) throws IOException {
 
+		ByteArrayOutputStream baos = generateExcelService.generateHtsRegisterReport(facility, start, end);
 
+		setStream(baos, response);
 
-
+	}
 
 }

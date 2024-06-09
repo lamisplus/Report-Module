@@ -2,6 +2,7 @@ package org.lamisplus.modules.report.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.audit4j.core.util.Log;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
 import org.lamisplus.modules.hiv.domain.dto.LabReport;
@@ -309,7 +310,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			LOG.info("start date {}", startDate);
 			LOG.info("end date {}", endDate);
 			if(Application.prep != null){
-				LOG.info("PrEP query not available check query.yml file");
+				LOG.info("PrEP query not available check query.yml file ");
 			}
 			String query = Application.prep;
 			query = query.replace("?1", String.valueOf(facilityId))
@@ -358,6 +359,43 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		return null;
 	}
 
+
+	@Override
+	public ByteArrayOutputStream generateKpPrevReport(Long facilityId, LocalDate start, LocalDate end) {
+		try {
+			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
+			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
+			LOG.info("start date {}", startDate);
+			LOG.info("end date {}", endDate);
+			LOG.info("facility Id {}", facilityId);
+			if(Application.kpPrev != null){
+				LOG.info("Kp-Prev query not available check query.yml file");
+			}
+
+//			String query = String.format(Application.kpPrev, facilityId, startDate, endDate);
+
+			String query = Application.kpPrev;
+			query = query.replace("?1", String.valueOf(facilityId))
+					.replace("?2", startDate)
+					.replace("?3", endDate);
+
+			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
+			LOG.info("query size is : {}" + fullData.size());
+
+			return excelService.generate(Application.kpPrevName, fullData, headers);
+		} catch (Exception e) {
+			LOG.info("Error Occurred when generating KP-Prev data", e);
+		}
+		LOG.info("End generate Kp Prev report");
+		return null;
+	}
+
+
+
+
+
 	@Override
 	public ByteArrayOutputStream generateLongitudinalPrepReport(Long facilityId, LocalDate start, LocalDate end) {
 		try {
@@ -381,6 +419,38 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			return excelService.generate(Application.longitudinalPrepName, fullData, headers);
 		} catch (Exception e) {
 			LOG.info("Error Occurred when generating Longitudinal PrEP data", e);
+		}
+		LOG.info("End generate Longitudinal PrEP report");
+		return null;
+	}
+
+
+	@Override
+	public ByteArrayOutputStream generateHtsRegisterReport(Long facilityId, LocalDate start, LocalDate end) {
+		try {
+			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
+			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
+			LOG.info("start date {}", startDate);
+			LOG.info("end date {}", endDate);
+			if(Application.htsRegister != null){
+				LOG.info("HTS Register query found in query.yml file.");
+				String query = Application.htsRegister;
+				query = query.replace("?1", String.valueOf(facilityId))
+						.replace("?2", startDate)
+						.replace("?3", endDate);
+
+				ResultSet resultSet = resultSetExtract.getResultSet(query);
+				List<String> headers = resultSetExtract.getHeaders(resultSet);
+				List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
+				LOG.info("query size is : {}" + fullData.size());
+
+				return excelService.generate(Application.htsRegisterName, fullData, headers);
+			} else {
+				LOG.info("HTS Register query not available. Check query.yml file.");
+			}
+		} catch (Exception e) {
+			LOG.info("Error Occurred when generating HTS Register data", e);
+
 		}
 		LOG.info("End generate Longitudinal PrEP report");
 		return null;
@@ -458,20 +528,27 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("end date {}", endDate);
 		String query = "";
 		String reportName = "";
-		//pmtct hts - 82d80564-6d3e-433e-8441-25db7fe1f2af
-		//pmtct maternal cohort - 2b6fe1b9-9af0-4af7-9f59-b9cfcb906158
-		if(reportId.equals("82d80564-6d3e-433e-8441-25db7fe1f2af")){
-//			query = String.format(Application.pmtctHts, facilityId, startDate, endDate);
+		switch (reportId) {
+			case "82d80564-6d3e-433e-8441-25db7fe1f2af":
 			query = Application.pmtctHts.replace("?1", facilityId.toString()).replace("?2", startDate).replace("?3", endDate);
-
-			reportName = Application.pmtctHtsName;
-		} else if(reportId.equals("2b6fe1b9-9af0-4af7-9f59-b9cfcb906158")){
-			query = String.format(Application.pmtctMaternalCohort, facilityId, startDate, endDate);
-			reportName = Application.pmtctMaternalCohortName;
-
-		} else {
-			LOG.info("Report not available...");
-			return null;
+				reportName = Application.pmtctHtsName;
+				System.out.println(query);
+				break;
+			case "2b6fe1b9-9af0-4af7-9f59-b9cfcb906158":
+				query = String.format(Application.pmtctMaternalCohort, facilityId, startDate, endDate);
+				reportName = Application.pmtctMaternalCohortName;
+				System.out.println(query);
+				break;
+			case "e5f5685b-d355-498f-bc71-191b4037726c":
+				query = Application.mhpss;
+				query = query.replace("?1", String.valueOf(facilityId)).replace("?2", startDate).replace("?3", endDate);
+				reportName = Application.mhpssName;
+				System.out.println(query);
+				System.out.println(reportName);
+				break;
+			default:
+				LOG.info("Report not available...");
+				return null;
 		}
 		if(query != null || query.equals("")){
 			LOG.info("pmtct query not available check query.yml file");
