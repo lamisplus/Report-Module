@@ -9,14 +9,14 @@ public  interface HtsReportDto {
       String getLga();
       String getPatientId();
       String getClientCode();
-//      String getFirstName();
-//      String getSurname();
-//      String getOtherName();
+      String getFirstName();
+      String getSurname();
+      String getOtherName();
       String getSex();
       Integer getAge();
       LocalDate getDateOfBirth();
-//      String getPhoneNumber();
-//      String getClientAddress();
+      String getPhoneNumber();
+      String getClientAddress();
       String getMaritalStatus();
       String getLgaOfResidence();
       String getStateOfResidence();
@@ -24,8 +24,8 @@ public  interface HtsReportDto {
       String getOccupation();
       LocalDate getDateVisit();
       String getFirstTimeVisit();
-      Integer getNumberOfChildren();
-      Integer getNumberOfWives();
+//      Integer getNumberOfChildren();
+//      Integer getNumberOfWives();
       String getIndexClient();
 
       String getPreviouslyTested();
@@ -47,9 +47,9 @@ public  interface HtsReportDto {
       LocalDate getViralLoadSampleCollectionDate();
       String getViralLoadConfirmationResult();
     //End
-      String getViralLoadResult();
+//      String getViralLoadResult();
       LocalDate getViralLoadConfirmationDate();
-      String getAssessmentCode();
+//      String getAssessmentCode();
       String getModality();
       String getSyphilisTestResult();
       String getHepatitisBTestResult();
@@ -66,5 +66,10 @@ public  interface HtsReportDto {
       String getNumberOfCondomsGiven();
       String getNumberOfLubricantsGiven();
        LocalDate getViralLoadReceivedResultDate();
+       String getSource();
+       String getPatientUuid();
+       String getTotalRiskScore();
+       String getTesterName();
+       String getRefferedForSti();
 
 }
