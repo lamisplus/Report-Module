@@ -346,7 +346,17 @@ const Reports = (props) => {
                       {/* <Label color='teal'>5</Label> */}
                       </Menu.Item>
 
-                      
+                      <Menu.Item
+                      name="inbox"
+                       active={activeItem === "hts-index-report"}
+                       onClick={() => handleItemClick("hts-index-report")}
+                        style={{
+                        backgroundColor: activeItem === "hts-index-report" ? "#000" : "",
+                         }}
+                     >
+                     <span style={{ color: "#fff" }}>HTS INDEX REPORT</span>
+                      {/* <Label color='teal'>5</Label> */}
+                      </Menu.Item>
 
 
                 </Menu>
@@ -501,6 +511,20 @@ const Reports = (props) => {
                 )
                 }
                 {activeItem === "kp-prev-report" && (
+                  <KpPrevReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
+                {activeItem === "hivst-report" && (
+                  <KpPrevReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
+                {activeItem === "hts-index-report" && (
                   <KpPrevReport
                     handleItemClick={handleItemClick}
                     setCompleted={setCompleted}
