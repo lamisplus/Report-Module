@@ -28,6 +28,8 @@ import AhdReport from "./AhdReport";
 import PrepLongitudinalReport from "./PrepLongitudinalReport";
 import MhpssReport from "./MhpssReport";
 import KpPrevReport from "./KpPrevReport";
+import HIVST from "./HIVSTReport";
+import HTSIndexReport from "./HTSIndexReport";
 
 const useStyles = makeStyles((theme) => ({
   error: {
