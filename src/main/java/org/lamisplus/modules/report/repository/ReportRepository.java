@@ -680,12 +680,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "where d.archived = 0 and d.date_devolved between  ?2 and ?3) d1 where row = 1 \n" +
             " ), \n" +
             "dsd2 as ( \n" +
-            "select person_uuid as person_uuid_dsd_2, dateOfCurrentDSD, currentDSDModel, dateReturnToSite \n" +
-            "from (select d.person_uuid, d.date_devolved as dateOfCurrentDSD, bmt.display as currentDSDModel, d.date_return_to_site AS dateReturnToSite, \n" +
-            "       ROW_NUMBER() OVER (PARTITION BY d.person_uuid ORDER BY d.date_devolved DESC ) AS row from dsd_devolvement d \n" +
-            "    left join base_application_codeset bmt on bmt.code = d.dsd_type \n" +
-            "where d.archived = 0 and d.date_devolved between  ?2 and ?3) d2 where row = 1 \n" +
-            "),\n" +
+            "select d2.person_uuid as person_uuid_dsd_2, d2.dateOfCurrentDSD, d2.currentDSDModel, d2.dateReturnToSite, bac.display as currentDsdOutlet " +
+            "from (select d.person_uuid, d.date_devolved as dateOfCurrentDSD, bmt.display as currentDSDModel, d.date_return_to_site AS dateReturnToSite, dsd_outlet as dsdOutlet, " +
+            "      ROW_NUMBER() OVER (PARTITION BY d.person_uuid ORDER BY d.date_devolved DESC ) AS row from dsd_devolvement d " +
+            "   left join base_application_codeset bmt on bmt.code = d.dsd_type " +
+            "where d.archived = 0 and d.date_devolved between ?2 and ?3) d2 " +
+            "join base_application_codeset bac on bac.id = d2.dsdOutlet where d2.row = 1 " +
+            "), " +
             "biometric AS (\n" +
             "           SELECT \n" +
             "              DISTINCT ON (he.person_uuid) he.person_uuid AS person_uuid60, \n" +

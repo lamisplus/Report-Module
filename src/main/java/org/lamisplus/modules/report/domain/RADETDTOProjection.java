@@ -133,6 +133,7 @@ public interface RADETDTOProjection {
 	LocalDate getDateOfDevolvement();
 	String getCurrentDSDModel();
 	LocalDate getDateOfCurrentDSD();
+	String getCurrentDsdOutlet();
 
 	LocalDate getDateReturnToSite();
 	// String getDsdModel();

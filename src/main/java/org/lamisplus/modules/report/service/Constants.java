@@ -184,6 +184,7 @@ public class Constants {
 					"Model devolved to",
 					"Date of current DSD",
 					"Current DSD model",
+					"Current DSD Outlet",
 					// "Date Commenced DSD (yyyy-mm-dd)",
 					"Date of Return of DSD Client to Facility (yyyy-mm-dd)",
 					"Screening for Chronic Conditions",
