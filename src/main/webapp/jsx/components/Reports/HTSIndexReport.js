@@ -103,7 +103,7 @@ const HTSIndexReport = (props) => {
         setLoading(true)
         //console.log(token);
 
-        axios.post(`${baseUrl}kp-prev-report?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,objValues.organisationUnitId,
+        axios.post(`${baseUrl}hts-index-report?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,objValues.organisationUnitId,
             { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
         )
           .then(response => {

@@ -400,10 +400,10 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
 			LOG.info("start date {}", startDate);
 			LOG.info("end date {}", endDate);
-			if(Application.longitudinal != null){
-				LOG.info("Longitudinal PrEP query not available check query.yml file");
+			if(Application.hivst != null){
+				LOG.info("HIVST query not available check query.yml file");
 			}
-			String query = Application.longitudinal;
+			String query = Application.hivst;
 			query = query.replace("?1", String.valueOf(facilityId))
 					.replace("?2", startDate)
 					.replace("?3", endDate);
@@ -413,11 +413,11 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
 			LOG.info("query size is : {}" + fullData.size());
 
-			return excelService.generate(Application.longitudinalPrepName, fullData, headers);
+			return excelService.generate(Application.hivstName, fullData, headers);
 		} catch (Exception e) {
-			LOG.info("Error Occurred when generating Longitudinal PrEP data", e);
+			LOG.info("Error Occurred when generating Hivst report", e);
 		}
-		LOG.info("End generate Longitudinal PrEP report");
+		LOG.info("End generate Hivst report");
 		return null;
 	}
 
