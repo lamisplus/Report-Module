@@ -5,7 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
 import "react-phone-input-2/lib/style.css";
-import { Icon, Menu } from "semantic-ui-react";
+import { Icon, Menu, Dropdown } from "semantic-ui-react";
 import "semantic-ui-css/semantic.min.css";
 import PatientLineList from "./PatientLineList";
 import Appointment from "./Appointment";
@@ -518,14 +518,14 @@ const Reports = (props) => {
                   />
                 )}
                 {activeItem === "hivst-report" && (
-                  <KpPrevReport
+                  <HIVST
                     handleItemClick={handleItemClick}
                     setCompleted={setCompleted}
                     completed={completed}
                   />
                 )}
                 {activeItem === "hts-index-report" && (
-                  <KpPrevReport
+                  <HTSIndexReport
                     handleItemClick={handleItemClick}
                     setCompleted={setCompleted}
                     completed={completed}

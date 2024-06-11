@@ -39,6 +39,10 @@ public class Application {
     private String htsRegisterQueryName;
     private String htsRegisterQuery;
 
+    private String hivstQueryName;
+    private String hivstQuery;
+
+
     public static String indexElicitation;
     public static String indexElicitationName;
     public static String biometric;
@@ -71,6 +75,10 @@ public class Application {
     public static String htsRegisterName;
     public static String htsRegister;
 
+    //HivSt Report
+    public static String hivstName;
+    public static String hivst;
+
 
 
     @PostConstruct
@@ -102,5 +110,11 @@ public class Application {
         // Hts Register
         htsRegister = getHtsRegisterQuery();
         htsRegisterName = getHtsRegisterQueryName();
+
+        //HivSt
+        hivst = getHivstQuery();
+        hivstName = getHivstQueryName();
+
+
     }
 }

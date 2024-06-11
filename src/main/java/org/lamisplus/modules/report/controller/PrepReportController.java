@@ -51,7 +51,7 @@ public class PrepReportController {
 	}
 
 	@PostMapping(REPORT_URL_VERSION_ONE + "/kp-prev-report")
-	public void mhpssReport(HttpServletResponse response, @RequestParam("facilityId") Long facility,
+	public void kpPrev (HttpServletResponse response, @RequestParam("facilityId") Long facility,
 										 @RequestParam("startDate") LocalDate start,
 										 @RequestParam("endDate") LocalDate end) throws IOException {
 
