@@ -334,6 +334,20 @@ const Reports = (props) => {
                       {/* <Label color='teal'>5</Label> */}
                       </Menu.Item>
 
+                      <Menu.Item
+                      name="inbox"
+                       active={activeItem === "hivst-report"}
+                       onClick={() => handleItemClick("hivst-report")}
+                        style={{
+                        backgroundColor: activeItem === "hivst-report" ? "#000" : "",
+                         }}
+                     >
+                     <span style={{ color: "#fff" }}>HIVST REPORT</span>
+                      {/* <Label color='teal'>5</Label> */}
+                      </Menu.Item>
+
+                      
+
 
                 </Menu>
               </div>
