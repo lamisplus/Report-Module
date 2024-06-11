@@ -536,6 +536,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           MAX(CASE WHEN lab_test_id = 66 THEN tbDiagnosticResult END),\n" +
             "           MAX(CASE WHEN lab_test_id = 64 THEN tbDiagnosticResult END),\n" +
             "           MAX(CASE WHEN lab_test_id = 67 THEN tbDiagnosticResult END),\n" +
+            "           MAX(CASE WHEN lab_test_id = 72 THEN tbDiagnosticResult END),\n" +
+            "           MAX(CASE WHEN lab_test_id = 71 THEN tbDiagnosticResult END),"+
+//            "           MAX(CASE WHEN lab_test_id = 00 THEN tbDiagnosticResult END),"+
             "           MAX(CASE WHEN lab_test_id = 68 THEN tbDiagnosticResult END)\n" +
             "       ) as tbDiagnosticResult ,\n" +
             "   coalesce(\n" +
@@ -544,6 +547,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "           MAX(CASE WHEN lab_test_id = 66 THEN 'Chest X-ray' END),\n" +
             "           MAX(CASE WHEN lab_test_id = 64 THEN 'AFB microscopy' END),\n" +
             "           MAX(CASE WHEN lab_test_id = 67 THEN 'Gene Xpert' END) ,\n" +
+            "           MAX(CASE WHEN lab_test_id = 72 THEN 'TrueNAT' END) ,\n" +
+            "           MAX(CASE WHEN lab_test_id = 71 THEN 'LF-LAM' END) ,"+
+//            "           MAX(CASE WHEN lab_test_id = 71 THEN 'Cobas' END) ,"+
             "           MAX(CASE WHEN lab_test_id = 58 THEN 'TB-LAM' END)\n" +
             "       ) as tbDiagnosticTestType\n" +
             "\n" +
