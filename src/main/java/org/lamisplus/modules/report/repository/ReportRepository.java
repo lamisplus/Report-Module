@@ -488,7 +488,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                and hes.status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC')) as les where row = 1 \n" +
             "    ), \n" +
             "    eac_count as (\n" +
-            "        select person_uuid, count(*) as no_eac_session from ( \n" +
+            "        select person_uuid, CASE WHEN count(*) > 6 THEN 6 ELSE count(*) END as no_eac_session from ( \n" +
             "        with current_eac as (\n" +
             "          select id, person_uuid, uuid, status, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row from hiv_eac where archived = 0 \n" +
             "        ) \n" +
