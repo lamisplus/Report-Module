@@ -1,5 +1,8 @@
 package org.lamisplus.modules.report.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.report.service.GenerateExcelService;
@@ -15,6 +18,7 @@ import java.time.LocalDate;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@Api(value = "HTS Report", description = "Suite of Endpoints that generated HTS Related Reports")
 public class HtsReportController {
 
 	final static String REPORT_URL_VERSION_ONE = "/api/v1";
@@ -85,7 +89,8 @@ public class HtsReportController {
 	}
 
 	@PostMapping(REPORT_URL_VERSION_ONE + "/hivst-report")
-	public void hivstReport (HttpServletResponse response, @RequestParam("facilityId") Long facility,
+	@ApiOperation(value = "Generate HIVST Report", notes = "This Api generates HIVST report", code = 200)
+	public void generateHIVSTReport (HttpServletResponse response, @RequestParam("facilityId") Long facility,
 										 @RequestParam("startDate") LocalDate start,
 										 @RequestParam("endDate") LocalDate end) throws IOException {
 
