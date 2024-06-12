@@ -84,4 +84,15 @@ public class HtsReportController {
 
 	}
 
+	@PostMapping(REPORT_URL_VERSION_ONE + "/hivst-report")
+	public void hivstReport (HttpServletResponse response, @RequestParam("facilityId") Long facility,
+										 @RequestParam("startDate") LocalDate start,
+										 @RequestParam("endDate") LocalDate end) throws IOException {
+
+		ByteArrayOutputStream baos = generateExcelService.generateHivstReport(facility, start, end);
+
+		setStream(baos, response);
+
+	}
+
 }

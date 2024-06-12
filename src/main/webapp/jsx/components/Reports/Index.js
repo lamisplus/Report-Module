@@ -5,7 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
 import "react-phone-input-2/lib/style.css";
-import { Icon, Menu } from "semantic-ui-react";
+import { Icon, Menu, Dropdown } from "semantic-ui-react";
 import "semantic-ui-css/semantic.min.css";
 import PatientLineList from "./PatientLineList";
 import Appointment from "./Appointment";
@@ -28,6 +28,8 @@ import AhdReport from "./AhdReport";
 import PrepLongitudinalReport from "./PrepLongitudinalReport";
 import MhpssReport from "./MhpssReport";
 import KpPrevReport from "./KpPrevReport";
+import HIVST from "./HIVSTReport";
+import HTSIndexReport from "./HTSIndexReport";
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -332,6 +334,30 @@ const Reports = (props) => {
                       {/* <Label color='teal'>5</Label> */}
                       </Menu.Item>
 
+                      <Menu.Item
+                      name="inbox"
+                       active={activeItem === "hivst-report"}
+                       onClick={() => handleItemClick("hivst-report")}
+                        style={{
+                        backgroundColor: activeItem === "hivst-report" ? "#000" : "",
+                         }}
+                     >
+                     <span style={{ color: "#fff" }}>HIVST REPORT</span>
+                      {/* <Label color='teal'>5</Label> */}
+                      </Menu.Item>
+
+                      <Menu.Item
+                      name="inbox"
+                       active={activeItem === "hts-index-report"}
+                       onClick={() => handleItemClick("hts-index-report")}
+                        style={{
+                        backgroundColor: activeItem === "hts-index-report" ? "#000" : "",
+                         }}
+                     >
+                     <span style={{ color: "#fff" }}>HTS INDEX REPORT</span>
+                      {/* <Label color='teal'>5</Label> */}
+                      </Menu.Item>
+
 
                 </Menu>
               </div>
@@ -486,6 +512,20 @@ const Reports = (props) => {
                 }
                 {activeItem === "kp-prev-report" && (
                   <KpPrevReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
+                {activeItem === "hivst-report" && (
+                  <HIVST
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
+                {activeItem === "hts-index-report" && (
+                  <HTSIndexReport
                     handleItemClick={handleItemClick}
                     setCompleted={setCompleted}
                     completed={completed}

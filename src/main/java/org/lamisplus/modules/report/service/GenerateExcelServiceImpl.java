@@ -393,7 +393,33 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	}
 
 
+	@Override
+	public ByteArrayOutputStream generateHivstReport(Long facilityId, LocalDate start, LocalDate end) {
+		try {
+			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
+			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
+			LOG.info("start date {}", startDate);
+			LOG.info("end date {}", endDate);
+			if(Application.hivst != null){
+				LOG.info("HIVST query not available check query.yml file");
+			}
+			String query = Application.hivst;
+			query = query.replace("?1", String.valueOf(facilityId))
+					.replace("?2", startDate)
+					.replace("?3", endDate);
 
+			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
+			LOG.info("query size is : {}" + fullData.size());
+
+			return excelService.generate(Application.hivstName, fullData, headers);
+		} catch (Exception e) {
+			LOG.info("Error Occurred when generating Hivst report", e);
+		}
+		LOG.info("End generate Hivst report");
+		return null;
+	}
 
 
 	@Override
