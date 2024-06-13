@@ -30,6 +30,7 @@ import MhpssReport from "./MhpssReport";
 import KpPrevReport from "./KpPrevReport";
 import HIVST from "./HIVSTReport";
 import HTSIndexReport from "./HTSIndexReport";
+import CustomReport from "./CustomReport";
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -355,6 +356,18 @@ const Reports = (props) => {
                          }}
                      >
                      <span style={{ color: "#fff" }}>HTS INDEX REPORT</span>
+                      {/* <Label color='teal'>5</Label> */}
+                      </Menu.Item>
+
+                      <Menu.Item
+                      name="inbox"
+                       active={activeItem === "hts-index-report"}
+                       onClick={() => handleItemClick("hts-index-report")}
+                        style={{
+                        backgroundColor: activeItem === "hts-index-report" ? "#000" : "",
+                         }}
+                     >
+                     <span style={{ color: "#fff" }}>CUSTOM REPORT</span>
                       {/* <Label color='teal'>5</Label> */}
                       </Menu.Item>
 

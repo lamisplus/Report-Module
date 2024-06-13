@@ -265,19 +265,82 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "         WHERE sample.rnkk = 1 \n" +
             "           AND (sample.archived is null OR sample.archived = 0) \n" +
             "           AND sample.facility_id = ?1 ), \n" +
+//            "tbstatus as ( \n" +
+//            "    with tbscreening_cs as ( \n" +
+//            "        with cs as ( \n" +
+//            "            SELECT id, person_uuid, date_of_observation AS dateOfTbScreened, data->'tbIptScreening'->>'status' AS tbStatus, \n" +
+//            "                data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, \n" +
+//            "                ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS rowNums \n" +
+//            "        FROM hiv_observation \n" +
+//            "        WHERE type = 'Chronic Care' and data is not null and archived = 0 \n" +
+//            "            and date_of_observation between ?2 and ?3 \n" +
+//            "            and facility_id = ?1 \n" +
+//            "        ) \n" +
+//            "        select * from cs where rowNums = 1 \n" +
+//            "    )" +
             "tbstatus as ( \n" +
             "    with tbscreening_cs as ( \n" +
             "        with cs as ( \n" +
+            "            with LatestObservations AS (\n" +
             "            SELECT id, person_uuid, date_of_observation AS dateOfTbScreened, data->'tbIptScreening'->>'status' AS tbStatus, \n" +
             "                data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, \n" +
             "                ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS rowNums \n" +
             "        FROM hiv_observation \n" +
             "        WHERE type = 'Chronic Care' and data is not null and archived = 0 \n" +
-            "            and date_of_observation between ?2 and ?3 \n" +
-            "            and facility_id = ?1 \n" +
+            "            and date_of_observation between '1980-01-01' and '2024-06-11' \n" +
+            "            and facility_id = 1972\t\n" +
+            "\t\t\t\t),\n" +
+            "\t\t\tFilteredLatestObservations AS (\n" +
+            "    SELECT\n" +
+            "        id,\n" +
+            "        person_uuid,\n" +
+            "        dateOfTbScreened,\n" +
+            "        tbStatus,\n" +
+            "        tbScreeningType\n" +
+            "    FROM\n" +
+            "        LatestObservations\n" +
+            "    WHERE\n" +
+            "        rowNums = 1\n" +
+            "),\n" +
+            "PresumptiveCheck AS (\n" +
+            "    SELECT\n" +
+            "        lo.person_uuid,\n" +
+            "        CASE \n" +
+            "            WHEN EXISTS (\n" +
+            "                SELECT 1\n" +
+            "                FROM hiv_observation ho\n" +
+            "                WHERE ho.person_uuid = lo.person_uuid\n" +
+            "                  AND ho.type = 'Chronic Care'\n" +
+            "                  AND ho.data IS NOT NULL\n" +
+            "                  AND ho.archived = 0\n" +
+            "                  AND ho.date_of_observation BETWEEN lo.dateOfTbScreened - INTERVAL '6 months' AND lo.dateOfTbScreened\n" +
+            "                  AND ho.data->'tbIptScreening'->>'status' ilike 'Presumptive TB%'\n" +
+            "                  AND ho.facility_id = 1972\n" +
+            "            ) THEN 'Presumptive TB and referred for evaluation'\n" +
+            "            ELSE lo.tbStatus\n" +
+            "        END AS tbStatus\n" +
+            "    FROM\n" +
+            "        FilteredLatestObservations lo\n" +
+            ")\n" +
+            "SELECT\n" +
+            "    lo.id,\n" +
+            "    lo.person_uuid,\n" +
+            "    lo.dateOfTbScreened,\n" +
+            "    pc.tbStatus,\n" +
+            "    lo.tbScreeningType\n" +
+            "FROM\n" +
+            "    FilteredLatestObservations lo\n" +
+            "JOIN\n" +
+            "    PresumptiveCheck pc ON lo.person_uuid = pc.person_uuid\n" +
+            "        \n" +
+            "        \n" +
+            "        \n" +
+            "        \n" +
+            "        \n" +
             "        ) \n" +
-            "        select * from cs where rowNums = 1 \n" +
-            "    ), \n" +
+            "        select * from cs \n" +
+            "    )" +
+            ", \n" +
             "    tbscreening_hac as ( \n" +
             "        with h as (\n" +
             "            select h.id, h.person_uuid, h.visit_date, cast(h.tb_screen->>'tbStatusId' as bigint) as tb_status_id, \n" +
