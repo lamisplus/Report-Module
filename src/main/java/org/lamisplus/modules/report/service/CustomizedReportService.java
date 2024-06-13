@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomizedReportService {
@@ -23,7 +24,7 @@ public class CustomizedReportService {
     private final ResultSetExtract resultSetExtract;
     private final ExcelService excelService;
     private static final Pattern SQL_INJECTION_PATTERN = Pattern.compile(
-            "(INSERT|DELETE|DROP|TRUNCATE)", Pattern.CASE_INSENSITIVE);
+            "(INSERT|DELETE|DROP|TRUNCATE|CREATE)", Pattern.CASE_INSENSITIVE);
 
     public CustomizedReportService(CustomisedReportRepository customisedReportRepository, ResultSetExtract resultSetExtract, ExcelService excelService) {
         this.customisedReportRepository = customisedReportRepository;
@@ -31,12 +32,23 @@ public class CustomizedReportService {
         this.excelService = excelService;
     }
 
-    public List<CustomizedReport> findAll() {
-        return customisedReportRepository.findAll();
+    public List<CustomizedReportDTO> findAll() {
+        List<CustomizedReport> customizedReports = customisedReportRepository.findAll();
+        return customizedReports.stream()
+                .map(customizedReport -> {
+                    CustomizedReportDTO dto = new CustomizedReportDTO();
+                    BeanUtils.copyProperties(customizedReport, dto);
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
-    public CustomizedReport findById(UUID id) {
-        return customisedReportRepository.findById(id).orElse(null);
+    public CustomizedReportDTO findById(UUID id) {
+        CustomizedReport customizedReport = customisedReportRepository.findById(id).orElse(null);
+        CustomizedReportDTO customizedReportDTO = new CustomizedReportDTO();
+        assert customizedReport != null;
+        BeanUtils.copyProperties(customizedReport, customizedReportDTO);
+        return customizedReportDTO;
     }
 
     public CustomizedReport save(CustomizedReportDTO customizedReportDTO) {

@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -17,19 +18,20 @@ public class CustomizedReport {
     public UUID id;
     public String reportName;
     public String query;
-    public LocalDate createdAt;
-    public LocalDate updatedAt;
+    public LocalDateTime createdAt;
+    public LocalDateTime updatedAt;
     public Boolean disabled;
 
     @PrePersist
     public  void prePersist () {
-        createdAt = LocalDate.now();
-        updatedAt = LocalDate.now();
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
         id = UUID.randomUUID();
+        disabled = false;
     }
 
     @PreUpdate
     public void preUpdate () {
-        updatedAt = LocalDate.now();
+        updatedAt = LocalDateTime.now();
     }
 }

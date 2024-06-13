@@ -34,14 +34,14 @@ public class CustomizedReportController {
 
     @GetMapping
     @ApiOperation(value = "Get all customized reports", notes = "Retrieve a list of all customized reports")
-    public List<CustomizedReport> getAllReports() {
+    public List<CustomizedReportDTO> getAllReports() {
         return service.findAll();
     }
 
     @GetMapping("/{id}")
     @ApiOperation(value = "Get a customized report by ID", notes = "Retrieve a customized report by its ID")
-    public ResponseEntity<CustomizedReport> getReportById(@PathVariable UUID id) {
-        CustomizedReport report = service.findById(id);
+    public ResponseEntity<CustomizedReportDTO> getReportById(@PathVariable UUID id) {
+        CustomizedReportDTO report = service.findById(id);
         return report != null ? new ResponseEntity<>(report, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
@@ -61,7 +61,8 @@ public class CustomizedReportController {
         if (service.isQueryInvalid(report.getQuery())) {
             return new ResponseEntity<>("Query is not valid", HttpStatus.BAD_REQUEST);
         }
-        if (service.findById(id) == null) {
+        CustomizedReportDTO customizedReportDTO = service.findById(id);
+        if (customizedReportDTO == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         report.setId(id);
@@ -80,11 +81,16 @@ public class CustomizedReportController {
     }
 
     @PostMapping("/generate-report")
-    public void generateCustomizedReport (HttpServletResponse response, @RequestParam("facilityId") Long facility,
+    public ResponseEntity<?> generateCustomizedReport (HttpServletResponse response,
                                    @RequestParam("query") String query,
                                    @RequestParam("reportName") String reportName) throws IOException {
+
+        if (service.isQueryInvalid(query)) {
+            return new ResponseEntity<>("Query is not valid", HttpStatus.BAD_REQUEST);
+        }
         ByteArrayOutputStream baos = service.generateCustomizedReport(query,  reportName);
         setStream(baos, response);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private void setStream(ByteArrayOutputStream baos, HttpServletResponse response) throws IOException {
