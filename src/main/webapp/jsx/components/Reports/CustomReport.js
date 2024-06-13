@@ -62,7 +62,12 @@ const CustomReport = (props) => {
     const [facilities, setFacilities] = useState([]);
     const [listOfParams, setListOfParams] = useState([]);
     const [objValues, setObjValues] = useState({
-        queryBody: ""
+        queryBody: "",
+        organisationUnitId:"",
+        organisationUnitName:"",
+        currentDate:currentDate,
+        facilities:facilities,
+        reportName: "",
     })
     useEffect(() => {
         Facilities()
@@ -90,11 +95,8 @@ const CustomReport = (props) => {
     };
 
     const handleInputChange = e => {
-        setObjValues({ ...objValues, [e.target.name]: e.target.value, organisationUnitName: e.target.innerText });
-        console.log(objValues?.queryBody)
-        const objValuesWithTemplateStrings = containsTemplateStrings(objValues);
-        console.log(objValuesWithTemplateStrings);
-
+        setObjValues({ ...objValues, [e.target.name]: e.target.value, query: e.target.innerText });
+        containsTemplateStrings(objValues);
     }
 
     function extractPatterns(e) {
@@ -102,35 +104,38 @@ const CustomReport = (props) => {
         const pattern = /\{\{([^}]+)\}\}/g;
         let match;
         while ((match = pattern.exec(e)) !== null) {
-          console.log(match[1]);
           const obj = {
             [match[1]]: ""
           }
           arr.push(obj)
 
         }
-        setListOfParams(arr )
-        console.log(arr);
+        setListOfParams(arr)
       }
 
     const handleAnalyze = (e) => {
         e.preventDefault();
-        console.log("Here is the text on the Text are :"+ objValues?.queryBody )
         const objValuesWithTemplateStrings = containsTemplateStrings(objValues?.queryBody);
-        console.log("Analyzed Params " +objValuesWithTemplateStrings)
-
         const text = extractPatterns(objValues?.queryBody)
-        console.log("Here are formmat Text " + text)
     }
 
-    
+    const handleCancel = (e) => {
+        e.preventDefault();
+        const objValuesWithTemplateStrings = containsTemplateStrings(objValues?.queryBody);
+        const text = extractPatterns(objValues?.queryBody)
+    }
+
+    const handleDryRun = (e) => {
+        e.preventDefault();
+        const objValuesWithTemplateStrings = containsTemplateStrings(objValues?.queryBody);
+        const text = extractPatterns(objValues?.queryBody)
+    }
 
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true)
         axios.get(`${baseUrl}reporting/pharmacy/${objValues.organisationUnitId}`,
             { headers: { "Authorization": `Bearer ${token}` }, responseType: 'blob' },
-
         )
             .then(response => {
                 setLoading(false)
@@ -155,11 +160,7 @@ const CustomReport = (props) => {
 
 
     }
-
-
     //   console.log(analyzeText);
-
-
     return (
         <>
 
@@ -177,7 +178,7 @@ const CustomReport = (props) => {
                                     <TextArea
                                         id="queryBody"
                                         name="queryBody"
-                                        multiline
+                                        multiline="multiline"
                                         rows={20}
                                         //   inputProps={{ maxLength: 200 }}
                                         //   value={notificationObject?.messageBody}
@@ -193,18 +194,25 @@ const CustomReport = (props) => {
 
                             <div className="form-group  col-md-6">
                                 <FormGroup>
-                                    <Label>Query Parameter *</Label>
-                                    <ScrollableDiv listOfParams={listOfParams}
+                                    <Label>Query Parameters *</Label>
+                                    <ScrollableDiv listOfParams={listOfParams} objValues={objValues}
 
                                     />
                                 </FormGroup>
                             </div>
                             <br />
                             <div className="row">
-                                <div className="form-group mb-3 col-md-6">
-                                    <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#014d88", color: '#fff' }} onClick={handleSubmit} disabled={objValues.organisationUnitId === "" ? true : false} />
-                                    <Button type="submit" content='Analyze Query' icon='up arrow' labelPosition='right' style={{ backgroundColor: "#014d88", color: '#fff' }} onClick={handleAnalyze}  />
-
+                                <div className="mb-3 col-md-2">
+                                    <Button type="submit" content='Cancel' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#FF0000", color: '#fff' }} onClick={handleCancel} />
+                                </div>
+                                <div className="mb-3 col-md-2">
+                                    <Button type="submit" content='Analyze' icon='up arrow' labelPosition='right' style={{ backgroundColor: "#014d88", color: '#fff' }} onClick={handleAnalyze}  />
+                                </div>
+                                <div className="mb-3 col-md-3">
+                                    <Button type="submit" content='Dry Run' icon='up arrow' labelPosition='right' style={{ backgroundColor: "#008000", color: '#fff' }} onClick={handleDryRun}  />
+                                </div>
+                                <div className="mb-3 col-md-2" hidden>
+                                    <Button type="submit" content='Generate' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#008000", color: '#fff' }} onClick={handleSubmit} hidden={objValues.organisationUnitId === "" ? true : false} />
                                 </div>
                             </div>
 
