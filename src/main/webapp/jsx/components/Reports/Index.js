@@ -361,10 +361,10 @@ const Reports = (props) => {
 
                       <Menu.Item
                       name="inbox"
-                       active={activeItem === "hts-index-report"}
-                       onClick={() => handleItemClick("hts-index-report")}
+                       active={activeItem === "custom-report"}
+                       onClick={() => handleItemClick("custom-report")}
                         style={{
-                        backgroundColor: activeItem === "hts-index-report" ? "#000" : "",
+                        backgroundColor: activeItem === "custom-report" ? "#000" : "",
                          }}
                      >
                      <span style={{ color: "#fff" }}>CUSTOM REPORT</span>
@@ -539,6 +539,13 @@ const Reports = (props) => {
                 )}
                 {activeItem === "hts-index-report" && (
                   <HTSIndexReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
+                {activeItem === "custom-report" && (
+                  <CustomReport
                     handleItemClick={handleItemClick}
                     setCompleted={setCompleted}
                     completed={completed}
