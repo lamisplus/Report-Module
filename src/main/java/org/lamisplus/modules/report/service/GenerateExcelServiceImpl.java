@@ -561,7 +561,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 				System.out.println(query);
 				break;
 			case "2b6fe1b9-9af0-4af7-9f59-b9cfcb906158":
-				query = String.format(Application.pmtctMaternalCohort, facilityId, startDate, endDate);
+				query = Application.pmtctMaternalCohort;
+				query = query.replace("?1", String.valueOf(facilityId)).replace("?2", startDate).replace("?3", endDate);
+//				query = String.format(Application.pmtctMaternalCohort, facilityId, startDate, endDate);
 				reportName = Application.pmtctMaternalCohortName;
 				System.out.println(query);
 				break;

@@ -1,18 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, {useCallback, useEffect, useState, forwardRef } from "react";
 import axios from "axios";
 import { FormGroup, Label, CardBody, Spinner, Input, Form } from "reactstrap";
 import { makeStyles } from "@material-ui/core/styles";
 import { Card } from "@material-ui/core";
-// import {Link, useHistory, useLocation} from "react-router-dom";
-// import {TiArrowBack} from 'react-icons/ti'
+import { FaDownload, FaEye, FaPlus, FaUpload } from "react-icons/fa";
+import { MdModeEdit, MdPerson, MdDelete } from "react-icons/md";
 import { token, url as baseUrl } from "../../../api";
 import 'react-phone-input-2/lib/style.css'
 import { Button } from 'semantic-ui-react'
 import { toast } from "react-toastify";
 import FileSaver from "file-saver";
-import { Message, Icon, TextArea } from 'semantic-ui-react'
+import { Message, Icon, TextArea, Dropdown } from 'semantic-ui-react'
 import ScrollableDiv from "../Shared/Scrollable"
-
 
 const useStyles = makeStyles((theme) => ({
     card: {
@@ -54,38 +53,46 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
+let rowNum = 0;
 
 const CustomReport = (props) => {
     let currentDate = new Date().toISOString().split('T')[0]
     const classes = useStyles();
     const [loading, setLoading] = useState(false)
-    const [facilities, setFacilities] = useState([]);
     const [listOfParams, setListOfParams] = useState([]);
+    const [facilities, setFacilities] = useState([]);
+    const [listOfReport, setListOfReport] = useState([]);
+    const [selectedReport, setSelectedReport] = useState("")
+    const [customQuery, setCustomQuery] = useState("")
+    const [customDataFields, setCustomDataFields] = useState({});
+    const [modal, setModal] = useState(false);
     const [objValues, setObjValues] = useState({
-        queryBody: "",
-        organisationUnitId:"",
-        organisationUnitName:"",
-        currentDate:currentDate,
-        facilities:facilities,
+        query: "",
         reportName: "",
+        organisationUnitId: "",
+        organisationUnitName: "",
+        currentDate: currentDate
     })
-    useEffect(() => {
-        Facilities()
-    }, []);
-    //Get list of WhoStaging
-    const Facilities = () => {
-        axios
-            .get(`${baseUrl}account`,
-                { headers: { "Authorization": `Bearer ${token}` } }
-            )
-            .then((response) => {
-                //console.log(response.data);
-                setFacilities(response.data.applicationUserOrganisationUnits);
-            })
-            .catch((error) => {
-                //console.log(error);
-            });
+    // const [objValues, setObjValues] = useState({
+    //     query: "",
+    //     reportName: ""
+    // })
+    const [formData, setFormData] = useState(objValues)
 
+    const loadFacilities = useCallback(async () => {
+        try{
+            const response = await axios.get(
+                `${baseUrl}v1/account`,
+                {headers: { "Authorization": `Bearer ${token}` }}
+            );
+            setFacilities(response.data.applicationUserOrganisationUnits);
+        }catch(e){
+            console.log(e);
+        }
+    }, []);
+
+    const onData = (data) => {
+        setCustomDataFields(data);
     }
 
     const containsTemplateStrings = (obj) => {
@@ -95,40 +102,118 @@ const CustomReport = (props) => {
     };
 
     const handleInputChange = e => {
-        setObjValues({ ...objValues, [e.target.name]: e.target.value, query: e.target.innerText });
-        containsTemplateStrings(objValues);
+        setObjValues({ ...objValues, [e.target.name]: e.target.value });
     }
+
 
     function extractPatterns(e) {
         var arr = []
         const pattern = /\{\{([^}]+)\}\}/g;
         let match;
         while ((match = pattern.exec(e)) !== null) {
-          const obj = {
-            [match[1]]: ""
-          }
-          arr.push(obj)
+            const obj = {
+                [match[1]]: ""
+            }
+            arr.push(obj)
 
         }
         setListOfParams(arr)
-      }
+    }
 
     const handleAnalyze = (e) => {
         e.preventDefault();
-        const objValuesWithTemplateStrings = containsTemplateStrings(objValues?.queryBody);
-        const text = extractPatterns(objValues?.queryBody)
+        const objValuesWithTemplateStrings = containsTemplateStrings(objValues?.query);
+        const text = extractPatterns(objValues?.query)
     }
 
     const handleCancel = (e) => {
         e.preventDefault();
-        const objValuesWithTemplateStrings = containsTemplateStrings(objValues?.queryBody);
-        const text = extractPatterns(objValues?.queryBody)
+        // const objValuesWithTemplateStrings = containsTemplateStrings(objValues?.queryBody);
+        // const text = extractPatterns(objValues?.queryBody)
     }
 
     const handleDryRun = (e) => {
         e.preventDefault();
-        const objValuesWithTemplateStrings = containsTemplateStrings(objValues?.queryBody);
-        const text = extractPatterns(objValues?.queryBody)
+        var customQuery = objValues?.query;
+        customQuery = replaceValues(customQuery, customDataFields);
+        customQuery = customQuery.trim().concat(" LIMIT 5");
+        setCustomQuery(customQuery);
+        console.log(customQuery);
+
+        axios
+            .post(`${baseUrl}customized-reports/generate-report?query=${encodeURIComponent(customQuery)}&reportName=${encodeURIComponent(objValues.reportName)}`, { headers: { "Authorization": `Bearer ${token}` } })
+            .then(response => {
+                // setObjValues(null)
+                // props.toggleModal()
+                // props.fetchNotificationConfigs()
+                getCustomReports();
+                toast.success("Custom report successfully generated...")
+                
+            })
+            .catch(error => {
+                console.log(error)
+            }
+
+            );
+
+    }   
+
+    function replaceValues(query, customDataFields) {
+        return query.replace(/{{\s*([^}]+)\s*}}/g, (match, key) => {
+            const normalizedKey = key.trim().toLowerCase().replace(' ', '_');
+            return customDataFields[normalizedKey] !== undefined ? customDataFields[normalizedKey] : match;
+        });
+    }
+
+    const handleSaveCustomReport = (e) => {
+        e.preventDefault()
+        axios
+            .post(`${baseUrl}customized-reports`, objValues, { headers: { "Authorization": `Bearer ${token}` } })
+            .then(response => {
+                // setObjValues(null)
+                // props.toggleModal()
+                // props.fetchNotificationConfigs()
+                getCustomReports();
+                toast.success("Custom report successfully saved...")
+                
+            })
+            .catch(error => {
+                console.log(error)
+            }
+
+            );
+    }
+
+    async function getCustomReports() {
+        axios
+            .get(`${baseUrl}customized-reports`, { headers: { "Authorization": `Bearer ${token}` } })
+            .then((response) => {
+                setListOfReport(
+                    Object.entries(response.data).map(([key, value]) => ({
+                        key: value.query,
+                        text: value.reportName,
+                        value: value.id,
+                    }))
+                );
+            })
+            .catch((error) => { });
+    }
+    useEffect(() => {
+        getCustomReports();
+        loadFacilities();
+    }, []);
+
+    const handleChange = (e, data) => {
+        e.preventDefault();
+        setSelectedReport(data.value)
+        //api call here
+        axios
+            .get(`${baseUrl}customized-reports/${data.value}`, { headers: { "Authorization": `Bearer ${token}` } })
+            .then((response) => {
+
+                setObjValues(response.data)
+                // setObjValues(objValues?.reportName, objValues?.query)
+            })
     }
 
     const handleSubmit = (e) => {
@@ -158,9 +243,54 @@ const CustomReport = (props) => {
                 }
             });
 
-
     }
-    //   console.log(analyzeText);
+
+    const openReportDeletionModal = (row) => {
+        axios
+            .delete(`${baseUrl}customized-reports/${row}, objValues`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            .then((response) => {
+                setModal(false)
+                getCustomReports();
+                toast.success("Report successfully deleted...")
+            })
+            .catch(error => {
+                console.log(error)
+            }
+
+            );
+    }
+
+    const deleteReportModal = (row) => {
+        rowNum = row.value;
+
+        setModal(true);
+
+    };
+    function actionItems(row) {
+        return [
+            {
+                type: 'link',
+                name: 'View',
+                icon: <FaEye size="22" />,
+                to: {}
+            },
+            {
+                type: 'button',
+                name: 'Edit',
+                icon: <MdModeEdit size="20" color='#014d88' />,
+                // onClick: (() => openNotificationConfigCreationModal(row))
+            },
+            {
+                type: 'button',
+                name: 'Delete',
+                icon: <MdDelete size="20" color='#014d88' />,
+                onClick: (() => deleteReportModal(row))
+            }
+        ]
+    }
+    
     return (
         <>
 
@@ -169,62 +299,96 @@ const CustomReport = (props) => {
 
                     <h2 style={{ color: '#000' }}>CUSTOM REPORT</h2>
                     <br />
+                    <FormGroup>
+                        <Label style={{ color: '#014d88', fontWeight: 'bolder' }}>List of Reports <span style={{ cursor: "pointer", color: "blue" }}
+                        >
+                        </span></Label>
+                        <Dropdown
+                            placeholder='Select Report'
+                            fluid
+                            search
+                            selection
+                            name="reports"
+                            id="reports"
+                            value={selectedReport}
+                            onChange={handleChange}
+                            options={listOfReport}
+                        />
+                    </FormGroup>
                     <form >
                         <div className="row">
-
                             <div className="form-group  col-md-6">
                                 <FormGroup>
-                                    <Label>Custom Query*</Label>
-                                    <TextArea
-                                        id="queryBody"
-                                        name="queryBody"
-                                        multiline="multiline"
-                                        rows={20}
-                                        //   inputProps={{ maxLength: 200 }}
-                                        //   value={notificationObject?.messageBody}
-                                        value={objValues?.queryBody}
+                                    <Label>Query Name*</Label>
+                                    <Input
+                                        type="text"
+                                        className="form-control"
+                                        name="reportName"
+                                        id="reportName"
                                         onChange={handleInputChange}
-                                        style={{ border: "1px solid #014D88", borderRadius: "0.2rem", width: "100%" }}
-                                        className="w-100"
-                                        width={100}
-
+                                        value={objValues?.reportName}
+                                        style={{ border: "1px solid #014D88", borderRadius: "0.2rem" }}
                                     />
                                 </FormGroup>
                             </div>
 
-                            <div className="form-group  col-md-6">
-                                <FormGroup>
-                                    <Label>Query Parameters *</Label>
-                                    <ScrollableDiv listOfParams={listOfParams} objValues={objValues}
-
-                                    />
-                                </FormGroup>
-                            </div>
-                            <br />
                             <div className="row">
-                                <div className="mb-3 col-md-2">
-                                    <Button type="submit" content='Cancel' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#FF0000", color: '#fff' }} onClick={handleCancel} />
-                                </div>
-                                <div className="mb-3 col-md-2">
-                                    <Button type="submit" content='Analyze' icon='up arrow' labelPosition='right' style={{ backgroundColor: "#014d88", color: '#fff' }} onClick={handleAnalyze}  />
-                                </div>
-                                <div className="mb-3 col-md-3">
-                                    <Button type="submit" content='Dry Run' icon='up arrow' labelPosition='right' style={{ backgroundColor: "#008000", color: '#fff' }} onClick={handleDryRun}  />
-                                </div>
-                                <div className="mb-3 col-md-2" hidden>
-                                    <Button type="submit" content='Generate' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#008000", color: '#fff' }} onClick={handleSubmit} hidden={objValues.organisationUnitId === "" ? true : false} />
-                                </div>
-                            </div>
+                                <div className="form-group  col-md-6">
+                                    <FormGroup>
+                                        <Label>Custom Query*</Label>
+                                        <TextArea
+                                            id="query"
+                                            name="query"
+                                            multiline="multiline"
+                                            rows={20}
+                                            onChange={handleInputChange}
+                                            style={{ border: "1px solid #014D88", borderRadius: "0.2rem", width: "100%" }}
+                                            value={objValues?.query}
+                                            className="w-100"
+                                            width={100}
 
-                            {loading && (
-                                <Message icon>
-                                    <Icon name='circle notched' loading />
-                                    <Message.Content>
-                                        <Message.Header>Just one second</Message.Header>
-                                        We are fetching that content for you.
-                                    </Message.Content>
-                                </Message>
-                            )}
+                                        />
+                                    </FormGroup>
+                                </div>
+
+                                <div className="form-group  col-md-6">
+                                    <FormGroup>
+                                        <Label>Query Parameters *</Label>
+                                        <ScrollableDiv listOfParams={listOfParams} objValues={objValues} facilityData={facilities} onData={onData}
+
+                                        />
+                                    </FormGroup>
+                                </div>
+                                <br />
+                                <div className="row">
+                                    {/* <div className="mb-3 col-md-2">
+                                        <Button type="submit" content='Cancel' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#FF0000", color: '#fff' }} onClick={handleCancel} />
+                                    </div> */}
+                                    <div className="mb-3 col-md-2">
+                                        <Button type="submit" content='Analyze' icon='up arrow' labelPosition='right' style={{ backgroundColor: "#014d88", color: '#fff' }} onClick={handleAnalyze} />
+                                    </div>
+                                    <div className="mb-3 col-md-3">
+                                        <Button type="submit" content='Dry Run' icon='up arrow' labelPosition='right' style={{ backgroundColor: "#008000", color: '#fff' }} onClick={handleDryRun} />
+                                    </div>
+                                    <div className="mb-3 col-md-3">
+                                        <Button type="submit" content='Save Query' icon='up arrow' labelPosition='right' style={{ backgroundColor: "#008000", color: '#fff' }} onClick={handleSaveCustomReport} />
+                                    </div>
+
+                                    <div className="mb-3 col-md-2" >
+                                        <Button type="submit" content='Generate' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#008000", color: '#fff' }} onClick={handleSaveCustomReport} hidden={objValues.organisationUnitId === "" ? true : false} />
+                                    </div>
+                                </div>
+
+                                {loading && (
+                                    <Message icon>
+                                        <Icon name='circle notched' loading />
+                                        <Message.Content>
+                                            <Message.Header>Just one second</Message.Header>
+                                            We are fetching that content for you.
+                                        </Message.Content>
+                                    </Message>
+                                )}
+                            </div>
                         </div>
                     </form>
 
