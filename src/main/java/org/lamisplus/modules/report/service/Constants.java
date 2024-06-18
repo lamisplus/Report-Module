@@ -147,7 +147,7 @@ public class Constants {
 					"Current ART Status",
 					"Date of Current ART Status",
 					"Client Verification Outcome",
-					"Client Verification Status",
+//					"Client Verification Status",
 					// "Biometric Status",
 					"Cause of Death",
 					"VA Cause of Death",

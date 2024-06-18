@@ -21,7 +21,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 @RestController
-@RequestMapping("/api/customized-reports")
+@RequestMapping("/api/v1/customized-reports")
 @Api(tags = "Customized Report", description = "API for managing customized reports")
 public class CustomizedReportController {
 

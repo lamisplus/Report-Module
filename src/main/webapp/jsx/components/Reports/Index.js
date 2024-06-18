@@ -347,7 +347,7 @@ const Reports = (props) => {
                       {/* <Label color='teal'>5</Label> */}
                       </Menu.Item>
 
-                      <Menu.Item
+                     {/* <Menu.Item
                       name="inbox"
                        active={activeItem === "hts-index-report"}
                        onClick={() => handleItemClick("hts-index-report")}
@@ -355,9 +355,9 @@ const Reports = (props) => {
                         backgroundColor: activeItem === "hts-index-report" ? "#000" : "",
                          }}
                      >
-                     <span style={{ color: "#fff" }}>HTS INDEX REPORT</span>
+                     <span style={{ color: "#fff" }}>HTS INDEX REPORT</span>*/}
                       {/* <Label color='teal'>5</Label> */}
-                      </Menu.Item>
+                     {/* </Menu.Item> */}
 
                       <Menu.Item
                       name="inbox"
@@ -367,9 +367,9 @@ const Reports = (props) => {
                         backgroundColor: activeItem === "custom-report" ? "#000" : "",
                          }}
                      >
-                     <span style={{ color: "#fff" }}>CUSTOM REPORT</span>
+                     <span style={{ color: "#fff" }}>CUSTOM REPORT</span> 
                       {/* <Label color='teal'>5</Label> */}
-                      </Menu.Item>
+                     </Menu.Item>
 
 
                 </Menu>
@@ -537,20 +537,20 @@ const Reports = (props) => {
                     completed={completed}
                   />
                 )}
-                {activeItem === "hts-index-report" && (
+                {/* {activeItem === "hts-index-report" && (
                   <HTSIndexReport
                     handleItemClick={handleItemClick}
                     setCompleted={setCompleted}
                     completed={completed}
                   />
-                )}
+                )} */}
                 {activeItem === "custom-report" && (
                   <CustomReport
                     handleItemClick={handleItemClick}
                     setCompleted={setCompleted}
                     completed={completed}
                   />
-                )}
+                )} 
               </div>
             </form>
           </div>

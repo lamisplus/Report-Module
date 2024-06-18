@@ -3,8 +3,6 @@ import axios from "axios";
 import { FormGroup, Label, CardBody, Spinner, Input, Form } from "reactstrap";
 import { makeStyles } from "@material-ui/core/styles";
 import { Card } from "@material-ui/core";
-import { FaDownload, FaEye, FaPlus, FaUpload } from "react-icons/fa";
-import { MdModeEdit, MdPerson, MdDelete } from "react-icons/md";
 import { token, url as baseUrl } from "../../../api";
 import 'react-phone-input-2/lib/style.css'
 import { Button } from 'semantic-ui-react'
@@ -53,8 +51,6 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-let rowNum = 0;
-
 const CustomReport = (props) => {
     let currentDate = new Date().toISOString().split('T')[0]
     const classes = useStyles();
@@ -65,7 +61,6 @@ const CustomReport = (props) => {
     const [selectedReport, setSelectedReport] = useState("")
     const [customQuery, setCustomQuery] = useState("")
     const [customDataFields, setCustomDataFields] = useState({});
-    const [modal, setModal] = useState(false);
     const [objValues, setObjValues] = useState({
         query: "",
         reportName: "",
@@ -82,7 +77,7 @@ const CustomReport = (props) => {
     const loadFacilities = useCallback(async () => {
         try{
             const response = await axios.get(
-                `${baseUrl}v1/account`,
+                `${baseUrl}account`,
                 {headers: { "Authorization": `Bearer ${token}` }}
             );
             setFacilities(response.data.applicationUserOrganisationUnits);
@@ -140,22 +135,38 @@ const CustomReport = (props) => {
         setCustomQuery(customQuery);
         console.log(customQuery);
 
-        axios
-            .post(`${baseUrl}customized-reports/generate-report?query=${encodeURIComponent(customQuery)}&reportName=${encodeURIComponent(objValues.reportName)}`, { headers: { "Authorization": `Bearer ${token}` } })
-            .then(response => {
-                // setObjValues(null)
-                // props.toggleModal()
-                // props.fetchNotificationConfigs()
-                getCustomReports();
-                toast.success("Custom report successfully generated...")
-                
-            })
-            .catch(error => {
-                console.log(error)
+        axios.post(
+            `${baseUrl}customized-reports/generate-report`,
+            {},
+            {
+              params: {
+                query: customQuery,
+                reportName: objValues.reportName,
+              },
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              responseType: 'blob',
             }
-
-            );
-
+          )
+            .then((response) => {
+              console.log("Here ******" + response.data);
+              setLoading(false);
+              const fileName = `${objValues.organisationUnitName} ${objValues.reportName} Report ${currentDate}`;
+              const responseData = response.data;
+              let blob = new Blob([responseData], { type: "application/octet-stream" });
+              FileSaver.saveAs(blob, `${fileName}.xlsx`);
+              toast.success("Custom Report generated successfully");
+            })
+            .catch((error) => {
+              setLoading(false);
+              if (error.response && error.response.data) {
+                let errorMessage = error.response.data.apierror && error.response.data.apierror.message !== "" ? error.response.data.apierror.message : "Something went wrong, please try again";
+                toast.error(errorMessage);
+              } else {
+                toast.error("Something went wrong. Please try again...");
+              }
+            });
     }   
 
     function replaceValues(query, customDataFields) {
@@ -170,9 +181,6 @@ const CustomReport = (props) => {
         axios
             .post(`${baseUrl}customized-reports`, objValues, { headers: { "Authorization": `Bearer ${token}` } })
             .then(response => {
-                // setObjValues(null)
-                // props.toggleModal()
-                // props.fetchNotificationConfigs()
                 getCustomReports();
                 toast.success("Custom report successfully saved...")
                 
@@ -198,6 +206,7 @@ const CustomReport = (props) => {
             })
             .catch((error) => { });
     }
+    
     useEffect(() => {
         getCustomReports();
         loadFacilities();
@@ -218,78 +227,43 @@ const CustomReport = (props) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        setLoading(true)
-        axios.get(`${baseUrl}reporting/pharmacy/${objValues.organisationUnitId}`,
-            { headers: { "Authorization": `Bearer ${token}` }, responseType: 'blob' },
+        var customQuery = objValues?.query;
+        customQuery = replaceValues(customQuery, customDataFields);
+        // customQuery = customQuery.trim().concat(" LIMIT 5");
+        setCustomQuery(customQuery);
+        axios.post(
+          `${baseUrl}customized-reports/generate-report`,
+          {},
+          {
+            params: {
+              query: customQuery,
+              reportName: objValues.reportName,
+            },
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            responseType: 'blob',
+          }
         )
-            .then(response => {
-                setLoading(false)
-                const fileName = `${objValues.organisationUnitName} Pharmacy ${currentDate}`
-                const responseData = response.data
-                let blob = new Blob([responseData], { type: "application/octet-stream" });
-                FileSaver.saveAs(blob, `${fileName}.xlsx`);
-                //toast.success(" Save successful");
-                //props.setActiveContent('recent-history')
-
-            })
-            .catch(error => {
-                setLoading(false)
-                if (error.response && error.response.data) {
-                    let errorMessage = error.response.data.apierror && error.response.data.apierror.message !== "" ? error.response.data.apierror.message : "Something went wrong, please try again";
-                    toast.error(errorMessage);
-                }
-                else {
-                    toast.error("Something went wrong. Please try again...");
-                }
-            });
-
-    }
-
-    const openReportDeletionModal = (row) => {
-        axios
-            .delete(`${baseUrl}customized-reports/${row}, objValues`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-            .then((response) => {
-                setModal(false)
-                getCustomReports();
-                toast.success("Report successfully deleted...")
-            })
-            .catch(error => {
-                console.log(error)
+          .then((response) => {
+            setLoading(false);
+            const fileName = `${objValues.organisationUnitName} ${objValues.reportName} Report ${currentDate}`;
+            const responseData = response.data;
+            let blob = new Blob([responseData], { type: "application/octet-stream" });
+            FileSaver.saveAs(blob, `${fileName}.xlsx`);
+            toast.success("Custom Report generated successfully");
+          })
+          .catch((error) => {
+            setLoading(false);
+            if (error.response && error.response.data) {
+              let errorMessage = error.response.data.apierror && error.response.data.apierror.message !== "" ? error.response.data.apierror.message : "Something went wrong, please try again";
+              toast.error(errorMessage);
+            } else {
+              toast.error("Something went wrong. Please try again...");
             }
-
-            );
-    }
-
-    const deleteReportModal = (row) => {
-        rowNum = row.value;
-
-        setModal(true);
-
-    };
-    function actionItems(row) {
-        return [
-            {
-                type: 'link',
-                name: 'View',
-                icon: <FaEye size="22" />,
-                to: {}
-            },
-            {
-                type: 'button',
-                name: 'Edit',
-                icon: <MdModeEdit size="20" color='#014d88' />,
-                // onClick: (() => openNotificationConfigCreationModal(row))
-            },
-            {
-                type: 'button',
-                name: 'Delete',
-                icon: <MdDelete size="20" color='#014d88' />,
-                onClick: (() => deleteReportModal(row))
-            }
-        ]
-    }
+          });
+      };
+      
     
     return (
         <>
@@ -367,15 +341,17 @@ const CustomReport = (props) => {
                                     <div className="mb-3 col-md-2">
                                         <Button type="submit" content='Analyze' icon='up arrow' labelPosition='right' style={{ backgroundColor: "#014d88", color: '#fff' }} onClick={handleAnalyze} />
                                     </div>
-                                    <div className="mb-3 col-md-3">
-                                        <Button type="submit" content='Dry Run' icon='up arrow' labelPosition='right' style={{ backgroundColor: "#008000", color: '#fff' }} onClick={handleDryRun} />
+                                    <div className="mb-3 col-md-2">
+                                        <Button type="submit" content='Dry Run' icon='up down' labelPosition='right' style={{ backgroundColor: "black", color: '#fff' }} onClick={handleDryRun} />
                                     </div>
                                     <div className="mb-3 col-md-3">
-                                        <Button type="submit" content='Save Query' icon='up arrow' labelPosition='right' style={{ backgroundColor: "#008000", color: '#fff' }} onClick={handleSaveCustomReport} />
+                                        <Button type="submit" content='Save Query' icon='up arrow' labelPosition='right' style={{ backgroundColor: "blue", color: '#fff' }} onClick={handleSaveCustomReport} />
                                     </div>
 
                                     <div className="mb-3 col-md-2" >
-                                        <Button type="submit" content='Generate' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#008000", color: '#fff' }} onClick={handleSaveCustomReport} hidden={objValues.organisationUnitId === "" ? true : false} />
+                                        {/* <Button type="submit" content='Generate' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#008000", color: '#fff' }} onClick={handleSubmit} hidden={objValues.organisationUnitId === "" ? true : false} /> */}
+
+                                        <Button type="submit" content='Generate' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#008000", color: '#fff' }} onClick={handleSubmit} />
                                     </div>
                                 </div>
 
