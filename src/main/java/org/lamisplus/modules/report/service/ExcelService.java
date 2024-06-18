@@ -6,7 +6,10 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.audit4j.core.util.Log;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.FluxSink;
 
 import java.io.ByteArrayOutputStream;
 import java.sql.Date;
@@ -24,12 +27,14 @@ public class ExcelService {
 	private SXSSFWorkbook workbook;
 	
 	private Sheet sheet;
-	
-	
-	
-	
-	
-	private void writeHeader(String sheetName, List<String> headers ) {
+
+	private final SimpMessageSendingOperations messagingTemplate;
+
+    public ExcelService(SimpMessageSendingOperations messagingTemplate) {
+        this.messagingTemplate = messagingTemplate;
+    }
+
+    private void writeHeader(String sheetName, List<String> headers ) {
 		sheet = workbook.createSheet(sheetName);
 		Row row = sheet.createRow(0);
 		CellStyle style = workbook.createCellStyle();
@@ -127,6 +132,7 @@ public class ExcelService {
 	}
 	
 	private void write(List<Map<Integer, Object>> listData) {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Writing report data ... ");
 		int rowCount = 1;
 		CellStyle nonNumericStyle = getNonNumericStyle();
 		CellStyle numericStyle = workbook.createCellStyle();
@@ -136,7 +142,8 @@ public class ExcelService {
 		getDoubleFormat(doubleStyle);
 		doubleStyle.setAlignment(HorizontalAlignment.LEFT);
 		
-		for (Map<Integer, Object> map : listData) { // you may be thinking O(n^2) but actually it is O(n)
+		for (Map<Integer, Object> map : listData) {
+
 			Row row = sheet.createRow(rowCount++);
 			int columnCount = 0;
 			for (Iterator<Integer> iterator = map.keySet().iterator(); iterator.hasNext(); ) {
@@ -152,6 +159,7 @@ public class ExcelService {
 					createCell(row, columnCount++, value, nonNumericStyle);
 				}
 			}
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Written " + rowCount + " of " + listData.size() + " rows ... ");
 		}
 	}
 	
@@ -171,6 +179,25 @@ public class ExcelService {
 			String sheetName,
 			List<Map<Integer, Object>> listData,
 			List<String> headers)  {
+		ByteArrayOutputStream bao = new ByteArrayOutputStream();
+		try {
+			this.workbook = new SXSSFWorkbook(1000);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Writing report headers ... ");
+			writeHeader(sheetName, headers);
+			write(listData);
+			Log.info("last row {}", workbook.getSheet(sheetName).getLastRowNum());
+			workbook.write(bao);
+
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return bao;
+	}
+
+	public ByteArrayOutputStream generateFlux(
+			String sheetName,
+			List<Map<Integer, Object>> listData,
+			List<String> headers, FluxSink<ResponseEntity<String>> fluxSink)  {
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		try {
 			this.workbook = new SXSSFWorkbook(1000);

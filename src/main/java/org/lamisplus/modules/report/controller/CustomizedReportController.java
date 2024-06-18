@@ -4,32 +4,37 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.lamisplus.modules.report.domain.dto.CustomizedReportDTO;
 import org.lamisplus.modules.report.domain.entity.CustomizedReport;
+import org.lamisplus.modules.report.service.Constants;
 import org.lamisplus.modules.report.service.CustomizedReportService;
-import org.lamisplus.modules.report.service.GenerateExcelService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.time.LocalDate;
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 @RestController
-@RequestMapping("/api/customized-reports")
+@RequestMapping("/api/v1/customized-reports")
 @Api(tags = "Customized Report", description = "API for managing customized reports")
 public class CustomizedReportController {
 
     private final CustomizedReportService service;
+    private final SimpMessageSendingOperations messagingTemplate;
 
 
-    public CustomizedReportController(CustomizedReportService service) {
+    public CustomizedReportController(CustomizedReportService service, SimpMessageSendingOperations messagingTemplate) {
         this.service = service;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @GetMapping
@@ -80,17 +85,23 @@ public class CustomizedReportController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/generate-report")
+    @GetMapping("/generate-report")
     public ResponseEntity<?> generateCustomizedReport (HttpServletResponse response,
                                    @RequestParam("query") String query,
                                    @RequestParam("reportName") String reportName) throws IOException {
-
+        messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting customized report");
         if (service.isQueryInvalid(query)) {
             return new ResponseEntity<>("Query is not valid", HttpStatus.BAD_REQUEST);
         }
         ByteArrayOutputStream baos = service.generateCustomizedReport(query,  reportName);
         setStream(baos, response);
+        messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating customized report");
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @SendTo(Constants.REPORT_GENERATION_PROGRESS_TOPIC)
+    public String broadcastMessage(@Payload String message) {
+        return message;
     }
 
     private void setStream(ByteArrayOutputStream baos, HttpServletResponse response) throws IOException {

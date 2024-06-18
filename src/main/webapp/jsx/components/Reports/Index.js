@@ -30,7 +30,7 @@ import MhpssReport from "./MhpssReport";
 import KpPrevReport from "./KpPrevReport";
 import HIVST from "./HIVSTReport";
 import HTSIndexReport from "./HTSIndexReport";
-import CustomReport from "./CustomReport";
+import CustomReportDemo from "./CustomReportDemo";
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -361,10 +361,10 @@ const Reports = (props) => {
 
                       <Menu.Item
                       name="inbox"
-                       active={activeItem === "hts-index-report"}
-                       onClick={() => handleItemClick("hts-index-report")}
+                       active={activeItem === "custom-report"}
+                       onClick={() => handleItemClick("custom-report")}
                         style={{
-                        backgroundColor: activeItem === "hts-index-report" ? "#000" : "",
+                        backgroundColor: activeItem === "custom-report" ? "#000" : "",
                          }}
                      >
                      <span style={{ color: "#fff" }}>CUSTOM REPORT</span>
@@ -544,6 +544,20 @@ const Reports = (props) => {
                     completed={completed}
                   />
                 )}
+                  {activeItem === "custom-report" && (
+                      <HIVST
+                          handleItemClick={handleItemClick}
+                          setCompleted={setCompleted}
+                          completed={completed}
+                      />
+                  )}
+                  {activeItem === "custom-report" && (
+                      <CustomReportDemo
+                          handleItemClick={handleItemClick}
+                          setCompleted={setCompleted}
+                          completed={completed}
+                      />
+                  )}
               </div>
             </form>
           </div>

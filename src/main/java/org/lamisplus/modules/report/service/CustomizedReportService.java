@@ -7,7 +7,10 @@ import org.lamisplus.modules.report.repository.CustomisedReportRepository;
 import org.lamisplus.modules.report.utility.ResultSetExtract;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.FluxSink;
 
 import java.io.ByteArrayOutputStream;
 import java.sql.ResultSet;
@@ -25,11 +28,13 @@ public class CustomizedReportService {
     private final ExcelService excelService;
     private static final Pattern SQL_INJECTION_PATTERN = Pattern.compile(
             "(INSERT|DELETE|DROP|TRUNCATE|CREATE)", Pattern.CASE_INSENSITIVE);
+    private final SimpMessageSendingOperations messagingTemplate;
 
-    public CustomizedReportService(CustomisedReportRepository customisedReportRepository, ResultSetExtract resultSetExtract, ExcelService excelService) {
+    public CustomizedReportService(CustomisedReportRepository customisedReportRepository, ResultSetExtract resultSetExtract, ExcelService excelService, SimpMessageSendingOperations messagingTemplate) {
         this.customisedReportRepository = customisedReportRepository;
         this.resultSetExtract = resultSetExtract;
         this.excelService = excelService;
+        this.messagingTemplate = messagingTemplate;
     }
 
     public List<CustomizedReportDTO> findAll() {
@@ -66,8 +71,11 @@ public class CustomizedReportService {
 
     @SneakyThrows
     public ByteArrayOutputStream generateCustomizedReport(String query, String reportName) {
+        messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
         ResultSet resultSet = resultSetExtract.getResultSet(query);
+        messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
         List<String> headers = resultSetExtract.getHeaders(resultSet);
+        messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
         List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
         return excelService.generate(reportName, fullData, headers);
     }
