@@ -11,6 +11,7 @@ import org.lamisplus.modules.hiv.domain.dto.*;
 import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.utility.Scrambler;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Component;
 
 
@@ -31,6 +32,7 @@ public class GenerateExcelDataHelper {
 	List<Object> errorObjects = new ArrayList<Object>();
 
 	private final Scrambler scrambler;
+	private final SimpMessageSendingOperations messagingTemplate;
 
 	public static List<Map<Integer, Object>> fillPatientLineListDataMapper(@NonNull List<PatientLineDto> listFinalResult) {
 		List<Map<Integer, Object>> result = new ArrayList<>();

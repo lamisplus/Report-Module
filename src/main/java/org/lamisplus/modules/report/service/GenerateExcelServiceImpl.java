@@ -1,6 +1,7 @@
 package org.lamisplus.modules.report.service;
 
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.audit4j.core.util.Log;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
@@ -19,7 +20,9 @@ import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.repository.ReportRepository;
 import org.lamisplus.modules.report.utility.DateUtil;
 import org.lamisplus.modules.report.utility.ResultSetExtract;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.FluxSink;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
@@ -61,16 +64,20 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 
 	private final ResultSetExtract resultSetExtract;
 	private final DateUtil dateUtil;
+	private final SimpMessageSendingOperations messagingTemplate;
 
 
 	@Override
 	public ByteArrayOutputStream generatePatientLine(HttpServletResponse response, Long facilityId) {
 		LOG.info("Start generating patient line list for facility: " + getFacilityName(facilityId));
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			List<PatientLineDto> data = patientReportService.getPatientLine(facilityId);
 //			LOG.info("fullData 1: " + data);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> fullData = GenerateExcelDataHelper.fillPatientLineListDataMapper(data);
 			LOG.info("fullData 2: " + data.size());
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.PATIENT_LINE_LIST, fullData, Constants.PATIENT_LINE_LIST_HEADER);
 		} catch (Exception e) {
 			LOG.error("Error Occurred when generating PATIENT LINE LIST!!!");
@@ -82,12 +89,15 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 
 	@Override
 	public ByteArrayOutputStream generateClientServiceList(HttpServletResponse response, Long facilityId) {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
 		try {
 			List<ClientServiceDto> data = reportRepository.generateClientServiceList(facilityId);
 			LOG.info("fullData 1: " + Arrays.toString(data.toArray()));
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> fullData = GenerateExcelDataHelper.fillClientServiceListDataMapper(data);
 			LOG.info("fullData 2: " + data.size());
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.CLIENT_SERVICE_LIST, fullData, Constants.CLIENT_SERVICE_HEADER);
 		} catch (Exception e) {
 			LOG.error("Error Occurred when generating CLIENT SERVICE LIST!!!");
@@ -120,10 +130,13 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	@Override
 	public ByteArrayOutputStream generateTBReport(Long facilityId, LocalDate start, LocalDate end) {
 		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			List<TBReportProjection> tbReportProjections = reportRepository.generateTBReport(facilityId, start, end);
 			LOG.info("TB Size {}", tbReportProjections.size());
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillTBReportDataMapper(tbReportProjections, end);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.TB_SHEET, data, Constants.TB_REPORT_HEADER);
 		} catch (Exception e) {
 			LOG.error("An error Occurred when generating TB report...");
@@ -137,10 +150,13 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	@Override
 	public ByteArrayOutputStream generateNCDReport(Long facilityId, LocalDate start, LocalDate end) {
 		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			List<NCDReportProjection> ncdReportProjections = reportRepository.generateNCDReport(facilityId, start, end);
 			LOG.info("TB Size {}", ncdReportProjections.size());
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillNCDReportDataMapper(ncdReportProjections, end);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.NCD_SHEET, data, Constants.NCD_REPORT_HEADER);
 		} catch (Exception e) {
 			LOG.error("An error Occurred when generating NCD report...");
@@ -154,10 +170,13 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	@Override
 	public ByteArrayOutputStream generateEACReport(Long facilityId, LocalDate start, LocalDate end) {
 		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			List<EACReportProjection> eacReportProjections = reportRepository.generateEACReport(facilityId, start, end);
 			LOG.info("EAC Size {}", eacReportProjections.size());
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillEACReportDataMapper(eacReportProjections, end);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.EAC_SHEET, data, Constants.EAC_REPORT_HEADER);
 		} catch (Exception e) {
 			LOG.error("An error Occurred when generating EAC report...");
@@ -169,12 +188,17 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	}
 
 	@Override
+	@SneakyThrows
 	public ByteArrayOutputStream generateRadet(Long facilityId, LocalDate start, LocalDate end) {
 		LOG.info("Start generating patient RADET for facility:" + getFacilityName(facilityId));
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			List<RADETDTOProjection> radetDtos = radetService.getRadetDtos(facilityId, start, end);
+
 			LOG.info("RADET Size {}", radetDtos.size());
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> data = excelDataHelper.fillRadetDataMapper(radetDtos,end);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
 		} catch (Exception e) {
 			LOG.error("An error Occurred when generating RADET...");
@@ -191,7 +215,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		try {
 			List<PharmacyReport> pharmacies = artPharmacyRepository.getArtPharmacyReport(facilityId);
 			LOG.info("Pharmacy data {}", pharmacies.size());
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillPharmacyDataMapper(pharmacies);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.PHARMACY_SHEET, data, Constants.PHARMACY_HEADER);
 		} catch (Exception e) {
 			LOG.info("Error Occurred when generating Pharmacy");
@@ -203,6 +229,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	
 	@Override
 	public ByteArrayOutputStream generateBiometricReport(Long facilityId, LocalDate start, LocalDate end) {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
 			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
@@ -212,7 +239,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			String query = String.format(Application.biometric, facilityId, startDate, endDate);
 
 			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
 			LOG.info("query size is : {}" + fullData.size());
 
@@ -226,11 +255,14 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	
 	@Override
 	public ByteArrayOutputStream generateLabReport(Long facilityId) throws IOException {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		LOG.info("generating Lab report");
 		try {
 			List<LabReport> labReports = hivEacRepository.getLabReports(facilityId);
 			LOG.info("Lab data {}", labReports.size());
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillLabDataMapper(labReports);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.LAB_SHEET_NAME, data, Constants.LAB_HEADER);
 		} catch (Exception e) {
 			LOG.info("Error Occurred when generating Lab report");
@@ -242,11 +274,14 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	
 	@Override
 	public ByteArrayOutputStream generateClinicReport(Long facilityId) throws IOException {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		LOG.info("generating Clinic report");
 		try {
 			List<ClinicDataDto> clinicData = reportRepository.getClinicData(facilityId);
 			LOG.info("Lab data {}", clinicData.size());
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillClinicDataMapper(clinicData);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.CLINIC_NAME, data, Constants.CLINIC_HEADER);
 		} catch (Exception e) {
 			LOG.info("Error Occurred when generating Clinic  report");
@@ -272,11 +307,14 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 
 	@Override
 	public ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, LocalDate end) {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		LOG.info("Start generating hts for facility:" + getFacilityName(facilityId));
 		try {
 			List<HtsReportDto> htsReport = htsReportService.getHtsReport(facilityId, start, end);
 			LOG.error("Hts Size: {}", htsReport.size());
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> data = excelDataHelper.fillHtsDataMapper(htsReport);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.HTS_SHEET, data, Constants.HTS_HEADER);
 		} catch (Exception e) {
 			LOG.error("Error Occurred when generating HTS !!!");
@@ -304,6 +342,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 
 	@Override
 	public ByteArrayOutputStream generatePrep(Long facilityId, LocalDate start, LocalDate end) {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
 			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
@@ -318,7 +357,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 					.replace("?3", endDate);
 
 			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
 			LOG.info("query size is : {}" + fullData.size());
 
@@ -333,6 +374,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 
 	@Override
 	public ByteArrayOutputStream generateAhdReport (Long facilityId, LocalDate start, LocalDate end) {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
 			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
@@ -347,7 +389,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 					.replace("?3", endDate);
 
 			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
 			LOG.info("query size is : {}" + fullData.size());
 
@@ -362,6 +406,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 
 	@Override
 	public ByteArrayOutputStream generateKpPrevReport(Long facilityId, LocalDate start, LocalDate end) {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
 			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
@@ -380,7 +425,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 					.replace("?3", endDate);
 
 			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
 			LOG.info("query size is : {}" + fullData.size());
 
@@ -395,6 +442,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 
 	@Override
 	public ByteArrayOutputStream generateHivstReport(Long facilityId, LocalDate start, LocalDate end) {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
 			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
@@ -409,7 +457,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 					.replace("?3", endDate);
 
 			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
 			LOG.info("query size is : {}" + fullData.size());
 
@@ -424,6 +474,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 
 	@Override
 	public ByteArrayOutputStream generateLongitudinalPrepReport(Long facilityId, LocalDate start, LocalDate end) {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
 			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
@@ -438,7 +489,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 					.replace("?3", endDate);
 
 			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
 			LOG.info("query size is : {}" + fullData.size());
 
@@ -453,6 +506,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 
 	@Override
 	public ByteArrayOutputStream generateHtsRegisterReport(Long facilityId, LocalDate start, LocalDate end) {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
 			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
@@ -466,7 +520,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 						.replace("?3", endDate);
 
 				ResultSet resultSet = resultSetExtract.getResultSet(query);
+				messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 				List<String> headers = resultSetExtract.getHeaders(resultSet);
+				messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 				List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
 				LOG.info("query size is : {}" + fullData.size());
 
@@ -485,6 +541,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 
 	@Override
 	public ByteArrayOutputStream generateIndexQueryLine(Long facilityId, LocalDate start, LocalDate end) {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		LOG.info("Start generating Index line list for facility: " + getFacilityName(facilityId));
 		try {
 			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
@@ -498,7 +555,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			String query = String.format(Application.indexElicitation, facilityId, startDate, endDate);
 
 			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
 			LOG.info("query size is : {}" + fullData.size());
 
@@ -548,6 +607,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 
 
 	public ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
 		String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
 		LOG.info("start date {}", startDate);
@@ -582,7 +642,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			LOG.info("pmtct query not available check query.yml file");
 		}
 		ResultSet resultSet = resultSetExtract.getResultSet(query);
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 		List<String> headers = resultSetExtract.getHeaders(resultSet);
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 		List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
 		LOG.info("query size is : {}" + fullData.size());
 		return excelService.generate(reportName, fullData, headers);

@@ -9,6 +9,8 @@ import org.lamisplus.modules.report.domain.AppointmentReportDto;
 import org.lamisplus.modules.report.domain.PatientLineListDto;
 import org.lamisplus.modules.report.service.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
 
@@ -72,14 +74,16 @@ public class PatientReportController {
 			@RequestParam("facilityId") Long facility,
 			@RequestParam("startDate") LocalDate start,
 			@RequestParam("endDate") LocalDate end) throws IOException {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting radet report");
 		
 		messagingTemplate.convertAndSend("/topic/radet", "start");
 		
 		ByteArrayOutputStream baos = generateExcelService.generateRadet(facility, start, end);
 		
 		setStream(baos, response);
-		
 		messagingTemplate.convertAndSend("/topic/radet", "end");
+
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating radet report");
 	}
 
 	@GetMapping("/tb-report")
@@ -194,8 +198,13 @@ public class PatientReportController {
 			@RequestParam("endDate") LocalDate end) {
 		return ResponseEntity.ok(appointmentReportService.getRefillAppointment(facility, start, end));
 	}
-	
-	
+
+
+	@SendTo(Constants.REPORT_GENERATION_PROGRESS_TOPIC)
+	public String broadcastMessage(@Payload String message) {
+		return message;
+	}
+
 	private void setStream(ByteArrayOutputStream baos, HttpServletResponse response) throws IOException {
 		response.setHeader("Content-Type", "application/octet-stream");
 		response.setHeader("Content-Length", Integer.toString(baos.size()));

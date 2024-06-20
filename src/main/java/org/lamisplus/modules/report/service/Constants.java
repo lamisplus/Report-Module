@@ -21,6 +21,8 @@ public class Constants {
 	public static final String HTS_SHEET = "hts";
 
 	public static final String PREP_SHEET = "prep";
+
+	public static final String REPORT_GENERATION_PROGRESS_TOPIC = "/topic/report-generation-progress";
 	
 	// headers
 	public static final List<String> PATIENT_LINE_LIST_HEADER = Arrays.asList(
