@@ -42,6 +42,9 @@ public class Application {
     private String hivstQueryName;
     private String hivstQuery;
 
+    private String adrQueryName;
+    private String adrQuery;
+
 
     public static String indexElicitation;
     public static String indexElicitationName;
@@ -79,6 +82,10 @@ public class Application {
     public static String hivstName;
     public static String hivst;
 
+    //ADR Report
+    public static String adrName;
+    public static String adr;
+
 
 
     @PostConstruct
@@ -114,6 +121,9 @@ public class Application {
         //HivSt
         hivst = getHivstQuery();
         hivstName = getHivstQueryName();
+        //ADR
+        adr = getAdrQuery();
+        adrName = getAdrQueryName();
 
 
     }
