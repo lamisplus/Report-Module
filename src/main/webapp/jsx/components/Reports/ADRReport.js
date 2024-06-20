@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const IndexElicitationReport = (props) => {
+const ADRReport = (props) => {
     let currentDate = new Date().toISOString().split('T')[0]
     const classes = useStyles();
     const [loading, setLoading] = useState(false)
@@ -67,20 +67,20 @@ const IndexElicitationReport = (props) => {
     })
     useEffect(() => {
         Facilities()
-    }, []);
+      }, []);
     //Get list of WhoStaging
     const Facilities =()=>{
-        axios
-            .get(`${baseUrl}account`,
-                { headers: {"Authorization" : `Bearer ${token}`} }
-            )
-            .then((response) => {
-                console.log(response.data);
-                setFacilities(response.data.applicationUserOrganisationUnits);
-            })
-            .catch((error) => {
-                //console.log(error);
-            });
+    axios
+        .get(`${baseUrl}account`,
+            { headers: {"Authorization" : `Bearer ${token}`} }
+        )
+        .then((response) => {
+        console.log(response.data);
+            setFacilities(response.data.applicationUserOrganisationUnits);
+        })
+        .catch((error) => {
+        //console.log(error);
+        });
 
     }
 
@@ -92,9 +92,9 @@ const IndexElicitationReport = (props) => {
         setStatus(!status)
 
         if (status === true) {
-            setObjValues ({...objValues,  startDate: "1980-01-01", endDate: currentDate});
+          setObjValues ({...objValues,  startDate: "1980-01-01", endDate: currentDate});
         } else {
-            setObjValues ({...objValues,  startDate: "", endDate: currentDate});
+          setObjValues ({...objValues,  startDate: "", endDate: currentDate});
         }
 
     }
@@ -104,32 +104,28 @@ const IndexElicitationReport = (props) => {
         setLoading(true)
         console.log(token);
 
-        axios.post(`${baseUrl}index-elicitation-reporting?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,objValues.organisationUnitId,
+        axios.post(`${baseUrl}adr-reporting?&facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,objValues.organisationUnitId,
             { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
         )
-            .then(response => {
-                setLoading(false)
-                const fileName = `${objValues.organisationUnitName} Index Elicitation ${currentDate}`
-                const responseData = response.data
-                let blob = new Blob([responseData], {type: "application/octet-stream"});
+          .then(response => {
+            setLoading(false)
+            const fileName = `${objValues.organisationUnitName} ADR ${currentDate}`
+            const responseData = response.data
+            let blob = new Blob([responseData], {type: "application/octet-stream"});
 
-                FileSaver.saveAs(blob, `${fileName}.xlsx`);
-                toast.success("Index Elicitation Report generated successfully");
-            })
-            .catch(error => {
-                setLoading(false)
-                if(error.response && error.response.data){
-                    let errorMessage = error.response.data.apierror && error.response.data.apierror.message!=="" ? error.response.data.apierror.message :  "Something went wrong, please try again";
-                    toast.error(errorMessage);
-                }
-                else{
-                    toast.error("Something went wrong. Please try again...");
-                }
-            });
-
-
-
-
+            FileSaver.saveAs(blob, `${fileName}.xlsx`);
+            toast.success("ADR Report generated successfully");
+          })
+          .catch(error => {
+            setLoading(false)
+            if(error.response && error.response.data){
+                let errorMessage = error.response.data.apierror && error.response.data.apierror.message!=="" ? error.response.data.apierror.message :  "Something went wrong, please try again";
+                toast.error(errorMessage);
+              }
+              else{
+                toast.error("Something went wrong. Please try again...");
+              }
+          });
     }
 
     return (
@@ -138,11 +134,11 @@ const IndexElicitationReport = (props) => {
             <Card >
                 <CardBody>
 
-                    <h2 style={{color:'#000'}}>INDEX ELICITATION REPORT</h2>
-                    <br/>
+                <h2 style={{color:'#000'}}>ADR REPORT</h2>
+                <br/>
                     <form >
                         <div className="row">
-                            <div className="form-group  col-md-6">
+                        <div className="form-group  col-md-6">
                                 <FormGroup>
                                     <Label>From *</Label>
                                     <input
@@ -177,11 +173,11 @@ const IndexElicitationReport = (props) => {
                                 </FormGroup>
                             </div>
                             <div className="form-group  col-md-6">
-                                <FormGroup check>
-                                    <Label check>
-                                        <Input type="checkbox" onChange={handleValueChange}/>
-                                        {' '} &nbsp;&nbsp;<span> As at Today.</span>
-                                    </Label>
+                                 <FormGroup check>
+                                  <Label check>
+                                    <Input type="checkbox" onChange={handleValueChange}/>
+                                     {' '} &nbsp;&nbsp;<span> As at Today.</span>
+                                  </Label>
                                 </FormGroup>
                             </div>
                             <div className="form-group  col-md-6">
@@ -208,17 +204,17 @@ const IndexElicitationReport = (props) => {
 
                             <br />
                             <div className="row">
-                                <div className="form-group mb-3 col-md-6">
-                                    <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={handleSubmit} disabled={objValues.organisationUnitId==="" ? true : false}/>
-                                </div>
+                            <div className="form-group mb-3 col-md-6">
+                            <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={handleSubmit} disabled={objValues.organisationUnitId==="" ? true : false}/>
+                            </div>
                             </div>
 
                             {loading && (
                                 <Message icon>
-                                                  <Message.Content>
-                                                        <ProgressComponent/>
-                                                  </Message.Content>
-                                                </Message>
+                                 <Message.Content>
+                                       <ProgressComponent/>
+                                 </Message.Content>
+                               </Message>
                             )}
                         </div>
                     </form>
@@ -227,7 +223,6 @@ const IndexElicitationReport = (props) => {
             </Card>
         </>
     );
-
 };
 
-export default IndexElicitationReport
+export default ADRReport

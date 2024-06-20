@@ -29,6 +29,7 @@ import 'react-widgets/dist/css/react-widgets.css';
 import { forwardRef } from 'react';
 import { toast} from "react-toastify";
 import { Message, Icon } from 'semantic-ui-react'
+import ProgressComponent from "./ProgressComponent"
 
 const tableIcons = {
     Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),

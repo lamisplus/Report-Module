@@ -11,6 +11,7 @@ import { Button } from "semantic-ui-react";
 import { toast } from "react-toastify";
 import FileSaver from "file-saver";
 import { Message, Icon } from "semantic-ui-react";
+import ProgressComponent from "./ProgressComponent";
 
 const useStyles = makeStyles((theme) => ({
   card: {

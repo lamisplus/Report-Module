@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import FileSaver from "file-saver";
 import { Message, Icon, TextArea, Dropdown } from 'semantic-ui-react'
 import ScrollableDiv from "../Shared/Scrollable"
+import ProgressComponent from "./ProgressComponent"
 
 const useStyles = makeStyles((theme) => ({
     card: {
