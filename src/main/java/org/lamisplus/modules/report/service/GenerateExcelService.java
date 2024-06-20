@@ -37,6 +37,8 @@ public interface GenerateExcelService {
 
  ByteArrayOutputStream generateAhdReport(Long facilityId, LocalDate start, LocalDate end);
 
+ ByteArrayOutputStream generateAdrReport(Long facilityId, LocalDate start, LocalDate end);
+
  ByteArrayOutputStream generateNCDReport(Long facilityId, LocalDate start, LocalDate end);
   ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException;
 

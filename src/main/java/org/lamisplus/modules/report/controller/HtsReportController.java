@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.lamisplus.modules.report.service.Constants;
 import org.lamisplus.modules.report.service.GenerateExcelService;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
@@ -30,13 +31,14 @@ public class HtsReportController {
 	public void htsLineList(HttpServletResponse response, @RequestParam("facilityId") Long facility,
 							@RequestParam("startDate") LocalDate start,
 							@RequestParam("endDate") LocalDate end) throws IOException {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting HTS report");
 
 		//messagingTemplate.convertAndSend("/topic/hts", "start");
 
 		ByteArrayOutputStream baos = generateExcelService.generateHts(facility, start, end);
 
 		setStream(baos, response);
-
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating HTS report");
 		//messagingTemplate.convertAndSend("/topic/hts", "end");
 	}
 

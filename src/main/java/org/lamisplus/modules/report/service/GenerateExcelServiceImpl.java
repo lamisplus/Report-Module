@@ -403,6 +403,37 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		return null;
 	}
 
+	@Override
+	public ByteArrayOutputStream generateAdrReport (Long facilityId, LocalDate start, LocalDate end) {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
+		try {
+			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
+			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
+			LOG.info("start date {}", startDate);
+			LOG.info("end date {}", endDate);
+			if(Application.ahd != null){
+				LOG.info("ADR query not available check query.yml file");
+			}
+			String query = Application.adr;
+			query = query.replace("?1", String.valueOf(facilityId))
+					.replace("?2", startDate)
+					.replace("?3", endDate);
+
+			ResultSet resultSet = resultSetExtract.getResultSet(query);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
+			List<String> headers = resultSetExtract.getHeaders(resultSet);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
+			List<Map<Integer, Object>> fullData = resultSetExtract.getQueryValues(resultSet, null);
+			LOG.info("query size is : {}" + fullData.size());
+
+			return excelService.generate(Application.adrName, fullData, headers);
+		} catch (Exception e) {
+			LOG.info("Error Occurred when generating ADR data", e);
+		}
+		LOG.info("End generate ADR report");
+		return null;
+	}
+
 
 	@Override
 	public ByteArrayOutputStream generateKpPrevReport(Long facilityId, LocalDate start, LocalDate end) {
