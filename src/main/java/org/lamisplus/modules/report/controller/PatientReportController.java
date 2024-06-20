@@ -44,22 +44,27 @@ public class PatientReportController {
 	
 	@PostMapping("/patient-line-list")
 	public void patientLineList(HttpServletResponse response, @RequestParam("facilityId") Long facility) throws IOException {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting Patient line list report");
 		messagingTemplate.convertAndSend("/topic/patient-line-list/status", "start");
 		ByteArrayOutputStream baos = generateExcelService.generatePatientLine(response, facility);
 		setStream(baos, response);
 		messagingTemplate.convertAndSend("/topic/patient-line-list/status", "end");
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating Patient line list report");
 	}
 
 	@GetMapping("/client-service-list/{facilityId}")
 	public void clientServiceList(HttpServletResponse response, @PathVariable("facilityId") Long facility) throws IOException {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting Client service list report");
 		messagingTemplate.convertAndSend("/topic/client-service-list", "start");
 		ByteArrayOutputStream baos = generateExcelService.generateClientServiceList(response, facility);
 		setStream(baos, response);
 		messagingTemplate.convertAndSend("/topic/client-service-list", "end");
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating client service report");
 	}
 	
 	@GetMapping("/patient-line-list/{facilityId}")
 	public void patientLineList1(HttpServletResponse response, @PathVariable("facilityId") Long facility) {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting patient line list report");
 		String facilityName = generateExcelService.getFacilityName(facility);
 		response.setContentType("application/octet-stream");
 		String headerKey = "Content-Disposition";
@@ -92,6 +97,7 @@ public class PatientReportController {
 			@RequestParam("facilityId") Long facilityId,
 			@RequestParam("start") LocalDate start,
 			@RequestParam("end") LocalDate end) throws IOException {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting TB report");
 
 		messagingTemplate.convertAndSend("/topic/tb-report", "start");
 
@@ -100,6 +106,7 @@ public class PatientReportController {
 		setStream(baos, response);
 
 		messagingTemplate.convertAndSend("/topic/tb-report", "end");
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating TB report");
 	}
 
 	@GetMapping("/eac-report")
@@ -109,6 +116,7 @@ public class PatientReportController {
 			@RequestParam("start") LocalDate start,
 			@RequestParam("end") LocalDate end) throws IOException {
 
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting EAC report");
 		messagingTemplate.convertAndSend("/topic/eac-report", "start");
 		LOG.info("Parameters {} ***** {} ******* {}", facilityId, start, end);
 		ByteArrayOutputStream baos = generateExcelService.generateEACReport(facilityId, start, end);
@@ -116,6 +124,7 @@ public class PatientReportController {
 		setStream(baos, response);
 
 		messagingTemplate.convertAndSend("/topic/eac-report", "end");
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating EAC report");
 	}
 
 	@GetMapping("/ncd-report")
@@ -124,6 +133,7 @@ public class PatientReportController {
 			@RequestParam("facilityId") Long facilityId,
 			@RequestParam("start") LocalDate start,
 			@RequestParam("end") LocalDate end) throws IOException {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting NCD report");
 
 		messagingTemplate.convertAndSend("/topic/ncd-report", "start");
 
@@ -132,18 +142,22 @@ public class PatientReportController {
 		setStream(baos, response);
 
 		messagingTemplate.convertAndSend("/topic/ncd-report", "end");
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating NCD report");
 	}
 	
 	@GetMapping("/pharmacy/{facilityId}")
 	public void generatePharmacy(HttpServletResponse response, @PathVariable("facilityId") Long facility) throws IOException {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting Pharmacy report");
 		messagingTemplate.convertAndSend("/topic/pharmacy", "start");
 		ByteArrayOutputStream baos = generateExcelService.generatePharmacyReport(facility);
 		setStream(baos, response);
 		messagingTemplate.convertAndSend("/topic/pharmacy", "end");
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating Pharmacy report");
 	}
 	
 	@GetMapping("/laboratory/{facilityId}")
 	public void generateLab(HttpServletResponse response, @PathVariable("facilityId") Long facility) throws IOException {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting Laboratory report");
 		messagingTemplate.convertAndSend("/topic/laboratory", "start");
 		ByteArrayOutputStream baos = generateExcelService.generateLabReport(facility);
 		setStream(baos, response);
@@ -156,10 +170,12 @@ public class PatientReportController {
 	                              @RequestParam("startDate") LocalDate start,
 	                              @RequestParam("endDate") LocalDate end
 	) throws IOException {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting Biometric report");
 		messagingTemplate.convertAndSend("/topic/biometric", "start");
 		ByteArrayOutputStream baos = generateExcelService.generateBiometricReport(facility, start, end);
 		setStream(baos, response);
 		messagingTemplate.convertAndSend("/topic/biometric", "end");
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating Biometric report");
 	}
 	
 	@GetMapping("/patient-line-list")
@@ -229,10 +245,12 @@ public class PatientReportController {
 	
 	@GetMapping("/clinic-data/{facilityId}")
 	public void generateClinicData(HttpServletResponse response, @PathVariable("facilityId") Long facility) throws IOException {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting clinic Data report");
 		messagingTemplate.convertAndSend("/topic/clinic-data", "start");
 		ByteArrayOutputStream baos = generateExcelService.generateClinicReport(facility);
 		setStream(baos, response);
 		messagingTemplate.convertAndSend("/topic/clinic-data", "end");
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating Clinic report");
 	}
 	
 	
