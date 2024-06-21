@@ -162,6 +162,8 @@ public class PatientReportController {
 		ByteArrayOutputStream baos = generateExcelService.generateLabReport(facility);
 		setStream(baos, response);
 		messagingTemplate.convertAndSend("/topic/pharmacy", "end");
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done Generating Laboratory report");
+
 	}
 	
 	@GetMapping("/biometric")

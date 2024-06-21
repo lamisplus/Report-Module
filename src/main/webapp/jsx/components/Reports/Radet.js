@@ -13,6 +13,8 @@ import FileSaver from "file-saver";
 import { Message, Icon } from "semantic-ui-react";
 import ProgressComponent from "./ProgressComponent"
 
+const SOCKET_URL = 'http://localhost:8080/ws-chat/';
+
 const useStyles = makeStyles((theme) => ({
   card: {
     margin: theme.spacing(20),
@@ -237,7 +239,6 @@ const PatientLineList = (props) => {
 
               <br />
               <div className="row">
-
                 <div className="form-group mb-3 col-md-6">
                   <Button
                     type="submit"
@@ -256,7 +257,7 @@ const PatientLineList = (props) => {
               {loading && (
                 <Message icon>
                   <Message.Content>
-                        <ProgressComponent/>
+                        <ProgressComponent  />
                   </Message.Content>
                 </Message>
               )}

@@ -287,8 +287,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS rowNums \n" +
             "        FROM hiv_observation \n" +
             "        WHERE type = 'Chronic Care' and data is not null and archived = 0 \n" +
-            "            and date_of_observation between '1980-01-01' and '2024-06-11' \n" +
-            "            and facility_id = 1972\t\n" +
+            "            and date_of_observation between ?2 and ?3 \n" +
+            "            and facility_id = ?1\t\n" +
             "\t\t\t\t),\n" +
             "\t\t\tFilteredLatestObservations AS (\n" +
             "    SELECT\n" +
@@ -315,7 +315,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "                  AND ho.archived = 0\n" +
             "                  AND ho.date_of_observation BETWEEN lo.dateOfTbScreened - INTERVAL '6 months' AND lo.dateOfTbScreened\n" +
             "                  AND ho.data->'tbIptScreening'->>'status' ilike 'Presumptive TB%'\n" +
-            "                  AND ho.facility_id = 1972\n" +
+            "                  AND ho.facility_id = ?1\n" +
             "            ) THEN 'Presumptive TB and referred for evaluation'\n" +
             "            ELSE lo.tbStatus\n" +
             "        END AS tbStatus\n" +
@@ -600,7 +600,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             " ), \n" +
             "dsd2 as ( \n" +
             "select d2.person_uuid as person_uuid_dsd_2, d2.dateOfCurrentDSD, d2.currentDSDModel, d2.dateReturnToSite, bac.display as currentDsdOutlet " +
-            "from (select d.person_uuid, d.date_devolved as dateOfCurrentDSD, bmt.display as currentDSDModel, d.date_return_to_site AS dateReturnToSite, dsd_outlet as dsdOutlet, " +
+            "from (select d.person_uuid, d.date_devolved as dateOfCurrentDSD, bmt.display as currentDSDModel, d.date_return_to_site AS dateReturnToSite, outlet_name as dsdOutlet, " +
             "      ROW_NUMBER() OVER (PARTITION BY d.person_uuid ORDER BY d.date_devolved DESC ) AS row from dsd_devolvement d " +
             "   left join base_application_codeset bmt on bmt.code = d.dsd_type " +
             "where d.archived = 0 and d.date_devolved between ?2 and ?3) d2 " +
@@ -661,7 +661,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "--               THEN hiv_status ELSE biometric_status END) AS biometric_status, \n" +
             "            MAX(status_date) OVER (PARTITION BY person_id ORDER BY status_date DESC) AS status_date \n" +
             "FROM hiv_status_tracker \n" +
-            "            WHERE archived=0 AND facility_id=1959\n" +
+            "            WHERE archived=0 AND facility_id=?1\n" +
             "            \n" +
             "              ) bst ON bst.person_id = he.person_uuid \n" +
             "            WHERE \n" +

@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.report.service.Constants;
 import org.lamisplus.modules.report.service.GenerateExcelService;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
 
@@ -115,6 +117,11 @@ public class HtsReportController {
 
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating HTS Register report");
 
+	}
+
+	@SendTo(Constants.REPORT_GENERATION_PROGRESS_TOPIC)
+	public String broadcastMessage(@Payload String message) {
+		return message;
 	}
 
 	@PostMapping(REPORT_URL_VERSION_ONE + "/hivst-report")

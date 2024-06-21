@@ -88,6 +88,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	}
 
 	@Override
+	@SneakyThrows
 	public ByteArrayOutputStream generateClientServiceList(HttpServletResponse response, Long facilityId) {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
@@ -128,6 +129,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 
 
 	@Override
+	@SneakyThrows
 	public ByteArrayOutputStream generateTBReport(Long facilityId, LocalDate start, LocalDate end) {
 		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
@@ -148,6 +150,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	}
 
 	@Override
+	@SneakyThrows
 	public ByteArrayOutputStream generateNCDReport(Long facilityId, LocalDate start, LocalDate end) {
 		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
@@ -168,6 +171,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	}
 
 	@Override
+	@SneakyThrows
 	public ByteArrayOutputStream generateEACReport(Long facilityId, LocalDate start, LocalDate end) {
 		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
