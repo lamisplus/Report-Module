@@ -604,7 +604,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "      ROW_NUMBER() OVER (PARTITION BY d.person_uuid ORDER BY d.date_devolved DESC ) AS row from dsd_devolvement d " +
             "   left join base_application_codeset bmt on bmt.code = d.dsd_type " +
             "where d.archived = 0 and d.date_devolved between ?2 and ?3) d2 " +
-            "join base_application_codeset bac on bac.id = d2.dsdOutlet where d2.row = 1 " +
+            "join base_application_codeset bac on bac.code = d2.dsdOutlet where d2.row = 1 " +
             "), " +
             "biometric AS (\n" +
             "           SELECT \n" +
