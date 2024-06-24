@@ -1,0 +1,47 @@
+//For pulling TB reports
+SELECT * FROM (SELECT\n" +
+            "     COALESCE(NULLIF(CAST(data->'tbIptScreening'->>'treatementType' AS text), ''), '') as tbTreatementType,\n" +
+            "     NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'tbTreatmentStartDate', '') AS DATE), NULL)as tbTreatmentStartDate,\n" +
+            "     CAST(data->'tbIptScreening'->>'treatmentOutcome' AS text) as tbTreatmentOutcome,\n" +
+            "     NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'completionDate', '') AS DATE), NULL) as tbCompletionDate,\n" +
+            "     person_uuid as tbTreatmentPersonUuid,\n" +
+            "     ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY date_of_observation DESC)\n" +
+            " FROM public.hiv_observation WHERE type = 'Chronic Care'\n" +
+            "       AND facility_id = ?1 and archived = 0\n" +
+            ") tbTreatment WHERE row_number = 1\n" +
+            "    AND tbTreatmentStartDate IS NOT NULL
+
+
+// FOR PULLING TBSCREENING STATUS
+    "tbstatus as ( \n" +
+ with tbscreening_cs as ( \n" +
+     with cs as ( \n" +
+         SELECT id, person_uuid, date_of_observation AS dateOfTbScreened, data->'tbIptScreening'->>'status' AS tbStatus, \n" +
+             data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, \n" +
+             ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS rowNums \n" +
+     FROM hiv_observation \n" +
+     WHERE type = 'Chronic Care' and data is not null and archived = 0 \n" +
+         and date_of_observation between ?2 and ?3 \n" +
+         and facility_id = ?1 \n" +
+     ) \n" +
+     select * from cs where rowNums = 1 \n" +
+ )" +
+
+ // PULLING BIOMETRIC RECAPTURE
+ //            "--                   SELECT * FROM (SELECT person_uuid, enrollment_date AS recapture_date, count, MAX(recapture) AS recentCapture, \n" +
+ //            "--                   ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY enrollment_date DESC) AS rank1\n" +
+ //            "--                  FROM biometric WHERE\n" +
+ //            "--                  archived=0\n" +
+ //            "--                  AND count is not null\n" +
+ //            "--                  AND enrollment_date is not null\n" +
+ //            "--                  AND version_iso_20 IS TRUE\n" +
+ //            "--                  AND recapture != 0 AND recapture IS NOT NULL\n" +
+ //            "--                   GROUP BY person_uuid, count, enrollment_date) recent where rank1 = 1\n" +
+
+ // FOR PULLING IPT
+ //            "       select person_uuid, date_completed as iptCompletionDate, iptCompletionStatus from ( \n" +
+ //            "                select person_uuid, cast(ipt->>'dateCompleted' as date) as date_completed, \n" +
+ //            "                COALESCE(NULLIF(CAST(ipt->>'completionStatus' AS text), ''), '') AS iptCompletionStatus, \n" +
+ //            "                row_number () over (partition by person_uuid order by cast(ipt->>'dateCompleted' as  date) desc) as rnk \n" +
+ //            "                from hiv_art_pharmacy where (ipt->>'dateCompleted' is not null and ipt->>'dateCompleted' != 'null' and ipt->>'dateCompleted' != '' AND TRIM(ipt->>'dateCompleted') <> '') \n" +
+ //            "                and archived = 0) ic where ic.rnk = 1 \n" +
