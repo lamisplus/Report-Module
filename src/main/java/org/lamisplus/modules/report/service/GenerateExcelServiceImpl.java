@@ -65,6 +65,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	private final ResultSetExtract resultSetExtract;
 	private final DateUtil dateUtil;
 	private final SimpMessageSendingOperations messagingTemplate;
+	private final QuarterService quarterService;
 
 
 	@Override
@@ -382,15 +383,19 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		try {
 			String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
 			String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
+			LocalDate previousQuarterEnd = quarterService.getPreviousQuarter(end).getEnd();
 			LOG.info("start date {}", startDate);
 			LOG.info("end date {}", endDate);
+			LOG.info("end date {}", previousQuarterEnd);
 			if(Application.ahd != null){
 				LOG.info("AHD query not available check query.yml file");
 			}
 			String query = Application.ahd;
 			query = query.replace("?1", String.valueOf(facilityId))
 					.replace("?2", startDate)
-					.replace("?3", endDate);
+					.replace("?3", endDate)
+					.replace("?4", previousQuarterEnd.toString());
+
 
 			ResultSet resultSet = resultSetExtract.getResultSet(query);
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
