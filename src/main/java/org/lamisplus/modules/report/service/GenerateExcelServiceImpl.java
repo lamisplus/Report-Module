@@ -386,7 +386,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			LocalDate previousQuarterEnd = quarterService.getPreviousQuarter(end).getEnd();
 			LOG.info("start date {}", startDate);
 			LOG.info("end date {}", endDate);
-			LOG.info("end date {}", previousQuarterEnd);
+			LOG.info("previousQuarter date {}", previousQuarterEnd);
 			if(Application.ahd != null){
 				LOG.info("AHD query not available check query.yml file");
 			}
