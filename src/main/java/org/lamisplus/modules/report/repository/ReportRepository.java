@@ -152,10 +152,10 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
                         " LEFT JOIN patient_person pp ON pp.uuid=hc.person_uuid      " +
                         " LEFT JOIN (SELECT * FROM (SELECT " +
                         " p.id," +
-                        " p.address ->>'{address,0,city}' as clientcity," +
-                        " p.address ->> '{address,0,line,0}' as clientaddress," +
-                        " p.address ->>'{address,0,district}' as lgaid," +
-                        " p.address ->> '{address,0,stateId}' as stateid, " +
+                        " (jsonb_array_elements(p.address->'address')->>'city') as clientcity, " +
+                        " (jsonb_array_elements(p.address->'address')->>'line') as clientaddress, " +
+                        " (jsonb_array_elements(p.address->'address')->>'district') as lgaid, " +
+                        " (jsonb_array_elements(p.address->'address')->>'stateId') as stateid, " +
                         " (jsonb_array_elements(p.address->'address')->>'city') as address " +
                         " FROM patient_person p) as result ) r ON r.id=pp.id" +
 
