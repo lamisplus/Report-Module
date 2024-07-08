@@ -320,7 +320,7 @@ public class Constants {
 					"Source",
 					"Risk Score",
 					"Reffered for STI",
-					"Tester Name",
+					"Tester Code",
 
 					"Prep Offered",
 					"Prep Accepted",

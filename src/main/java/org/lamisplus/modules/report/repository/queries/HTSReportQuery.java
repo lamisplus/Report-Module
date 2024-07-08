@@ -3,7 +3,7 @@ package org.lamisplus.modules.report.repository.queries;
 public class HTSReportQuery {
 
 
-    public static final String HTS_REPORT_QUERY = "SELECT hc.client_code AS clientCode,  \n" +
+    public static final String HTS_REPORT_QUERY = "SELECT hc.client_code AS clientCode, \n" +
             "(CASE WHEN hc.person_uuid IS NULL THEN INITCAP(hc.extra->>'first_name') ELSE INITCAP(pp.first_name) END) AS firstName,  \n" +
             "(CASE WHEN hc.person_uuid IS NULL THEN INITCAP(hc.extra->>'surname') ELSE INITCAP(pp.surname) END) AS surname,  \n" +
             "(CASE WHEN hc.person_uuid IS NULL THEN INITCAP(hc.extra->>'middile_name') ELSE INITCAP(pp.other_name) END) AS otherName,  \n" +
@@ -19,9 +19,9 @@ public class HTSReportQuery {
             " (CASE WHEN hc.person_uuid IS NULL THEN hc.extra->>'marital_status'  \n" +
             "ELSE pp.marital_status->>'display' END) AS maritalStatus,  \n" +
             "(CASE WHEN hc.person_uuid IS NULL  \n" +
-            "THEN hc.extra->>'lga_of_residence' ELSE res_lga.name END) AS LGAOfResidence,  \n" +
+            "THEN hc.extra->>'lga_of_residence' ELSE lgaOfResidence.lgaOfResidence END) AS LGAOfResidence,  \n" +
             "(CASE WHEN hc.person_uuid IS NULL   \n" +
-            " THEN hc.extra->>'state_of_residence' ELSE pp.address ->>'{address,0,city}' END) AS StateOfResidence,  \n" +
+            " THEN hc.extra->>'state_of_residence' ELSE res_state.name END) AS StateOfResidence,  \n" +
             " facility.name AS facility,  \n" +
             " state.name AS state,  \n" +
             " lga.name AS lga,  \n" +
@@ -115,16 +115,22 @@ public class HTSReportQuery {
             "p.id,\n" +
             "p.address ->>'{address,0,city}' as clientcity,\n" +
             "p.address ->> '{address,0,line,0}' as clientaddress,\n" +
-            "p.address ->>'{address,0,district}' as lgaid,\n" +
-            "p.address ->> '{address,0,stateId}' as stateid,\n" +
+            "p.address->'address'->0->>'stateId' AS stateid,\n" +
             "(jsonb_array_elements(p.address->'address')->>'city') as address\n" +
             "FROM patient_person p) as result ) r ON r.id=pp.id\n" +
-            "LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)  \n" +
-            "LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)  \n" +
+            "LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)   \n" +
             "LEFT JOIN base_organisation_unit facility ON facility.id=hc.facility_id  \n" +
             "LEFT JOIN base_organisation_unit state ON state.id=facility.parent_organisation_unit_id  \n" +
             "LEFT JOIN base_organisation_unit lga ON lga.id=state.parent_organisation_unit_id  \n" +
             "LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=hc.facility_id AND boui.name='DATIM_ID' \n" +
+            "LEFT JOIN (select DISTINCT ON (personUuid) personUuid as personUuid11, \n" +
+            "case when (addr ~ '^[0-9\\\\\\\\\\\\\\\\.]+$') =TRUE \n" +
+            " then (select name from base_organisation_unit where id = cast(addr as int)) ELSE\n" +
+            "(select name from base_organisation_unit where id = cast(facilityLga as int)) end as lgaOfResidence \n" +
+            "from (\n" +
+            " select pp.uuid AS personUuid, facility_lga.parent_organisation_unit_id AS facilityLga, (jsonb_array_elements(pp.address->'address')->>'district') as addr from patient_person pp\n" +
+            "LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = CAST (pp.organization->'id' AS INTEGER) \n" +
+            ") dt ) lgaOfResidence ON lgaOfResidence.personUuid11 = hc.person_uuid\n" +
             "LEFT JOIN hiv_enrollment he ON he.person_uuid = hc.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT person_uuid, diagnosedWithTb + lastHivTestDone + whatWasTheResult + lastHivTestHadAnal + lastHivTestVaginalOral\n" +

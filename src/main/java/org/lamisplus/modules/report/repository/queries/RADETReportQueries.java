@@ -33,7 +33,7 @@ public class RADETReportQueries {
             "INNER JOIN hiv_art_clinical hac ON hac.hiv_enrollment_uuid = h.uuid\n" +
             "AND hac.archived = 0\n" +
             "INNER JOIN hiv_regimen hr ON hr.id = hac.regimen_id\n" +
-            "INNER JOIN hiv_regimen_type hrt ON hrt.id = hac.regimen_type_id\n" +
+            "INNER JOIN hiv_regimen_type hrt ON hrt.id = hac.regimen_type_id AND hac.regimen_type_id IN (1,2,3,4,14)\n" +
             "WHERE\n" +
             "h.archived = 0\n" +
             "AND p.archived = 0\n" +
@@ -84,7 +84,7 @@ public class RADETReportQueries {
             "         person_uuid,\n" +
             "         MAX(hac.visit_date) AS MAXDATE\n" +
             "     FROM\n" +
-            "         hiv_art_clinical hac WHERE archived = 0\n" +
+            "         hiv_art_clinical hac WHERE hac.archived = 0 AND hac.tb_status != ''\n" +
             "     GROUP BY\n" +
             "         person_uuid\n" +
             "     ORDER BY\n" +
@@ -339,7 +339,7 @@ public class RADETReportQueries {
             "\t    data->'tbIptScreening'->>'chestXrayResult' as chestXrayResult,\n" +
             "        data->'tbIptScreening'->>'diagnosticTestType' AS tbDiagnosticTestType,\n" +
             "\t    data->'tbIptScreening'->>'tbType' AS tbTreatmentType,\n" +
-            "\t    data->'tbIptScreening'->>'dateSpecimenSent' AS specimenSentDate,\n" +
+            "\t    NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'dateSpecimenSent', '') AS DATE), NULL) AS specimenSentDate,\n" +
             "\t    data->'tbIptScreening'->>'status' as screeningStatus,\n" +
             "\t    data->'tbIptScreening'->>'dateOfDiagnosticTest' as dateOfDiagnosticTest, \n" +
             "        data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType\n" +
@@ -619,35 +619,37 @@ public class RADETReportQueries {
             "\t \n" +
             "\t \n" +
             "iptNew AS (\n" +
-            "WITH tpt_completed AS (\n" +
+           "WITH tpt_completed AS (\n" +
+            "\tSELECT * FROM (\n" +
             "    SELECT\n" +
-            "        person_uuid AS person_uuid,  -- Use person_uuid to uniquely identify each record\n" +
+            "        person_uuid AS person_uuid,\n" +
             "        data->'tptMonitoring'->>'endedTpt' AS endedTpt,\n" +
-            "        data->'tptMonitoring'->>'dateTptEnded' AS tptCompletionDate,\n" +
+            "        NULLIF(CAST(NULLIF(data->'tptMonitoring'->>'dateTptEnded', '') AS DATE), NULL) AS tptCompletionDate,\n" +
             "        data->'tptMonitoring'->>'outComeOfIpt' AS tptCompletionStatus,\n" +
-            "        data->'tptMonitoring'->>'tptPreventionOutcome' AS completion_tptPreventionOutcome\n" +
+            "        data->'tbIptScreening'->>'outcome' AS completion_tptPreventionOutcome, \n" +
+            "\t \tROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY date_of_observation  DESC) rowNum\n" +
             "    FROM\n" +
             "        hiv_observation\n" +
             "    WHERE\n" +
-            "        data->'tptMonitoring'->>'endedTpt' = 'Yes' AND\n" +
+            "        data->'tptMonitoring'->>'endedTpt' = 'Yes' AND \n" +
             "        data->'tptMonitoring'->>'dateTptEnded' IS NOT NULL AND\n" +
             "        data->'tptMonitoring'->>'dateTptEnded' != ''\n" +
             "        AND archived = 0\n" +
-            "),\n" +
-            "\n" +
+            "\t\t) subTc WHERE rowNum = 1\n" +
+            "),"+
             "pt_screened AS (\n" +
             "    SELECT\n" +
             "        person_uuid AS person_uuid,  -- Use person_uuid to uniquely identify each record\n" +
             "        data->'tptMonitoring'->>'tptRegimen' AS tptType,\n" +
-            "        data->'tptMonitoring'->>'dateTptStarted' AS tptStartDate,\n" +
+            "        NULLIF(CAST(NULLIF(data->'tptMonitoring'->>'dateTptStarted', '') AS DATE), NULL) AS tptStartDate,\n" +
             "        data->'tptMonitoring'->>'eligibilityTpt' AS eligibilityTpt\n" +
             "    FROM\n" +
             "        hiv_observation\n" +
             "    WHERE\n" +
             "        (data->'tptMonitoring'->>'eligibilityTpt' IS NOT NULL AND  data->'tptMonitoring'->>'eligibilityTpt' != '') \n" +
             "        AND \n" +
-            "        (data->'tptMonitoring'->>'tptPreventionOutcome' IS NOT NULL AND data->'tptMonitoring'->>'tptPreventionOutcome' != '' \n" +
-            "        AND data->'tptMonitoring'->>'tptPreventionOutcome' != 'Currently on TPT')\n" +
+            "        (data->'tbIptScreening'->>'outcome' IS NOT NULL AND data->'tbIptScreening'->>'outcome' != '' \n" +
+            "        AND data->'tbIptScreening'->>'outcome' != 'Currently on TPT')\n" +
             ")\n" +
             "SELECT\n" +
             "    COALESCE(tc.person_uuid, ts.person_uuid) AS person_uuid,  -- Use COALESCE to get the person_uuid from either table\n" +
