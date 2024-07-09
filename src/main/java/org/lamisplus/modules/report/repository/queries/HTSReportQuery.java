@@ -46,7 +46,7 @@ public class HTSReportQuery {
             "rf.display AS referredFrom,  \n" +
             "ts.display AS testingSetting,  \n" +
             "tc.display AS counselingType,  \n" +
-            "preg.display AS pregnancyStatus,  \n" +
+            "preg.display AS pregnancyStatus, (select display from base_application_codeset where code = hrs.entry_point) AS entryPoint, \n" +
             "(CASE \n" +
             "WHEN preg.display='Breastfeeding' THEN 'Yes'  \n" +
             "WHEN preg.display IS NULL THEN NULL \n" +

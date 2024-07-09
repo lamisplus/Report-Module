@@ -34,6 +34,7 @@ public  interface HtsReportDto {
       String getTestingSetting();
       String getCounselingType();
       String getPregnancyStatus();
+      String getEntryPoint();
       String getBreastFeeding();
       String getIndexType();
       String getIfRecencyTestingOptIn();

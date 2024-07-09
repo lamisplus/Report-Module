@@ -660,6 +660,7 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getOccupation())));
 					map.put(index++, htsReportDto.getDateVisit());
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFirstTimeVisit())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getEntryPoint())));
 //					map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfWives())));
 //					map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfChildren())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getIndexClient())));
