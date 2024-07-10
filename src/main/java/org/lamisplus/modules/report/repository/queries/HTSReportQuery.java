@@ -115,9 +115,9 @@ public class HTSReportQuery {
             "p.id,\n" +
             "p.address ->>'{address,0,city}' as clientcity,\n" +
             "p.address ->> '{address,0,line,0}' as clientaddress,\n" +
-            "p.address->'address'->0->>'stateId' AS stateid,\n" +
+            "(jsonb_array_elements(p.address->'address')->>'stateId') AS stateid,\n" +
             "(jsonb_array_elements(p.address->'address')->>'city') as address\n" +
-            "FROM patient_person p) as result ) r ON r.id=pp.id\n" +
+            "FROM patient_person p) as result WHERE stateid ~ '^[0-9]+$' ) r ON r.id=pp.id\n" +
             "LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)   \n" +
             "LEFT JOIN base_organisation_unit facility ON facility.id=hc.facility_id  \n" +
             "LEFT JOIN base_organisation_unit state ON state.id=facility.parent_organisation_unit_id  \n" +

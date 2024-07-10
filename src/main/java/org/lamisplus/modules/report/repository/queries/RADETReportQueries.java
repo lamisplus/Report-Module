@@ -179,7 +179,7 @@ public class RADETReportQueries {
             "               ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY visit_date DESC) AS rowNums \n" +
             "            from hiv_art_clinical h \n" +
             "            join base_application_codeset b on b.id = cast(h.tb_screen->>'tbStatusId' as bigint) \n" +
-            "            where h.archived = 0 and h.visit_date between ?2 and ?3 and facility_id = ?1 \n" +
+            "            where h.archived = 0 and h.visit_date between ?2 and ?3 and facility_id = ?1 and h.tb_screen->>'tbStatusId' !='' and h.tb_screen->>'tbStatusId' IS NOT NULL \n" +
             "        ) \n" +
             "        select * from h where rowNums = 1 \n" +
             "    ) \n" +
@@ -270,7 +270,7 @@ public class RADETReportQueries {
             "FROM public.laboratory_sample  sm\n" +
             "         INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
             "         INNER JOIN  laboratory_labtest llt on llt.id = lt.lab_test_id\n" +
-            "WHERE lt.lab_test_id IN (65,51,66,64)\n" +
+            "WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58)\n" +
             "        AND sm.archived = 0\n" +
             "        AND sm. date_sample_collected <= ?3\n" +
             "        AND sm.facility_id = ?1\n" +
@@ -306,7 +306,7 @@ public class RADETReportQueries {
             " lt.lab_test_id\n" +
             "     FROM laboratory_result  sm\n" +
             "  INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
-            "     WHERE lt.lab_test_id IN (65,51,66,64) and sm.archived = 0\n" +
+            "     WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58) and sm.archived = 0\n" +
             "       AND sm.date_result_reported is not null\n" +
             "       AND sm.facility_id = ?1\n" +
             "       AND sm.date_result_reported <= ?3\n" +
