@@ -153,55 +153,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<RADETDTOProjection> getRadetData(Long facilityId, LocalDate start, LocalDate end,
                                           LocalDate previous, LocalDate previousPrevious, LocalDate dateOfStartOfCurrentQuarter);
 
-        @Query(value = "SELECT  DISTINCT (p.uuid) AS patientId, \n" +
-                        "                            p.hospital_number AS hospitalNumber, \n" +
-                        "                            EXTRACT( \n" +
-                        "                                    YEAR \n" +
-                        "                                    FROM \n" +
-                        "                                    AGE(NOW(), date_of_birth) \n" +
-                        "                                ) AS age, \n" +
-                        "                            INITCAP(p.sex) AS gender, \n" +
-                        "                            p.date_of_birth AS dateOfBirth, \n" +
-                        "                            facility.name AS facilityName, \n" +
-                        "                            facility_lga.name AS lga, \n" +
-                        "                            facility_state.name AS state, \n" +
-                        "                            boui.code AS datimId, \n" +
-                        "            tvs.*, \n" +
-                        "            tvs.body_weight as BodyWeight,  \n" +
-                        "           (CASE\n" +
-                        "    WHEN hac.pregnancy_status = 'Not Pregnant' THEN hac.pregnancy_status\n" +
-                        "    WHEN hac.pregnancy_status = 'Pregnant' THEN hac.pregnancy_status\n" +
-                        "    WHEN hac.pregnancy_status = 'Breastfeeding' THEN hac.pregnancy_status\n" +
-                        "    WHEN hac.pregnancy_status = 'Post Partum' THEN hac.pregnancy_status\n" +
-                        "    WHEN preg.display IS NOT NULL THEN hac.pregnancy_status\n" +
-                        "    ELSE NULL END ) AS pregnancyStatus, \n" +
-                        "            hac.next_appointment as nextAppointment , \n" +
-                        "            hac.visit_date as visitDate, \n" +
-                        "            funStatus.display as funtionalStatus, \n" +
-                        "            clnicalStage.display as clinicalStage, \n" +
-                        "            tbStatus.display as tbStatus \n" +
-                        "            FROM \n" +
-                        "                 patient_person p \n" +
-                        "                       INNER JOIN base_organisation_unit facility ON facility.id = facility_id \n"
-                        +
-                        "                       INNER JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id \n"
-                        +
-                        "                       INNER JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id \n"
-                        +
-                        "                       INNER JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id = facility_id AND boui.name='DATIM_ID' \n"
-                        +
-                        "                       INNER JOIN hiv_art_clinical hac ON hac.person_uuid = p.uuid  \n" +
-                        " \t\t   LEFT JOIN base_application_codeset preg ON preg.code = hac.pregnancy_status\n" +
-                        "           INNER JOIN base_application_codeset funStatus ON funStatus.id = hac.functional_status_id \n"
-                        +
-                        "           INNER JOIN base_application_codeset clnicalStage ON clnicalStage.id = hac.clinical_stage_id \n"
-                        +
-                        "           INNER JOIN base_application_codeset tbStatus ON tbStatus.id = CAST(regexp_replace(hac.tb_status, '[^0-9]', '', 'g') AS INTEGER)  \n"
-                        +
-                        "           INNER JOIN triage_vital_sign tvs ON tvs.uuid = hac.vital_sign_uuid \n" +
-                        "                       AND hac.archived = 0 \n" +
-                        "               WHERE   hac.archived = 0 \n" +
-                        "           AND hac.facility_id =?1", nativeQuery = true)
+        @Query(value = CLINICALReportQuery.CLINICAL_REPORT_QUERY, nativeQuery = true)
         List<ClinicDataDto> getClinicData(Long facilityId);
 
         @Query(value = "WITH bio_data AS (\n" +

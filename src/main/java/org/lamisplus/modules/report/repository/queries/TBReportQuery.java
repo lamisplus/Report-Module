@@ -48,7 +48,7 @@ public class TBReportQuery {
             "               ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY visit_date DESC) AS rowNums \n" +
             "            from hiv_art_clinical h \n" +
             "            join base_application_codeset b on b.id = cast(h.tb_screen->>'tbStatusId' as bigint) \n" +
-            "            where h.archived = 0 and h.visit_date between ?2 and ?3 and facility_id = ?1 \n" +
+            "            where h.archived = 0 and h.visit_date between ?2 and ?3 and facility_id = ?1 AND h.tb_status != ''\n" +
             "        ) \n" +
             "        select * from h where rowNums = 1 \n" +
             "    ) \n" +
@@ -141,7 +141,7 @@ public class TBReportQuery {
             "        data->'tbIptScreening'->>'tbTestResult' AS tbDiagnosticResult,\n" +
             "    data->'tbIptScreening'->>'chestXrayResult' as chestXrayResult,\n" +
             "        data->'tbIptScreening'->>'diagnosticTestType' AS tbDiagnosticTestType,\n" +
-            "    data->'tbIptScreening'->>'tbType' AS tbTreatmentType,\n" +
+            "    COALESCE(NULLIF(data->'tptMonitoring'->>'tbType',''), NULLIF(data->'tbIptScreening'->>'tbType','')) AS tbTreatmentType,\n" +
             "    NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'dateSpecimenSent', '') AS DATE), NULL) AS specimenSentDate,\n" +
             "    data->'tbIptScreening'->>'status' as screeningStatus,\n" +
             "    data->'tbIptScreening'->>'dateOfDiagnosticTest' as dateOfDiagnosticTest, \n" +
@@ -189,6 +189,18 @@ public class TBReportQuery {
             "ON\n" +
             "    ts.person_uuid = tc.person_uuid  order by screeningDate desc\n" +
             "),\n" +
+            "tb_sample_collection AS (SELECT sample.created_by,CAST(sample.date_sample_collected AS DATE) as dateOfTbSampleCollection, patient_uuid as personTbSample  FROM (\n" +
+            "SELECT llt.lab_test_name,sm.created_by, lt.viral_load_indication, sm.facility_id,sm.date_sample_collected, sm.patient_uuid, sm.archived, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_sample_collected DESC) as rnkk\n" +
+            "FROM public.laboratory_sample  sm\n" +
+            "         INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
+            "         INNER JOIN  laboratory_labtest llt on llt.id = lt.lab_test_id\n" +
+            "WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58)\n" +
+            "        AND sm.archived = 0\n" +
+            "        AND sm. date_sample_collected <= ?3 \n" +
+            "        AND sm.facility_id = ?1 \n" +
+            "        )as sample\n" +
+            "      WHERE sample.rnkk = 1\n" +
+            "     ),"+
             "\tiptNew AS (\n" +
             "WITH tpt_completed AS (\n" +
             "\tSELECT * FROM (\n" +
@@ -214,7 +226,7 @@ public class TBReportQuery {
             "        person_uuid AS person_uuid,  -- Use person_uuid to uniquely identify each record\n" +
             "        data->'tptMonitoring'->>'tptRegimen' AS tptType,\n" +
             "        NULLIF(CAST(NULLIF(data->'tptMonitoring'->>'dateTptStarted', '') AS DATE), NULL) AS tptStartDate,\n" +
-            "        data->'tptMonitoring'->>'eligibilityTpt' AS eligibilityTpt,\n" +
+            "        data->'tptMonitoring'->>'eligibilityTpt' AS eligibilityTpt, data->'tptMonitoring'->>'weight' AS tptWeight,\n" +
             "\tROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY date_of_observation  DESC) rowNum1\n" +
             "    FROM\n" +
             "        hiv_observation\n" +
@@ -227,7 +239,7 @@ public class TBReportQuery {
             "SELECT\n" +
             "    COALESCE(tc.person_uuid, ts.person_uuid) AS person_uuid,  -- Use COALESCE to get the person_uuid from either table\n" +
             "    ts.tptType,\n" +
-            "ts.tptStartDate,\n" +
+            "    ts.tptStartDate, ts.tptWeight,\n" +
             "    ts.eligibilityTpt,\n" +
             "    tc.endedTpt,\n" +
             "    tc.tptCompletionDate,\n" +
@@ -298,11 +310,11 @@ public class TBReportQuery {
             "    COALESCE(tbTmentNew.completionDate , tb_treatement_completion.tb_completion_date) AS tbTreatmentCompletionDate, \n" +
             "    COALESCE(tbTmentNew.treatmentOutcome, tb_treatement_completion.tb_treatment_outcome) AS tbTreatmentOutcome, \n" +
             "    COALESCE(tbTmentNew.tbDiagnosticResult, current_tb_result.tb_diagnostic_result) AS tbDiagnosticResult, \n" +
-            "    current_tb_result.date_of_tb_diagnostic_result_received AS dateOfTbDiagnosticResultReceived, \n" +
+            "    current_tb_result.date_of_tb_diagnostic_result_received AS dateOfTbDiagnosticResultReceived, tbSample.dateOfTbSampleCollection, \n" +
             "    COALESCE(tbTmentNew.tbDiagnosticTestType, current_tb_result.tb_diagnostic_test_type) AS tbDiagnosticTestType, \n" +
             "    COALESCE(iptN.tptStartDate, ipt_start.date_of_ipt_start) AS dateOfIptStart, COALESCE(iptN.tptType, ipt_start.regimen_name) as regimenName, \n" +
             "    COALESCE(iptN.tptCompletionDate, ipt_cA.dateCompletedTpt) AS iptCompletionDate, \n" +
-            "    COALESCE(iptN.tptCompletionStatus, ipt_cA.iptCompletionStatus) AS iptCompletionStatus , weight.weight_at_start_tpt as weightAtStartTpt \n" +
+            "    COALESCE(iptN.tptCompletionStatus, ipt_cA.iptCompletionStatus) AS iptCompletionStatus , COALESCE(iptN.tptWeight, weight.weight_at_start_tpt) as weightAtStartTpt \n" +
             "FROM \n" +
             "    bio_data bio \n" +
             "LEFT JOIN tb_status tb ON bio.uuid = tb.person_uuid \n" +
@@ -313,6 +325,7 @@ public class TBReportQuery {
             "LEFT JOIN weight ON bio.uuid = weight.person_uuid \n" +
             "LEFT JOIN ipt_cA on ipt_cA.person_uuid = bio.uuid\n" +
             "LEFT JOIN iptNew iptN ON  bio.uuid= iptN.person_uuid\n" +
-            "LEFT JOIN  tbTreatmentNew tbTmentNew ON tbTmentNew.person_uuid_tb = bio.uuid";
+            "LEFT JOIN  tbTreatmentNew tbTmentNew ON tbTmentNew.person_uuid_tb = bio.uuid\n" +
+            "LEFT JOIN tb_sample_collection tbSample ON tbSample.personTbSample = bio.uuid";
 
 }

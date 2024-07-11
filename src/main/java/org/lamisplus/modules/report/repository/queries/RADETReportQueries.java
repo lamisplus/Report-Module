@@ -338,7 +338,7 @@ public class RADETReportQueries {
             "        data->'tbIptScreening'->>'tbTestResult' AS tbDiagnosticResult,\n" +
             "\t    data->'tbIptScreening'->>'chestXrayResult' as chestXrayResult,\n" +
             "        data->'tbIptScreening'->>'diagnosticTestType' AS tbDiagnosticTestType,\n" +
-            "\t    data->'tbIptScreening'->>'tbType' AS tbTreatmentType,\n" +
+            "\t    COALESCE(NULLIF(data->'tptMonitoring'->>'tbType',''), NULLIF(data->'tbIptScreening'->>'tbType','')) AS tbTreatmentType,\n" +
             "\t    NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'dateSpecimenSent', '') AS DATE), NULL) AS specimenSentDate,\n" +
             "\t    data->'tbIptScreening'->>'status' as screeningStatus,\n" +
             "\t    data->'tbIptScreening'->>'dateOfDiagnosticTest' as dateOfDiagnosticTest, \n" +
