@@ -29,6 +29,7 @@ import 'react-widgets/dist/css/react-widgets.css';
 import { forwardRef } from 'react';
 import { toast} from "react-toastify";
 import { Message, Icon } from 'semantic-ui-react'
+import ProgressComponent from "./ProgressComponent"
 
 const tableIcons = {
     Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -257,12 +258,10 @@ const Appointment = (props) => {
 
                     <br/>
                     {loading && (
-                        <Message icon>
-                            <Icon name='circle notched' loading />
-                            <Message.Content>
-                            <Message.Header>Just one second</Message.Header>
-                            We are fetching that content for you.
-                            </Message.Content>
+                       <Message icon>
+                          <Message.Content>
+                                <ProgressComponent/>
+                          </Message.Content>
                         </Message>
                     )}
                     {showNoRecord && (

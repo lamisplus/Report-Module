@@ -1,0 +1,32 @@
+#query:
+#  index-query:  SELECT boui.code as "Facility Id (Datim)", state.name AS "State", lga.name AS "LGA", facility.name AS "Facility", hc.client_code AS "Client Code",
+#                pp.uuid AS "Patient Id",
+#                hc.uuid AS "Index HTS Uuid",
+#                (CASE WHEN hc.test1->>'result' ILIKE 'Yes' THEN 'Positive' ELSE 'Negative' END) AS "HIV Status of Index",
+#                hc.index_notification_services_elicitation ->> 'OfferedIns' AS "Offered INS",
+#                hc.index_notification_services_elicitation ->> 'AcceptedIns' AS "Accepted INS",
+#                hc.client_code AS "Index Code",
+#                hie.first_name AS "First Name",
+#                hie.last_name AS "Last Name",
+#                hie.middle_name AS "Middle Name",
+#                hie.phone_number AS "Phone Number",
+#                hie.dob AS "Date of Birth",
+#                se.display AS "Sex",
+#                hie.address AS "Address",
+#                noti_method.display AS "Notification Method",
+#                sexually_un.display AS "Sexually uncomfortable",
+#                CASE WHEN hie.currently_live_with_partner  IS TRUE THEN 'Yes' ELSE 'No' END AS "Currently living with partner",
+#                relationship.display AS "Relationship with index client",
+#                hie.date_partner_came_for_testing AS "Date Partner Came For Testing"
+#                FROM hts_client hc
+#                LEFT JOIN patient_person pp ON pp.uuid=hc.person_uuid
+#                INNER JOIN hts_index_elicitation hie ON hie.hts_client_uuid = hc.uuid
+#                LEFT JOIN base_application_codeset se ON se.id=hie.sex
+#                LEFT JOIN base_application_codeset noti_method ON noti_method.id=hie.notification_method
+#                LEFT JOIN base_application_codeset sexually_un ON sexually_un.id=hie.sexually_uncomfortable
+#                LEFT JOIN base_application_codeset relationship ON relationship.id=hie.relationship_with_index_client
+#                LEFT JOIN base_organisation_unit facility ON facility.id=hc.facility_id
+#                LEFT JOIN base_organisation_unit state ON state.id=facility.parent_organisation_unit_id
+#                LEFT JOIN base_organisation_unit lga ON lga.id=state.parent_organisation_unit_id
+#                LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=hc.facility_id AND boui.name='DATIM_ID'
+#                WHERE hc.archived=0
