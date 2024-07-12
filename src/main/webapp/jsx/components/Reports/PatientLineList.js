@@ -11,6 +11,7 @@ import { Button} from 'semantic-ui-react'
 import { toast} from "react-toastify";
 import FileSaver from "file-saver";
 import { Message, Icon } from 'semantic-ui-react'
+import ProgressComponent from "./ProgressComponent"
 
 
 const useStyles = makeStyles((theme) => ({
@@ -156,12 +157,10 @@ console.log(facilitiesUpdate)
 
                             {loading && (
                                 <Message icon>
-                                    <Icon name='circle notched' loading />
-                                <Message.Content>
-                                <Message.Header>Just one second</Message.Header>
-                                    We are fetching that content for you.
-                                </Message.Content>
-                                </Message>
+                                                  <Message.Content>
+                                                        <ProgressComponent/>
+                                                  </Message.Content>
+                                                </Message>
                             )}
                         </div>
                     </form>

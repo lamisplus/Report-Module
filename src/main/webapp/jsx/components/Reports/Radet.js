@@ -11,6 +11,9 @@ import { Button } from "semantic-ui-react";
 import { toast } from "react-toastify";
 import FileSaver from "file-saver";
 import { Message, Icon } from "semantic-ui-react";
+import ProgressComponent from "./ProgressComponent"
+
+const SOCKET_URL = 'http://localhost:8080/ws-chat/';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -253,10 +256,8 @@ const PatientLineList = (props) => {
 
               {loading && (
                 <Message icon>
-                  <Icon name="circle notched" loading />
                   <Message.Content>
-                    <Message.Header>Just one second</Message.Header>
-                    We are fetching that content for you.
+                        <ProgressComponent  />
                   </Message.Content>
                 </Message>
               )}

@@ -21,6 +21,8 @@ public class Constants {
 	public static final String HTS_SHEET = "hts";
 
 	public static final String PREP_SHEET = "prep";
+
+	public static final String REPORT_GENERATION_PROGRESS_TOPIC = "/topic/report-generation-progress";
 	
 	// headers
 	public static final List<String> PATIENT_LINE_LIST_HEADER = Arrays.asList(
@@ -119,9 +121,9 @@ public class Constants {
 					"Target group",
 					"Current Weight (kg)",
 					"Pregnancy Status",
-					"Date Birth (yyyy-mm-dd)",
+					"Date of Birth (yyyy-mm-dd)",
 					//"OVC Enrollment Date (yyyy-mm-dd)",
-					//"Services Provided (Enter one line per service)",
+					//"Services Provided (Enter one lineu per service)",
 					"Age",
 					"Care Entry Point",
 					"Date of Registration",
@@ -147,7 +149,7 @@ public class Constants {
 					"Current ART Status",
 					"Date of Current ART Status",
 					"Client Verification Outcome",
-					"Client Verification Status",
+//					"Client Verification Status",
 					// "Biometric Status",
 					"Cause of Death",
 					"VA Cause of Death",
@@ -163,7 +165,7 @@ public class Constants {
 					"Date of TB Diagnostic Result Received (yyyy-mm-dd)",
 					"TB Diagnostic Result",
 					"Date of Start of TB Treatment (yyyy-mm-dd)",
-					"TB Treatment Type (new, relapsed etc)",
+					"TB Type (new, relapsed etc)",
 					"Date of Completion of TB Treatment (yyyy-mm-dd)",
 					"TB Treatment Outcome",
 					// "Date of TB-LAM",
@@ -184,6 +186,7 @@ public class Constants {
 					"Model devolved to",
 					"Date of current DSD",
 					"Current DSD model",
+					"Current DSD Outlet",
 					// "Date Commenced DSD (yyyy-mm-dd)",
 					"Date of Return of DSD Client to Facility (yyyy-mm-dd)",
 					"Screening for Chronic Conditions",
@@ -262,27 +265,27 @@ public class Constants {
 			Arrays.asList(
 					"S/No",
 					"Facility Id (Datim)",
-
 					"Facility",
 					"Client Code",
-					//"First Name",
-					//"Surname",
-					//"Other Names",
+					"First Name",
+					"Surname",
+					"Other Names",
 					"Sex",
 					"Target Group",
 					"Age",
 					"Date Of Birth (yyyy-mm-dd)",
-					//"Phone Number",
+					"Phone Number",
 					"Marital Status",
-					//"Client Address",
+					"Client Address",
 					"LGA of Residence",
 					"State Of Residence",
 					"Education",
 					"Occupation",
 					"Date of Visit (yyyy-mm-dd)",
 					"First Time Visit",
-					"Number of wives",
-					"Number of Children",
+					"Entry Point",
+//					"Number of wives",
+//					"Number of Children",
 					"Index Client",
 					"Previously Tested",
 					"Referred From",
@@ -293,6 +296,7 @@ public class Constants {
 //					"Breastfeeding",
 					"Index Type",
 					"Final HIV Test Result",
+					"Patient UUID",
 					"Date Of HIV Testing (yyyy-mm-dd)",
 //					"If Recency Testing Opt In",
 					"Opt Out of RTRI?",
@@ -302,17 +306,22 @@ public class Constants {
 					"Recency Interpretation",
 
 					"Recency Viral Load Sample Collection Date",
-					"Recency Viral Load Result Classification",
+//					"Recency Viral Load Result Classification",
 					"Recency Viral Load Confirmation Result",
 					"Recency Viral Load Result Received Date (yyyy-mm-dd)",
 //					"Recency Viral Load Confirmation Date (yyyy-mm-dd)",
 					"Final Recency Result",
-					"Assessment Code",
+//					"Assessment Code",
 					"Syphilis Test Result",
 					"Hepatitis B Result",
 					"Hepatitis C Result",
 					"CD4 Type",
 					"CD4 Test Result",
+					//Hackathon group 4 newly added column
+					"Source",
+					"Risk Score",
+					"Reffered for STI",
+					"Tester Code",
 
 					"Prep Offered",
 					"Prep Accepted",
@@ -442,10 +451,10 @@ public class Constants {
 					"Unique Id",
 					//"Surname", "Other Names",
 					"Sex", "Date of birth", "Age", "ART Start Date", "Date of Last Visit",
-					"Date of TB Screening", "Screening Type", "TB Screening Outcome", "TB Diagnostic Evaluation",
-					"Date of TB Diagnostic Evaluation", "TB Evaluation Method", "Date Result Received",
-					"TB Diagnostic Result", "Date of TB Treatment", "TB Type (new, relapsed etc)", "TB Treatment Outcome", "Date TB Treatment Outcome",
-					"Eligible for TPT", "Date of TPT Start (yyyy-mm-dd)", "TPT Type", "TPT Outcome", "Date of TPT Outcome", "Weight At Start TPT"
+					"Date of TB Screening", "TB Screening Type", "TB Status", "TB Diagnostic Evaluation",
+					"Date of TB Diagnostic Evaluation", "Date of TB Sample Collection (yyyy-mm-dd)", "TB Diagnostic Test Type", "Date Result Received",
+					"TB Diagnostic Result", "Date of TB Treatment", "TB Type (new, relapsed etc)",  "Date TB Treatment Outcome", "TB Treatment Outcome",
+					"Eligible for TPT", "Date of TPT Start (yyyy-mm-dd)", "TPT Type", "TPT completion status", "TPT completion date", "Weight At Start TPT"
 			);
 
 	public static final List<String> EAC_REPORT_HEADER =

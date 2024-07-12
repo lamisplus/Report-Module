@@ -16,4 +16,24 @@
             )
         </sql>
     </changeSet>
+
+    <changeSet id="20240613-001" author="Anana Aristotle">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="customized_report"/>
+            </not>
+        </preConditions>
+        <sql>
+            CREATE TABLE IF NOT EXISTS public.customized_report
+            (
+                id uuid NOT NULL,
+                report_name character varying COLLATE pg_catalog."default",
+                query character varying COLLATE pg_catalog."default",
+                created_at timestamp without time zone,
+                disabled boolean DEFAULT false,
+                updated_at timestamp without time zone,
+                CONSTRAINT customized_report_pkey PRIMARY KEY (id)
+                )
+        </sql>
+    </changeSet>
 </databaseChangeLog>

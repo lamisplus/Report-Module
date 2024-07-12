@@ -81,7 +81,7 @@ public interface RADETDTOProjection {
 	String getPreviousStatus();
 
 	String getClientVerificationOutCome();
-	String getClientVerificationStatus();
+//	String getClientVerificationStatus();
 
 
 	//Biometric status
@@ -133,6 +133,7 @@ public interface RADETDTOProjection {
 	LocalDate getDateOfDevolvement();
 	String getCurrentDSDModel();
 	LocalDate getDateOfCurrentDSD();
+	String getCurrentDsdOutlet();
 
 	LocalDate getDateReturnToSite();
 	// String getDsdModel();
