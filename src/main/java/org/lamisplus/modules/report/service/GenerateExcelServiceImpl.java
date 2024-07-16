@@ -26,6 +26,7 @@ import reactor.core.publisher.FluxSink;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -95,7 +96,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
 		try {
 			List<ClientServiceDto> data = reportRepository.generateClientServiceList(facilityId);
-			LOG.info("fullData 1: " + Arrays.toString(data.toArray()));
+//			LOG.info("fullData 1: " + Arrays.toString(data.toArray()));
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> fullData = GenerateExcelDataHelper.fillClientServiceListDataMapper(data);
 			LOG.info("fullData 2: " + data.size());
@@ -103,7 +104,6 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			return excelService.generate(Constants.CLIENT_SERVICE_LIST, fullData, Constants.CLIENT_SERVICE_HEADER);
 		} catch (Exception e) {
 			LOG.error("Error Occurred when generating CLIENT SERVICE LIST!!!");
-			e.printStackTrace();
 		}
 		LOG.info("End generate client service list ");
 		return null;
@@ -558,7 +558,6 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 				query = query.replace("?1", String.valueOf(facilityId))
 						.replace("?2", startDate)
 						.replace("?3", endDate);
-
 				ResultSet resultSet = resultSetExtract.getResultSet(query);
 				messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 				List<String> headers = resultSetExtract.getHeaders(resultSet);

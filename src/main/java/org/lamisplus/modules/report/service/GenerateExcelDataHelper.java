@@ -6,6 +6,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.formula.functions.Today;
 import org.audit4j.core.util.Log;
 import org.lamisplus.modules.hiv.domain.dto.*;
 import org.lamisplus.modules.report.domain.*;
@@ -13,11 +14,14 @@ import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.utility.Scrambler;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Component;
+import scala.util.Try;
 
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -949,39 +953,51 @@ public class GenerateExcelDataHelper {
 			if (clientService != null) {
 				Map<Integer, Object> map = new HashMap<>();
 				int index = 0;
-				map.put(index++, getStringValue(clientService.getFacilityState()));
-				map.put(index++, getStringValue(clientService.getFacilityName()));
-				map.put(index++, getStringValue(clientService.getSerialEnrollmentNo()));
-				map.put(index++, getStringValue(clientService.getPersonUuid()));
+				try {
+					map.put(index++, getStringValue(clientService.getFacilityState()));
+					map.put(index++, getStringValue(clientService.getFacilityName()));
+					map.put(index++, getStringValue(clientService.getSerialEnrollmentNo()));
+					map.put(index++, getStringValue(clientService.getPersonUuid()));
 //				map.put(index++, radetReportDto.getHospitalNumber());
-				map.put(index++, clientService.getHospitalNumber());
-				map.put(index++, getStringValue(String.valueOf(clientService.getDateOfObservation())));
-				map.put(index++, getStringValue(clientService.getAnyOfTheFollowingList()));
-				map.put(index++, getStringValue(clientService.getDateOfAttempt()));
-				map.put(index++, getStringValue(clientService.getNoAttempts()));
-				map.put(index++, getStringValue(clientService.getVerificationAttempts()));
+					map.put(index++, clientService.getHospitalNumber());
+					map.put(index++, getStringValue(String.valueOf(clientService.getDateOfObservation())));
+					map.put(index++, getStringValue(clientService.getAnyOfTheFollowingList()));
+					map.put(index++, getStringValue(clientService.getDateOfAttempt()));
+					map.put(index++, getStringValue(clientService.getNoAttempts()));
+					map.put(index++, getStringValue(clientService.getVerificationAttempts()));
 //				map.put(index++, getStringValue(clientService.getVerificationStatus()));
-				map.put(index++, getStringValue(clientService.getOutcome()));
-				map.put(index++, getStringValue(clientService.getDsdModel()));
-				map.put(index++, getStringValue(clientService.getComment()));
-				map.put(index++, getStringValue(clientService.getReturnedToCare()));
-				map.put(index++, getStringValue(clientService.getReferredTo()));
-				map.put(index++, getStringValue(clientService.getDiscontinuation()));
-				map.put(index++, getStringValue(clientService.getDateOfDiscontinuation()));
-				map.put(index++, getStringValue(clientService.getReasonForDiscontinuation()));
-				//Client Verification triggers
-				map.put(index++, getStringValue(clientService.getNoInitBiometric()));
-				map.put(index++, getStringValue(clientService.getDuplicatedDemographic()));
-				map.put(index++, getStringValue(clientService.getLastVisitIsOver18M()));
-				map.put(index++, getStringValue(clientService.getIncompleteVisitData()));
-				map.put(index++, getStringValue(clientService.getNoRecapture()));
-				map.put(index++, getStringValue(clientService.getLongIntervalsARVPickup()));
-				map.put(index++, getStringValue(clientService.getSameSexDOBARTStartDate()));
-				map.put(index++, getStringValue(clientService.getPickupByProxy()));
-				map.put(index++, getStringValue(clientService.getRepeatEncounterNoPrint()));
-				map.put(index++, getStringValue(clientService.getOtherSpecifyForCV()));
+					map.put(index++, getStringValue(clientService.getOutcome()));
+					map.put(index++, getStringValue(clientService.getDsdModel()));
+					map.put(index++, getStringValue(clientService.getComment()));
+					map.put(index++, getStringValue(clientService.getReturnedToCare()));
+					map.put(index++, getStringValue(clientService.getReferredTo()));
+					map.put(index++, getStringValue(clientService.getDiscontinuation()));
+					map.put(index++, getStringValue(clientService.getDateOfDiscontinuation()));
+					map.put(index++, getStringValue(clientService.getReasonForDiscontinuation()));
+					//Client Verification triggers
+					map.put(index++, getStringValue(clientService.getNoInitBiometric()));
+					map.put(index++, getStringValue(clientService.getDuplicatedDemographic()));
+					map.put(index++, getStringValue(clientService.getLastVisitIsOver18M()));
+					map.put(index++, getStringValue(clientService.getIncompleteVisitData()));
+					map.put(index++, getStringValue(clientService.getNoRecapture()));
+					map.put(index++, getStringValue(clientService.getLongIntervalsARVPickup()));
+					map.put(index++, getStringValue(clientService.getSameSexDOBARTStartDate()));
+					map.put(index++, getStringValue(clientService.getPickupByProxy()));
+					map.put(index++, getStringValue(clientService.getRepeatEncounterNoPrint()));
+					map.put(index++, getStringValue(clientService.getOtherSpecifyForCV()));
 
-				result.add(map);
+					System.out.println("Patient ID Generating " + clientService.getHospitalNumber());
+					result.add(map);
+				} catch (Exception e) {
+					try (FileWriter writer = new FileWriter(System.getProperty("user.home") + "/Downloads/clientVerification_error_log_" + LocalDate.now() +".txt" , true)) {
+						writer.write("ID: " + clientService.getHospitalNumber() + "\n");
+						writer.write("Error Message: " + e.getMessage() + "\n");
+						writer.write("Client Verification Row: " + new ObjectMapper().writeValueAsString(clientService) + "\n");
+						writer.write("-------------------------------\n");
+					} catch (IOException io) {
+						Log.error("Error writing to log file", io);
+					}
+				}
 			}
 		}
 		Log.info("result: " + result.size()); // going to be one
