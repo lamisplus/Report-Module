@@ -201,7 +201,7 @@ const Reports = (props) => {
                   <Menu.Item
                     name="inbox"
                     active={activeItem === "radet"}
-                    onClick={() => handleItemClick("radet")}
+                    onClick={() => handleItemClick1("radet")}
                     style={{
                       backgroundColor: activeItem === "radet" ? "#000" : "",
                     }}
@@ -248,7 +248,7 @@ const Reports = (props) => {
                   <Menu.Item
                     name="inbox"
                     active={activeItem === "biometric"}
-                    onClick={() => handleItemClick("biometric")}
+                    onClick={() => handleItemClick1("biometric")}
                     style={{
                       backgroundColor: activeItem === "biometric" ? "#000" : "",
                     }}
@@ -273,7 +273,7 @@ const Reports = (props) => {
                   <Menu.Item
                     name="inbox"
                     active={activeItem === "hts-report"}
-                    onClick={() => handleItemClick("hts-report")}
+                    onClick={() => handleItemClick1("hts-report")}
                     style={{
                       backgroundColor:
                         activeItem === "hts-report" ? "#000" : "",
@@ -299,7 +299,7 @@ const Reports = (props) => {
                   <Menu.Item
                     name="inbox"
                     active={activeItem === "prep-report"}
-                    onClick={() => handleItemClick("prep-report")}
+                    onClick={() => handleItemClick1("prep-report")}
                     style={{
                       backgroundColor:
                         activeItem === "prep-report" ? "#000" : "",

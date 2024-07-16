@@ -107,7 +107,7 @@ public class TBReportQuery {
             "            laboratory_result sm \n" +
             "            INNER JOIN public.laboratory_test lt ON sm.test_id = lt.id \n" +
             "        WHERE \n" +
-            "            lt.lab_test_id IN (65, 51, 66, 64, 67, 72, 71, 86, 58) \n" +
+            "            lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73) \n" +
             "            AND sm.archived = 0 \n" +
             "            AND sm.date_result_reported IS NOT NULL \n" +
             "            AND sm.facility_id = ?1 \n" +
@@ -134,6 +134,7 @@ public class TBReportQuery {
             "), \n" +
             "tbTreatmentNew AS (\n" +
             "WITH tb_start AS (\n" +
+            "\tSELECT * FROM (\n" +
             "    SELECT\n" +
             "        person_uuid AS person_uuid,\n" +
             "    date_of_observation as screeningDate,\n" +
@@ -145,7 +146,7 @@ public class TBReportQuery {
             "    NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'dateSpecimenSent', '') AS DATE), NULL) AS specimenSentDate,\n" +
             "    data->'tbIptScreening'->>'status' as screeningStatus,\n" +
             "    data->'tbIptScreening'->>'dateOfDiagnosticTest' as dateOfDiagnosticTest, \n" +
-            "        data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType\n" +
+            "        data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) as rnk3\n" +
             "    FROM\n" +
             "        hiv_observation\n" +
             "    WHERE archived = 0 AND\n" +
@@ -155,7 +156,7 @@ public class TBReportQuery {
             "and\n" +
             "        (data->'tbIptScreening'->>'outcome' = 'Presumptive TB' or data->'tbIptScreening'->>'outcome'='Not Presumptive' )\n" +
             ")\n" +
-            "),\n" +
+            ")  subTc WHERE rnk3 = 1 ),\n" +
             "tb_completion AS (\n" +
             "    SELECT\n" +
             "        person_uuid AS person_uuid,\n" +
@@ -194,7 +195,7 @@ public class TBReportQuery {
             "FROM public.laboratory_sample  sm\n" +
             "         INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
             "         INNER JOIN  laboratory_labtest llt on llt.id = lt.lab_test_id\n" +
-            "WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58)\n" +
+            "         WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73)\n" +
             "        AND sm.archived = 0\n" +
             "        AND sm. date_sample_collected <= ?3 \n" +
             "        AND sm.facility_id = ?1 \n" +
@@ -312,7 +313,7 @@ public class TBReportQuery {
             "    COALESCE(tbTmentNew.tbDiagnosticResult, current_tb_result.tb_diagnostic_result) AS tbDiagnosticResult, \n" +
             "    current_tb_result.date_of_tb_diagnostic_result_received AS dateOfTbDiagnosticResultReceived, tbSample.dateOfTbSampleCollection, \n" +
             "    COALESCE(tbTmentNew.tbDiagnosticTestType, current_tb_result.tb_diagnostic_test_type) AS tbDiagnosticTestType, \n" +
-            "    COALESCE(iptN.tptStartDate, ipt_start.date_of_ipt_start) AS dateOfIptStart, COALESCE(iptN.tptType, ipt_start.regimen_name) as regimenName, \n" +
+            "    ipt_start.date_of_ipt_start AS dateOfIptStart, ipt_start.regimen_name as regimenName, \n" +
             "    COALESCE(iptN.tptCompletionDate, ipt_cA.dateCompletedTpt) AS iptCompletionDate, \n" +
             "    COALESCE(iptN.tptCompletionStatus, ipt_cA.iptCompletionStatus) AS iptCompletionStatus , COALESCE(iptN.tptWeight, weight.weight_at_start_tpt) as weightAtStartTpt \n" +
             "FROM \n" +
