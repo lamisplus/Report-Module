@@ -908,7 +908,7 @@ public class RADETReportQueries {
             "        (\n" +
             "CASE\n" +
             "    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
-            "    WHEN( stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %'))\n" +
+            "    WHEN( stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' OR stat.hiv_status ILIKE '%ART Transfer In%'))\n" +
             "        THEN stat.hiv_status\n" +
             "    ELSE pharmacy.status\n" +
             "    END\n" +
@@ -916,7 +916,7 @@ public class RADETReportQueries {
             "        (\n" +
             "CASE\n" +
             "    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%'  THEN stat.status_date\n" +
-            "    WHEN(stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.status_date\n" +
+            "    WHEN(stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' OR stat.hiv_status ILIKE '%ART Transfer In%')) THEN stat.status_date\n" +
             "    ELSE pharmacy.visit_date\n" +
             "    END\n" +
             ") AS status_date,\n" +
@@ -1132,6 +1132,8 @@ public class RADETReportQueries {
             "   ) AS DATE)AS previousStatusDate,\n" +
             "           (\n" +
             "   CASE\n" +
+            "       WHEN ct.status ILIKE '%ACTIVE%' THEN 'Active'"+
+            "       WHEN ct.status ILIKE '%ART Transfer In%' THEN ''" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN 'Died'\n" +
             "       WHEN prepre.status ILIKE '%out%' THEN 'Transferred Out'\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN 'Died'\n" +
@@ -1151,6 +1153,8 @@ public class RADETReportQueries {
             "   ) AS currentStatus,\n" +
             "           CAST((\n" +
             "   CASE\n" +
+            "       WHEN ct.status ILIKE '%ACTIVE%' THEN ct.status_date\n" +
+            "       WHEN ct.status ILIKE '%ART Transfer In%' THEN ct.status_date"+
             "       WHEN prepre.status ILIKE '%DEATH%' THEN prepre.status_date\n" +
             "       WHEN prepre.status ILIKE '%out%' THEN prepre.status_date\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN pre.status_date\n" +

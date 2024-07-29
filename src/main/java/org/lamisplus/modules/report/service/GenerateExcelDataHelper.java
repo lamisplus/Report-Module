@@ -639,12 +639,11 @@ public class GenerateExcelDataHelper {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		int sn = 1;
 		Log.info("converting HTS db records to excel ....");
-		try {
 			for (HtsReportDto htsReportDto : htsReportDtos) {
 				if (htsReportDto != null) {
 					Map<Integer, Object> map = new HashMap<>();
 					int index = 0;
-
+					try {
 					map.put(index++, String.valueOf(sn));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getDatimCode())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFacility())));
@@ -712,17 +711,40 @@ public class GenerateExcelDataHelper {
 					map.put(index, getStringValue(String.valueOf(htsReportDto.getHtsLongitude())));
 					result.add(map);
 					sn++;
-				}
+
+				}catch (Exception e) {
+						try (FileWriter writer = new FileWriter(System.getProperty("user.home") + "/Downloads/Report_error_log_" + LocalDate.now() +".txt" , true)) {
+							writer.write("ID: " + htsReportDto.getClientCode() + "\n");
+							writer.write("Error Message: " + e.getMessage() + "\n");
+							writer.write("Hts Report Row: " + new ObjectMapper().writeValueAsString(htsReportDto) + "\n");
+							writer.write("-------------------------------\n");
+						} catch (IOException io) {
+							Log.error("Error writing to log file", io);
+						}
+						LOG.error("An error occurred when converting db records to excel");
+						LOG.error("The error message is: " + e.getMessage());
+//						e.printStackTrace();
+					}
 			}
-			LOG.info("Done converting db records total size {}", result.size());
-			return result;
-		}catch (Exception e) {
-			LOG.error("An error occurred when converting db records to excel");
-			LOG.error("The error message is: " + e.getMessage());
-			e.printStackTrace();
+//			LOG.info("Done converting db records total size {}", result.size());
+//			return result;
 		}
 		return result;
+
 	}
+
+//} catch (Exception e) {
+//		try (FileWriter writer = new FileWriter(System.getProperty("user.home") + "/Downloads/clientVerification_error_log_" + LocalDate.now() +".txt" , true)) {
+//		writer.write("ID: " + clientService.getHospitalNumber() + "\n");
+//		writer.write("Error Message: " + e.getMessage() + "\n");
+//		writer.write("Client Verification Row: " + new ObjectMapper().writeValueAsString(clientService) + "\n");
+//		writer.write("-------------------------------\n");
+//
+//		} catch (IOException io) {
+//		Log.error("Error writing to log file", io);
+//		}
+////					throw new Exception("Client Verification Report generated with error!!!");
+//		}
 
 
 	public  List<Map<Integer, Object>> fillPrepDataMapper(@NonNull List<PrepReportDto> prepReportDtos) {
@@ -839,7 +861,8 @@ public class GenerateExcelDataHelper {
 	}
 
 	private static String getStringValue(String value) {
-		return value.replace("null", "");
+//		return value.replace("null", "");
+		return value!= null ? value.replace("null", "") : "";
 	}
 
 	public static List<Map<Integer, Object>> fillClinicDataMapper(
@@ -947,7 +970,7 @@ public class GenerateExcelDataHelper {
 		return result;
 	}
 
-	public static List<Map<Integer, Object>> fillClientServiceListDataMapper(@NonNull List<ClientServiceDto> listFinalResult) {
+	public static List<Map<Integer, Object>> fillClientServiceListDataMapper(@NonNull List<ClientServiceDto> listFinalResult)  {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		for (ClientServiceDto clientService : listFinalResult) {
 			if (clientService != null) {
@@ -986,17 +1009,19 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(clientService.getRepeatEncounterNoPrint()));
 					map.put(index++, getStringValue(clientService.getOtherSpecifyForCV()));
 
-					System.out.println("Patient ID Generating " + clientService.getHospitalNumber());
+					//System.out.println("Patient ID Generating " + clientService.getHospitalNumber());
 					result.add(map);
 				} catch (Exception e) {
-					try (FileWriter writer = new FileWriter(System.getProperty("user.home") + "/Downloads/clientVerification_error_log_" + LocalDate.now() +".txt" , true)) {
+					try (FileWriter writer = new FileWriter(System.getProperty("user.home") + "/Downloads/Report_error_log_" + LocalDate.now() +".txt" , true)) {
 						writer.write("ID: " + clientService.getHospitalNumber() + "\n");
 						writer.write("Error Message: " + e.getMessage() + "\n");
 						writer.write("Client Verification Row: " + new ObjectMapper().writeValueAsString(clientService) + "\n");
 						writer.write("-------------------------------\n");
+
 					} catch (IOException io) {
 						Log.error("Error writing to log file", io);
 					}
+//					throw new Exception("Client Verification Report generated with error!!!");
 				}
 			}
 		}
