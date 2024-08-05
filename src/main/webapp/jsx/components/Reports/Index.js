@@ -62,37 +62,50 @@ const Reports = (props) => {
     console.log(value); // This should print the selected option
   };
 
+  const reportSurveillance = [
+    { key: 'hts-report', value: 'hts-report', text: 'HTS REPORT' },
+    { key: 'hts-register', value: 'hts-register', text: 'HTS REGISTER' },
+    { key: 'hivst-report', value: 'hivst-report', text: 'HIVST REPORT' },
+    // { key: 'hts-index-report', value: 'hts-index-report', text: 'HTS INDEX REPORT' },
+  ]
+
+  const reportBiometric = [
+      { key: 'biometric', value: 'biometric', text: 'BIOMETRIC DATA' },
+    
+  ]
+
+  const reportPrevention = [
+    { key: 'prep-report', value: 'prep-report', text: 'Prep REPORT' },
+    { key: 'prep-longitudinal-report', value: 'prep-longitudinal-report', text: 'PrEP LONGITUDINAL REPORT' },
+    { key: 'kp-prev-report', value: 'kp-prev-report', text: 'KP PREV REPORT' },
+  ]
+
+  const reportPMTCT = [
+    { key: 'pmtct-hts', value: 'pmtct-hts', text: 'PMTCT HTS' },
+    { key: 'pmtct-maternal-cohort', value: 'pmtct-maternal-cohort', text: 'PMTCT MATERNAL COHORT' },
+
+  ]
+
+  const reportPsychosocial = [
+    { key: 'mhpss-report', value: 'mhpss-report', text: 'MHPSS Report' },
+
+  ]
 
   const reportOptions = [
     // { key: 'radet', value: 'radet', text: 'RADET' },
     { key: 'appointment', value: 'appointment', text: 'APPOINTMENT' },
     { key: 'line-list', value: 'line-list', text: 'PATIENT LINE LIST' },
     { key: 'pharmacy-report', value: 'pharmacy-report', text: 'PHARMACY DATA' },
-    // { key: 'biometric', value: 'biometric', text: 'BIOMETRIC DATA' },
     { key: 'laboratory-report', value: 'laboratory-report', text: 'LABORATORY DATA' },
-    // { key: 'hts-report', value: 'hts-report', text: 'HTS REPORT' },
-    { key: 'hts-register', value: 'hts-register', text: 'HTS REGISTER' },
-
-    // { key: 'prep-report', value: 'prep-report', text: 'Prep REPORT' },
-    { key: 'prep-longitudinal-report', value: 'prep-longitudinal-report', text: 'PrEP LONGITUDINAL REPORT' },
     { key: 'clinic-data-report', value: 'clinic-data-report', text: 'CLINIC DATA REPORT' },
     { key: 'client-verification', value: 'client-verification', text: 'CLIENT VERIFICATION' },
     { key: 'tb-report', value: 'tb-report', text: 'TB REPORT' },
     { key: 'ncd-report', value: 'ncd-report', text: 'NCD Report' },
     { key: 'eac-report', value: 'eac-report', text: 'EAC Report' },
     { key: 'index-elicitation', value: 'index-elicitation', text: 'INDEX ELICITATION' },
-
-    { key: 'pmtct-hts', value: 'pmtct-hts', text: 'PMTCT HTS' },
-    { key: 'pmtct-maternal-cohort', value: 'pmtct-maternal-cohort', text: 'PMTCT MATERNAL COHORT' },
     { key: 'ahd-report', value: 'ahd-report', text: 'AHD REPORT' },
-    { key: 'mhpss-report', value: 'mhpss-report', text: 'MHPSS Report' },
-    { key: 'kp-prev-report', value: 'kp-prev-report', text: 'KP PREV REPORT' },
-    { key: 'hivst-report', value: 'hivst-report', text: 'HIVST REPORT' },
-    // { key: 'hts-index-report', value: 'hts-index-report', text: 'HTS INDEX REPORT' },
     { key: 'adr-report', value: 'adr-report', text: 'ADR REPORT' },
     { key: 'custom-report', value: 'custom-report', text: 'CUSTOM REPORT' },
-
-
   ]
 
 
@@ -196,7 +209,64 @@ const Reports = (props) => {
                     options={reportOptions}
                     onChange={(event, data) => handleItemClick1(data.value)}
                     onClick={(value) => handleItemClick1(value)}
-                    placeholder='Select Report'
+                    placeholder='Select Treatment Report'
+                  />
+                  <br/>
+                    <Dropdown
+                    clearable
+                    fluid
+                    search
+                    selection
+                    options={reportSurveillance}
+                    onChange={(event, data) => handleItemClick1(data.value)}
+                    onClick={(value) => handleItemClick1(value)}
+                    placeholder='Select Surveillance Report'
+                  />
+                  <br/>
+
+                    <Dropdown
+                    clearable
+                    fluid
+                    search
+                    selection
+                    options={reportBiometric}
+                    onChange={(event, data) => handleItemClick1(data.value)}
+                    onClick={(value) => handleItemClick1(value)}
+                    placeholder='Select Biometric Report'
+                  />
+                  <br/>
+
+                    <Dropdown
+                    clearable
+                    fluid
+                    search
+                    selection
+                    options={reportPrevention}
+                    onChange={(event, data) => handleItemClick1(data.value)}
+                    onClick={(value) => handleItemClick1(value)}
+                    placeholder='Select Prevention Report'
+                  />
+                  <br/>
+                  <Dropdown
+                    clearable
+                    fluid
+                    search
+                    selection
+                    options={reportPMTCT}
+                    onChange={(event, data) => handleItemClick1(data.value)}
+                    onClick={(value) => handleItemClick1(value)}
+                    placeholder='Select PMTCT Report'
+                  />
+                  <br/>
+                  <Dropdown
+                    clearable
+                    fluid
+                    search
+                    selection
+                    options={reportPsychosocial}
+                    onChange={(event, data) => handleItemClick1(data.value)}
+                    onClick={(value) => handleItemClick1(value)}
+                    placeholder='Select Psychosocial Report'
                   />
                   <Menu.Item
                     name="inbox"
