@@ -92,7 +92,7 @@ const Reports = (props) => {
   ]
 
   const reportOptions = [
-    // { key: 'radet', value: 'radet', text: 'RADET' },
+    { key: 'radet', value: 'radet', text: 'RADET' },
     { key: 'appointment', value: 'appointment', text: 'APPOINTMENT' },
     { key: 'line-list', value: 'line-list', text: 'PATIENT LINE LIST' },
     { key: 'pharmacy-report', value: 'pharmacy-report', text: 'PHARMACY DATA' },

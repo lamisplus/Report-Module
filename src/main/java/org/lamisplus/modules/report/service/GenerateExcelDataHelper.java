@@ -591,6 +591,7 @@ public class GenerateExcelDataHelper {
 				result.add(map);
 				sn++;
 			} catch (Exception e) {
+				errorLog("radet_errors", radetReportDto, e);
 				LOG.error("An error occurred when converting db record to excel for patient id {}", currentRecord.getPersonUuid());
 				writeToErrorFile(currentRecord);
 				LOG.error("The error message is: " + e.getMessage());
@@ -608,6 +609,18 @@ public class GenerateExcelDataHelper {
 			objectMapper.writeValue(jsonFile, errorObjects);
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+
+	private void errorLog(String fileName, Object object, Exception e) {
+		try (FileWriter writer = new FileWriter(System.getProperty("user.home") + "/Downloads/" + fileName + "_" + LocalDate.now() + ".txt", true)) {
+			writer.write("ID: " + object.toString() + "\n");
+			writer.write("Error Message: " + e.getMessage() + "\n");
+			writer.write("Object: " + new ObjectMapper().writeValueAsString(object) + "\n");
+			writer.write("-------------------------------\n");
+		} catch (IOException io) {
+			Log.error("Error writing to log file", io);
 		}
 	}
 
@@ -713,7 +726,7 @@ public class GenerateExcelDataHelper {
 					sn++;
 
 				}catch (Exception e) {
-						try (FileWriter writer = new FileWriter(System.getProperty("user.home") + "/Downloads/Report_error_log_" + LocalDate.now() +".txt" , true)) {
+						try (FileWriter writer = new FileWriter(System.getProperty("user.home") + "/Downloads/Hts_Report_error_log_" + LocalDate.now() +".txt" , true)) {
 							writer.write("ID: " + htsReportDto.getClientCode() + "\n");
 							writer.write("Error Message: " + e.getMessage() + "\n");
 							writer.write("Hts Report Row: " + new ObjectMapper().writeValueAsString(htsReportDto) + "\n");
@@ -726,25 +739,12 @@ public class GenerateExcelDataHelper {
 //						e.printStackTrace();
 					}
 			}
-//			LOG.info("Done converting db records total size {}", result.size());
-//			return result;
+			LOG.info("Done converting db records total size {}", result.size());
+			return result;
 		}
 		return result;
 
 	}
-
-//} catch (Exception e) {
-//		try (FileWriter writer = new FileWriter(System.getProperty("user.home") + "/Downloads/clientVerification_error_log_" + LocalDate.now() +".txt" , true)) {
-//		writer.write("ID: " + clientService.getHospitalNumber() + "\n");
-//		writer.write("Error Message: " + e.getMessage() + "\n");
-//		writer.write("Client Verification Row: " + new ObjectMapper().writeValueAsString(clientService) + "\n");
-//		writer.write("-------------------------------\n");
-//
-//		} catch (IOException io) {
-//		Log.error("Error writing to log file", io);
-//		}
-////					throw new Exception("Client Verification Report generated with error!!!");
-//		}
 
 
 	public  List<Map<Integer, Object>> fillPrepDataMapper(@NonNull List<PrepReportDto> prepReportDtos) {
@@ -1012,7 +1012,7 @@ public class GenerateExcelDataHelper {
 					//System.out.println("Patient ID Generating " + clientService.getHospitalNumber());
 					result.add(map);
 				} catch (Exception e) {
-					try (FileWriter writer = new FileWriter(System.getProperty("user.home") + "/Downloads/Report_error_log_" + LocalDate.now() +".txt" , true)) {
+					try (FileWriter writer = new FileWriter(System.getProperty("user.home") + "/Downloads/Client_Verification_Report_error_log_" + LocalDate.now() +".txt" , true)) {
 						writer.write("ID: " + clientService.getHospitalNumber() + "\n");
 						writer.write("Error Message: " + e.getMessage() + "\n");
 						writer.write("Client Verification Row: " + new ObjectMapper().writeValueAsString(clientService) + "\n");
