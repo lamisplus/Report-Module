@@ -249,7 +249,7 @@ const Appointment = (props) => {
                             <div className="row">
                             <div className="form-group mb-3 col-md-6">
                             <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={handleSubmit}
-                                disabled={objValues.facilityId==="" || objValues.startDate==="" || objValues.endDate===""  || objValues.type==="" ? true : false}
+                                disabled={objValues.facilityId==="" || objValues.startDate==="" || objValues.endDate===""  || objValues.type==="" ? true : false || loading} 
                             />
                             </div>
                             </div>

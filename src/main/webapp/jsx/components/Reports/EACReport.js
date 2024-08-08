@@ -202,9 +202,10 @@ const EACReport = (props) => {
                     labelPosition="right"
                     style={{ backgroundColor: "#014d88", color: "#fff" }}
                     onClick={handleSubmit}
-                    disabled={
-                      objValues.organisationUnitId === "" ? true : false
-                    }
+                    // disabled={
+                    //   objValues.organisationUnitId === "" ? true : false
+                    // }
+                    disabled={objValues.organisationUnitId === "" || loading} 
                   />
                 </div>
               </div>
