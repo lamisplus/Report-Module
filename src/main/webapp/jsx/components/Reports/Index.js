@@ -33,6 +33,13 @@ import HTSIndexReport from "./HTSIndexReport";
 import CustomReport from "./CustomReport";
 import ADRReport from "./ADRReport"
 
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import Typography from '@mui/material/Typography';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Divider from '@mui/material/Divider';
+
 const useStyles = makeStyles((theme) => ({
   error: {
     color: "#f85032",
@@ -49,6 +56,7 @@ const Reports = (props) => {
   const [saving, setSaving] = useState(false);
   const [activeItem, setactiveItem] = useState("basic");
   const [activeItem1, setActiveItem1] = useState("basic");
+  const [expanded, setExpanded] = React.useState(false);
 
   const [completed, setCompleted] = useState([]);
   const handleItemClick = (activeItem) => {
@@ -56,6 +64,9 @@ const Reports = (props) => {
     //setCompleted({...completed, ...completedMenu})
   };
 
+  const handleChange = (panel) => (event, isExpanded) => {
+    setExpanded(isExpanded ? panel : false);
+  };
 
   const handleItemClick1 = (value) => {
     setActiveItem1(value);
@@ -113,7 +124,6 @@ const Reports = (props) => {
 
     switch (activeItem1) {
       case 'radet':
-        console.log("Got here   :" + activeItem1);
         return <Radet handleItemClick={handleItemClick1} setCompleted={setCompleted} completed={completed} />;
       case "appointment":
         return <Appointment handleItemClick={handleItemClick1} setCompleted={setCompleted} completed={completed} />;
@@ -189,7 +199,7 @@ const Reports = (props) => {
               <br />
               <div className="col-md-3 float-start">
                 <Menu
-                  size="medium"
+                  size="large"
                   vertical
                   style={{ backgroundColor: "#014D88" }}
                 >
@@ -201,7 +211,118 @@ const Reports = (props) => {
                   >
                     <span style={{ color: "#fff" }}> Search all Report below </span>
                   </Menu.Item>
-                  <Dropdown
+
+                  <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1bh-content"
+          id="panel1bh-header"
+          sx={{marginTop:0}}
+        >
+          {/* <Typography sx={{ width: '33%', flexShrink: 0 }}>
+          Select Treatment Report
+          </Typography> */}
+          <Typography sx={{marginTop:0}}>Select Treatment Report</Typography>
+        </AccordionSummary>
+        <AccordionDetails style={{paddingTop: 0, marginTop:0, marginTop:0 }}>
+          {Object.values(reportOptions).map((option) => (<>
+    <Typography  style={{cursor:"pointer", marginBottom: "7px"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text} </Typography>
+    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></>
+  ))}
+        </AccordionDetails>
+      </Accordion>
+      <Accordion expanded={expanded === 'panel2'} onChange={handleChange('panel2')}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel2bh-content"
+          id="panel2bh-header"
+        >
+          <Typography sx={{marginTop:0}}>
+          Select Surveillance Report
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails style={{paddingTop: 0, marginTop:0, marginTop:0 }}>
+          {Object.values(reportSurveillance).map((option) => (<>
+    <Typography><div style={{cursor:"pointer", marginBottom: "7px"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></>
+  ))}
+        </AccordionDetails>
+      </Accordion>
+      <Accordion expanded={expanded === 'panel3'} onChange={handleChange('panel3')}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel3bh-content"
+          id="panel3bh-header"
+        >
+         
+          <Typography sx={{  flexShrink: 0 }}>
+          Select Biometric Report
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails style={{paddingTop: 0, marginTop:0, marginTop:0 }}>
+          {Object.values(reportBiometric).map((option) => (<>
+    <Typography><div style={{cursor:"pointer", marginBottom: "7px"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></>
+  ))}
+        </AccordionDetails>
+      </Accordion>
+      <Accordion expanded={expanded === 'panel4'} onChange={handleChange('panel4')}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel3bh-content"
+          id="panel3bh-header"
+        >
+         
+          <Typography sx={{  flexShrink: 0 }}>
+          Select Prevention Report
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails style={{paddingTop: 0, marginTop:0, marginTop:0 }}>
+          {Object.values(reportPrevention).map((option) => (<>
+    <Typography><div style={{cursor:"pointer", marginBottom: "7px"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></>
+  ))}
+        </AccordionDetails>
+      </Accordion>
+      <Accordion expanded={expanded === 'panel5'} onChange={handleChange('panel5')}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel3bh-content"
+          id="panel3bh-header"
+        >
+         
+          <Typography sx={{  flexShrink: 0 }}>
+          Select PMTCT Report
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails style={{paddingTop: 0, marginTop:0, marginTop:0 }}>
+          {Object.values(reportPMTCT).map((option) => (<>
+    <Typography><div style={{cursor:"pointer", marginBottom: "7px"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></>
+  ))}
+        </AccordionDetails>
+      </Accordion>
+      <Accordion expanded={expanded === 'panel6'} onChange={handleChange('panel6')}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel3bh-content"
+          id="panel3bh-header"
+        >
+         
+          <Typography sx={{  flexShrink: 0 }}>
+          Select Psychosocial Report
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails style={{paddingTop: 0, marginTop:0, marginTop:0 }}>
+          {Object.values(reportPsychosocial).map((option) => (<>
+    <Typography><div style={{cursor:"pointer", marginBottom: "7px"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></>
+  ))}
+        </AccordionDetails>
+      </Accordion>
+
+
+                  {/* <Dropdown
                     clearable
                     fluid
                     search
@@ -267,7 +388,7 @@ const Reports = (props) => {
                     onChange={(event, data) => handleItemClick1(data.value)}
                     onClick={(value) => handleItemClick1(value)}
                     placeholder='Select Psychosocial Report'
-                  />
+                  /> */}
                   <Menu.Item
                     name="inbox"
                     active={activeItem === "radet"}
@@ -277,7 +398,7 @@ const Reports = (props) => {
                     }}
                   >
                     <span style={{ color: "#fff" }}> RADET </span>
-                  </Menu.Item>
+                  </Menu.Item> 
 
                   {/* <Menu.Item
                     name="spam"

@@ -37,6 +37,7 @@ public class GenerateExcelDataHelper {
 
 	private final Scrambler scrambler;
 	private final SimpMessageSendingOperations messagingTemplate;
+	private final ExcelService excelService;
 
 	public static List<Map<Integer, Object>> fillPatientLineListDataMapper(@NonNull List<PatientLineDto> listFinalResult) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
@@ -591,7 +592,7 @@ public class GenerateExcelDataHelper {
 				result.add(map);
 				sn++;
 			} catch (Exception e) {
-				errorLog("radet_errors", radetReportDto, e);
+//				errorLog("radet_errors", radetReportDto, e);
 				LOG.error("An error occurred when converting db record to excel for patient id {}", currentRecord.getPersonUuid());
 				writeToErrorFile(currentRecord);
 				LOG.error("The error message is: " + e.getMessage());
@@ -613,16 +614,16 @@ public class GenerateExcelDataHelper {
 	}
 
 
-	private void errorLog(String fileName, Object object, Exception e) {
-		try (FileWriter writer = new FileWriter(System.getProperty("user.home") + "/Downloads/" + fileName + "_" + LocalDate.now() + ".txt", true)) {
-			writer.write("ID: " + object.toString() + "\n");
-			writer.write("Error Message: " + e.getMessage() + "\n");
-			writer.write("Object: " + new ObjectMapper().writeValueAsString(object) + "\n");
-			writer.write("-------------------------------\n");
-		} catch (IOException io) {
-			Log.error("Error writing to log file", io);
-		}
-	}
+//	private void errorLog(String fileName, Object object, Exception e) {
+//		try (FileWriter writer = new FileWriter(System.getProperty("user.home") + "/Downloads/" + fileName + "_" + LocalDate.now() + ".txt", true)) {
+//			writer.write("ID: " + object.toString() + "\n");
+//			writer.write("Error Message: " + e.getMessage() + "\n");
+//			writer.write("Object: " + new ObjectMapper().writeValueAsString(object) + "\n");
+//			writer.write("-------------------------------\n");
+//		} catch (IOException io) {
+//			Log.error("Error writing to log file", io);
+//		}
+//	}
 
 	private void deleteErrorFile(){
 		File file = new File("radet_error.json");
@@ -726,6 +727,7 @@ public class GenerateExcelDataHelper {
 					sn++;
 
 				}catch (Exception e) {
+//						excelService.generate(Constants.HTS_SHEET, htsReportDto, Constants.HTS_HEADER);
 						try (FileWriter writer = new FileWriter(System.getProperty("user.home") + "/Downloads/Hts_Report_error_log_" + LocalDate.now() +".txt" , true)) {
 							writer.write("ID: " + htsReportDto.getClientCode() + "\n");
 							writer.write("Error Message: " + e.getMessage() + "\n");
@@ -1028,6 +1030,7 @@ public class GenerateExcelDataHelper {
 		Log.info("result: " + result.size()); // going to be one
 		return result;
 	}
+
 
 
 
