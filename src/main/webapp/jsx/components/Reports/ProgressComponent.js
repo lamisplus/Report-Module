@@ -49,7 +49,7 @@ import { LinearProgress, Box, Typography } from '@mui/material'; // Assuming you
 //             <div>
 //             <SockJsClient
 //                 url={wsUrl}
-//                 topics={['/topic/report-generation-progress']}
+//                 topics={['topic/report-generation-progress']}
 //                 onConnect={onConnected}
 //                 onDisconnect={onDisconnected}
 //                 onMessage={msg => onMessageReceived(msg)}
