@@ -321,6 +321,16 @@ const Reports = (props) => {
         </AccordionDetails>
       </Accordion>
 
+      <br/>
+
+      <Menu.Item
+                    name="inbox"
+                    style={{
+                      backgroundColor: "#000",
+                    }}
+                  >
+                    <span style={{ color: "#fff" }}> Basic Report below </span>
+                  </Menu.Item>
 
                   {/* <Dropdown
                     clearable
