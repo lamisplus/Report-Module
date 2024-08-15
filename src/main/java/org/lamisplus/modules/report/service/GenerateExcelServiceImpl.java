@@ -205,6 +205,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			List<Map<Integer, Object>> data = excelDataHelper.fillRadetDataMapper(radetDtos,end);
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
+
 		} catch (Exception e) {
 			LOG.error("An error Occurred when generating RADET...");
 			LOG.error("Error message: " + e.getMessage());

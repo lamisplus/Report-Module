@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FormGroup, Label, CardBody, Spinner, Input, Form } from "reactstrap";
+import { FormGroup, Label, CardBody, Input } from "reactstrap";
 import { makeStyles } from "@material-ui/core/styles";
 import { Card } from "@material-ui/core";
 // import {Link, useHistory, useLocation} from "react-router-dom";
@@ -10,7 +10,7 @@ import "react-phone-input-2/lib/style.css";
 import { Button } from "semantic-ui-react";
 import { toast } from "react-toastify";
 import FileSaver from "file-saver";
-import { Message, Icon } from "semantic-ui-react";
+import { Message } from "semantic-ui-react";
 import ProgressComponent from "./ProgressComponent"
 
 const SOCKET_URL = 'http://localhost:8080/ws-chat/';
@@ -127,10 +127,10 @@ const PatientLineList = (props) => {
     axios
       .get(
         `${baseUrl}reporting/radet?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
-        { headers: { Authorization: `Bearer ${token}` }, responseType: "blob" }
+        { headers: { Authorization: `Bearer ${token}` }, responseType: "blob"}
       )
       .then((response) => {
-        setLoading(false);
+        setLoading(false); 
         const facilityName = JSON.parse(localStorage.getItem("facility"));
         // console.log(facilityName);
         const fileName = `${facilityName} Radet ${currentDate}`;
@@ -164,7 +164,7 @@ const PatientLineList = (props) => {
         <CardBody>
           <h2 style={{ color: "#000" }}>RADET REPORT</h2>
           <br />
-          <form>
+          <>
             <div className="row">
               <div className="form-group  col-md-6">
                 <FormGroup>
@@ -260,7 +260,7 @@ const PatientLineList = (props) => {
                 </Message>
               )}
             </div>
-          </form>
+          </>
         </CardBody>
       </Card>
     </>

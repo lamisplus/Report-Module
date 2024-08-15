@@ -212,111 +212,116 @@ const Reports = (props) => {
                     <span style={{ color: "#fff" }}> Search all Report below </span>
                   </Menu.Item>
 
-                  <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
+                  <Accordion expanded={expanded === 'panel2'} onChange={handleChange('panel2')} style={{ backgroundColor: "#014D88" }}> 
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel2bh-content"
+          id="panel2bh-header"
+        >
+          <Typography sx={{marginTop:0, color: "#fff"}}>
+          Select Surveillance Report
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
+          {Object.values(reportSurveillance).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
+            <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
+    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>
+  ))}
+        </AccordionDetails>
+      </Accordion>
+
+                  <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')} style={{ backgroundColor: "#014D88" }}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel1bh-content"
           id="panel1bh-header"
           sx={{marginTop:0}}
         >
-          {/* <Typography sx={{ width: '33%', flexShrink: 0 }}>
-          Select Treatment Report
-          </Typography> */}
-          <Typography sx={{marginTop:0}}>Select Treatment Report</Typography>
+          <Typography sx={{marginTop:0, color: "#fff"}}>Select Treatment Report</Typography>
         </AccordionSummary>
-        <AccordionDetails style={{paddingTop: 0, marginTop:0, marginTop:0 }}>
-          {Object.values(reportOptions).map((option) => (<>
-    <Typography  style={{cursor:"pointer", marginBottom: "7px"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text} </Typography>
-    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></>
+        <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
+          {Object.values(reportOptions).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
+            <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
+    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>
   ))}
         </AccordionDetails>
       </Accordion>
-      <Accordion expanded={expanded === 'panel2'} onChange={handleChange('panel2')}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel2bh-content"
-          id="panel2bh-header"
-        >
-          <Typography sx={{marginTop:0}}>
-          Select Surveillance Report
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails style={{paddingTop: 0, marginTop:0, marginTop:0 }}>
-          {Object.values(reportSurveillance).map((option) => (<>
-    <Typography><div style={{cursor:"pointer", marginBottom: "7px"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
-    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></>
-  ))}
-        </AccordionDetails>
-      </Accordion>
-      <Accordion expanded={expanded === 'panel3'} onChange={handleChange('panel3')}>
+      
+      <Accordion expanded={expanded === 'panel3'} onChange={handleChange('panel3')} style={{ backgroundColor: "#014D88" }}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel3bh-content"
           id="panel3bh-header"
         >
          
-          <Typography sx={{  flexShrink: 0 }}>
+          <Typography sx={{  flexShrink: 0, color: "#fff" }}>
           Select Biometric Report
           </Typography>
         </AccordionSummary>
-        <AccordionDetails style={{paddingTop: 0, marginTop:0, marginTop:0 }}>
-          {Object.values(reportBiometric).map((option) => (<>
-    <Typography><div style={{cursor:"pointer", marginBottom: "7px"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
-    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></>
+        <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
+          {Object.values(reportBiometric).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
+            <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
+    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>
   ))}
         </AccordionDetails>
       </Accordion>
-      <Accordion expanded={expanded === 'panel4'} onChange={handleChange('panel4')}>
+      <Accordion expanded={expanded === 'panel4'} onChange={handleChange('panel4')} style={{ backgroundColor: "#014D88" }}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel3bh-content"
           id="panel3bh-header"
         >
          
-          <Typography sx={{  flexShrink: 0 }}>
+          <Typography sx={{  flexShrink: 0, color: "#fff" }}>
           Select Prevention Report
           </Typography>
         </AccordionSummary>
-        <AccordionDetails style={{paddingTop: 0, marginTop:0, marginTop:0 }}>
-          {Object.values(reportPrevention).map((option) => (<>
-    <Typography><div style={{cursor:"pointer", marginBottom: "7px"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
-    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></>
+        <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
+          {Object.values(reportPrevention).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
+            <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
+    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>
   ))}
         </AccordionDetails>
       </Accordion>
-      <Accordion expanded={expanded === 'panel5'} onChange={handleChange('panel5')}>
+      <Accordion expanded={expanded === 'panel5'} onChange={handleChange('panel5')} style={{ backgroundColor: "#014D88" }}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel3bh-content"
           id="panel3bh-header"
         >
          
-          <Typography sx={{  flexShrink: 0 }}>
+          <Typography sx={{  flexShrink: 0, color: "#fff" }}>
           Select PMTCT Report
           </Typography>
         </AccordionSummary>
-        <AccordionDetails style={{paddingTop: 0, marginTop:0, marginTop:0 }}>
-          {Object.values(reportPMTCT).map((option) => (<>
-    <Typography><div style={{cursor:"pointer", marginBottom: "7px"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
-    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></>
+        <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
+          {Object.values(reportPMTCT).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
+            <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
+    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>
   ))}
         </AccordionDetails>
       </Accordion>
-      <Accordion expanded={expanded === 'panel6'} onChange={handleChange('panel6')}>
+      <Accordion expanded={expanded === 'panel6'} onChange={handleChange('panel6')} style={{ backgroundColor: "#014D88" }}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel3bh-content"
           id="panel3bh-header"
         >
          
-          <Typography sx={{  flexShrink: 0 }}>
+          <Typography sx={{  flexShrink: 0, color: "#fff" }}>
           Select Psychosocial Report
           </Typography>
         </AccordionSummary>
-        <AccordionDetails style={{paddingTop: 0, marginTop:0, marginTop:0 }}>
-          {Object.values(reportPsychosocial).map((option) => (<>
-    <Typography><div style={{cursor:"pointer", marginBottom: "7px"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
-    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></>
+        <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
+          {Object.values(reportPsychosocial).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
+            <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
+    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>
   ))}
         </AccordionDetails>
       </Accordion>
