@@ -3,8 +3,6 @@ import axios from "axios";
 import { FormGroup, Label, CardBody, Input } from "reactstrap";
 import { makeStyles } from "@material-ui/core/styles";
 import { Card } from "@material-ui/core";
-// import {Link, useHistory, useLocation} from "react-router-dom";
-// import {TiArrowBack} from 'react-icons/ti'
 import { token, url as baseUrl } from "../../../api";
 import "react-phone-input-2/lib/style.css";
 import { Button } from "semantic-ui-react";
@@ -13,7 +11,7 @@ import FileSaver from "file-saver";
 import { Message } from "semantic-ui-react";
 import ProgressComponent from "./ProgressComponent"
 
-const SOCKET_URL = 'http://localhost:8080/ws-chat/';
+const SOCKET_URL = 'http://localhost:8383/ws-chat/';
 
 const useStyles = makeStyles((theme) => ({
   card: {
