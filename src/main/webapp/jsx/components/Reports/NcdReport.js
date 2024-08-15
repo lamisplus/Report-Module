@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FormGroup, Label, CardBody, Spinner, Input, Form } from "reactstrap";
+import { FormGroup, Label, CardBody } from "reactstrap";
 import { makeStyles } from "@material-ui/core/styles";
 import { Card } from "@material-ui/core";
 // import {Link, useHistory, useLocation} from "react-router-dom";
@@ -130,7 +130,7 @@ const NcdReport = (props) => {
         <CardBody>
           <h2 style={{ color: "#000" }}>NCD REPORT</h2>
           <br />
-          <form>
+          <>
             <div className="row">
               <div className="form-group  col-md-6">
                 <FormGroup>
@@ -215,7 +215,7 @@ const NcdReport = (props) => {
                                 </Message>
               )}
             </div>
-          </form>
+          </>
         </CardBody>
       </Card>
     </>
