@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import axios from "axios";
-import {FormGroup, Label , CardBody, Spinner,Input,Form} from "reactstrap";
+import {FormGroup, Label , CardBody} from "reactstrap";
 import {makeStyles} from "@material-ui/core/styles";
 import {Card} from "@material-ui/core";
 // import {Link, useHistory, useLocation} from "react-router-dom";
@@ -10,7 +10,7 @@ import 'react-phone-input-2/lib/style.css'
 import { Button} from 'semantic-ui-react'
 import { toast} from "react-toastify";
 import FileSaver from "file-saver";
-import { Message, Icon } from 'semantic-ui-react'
+import { Message} from 'semantic-ui-react'
 import ProgressComponent from "./ProgressComponent"
 
 
@@ -116,7 +116,6 @@ const LaboratoryReport = (props) => {
 
     }
     
-    
 
     return (
         <>
@@ -126,7 +125,7 @@ const LaboratoryReport = (props) => {
     
                 <h2 style={{color:'#000'}}>LABORATORY REPORT</h2>
                 <br/>
-                    <form >
+                    < >
                         <div className="row">
                         
                             <div className="form-group  col-md-6">
@@ -166,7 +165,7 @@ const LaboratoryReport = (props) => {
                                                 </Message>
                             )}
                         </div>
-                    </form>
+                    </>
 
                 </CardBody>
             </Card>                                 
