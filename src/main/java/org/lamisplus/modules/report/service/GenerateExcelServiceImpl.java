@@ -7,7 +7,6 @@ import org.audit4j.core.util.Log;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
 import org.lamisplus.modules.hiv.domain.dto.LabReport;
-import org.lamisplus.modules.hiv.domain.dto.PatientLineDto;
 import org.lamisplus.modules.hiv.domain.dto.PharmacyReport;
 import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
 import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
@@ -74,7 +73,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("Start generating patient line list for facility: " + getFacilityName(facilityId));
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
-			List<PatientLineDto> data = patientReportService.getPatientLine(facilityId);
+			List<PatientLineDto> data = reportRepository.getPatientLineByFacilityId(facilityId);
 //			LOG.info("fullData 1: " + data);
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> fullData = GenerateExcelDataHelper.fillPatientLineListDataMapper(data);

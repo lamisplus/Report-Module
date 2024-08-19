@@ -10,7 +10,6 @@ import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.module.ModuleService;
 import org.lamisplus.modules.base.service.ApplicationCodesetService;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
-import org.lamisplus.modules.hiv.domain.dto.PatientLineDto;
 import org.lamisplus.modules.hiv.domain.dto.ViralLoadRadetDto;
 import org.lamisplus.modules.hiv.domain.entity.ARTClinical;
 import org.lamisplus.modules.hiv.domain.entity.ArtPharmacy;
@@ -18,6 +17,7 @@ import org.lamisplus.modules.hiv.domain.entity.HivEnrollment;
 import org.lamisplus.modules.hiv.domain.entity.Regimen;
 import org.lamisplus.modules.hiv.repositories.*;
 import org.lamisplus.modules.patient.domain.entity.Person;
+import org.lamisplus.modules.report.domain.PatientLineDto;
 import org.lamisplus.modules.report.domain.PatientLineListDto;
 import org.lamisplus.modules.report.repository.ReportRepository;
 import org.lamisplus.modules.triage.domain.entity.VitalSign;
@@ -67,7 +67,7 @@ public class PatientReportService {
 		
 	}
 	
-	public List<PatientLineDto> getPatientLine(Long facilityId) {
+	public List<org.lamisplus.modules.report.domain.PatientLineDto> getPatientLine(Long facilityId) {
 		System.out.println("start: fetching records from db: ");
 		List<PatientLineDto> patientLineDtoList = reportRepository.getPatientLineByFacilityId(facilityId);
 		System.out.println("Total size:  " + patientLineDtoList.size());

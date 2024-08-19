@@ -10,6 +10,7 @@ import org.apache.poi.ss.formula.functions.Today;
 import org.audit4j.core.util.Log;
 import org.lamisplus.modules.hiv.domain.dto.*;
 import org.lamisplus.modules.report.domain.*;
+import org.lamisplus.modules.report.domain.PatientLineDto;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.utility.Scrambler;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -107,7 +108,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, patient.getLastViralLoad());
 				map.put(index++, vlDate);
 				map.put(index++, patient.getViralLoadType());
-				map.put(index, "");
+				map.put(index++, getStringValue(patient.getCmName()));
 				result.add(map);
 			}
 		}
