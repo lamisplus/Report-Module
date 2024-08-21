@@ -179,6 +179,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<ClientServiceDto> generateClientServiceList(Long facilityId);
 
 
+    @Query(value = LABORATORYReportQuery.LABORATORY_REPORT_QUERY,
+            nativeQuery = true)
+    List<LabReport> getLabReports(Long facilityId);
+
+
         @Query(value = TBReportQuery.TB_REPORT_QUERY, nativeQuery = true)
         List<TBReportProjection> generateTBReport(Long facilityId, LocalDate start, LocalDate end);
 

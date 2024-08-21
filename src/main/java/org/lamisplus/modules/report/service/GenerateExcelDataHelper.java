@@ -10,6 +10,7 @@ import org.apache.poi.ss.formula.functions.Today;
 import org.audit4j.core.util.Log;
 import org.lamisplus.modules.hiv.domain.dto.*;
 import org.lamisplus.modules.report.domain.*;
+import org.lamisplus.modules.report.domain.LabReport;
 import org.lamisplus.modules.report.domain.PatientLineDto;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.utility.Scrambler;
