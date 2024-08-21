@@ -12,6 +12,7 @@ import org.lamisplus.modules.hiv.domain.dto.*;
 import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.report.domain.LabReport;
 import org.lamisplus.modules.report.domain.PatientLineDto;
+import org.lamisplus.modules.report.domain.PharmacyReport;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.utility.Scrambler;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;

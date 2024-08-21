@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.audit4j.core.util.Log;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
-import org.lamisplus.modules.hiv.domain.dto.PharmacyReport;
 import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
 import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 
@@ -217,7 +216,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	public ByteArrayOutputStream generatePharmacyReport(Long facilityId) {
 		LOG.info("generating Pharmacy");
 		try {
-			List<PharmacyReport> pharmacies = artPharmacyRepository.getArtPharmacyReport(facilityId);
+			List<PharmacyReport> pharmacies = reportRepository.getArtPharmacyReport(facilityId);
 			LOG.info("Pharmacy data {}", pharmacies.size());
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillPharmacyDataMapper(pharmacies);
