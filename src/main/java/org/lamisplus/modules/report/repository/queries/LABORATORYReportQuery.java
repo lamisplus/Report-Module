@@ -17,5 +17,5 @@ public class LABORATORYReportQuery {
             "inner join laboratory_labtest c on a.lab_test_id=c.id\n" +
             "INNER JOIN base_organisation_unit_identifier oi ON oi.organisation_unit_id=a.facility_id AND oi.name = 'DATIM_ID'\n" +
             "inner join laboratory_sample d on a.id=d.test_id\n" +
-            "where c.lab_test_name = 'Viral Load' and b.result_reported != '' and a.facility_id =?1";
+            "where b.result_reported != '' and a.facility_id =?1";
 }
