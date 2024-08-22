@@ -83,14 +83,23 @@ const ClinicData = (props) => {
       });
   };
 
-  const handleInputChange = (e) => {
+  // const handleInputChange = (e) => {
     //1980-01-01
-    setObjValues({
-      ...objValues,
-      [e.target.name]: e.target.value,
-      organisationUnitName: e.target.innerText,
-    });
-  };
+  //   setObjValues({
+  //     ...objValues,
+  //     [e.target.name]: e.target.value,
+  //     organisationUnitName: e.target.innerText,
+  //   });
+  // };
+  const handleInputChange = (e) => {
+    const selectedOption = e.target.options[e.target.selectedIndex];
+    const selectedValue = e.target.value;
+    objValues.organisationUnitName = selectedOption.innerText;
+    setObjValues(prevValues => ({
+      ...prevValues,
+      [e.target.name]: selectedValue,
+    }));
+};
 
   const handleValueChange = () => {
     setStatus(!status);

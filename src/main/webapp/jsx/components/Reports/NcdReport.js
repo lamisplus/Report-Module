@@ -81,13 +81,22 @@ const NcdReport = (props) => {
         //console.log(error);
       });
   };
+  // const handleInputChange = (e) => {
+  //   setObjValues({
+  //     ...objValues,
+  //     [e.target.name]: e.target.value,
+  //     organisationUnitName: e.target.innerText,
+  //   });
+  // };
   const handleInputChange = (e) => {
-    setObjValues({
-      ...objValues,
-      [e.target.name]: e.target.value,
-      organisationUnitName: e.target.innerText,
-    });
-  };
+    const selectedOption = e.target.options[e.target.selectedIndex];
+    const selectedValue = e.target.value;
+    objValues.organisationUnitName = selectedOption.innerText;
+    setObjValues(prevValues => ({
+      ...prevValues,
+      [e.target.name]: selectedValue,
+    }));
+};
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);

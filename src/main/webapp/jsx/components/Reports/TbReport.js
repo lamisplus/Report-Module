@@ -81,9 +81,18 @@ const TbReport = (props) => {
         });
     }
 
-    const handleInputChange = e => {
-        setObjValues ({...objValues,  [e.target.name]: e.target.value, organisationUnitName: e.target.innerText});
-    }
+    // const handleInputChange = e => {
+    //     setObjValues ({...objValues,  [e.target.name]: e.target.value, organisationUnitName: e.target.innerText});
+    // }
+    const handleInputChange = (e) => {
+      const selectedOption = e.target.options[e.target.selectedIndex];
+      const selectedValue = e.target.value;
+      objValues.organisationUnitName = selectedOption.innerText;
+      setObjValues(prevValues => ({
+        ...prevValues,
+        [e.target.name]: selectedValue,
+      }));
+  };
 
     const handleValueChange = () => {
         setStatus(!status)

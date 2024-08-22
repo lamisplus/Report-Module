@@ -79,15 +79,22 @@ const ClientVerification = (props) => {
         //console.log(error);
       });
   };
+  // const handleInputChange = (e) => {
+  //   setObjValues({
+  //     ...objValues,
+  //     [e.target.name]: e.target.value,
+  //       organisationUnitName: e.target.innerText,
+  //   });
+  // };
   const handleInputChange = (e) => {
-    setObjValues({
-      ...objValues,
-      [e.target.name]: e.target.value,
-        organisationUnitName: e.target.innerText,
-    
-    });
-      
-  };
+    const selectedOption = e.target.options[e.target.selectedIndex];
+    const selectedValue = e.target.value;
+    objValues.organisationUnitName = selectedOption.innerText;
+    setObjValues(prevValues => ({
+      ...prevValues,
+      [e.target.name]: selectedValue,
+    }));
+};
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -100,7 +107,8 @@ const ClientVerification = (props) => {
       })
       .then((response) => {
         setLoading(false);
-        const fileName = `${objValues.organisationUnitName}Client Verification${currentDate}`;
+        // const fileName = `${objValues.organisationUnitName} Client Verification${currentDate}`;
+        const fileName = `${objValues.organisationUnitName} Client Verification${currentDate}`;
         const responseData = response.data;
         let blob = new Blob([responseData], {
           type: "application/octet-stream",
