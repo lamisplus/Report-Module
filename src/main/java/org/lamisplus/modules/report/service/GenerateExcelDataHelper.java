@@ -656,11 +656,11 @@ public class GenerateExcelDataHelper {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		int sn = 1;
 		Log.info("converting HTS db records to excel ....");
+		try {
 			for (HtsReportDto htsReportDto : htsReportDtos) {
 				if (htsReportDto != null) {
 					Map<Integer, Object> map = new HashMap<>();
 					int index = 0;
-					try {
 					map.put(index++, String.valueOf(sn));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getDatimCode())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFacility())));
@@ -727,28 +727,17 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getHtsLatitude())));
 					map.put(index, getStringValue(String.valueOf(htsReportDto.getHtsLongitude())));
 					result.add(map);
-					sn++;
-
-				}catch (Exception e) {
-//						excelService.generate(Constants.HTS_SHEET, htsReportDto, Constants.HTS_HEADER);
-						try (FileWriter writer = new FileWriter(System.getProperty("user.home") + "/Downloads/Hts_Report_error_log_" + LocalDate.now() +".txt" , true)) {
-							writer.write("ID: " + htsReportDto.getClientCode() + "\n");
-							writer.write("Error Message: " + e.getMessage() + "\n");
-							writer.write("Hts Report Row: " + new ObjectMapper().writeValueAsString(htsReportDto) + "\n");
-							writer.write("-------------------------------\n");
-						} catch (IOException io) {
-							Log.error("Error writing to log file", io);
-						}
-						LOG.error("An error occurred when converting db records to excel");
-						LOG.error("The error message is: " + e.getMessage());
-//						e.printStackTrace();
+						sn++;
 					}
-			}
-			LOG.info("Done converting db records total size {}", result.size());
-			return result;
+				}
+				LOG.info("Done converting db records total size {}", result.size());
+				return result;
+			}catch (Exception e) {
+			LOG.error("An error occurred when converting db records to excel");
+			LOG.error("The error message is: " + e.getMessage());
+			e.printStackTrace();
 		}
 		return result;
-
 	}
 
 
