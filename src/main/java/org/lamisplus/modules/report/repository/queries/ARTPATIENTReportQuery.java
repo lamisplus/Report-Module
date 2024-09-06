@@ -47,11 +47,11 @@ public class ARTPATIENTReportQuery {
             "NULLIF(NULLIF(address_object->>'stateId', 'null'), '')) \n" +
             " ELSE NULL \n" +
             "END AS address,\n" +
-            "CASE WHEN address_object->>'stateId' ~ '^\\\\d+(\\\\.\\\\d+)?$' \n" +
+            "CASE WHEN address_object->>'stateId' ~ '^[0-9\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\.]+$' \n" +
             " THEN address_object->>'stateId' \n" +
             " ELSE NULL \n" +
             "END AS stateId,\n" +
-            "CASE WHEN address_object->>'stateId' ~ '^\\\\d+(\\\\.\\\\d+)?$' \n" +
+            "CASE WHEN address_object->>'district' ~ '^[0-9\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\.]+$'  \n" +
             " THEN address_object->>'district' \n" +
             " ELSE NULL \n" +
             "END AS lgaId\n" +
