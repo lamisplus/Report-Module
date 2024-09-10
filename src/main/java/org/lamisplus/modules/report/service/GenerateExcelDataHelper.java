@@ -665,6 +665,7 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getDatimCode())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFacility())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getClientCode())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPatientId())));
 					map.put(index++, getStringValue(String.valueOf(scrambler.scrambleCharacters(htsReportDto.getFirstName()))));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getSurname() != null ? scrambler.scrambleCharacters(htsReportDto.getSurname()) :"")));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getOtherName() != null ? scrambler.scrambleCharacters(htsReportDto.getOtherName()): "")));

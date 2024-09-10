@@ -267,6 +267,7 @@ public class Constants {
 					"Facility Id (Datim)",
 					"Facility",
 					"Client Code",
+					"Patient ID",
 					"First Name",
 					"Surname",
 					"Other Names",

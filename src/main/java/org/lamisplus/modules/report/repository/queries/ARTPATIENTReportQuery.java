@@ -47,11 +47,11 @@ public class ARTPATIENTReportQuery {
             "NULLIF(NULLIF(address_object->>'stateId', 'null'), '')) \n" +
             " ELSE NULL \n" +
             "END AS address,\n" +
-            "CASE WHEN address_object->>'stateId' ~ '^[0-9\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\.]+$' \n" +
+            "CASE WHEN address_object->>'stateId' ~ '^[0-9.]+$' \n" +
             " THEN address_object->>'stateId' \n" +
             " ELSE NULL \n" +
             "END AS stateId,\n" +
-            "CASE WHEN address_object->>'district' ~ '^[0-9\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\.]+$'  \n" +
+            "CASE WHEN address_object->>'district' ~ '^[0-9.]+$'  \n" +
             " THEN address_object->>'district' \n" +
             " ELSE NULL \n" +
             "END AS lgaId\n" +
@@ -66,7 +66,7 @@ public class ARTPATIENTReportQuery {
             "\n" +
             " LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateId AS BIGINT)\n" +
             "\n" +
-            " LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(CASE WHEN r.lgaId ~ E'^\\\\\\\\d+$' THEN r.lgaId ELSE NULL END AS BIGINT)\n" +
+            " LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(CASE WHEN r.lgaId ~ '^[0-9.]+$' THEN r.lgaId ELSE NULL END AS BIGINT)\n" +
             "\n" +
             " INNER JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=?1 AND boui.name='DATIM_ID'\n" +
             "\n" +
