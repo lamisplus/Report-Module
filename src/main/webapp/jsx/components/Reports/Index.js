@@ -32,7 +32,7 @@ import HIVST from "./HIVSTReport";
 import HTSIndexReport from "./HTSIndexReport";
 import CustomReport from "./CustomReport";
 import ADRReport from "./ADRReport"
-
+import PMTCTMonthlySummaryReport from "./PMTCTMonthlySummaryReport";
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -83,7 +83,10 @@ const Reports = (props) => {
       { key: 'biometric', value: 'biometric', text: 'BIOMETRIC DATA' },
     
   ]
-
+  const monthSummaryReport = [
+    { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary' },
+  
+]
   const reportPrevention = [
     { key: 'prep-report', value: 'prep-report', text: 'Prep REPORT' },
     { key: 'prep-longitudinal-report', value: 'prep-longitudinal-report', text: 'PrEP LONGITUDINAL REPORT' },
@@ -180,7 +183,8 @@ const Reports = (props) => {
         return <ADRReport handleItemClick={handleItemClick1} setCompleted={setCompleted} completed={completed} />;
       case "custom-report":
         return <CustomReport handleItemClick={handleItemClick1} setCompleted={setCompleted} completed={completed} />;
-
+        case 'PMTCT-MSF':
+          return <PMTCTMonthlySummaryReport handleItemClick={handleItemClick1} setCompleted={setCompleted} completed={completed} />;
       default:
         return null;
     }
@@ -267,6 +271,10 @@ const Reports = (props) => {
   ))}
         </AccordionDetails>
       </Accordion>
+
+
+
+ 
       <Accordion expanded={expanded === 'panel4'} onChange={handleChange('panel4')} style={{ backgroundColor: "#014D88" }}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
@@ -324,6 +332,32 @@ const Reports = (props) => {
   ))}
         </AccordionDetails>
       </Accordion>
+
+
+
+
+      {/* monthly Summary Form Accordion */}
+      {/* <Accordion expanded={expanded === 'panel7'} onChange={handleChange('panel7')} style={{ backgroundColor: "#014D88" }}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel3bh-content"
+          id="panel3bh-header"
+        >
+         
+          <Typography sx={{  flexShrink: 0, color: "#fff" }}>
+          Select Monthly Summary Report
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
+          {Object.values(monthSummaryReport).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
+            <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
+    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>
+  ))}
+        </AccordionDetails>
+      </Accordion> */}
+     {/*End of monthly Summary Form Accordion  Accordion  */}
+
 
       <br/>
 
