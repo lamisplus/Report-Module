@@ -452,7 +452,7 @@ public class Constants {
 					"Unique Id",
 					//"Surname", "Other Names",
 					"Sex", "Date of birth", "Age", "ART Start Date", "Date of Last Visit",
-					"Date of TB Screening", "TB Screening Type", "TB Status", "TB Diagnostic Evaluation",
+					"Date of TB Screening", "TB Screening Type", "TB Screening Outcome", "TB Diagnostic Evaluation",
 					"Date of TB Diagnostic Evaluation", "Date of TB Sample Collection (yyyy-mm-dd)", "TB Diagnostic Test Type", "Date Result Received",
 					"TB Diagnostic Result", "Date of TB Treatment", "TB Type (new, relapsed etc)",  "Date TB Treatment Outcome", "TB Treatment Outcome",
 					"Eligible for TPT", "Date of TPT Start (yyyy-mm-dd)", "TPT Type", "TPT completion status", "TPT completion date", "Weight At Start TPT"
