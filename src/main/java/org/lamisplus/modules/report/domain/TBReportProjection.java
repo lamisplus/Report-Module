@@ -41,4 +41,17 @@ public interface TBReportProjection {
     String getRegimenName();
     LocalDate getIptCompletionDate();
     String getWeightAtStartTpt();
+
+    LocalDate getSpecimenSentDate();
+
+    String getSpecimenType();
+
+    String getClinicallyEvaulated();
+
+    String getChestXrayResultTest();
+
+   LocalDate getDateOfChestXrayResultTestDone();
+
+    String getContractionForTpt();
+    String getContractionOptions();
 }

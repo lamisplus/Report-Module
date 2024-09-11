@@ -144,7 +144,21 @@ public class TBReportQuery {
             "        data->'tbIptScreening'->>'diagnosticTestType' AS tbDiagnosticTestType,\n" +
             "    COALESCE(NULLIF(data->'tptMonitoring'->>'tbType',''), NULLIF(data->'tbIptScreening'->>'tbType','')) AS tbTreatmentType,\n" +
             "    NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'dateSpecimenSent', '') AS DATE), NULL) AS specimenSentDate,\n" +
+            "    data->'tbIptScreening'->>'specimenType' AS specimenType,\n" +
+            "    data->'tbIptScreening'->>'clinicallyEvaulated' as clinicallyEvaulated,\n" +
+            "    data->'tbIptScreening'->>'chestXrayResultTest' AS chestXrayResultTest,\n" +
+            "    NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'dateOfChestXrayResultTestDone' , '') AS DATE), NULL) AS dateOfChestXrayResultTestDone,\n" +
+            "    data->'tptMonitoring'->>'contractionForTpt' AS contractionForTpt," +
             "    data->'tbIptScreening'->>'status' as screeningStatus,\n" +
+            "    TRIM(BOTH ',' FROM\n" +
+            "    COALESCE(\n" +
+            "      CASE WHEN (data->'tptMonitoring'->>'liverSymptoms' IS NOT NULL AND data->'tptMonitoring'->>'liverSymptoms' != '' AND data->'tptMonitoring'->>'liverSymptoms' != 'No') THEN ',Liver Symptoms' ELSE '' END ||\n" +
+            "      CASE WHEN (data->'tptMonitoring'->>'chronicAlcohol' IS NOT NULL AND data->'tptMonitoring'->>'chronicAlcohol' != '' AND data->'tptMonitoring'->>'chronicAlcohol' != 'No') THEN ',Chronic Alcohol' ELSE '' END ||\n" +
+            "      CASE WHEN (data->'tptMonitoring'->>'neurologicSymptoms' IS NOT NULL AND data->'tptMonitoring'->>'neurologicSymptoms' != '' AND data->'tptMonitoring'->>'neurologicSymptoms' != 'No') THEN ',Neurologic Symptoms' ELSE '' END ||\n" +
+            "      CASE WHEN (data->'tptMonitoring'->>'rash' IS NOT NULL AND data->'tptMonitoring'->>'rash' != '' AND data->'tptMonitoring'->>'rash' != 'No') THEN ',Rash' ELSE '' END,\n" +
+            "      ''\n" +
+            "    )\n" +
+            "  ) AS contractionOptions," +
             "    data->'tbIptScreening'->>'dateOfDiagnosticTest' as dateOfDiagnosticTest, \n" +
             "        data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) as rnk3\n" +
             "    FROM\n" +
@@ -180,6 +194,12 @@ public class TBReportQuery {
             "ts.tbTreatmentType,\n" +
             "ts.screeningDate,\n" +
             "ts.specimenSentDate,\n" +
+            "ts.specimenType,\n" +
+            "ts.clinicallyEvaulated,\n" +
+            "ts.chestXrayResultTest,\n" +
+            "ts.dateOfChestXrayResultTestDone,\n" +
+            "ts.contractionForTpt,\n" +
+            "ts.contractionOptions," +
             "dateOfDiagnosticTest,\n" +
             "    tc.completionDate,\n" +
             "    tc.treatmentOutcome\n" +
@@ -315,6 +335,8 @@ public class TBReportQuery {
             "    COALESCE(tbTmentNew.tbDiagnosticTestType, current_tb_result.tb_diagnostic_test_type) AS tbDiagnosticTestType, \n" +
             "    ipt_start.date_of_ipt_start AS dateOfIptStart, ipt_start.regimen_name as regimenName, \n" +
             "    COALESCE(iptN.tptCompletionDate, ipt_cA.dateCompletedTpt) AS iptCompletionDate, \n" +
+            "    tbTmentNew.specimenSentDate, tbTmentNew.specimenType, tbTmentNew.clinicallyEvaulated, tbTmentNew.chestXrayResultTest,\n" +
+            "    tbTmentNew.dateOfChestXrayResultTestDone, tbTmentNew.contractionForTpt, tbTmentNew.contractionOptions," +
             "    COALESCE(iptN.tptCompletionStatus, ipt_cA.iptCompletionStatus) AS iptCompletionStatus , COALESCE(iptN.tptWeight, weight.weight_at_start_tpt) as weightAtStartTpt \n" +
             "FROM \n" +
             "    bio_data bio \n" +
