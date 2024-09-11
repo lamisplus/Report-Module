@@ -480,6 +480,7 @@ public class Constants {
 					"Date TB Treatment Outcome",
 					"Eligible for TPT",
 					"Contraindications for TPT",
+					"Contraindication Type",
 					"Date of TPT Start (yyyy-mm-dd)",
 					"TPT Type",
 					"TPT completion status",

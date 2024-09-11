@@ -149,29 +149,36 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbScreeningType())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbStatus())));
 
+				map.put(index++, tbReportProjection.getDateOfTbSampleCollection());
+				map.put(index++, tbReportProjection.getSpecimenSentDate());
+				map.put(index++, tbReportProjection.getSpecimenType());
+
 				map.put(index++, (tbReportProjection.getDateOfTbDiagnosticResultReceived() != null) ? "Yes" : "No");
 				// Date of TB Diagnostic Evaluation
 
 				map.put(index++, tbReportProjection.getDateOfTbDiagnosticResultReceived());
-
-				map.put(index++, tbReportProjection.getDateOfTbSampleCollection());
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticTestType())));
 				map.put(index++, tbReportProjection.getDateOfTbDiagnosticResultReceived());
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticResult())));
 
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getClinicallyEvaulated())));
+				map.put(index++, tbReportProjection.getDateOfChestXrayResultTestDone());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getChestXrayResultTest())));
 
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentStartDate())));
+
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentType())));
-				map.put(index++, tbReportProjection.getTbTreatmentCompletionDate());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentStartDate())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentOutcome())));
+				map.put(index++, tbReportProjection.getTbTreatmentCompletionDate());
 
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getEligibleForTPT())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getContractionForTpt())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getContractionOptions())));
+
 				map.put(index++, tbReportProjection.getDateOfIptStart());
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getRegimenName())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getIptCompletionStatus())));
-
 				map.put(index++, tbReportProjection.getIptCompletionDate());
-
 				map.put(index, tbReportProjection.getWeightAtStartTpt());
 
 				result.add(map);
