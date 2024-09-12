@@ -228,7 +228,7 @@ const Reports = (props) => {
         <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
           {Object.values(reportSurveillance).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
             <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
-    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: activeItem1 === option.value ? "grey" : "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
     <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>
   ))}
         </AccordionDetails>
@@ -246,7 +246,7 @@ const Reports = (props) => {
         <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
           {Object.values(reportOptions).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
             <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
-    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: activeItem1 === option.value ? "grey" : "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
     <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>
   ))}
         </AccordionDetails>
@@ -266,7 +266,7 @@ const Reports = (props) => {
         <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
           {Object.values(reportBiometric).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
             <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
-    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: activeItem1 === option.value ? "grey" : "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
     <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>
   ))}
         </AccordionDetails>
@@ -289,7 +289,7 @@ const Reports = (props) => {
         <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
           {Object.values(reportPrevention).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
             <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
-    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: activeItem1 === option.value ? "grey" : "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
     <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>
   ))}
         </AccordionDetails>
@@ -308,7 +308,7 @@ const Reports = (props) => {
         <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
           {Object.values(reportPMTCT).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
             <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
-    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: activeItem1 === option.value ? "grey" : "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
     <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>
   ))}
         </AccordionDetails>
@@ -327,7 +327,7 @@ const Reports = (props) => {
         <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
           {Object.values(reportPsychosocial).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
             <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
-    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: activeItem1 === option.value ? "grey" : "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
     <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>
   ))}
         </AccordionDetails>
