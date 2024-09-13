@@ -82,11 +82,11 @@ public class HTSReportQuery {
             "hc.risk_stratification_code AS Assessmentcode,  \n" +
             "modality_code.display AS modality,  \n" +
             "(CASE WHEN hc.syphilis_testing->>'syphilisTestResult' ILIKE 'Yes'   \n" +
-            "THEN 'Reactive' ELSE 'Non-Reactive' END) As syphilisTestResult,  \n" +
+            "THEN 'Reactive' WHEN hc.syphilis_testing->>'syphilisTestResult' ILIKE 'No' THEN 'Non-Reactive' ELSE '' END) As syphilisTestResult,  \n" +
             "(CASE WHEN hc.hepatitis_testing->>'hepatitisBTestResult' ILIKE 'Yes'   \n" +
-            " THEN 'Positive' ELSE 'Negative' END) AS hepatitisBTestResult,  \n" +
+            " THEN 'Positive' WHEN hc.hepatitis_testing->>'hepatitisBTestResult' ILIKE 'No' THEN 'Negative' ELSE '' END) AS hepatitisBTestResult,  \n" +
             "(CASE WHEN hc.hepatitis_testing->>'hepatitisCTestResult' ILIKE 'Yes'   \n" +
-            " THEN 'Positive' ELSE 'Negative' END) AS hepatitisCTestResult,  \n" +
+            " THEN 'Positive' WHEN hc.hepatitis_testing->>'hepatitisCTestResult' ILIKE 'No' THEN 'Negative' ELSE '' END) AS hepatitisCTestResult,  \n" +
             "hc.cd4->>'cd4Count' AS CD4Type,  \n" +
             "hc.cd4->>'cd4SemiQuantitative' AS CD4TestResult,  \n" +
             "(CASE WHEN hc.hiv_test_result2 = 'Positive' THEN 'Positive'\n" +
