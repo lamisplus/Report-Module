@@ -655,21 +655,16 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			case "82d80564-6d3e-433e-8441-25db7fe1f2af":
 			query = Application.pmtctHts.replace("?1", facilityId.toString()).replace("?2", startDate).replace("?3", endDate);
 				reportName = Application.pmtctHtsName;
-				System.out.println(query);
 				break;
 			case "2b6fe1b9-9af0-4af7-9f59-b9cfcb906158":
 				query = Application.pmtctMaternalCohort;
 				query = query.replace("?1", String.valueOf(facilityId)).replace("?2", startDate).replace("?3", endDate);
-//				query = String.format(Application.pmtctMaternalCohort, facilityId, startDate, endDate);
 				reportName = Application.pmtctMaternalCohortName;
-				System.out.println(query);
 				break;
 			case "e5f5685b-d355-498f-bc71-191b4037726c":
 				query = Application.mhpss;
 				query = query.replace("?1", String.valueOf(facilityId)).replace("?2", startDate).replace("?3", endDate);
 				reportName = Application.mhpssName;
-				System.out.println(query);
-				System.out.println(reportName);
 				break;
 			default:
 				LOG.info("Report not available...");
