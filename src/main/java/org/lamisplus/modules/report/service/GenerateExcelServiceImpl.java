@@ -3,7 +3,6 @@ package org.lamisplus.modules.report.service;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.audit4j.core.util.Log;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
 import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
@@ -19,16 +18,13 @@ import org.lamisplus.modules.report.utility.DateUtil;
 import org.lamisplus.modules.report.utility.ResultSetExtract;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.FluxSink;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -38,28 +34,11 @@ import java.util.Map;
 @Service
 public class GenerateExcelServiceImpl implements GenerateExcelService {
 	private final ReportRepository reportRepository;
-	
-	private final PatientReportService patientReportService;
-	
 	private final RadetService radetService;
-	
 	private final OrganisationUnitService organisationUnitService;
-	
-	private final ArtPharmacyRepository artPharmacyRepository;
-
 	private final HtsReportService htsReportService;
-
-	private final PrepReportService prepReportService;
-	
-	
-	private final BiometricReportService biometricReportService;
-	
 	private final ExcelService excelService;
-	
-	private final HIVEacRepository hivEacRepository;
-	
 	private final GenerateExcelDataHelper excelDataHelper;
-
 	private final ResultSetExtract resultSetExtract;
 	private final DateUtil dateUtil;
 	private final SimpMessageSendingOperations messagingTemplate;
@@ -72,7 +51,6 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			List<PatientLineDto> data = reportRepository.getPatientLineByFacilityId(facilityId);
-//			LOG.info("fullData 1: " + data);
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> fullData = GenerateExcelDataHelper.fillPatientLineListDataMapper(data);
 			LOG.info("fullData 2: " + data.size());
@@ -107,23 +85,6 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	}
 
 
-//	@Override
-//	public ByteArrayOutputStream generateTBReport(Long facilityId, LocalDate start, LocalDate end) {
-//		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
-//		try {
-//			List<TBReportProjection> tbReportProjections = reportRepository.generateTBReport(facilityId, start, end);
-//			LOG.info("RADET Size {}", tbReportProjections.size());
-//
-//			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillTBReportDataMapper(tbReportProjections);
-//			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
-//		} catch (Exception e) {
-//			LOG.error("An error Occurred when generating TB report...");
-//			LOG.error("Error message: " + e.getMessage());
-//			e.printStackTrace();
-//		}
-//		LOG.info("End generate patient TB report");
-//		return null;
-//	}
 
 
 	@Override
@@ -454,9 +415,6 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			if(Application.kpPrev != null){
 				LOG.info("Kp-Prev query not available check query.yml file");
 			}
-
-//			String query = String.format(Application.kpPrev, facilityId, startDate, endDate);
-
 			String query = Application.kpPrev;
 			query = query.replace("?1", String.valueOf(facilityId))
 					.replace("?2", startDate)
@@ -608,39 +566,24 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		return null;
 	}
 
-//	@Override
-//	public ByteArrayOutputStream generateNCDReport(Long facilityId, LocalDate start, LocalDate end) {
-//		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
-//		try {
-//			List<NCDReportProjection> ncdReportProjections = reportRepository.generateNCDReport(facilityId, start, end);
-//			LOG.info("TB Size {}", ncdReportProjections.size());
-//			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillNCDReportDataMapper(ncdReportProjections, end);
-//			return excelService.generate(Constants.NCD_SHEET, data, Constants.NCD_REPORT_HEADER);
-//		} catch (Exception e) {
-//			LOG.error("An error Occurred when generating NCD report...");
-//			LOG.error("Error message: " + e.getMessage());
-//			e.printStackTrace();
-//		}
-//		LOG.info("End generate patient NCD report");
-//		return null;
-//	}
-
-//	@Override
-//	public ByteArrayOutputStream generateEACReport(Long facilityId, LocalDate start, LocalDate end) {
-//		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
-//		try {
-//			List<EACReportProjection> eacReportProjections = reportRepository.generateEACReport(facilityId, start, end);
-//			LOG.info("EAC Size {}", eacReportProjections.size());
-//			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillEACReportDataMapper(eacReportProjections, end);
-//			return excelService.generate(Constants.EAC_SHEET, data, Constants.EAC_REPORT_HEADER);
-//		} catch (Exception e) {
-//			LOG.error("An error Occurred when generating EAC report...");
-//			LOG.error("Error message: " + e.getMessage());
-//			e.printStackTrace();
-//		}
-//		LOG.info("End generate patient EAC report");
-//		return null;
-//	}
+	@Override
+	@SneakyThrows
+	public ByteArrayOutputStream generateFamilyIndex (Long facilityId) {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
+		LOG.info("Start generating family index list for facility: " + getFacilityName(facilityId));
+		try {
+			List<FamilyIndexReportDtoProjection> records = reportRepository.getFamilyIndexReport(facilityId);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
+			List<Map<Integer, Object>> fullData = GenerateExcelDataHelper.fillFamilyIndexMapper(records);
+			LOG.info("fullData 2: " + records.size());
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
+			return excelService.generate(Constants.FAMILY_INDEX_SHEET, fullData, Constants.FAMILY_INDEX_HEADER);
+		} catch (Exception e) {
+			LOG.error("Error Occurred while generating FAMILY INDEX REport!!!");
+		}
+		LOG.info("End generate generating FAMILY INDEX REport...");
+		return null;
+	}
 
 
 	public ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException {

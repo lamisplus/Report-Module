@@ -3,8 +3,6 @@ import axios from "axios";
 import {FormGroup, Label , CardBody, Input} from "reactstrap";
 import {makeStyles} from "@material-ui/core/styles";
 import {Card} from "@material-ui/core";
-// import {Link, useHistory, useLocation} from "react-router-dom";
-// import {TiArrowBack} from 'react-icons/ti'
 import {token, url as baseUrl } from "../../../api";
 import 'react-phone-input-2/lib/style.css'
 import { Button} from 'semantic-ui-react'
@@ -113,17 +111,17 @@ const HTSIndexReport = (props) => {
         setLoading(true)
         //console.log(token);
 
-        axios.post(`${baseUrl}hts-index-report?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,objValues.organisationUnitId,
+        axios.post(`${baseUrl}family-index-report?facilityId=${objValues.organisationUnitId}`,objValues.organisationUnitId,
             { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
         )
           .then(response => {
             setLoading(false)
-            const fileName =`${objValues.organisationUnitName} HTS Index Report ${currentDate}`
+            const fileName =`${objValues.organisationUnitName} HTS FAMILY Index Report ${currentDate}`
             const responseData = response.data
             let blob = new Blob([responseData], {type: "application/octet-stream"});
 
             FileSaver.saveAs(blob, `${fileName}.xlsx`);
-            toast.success("HTS Index Report generated successfully");
+            toast.success("HTS FAMILY Index Report generated successfully");
           })
           .catch(error => {
             setLoading(false)
@@ -143,11 +141,11 @@ const HTSIndexReport = (props) => {
             <Card >
                 <CardBody>
 
-                <h2 style={{color:'#000'}}>HTS Index REPORT</h2>
+                <h2 style={{color:'#000'}}>HTS INDEX REPORT</h2>
                 <br/>
                     < >
                         <div className="row">
-                        <div className="form-group  col-md-6">
+                        {/* <div className="form-group  col-md-6">
                                 <FormGroup>
                                     <Label>From *</Label>
                                     <input
@@ -188,7 +186,7 @@ const HTSIndexReport = (props) => {
                                      {' '} &nbsp;&nbsp;<span> As at Today.</span>
                                   </Label>
                                 </FormGroup>
-                            </div>
+                            </div> */}
                             <div className="form-group  col-md-6">
                                 <FormGroup>
                                     <Label>Facility*</Label>

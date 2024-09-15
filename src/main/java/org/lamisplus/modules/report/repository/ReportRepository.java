@@ -15,6 +15,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
         @Query(value = HTSReportQuery.HTS_REPORT_QUERY, nativeQuery = true)
         List<HtsReportDto> getHtsReport(Long facilityId, LocalDate start, LocalDate end);
 
+        @Query(value = FamilyIndexReportQuery.FAMILY_INDEX_REPORT_QUERY, nativeQuery = true)
+        List<FamilyIndexReportDtoProjection> getFamilyIndexReport (Long facilityId);
+
 
     @Query(value = "SELECT DISTINCT ON (p.uuid)p.uuid AS PersonUuid, p.id, p.uuid,p.hospital_number as hospitalNumber,       \n" +
             "                        INITCAP(p.surname) AS surname, INITCAP(p.first_name) as firstName, he.date_started AS hivEnrollmentDate,    \n" +

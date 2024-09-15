@@ -2,6 +2,7 @@ package org.lamisplus.modules.report.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.lamisplus.modules.report.domain.FamilyIndexReportDtoProjection;
 import org.lamisplus.modules.report.domain.HtsReportDto;
 import org.lamisplus.modules.report.repository.ReportRepository;
 import org.lamisplus.modules.report.utility.DateUtil;
@@ -21,4 +22,9 @@ public class HtsReportService {
 
         return reportRepository.getHtsReport(facilityId, start, dateUtil.datePadding(end));
     }
+
+//    public List<FamilyIndexReportDtoProjection> getFamilyIndexReport (Long facilityId){
+//
+//        return reportRepository.getFamilyIndexReport(facilityId);
+//    }
 }

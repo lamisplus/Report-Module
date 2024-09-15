@@ -76,7 +76,7 @@ const Reports = (props) => {
     { key: 'hts-report', value: 'hts-report', text: 'HTS REPORT' },
     { key: 'hts-register', value: 'hts-register', text: 'HTS REGISTER' },
     { key: 'hivst-report', value: 'hivst-report', text: 'HIVST REPORT' },
-    // { key: 'hts-index-report', value: 'hts-index-report', text: 'HTS INDEX REPORT' },
+    { key: 'hts-index-report', value: 'hts-index-report', text: 'HTS INDEX REPORT' },
   ]
 
   const reportBiometric = [

@@ -1032,6 +1032,62 @@ public class GenerateExcelDataHelper {
 	}
 
 
+	public static List<Map<Integer, Object>> fillFamilyIndexMapper(@NonNull List<FamilyIndexReportDtoProjection> listFinalResult)  {
+		List<Map<Integer, Object>> result = new ArrayList<>();
+		for (FamilyIndexReportDtoProjection familyIndex : listFinalResult) {
+			if (familyIndex != null) {
+				Map<Integer, Object> map = new HashMap<>();
+				int index = 0;
+				try {
+					map.put(index++, getStringValue(familyIndex.getState()));
+					map.put(index++, getStringValue(familyIndex.getLga()));
+					map.put(index++, getStringValue(familyIndex.getFacilityName()));
+					map.put(index++, getStringValue(familyIndex.getDatimId()));
+					map.put(index++, getStringValue(familyIndex.getPatientName()));
+					map.put(index++, getStringValue(familyIndex.getOtherName()));
+					map.put(index++, getStringValue(familyIndex.getHospitalNumber()));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getDateOfBirth())));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getAge())));
+					map.put(index++, getStringValue(familyIndex.getSex()));
+					map.put(index++, getStringValue(familyIndex.getMaritalStatus()));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getDateConfirmedHiv())));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getDateEnrolled())));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getEntryPoint())));
+					map.put(index++, getStringValue(null));
+					map.put(index++, getStringValue(familyIndex.getRecencyTesting()));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getDateOfferIndex())));
+					map.put(index++, getStringValue(familyIndex.getAcceptedTesting()));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getDateOfElicitation())));
+					map.put(index++, getStringValue(familyIndex.getElicitedClientName()));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getElicitedAge())));
+					map.put(index++, getStringValue(familyIndex.getElicitedClientSex()));
+					map.put(index++, getStringValue(familyIndex.getElicitedClientPhoneNumber()));
+					map.put(index++, getStringValue(familyIndex.getElicitedClientAddress()));
+					map.put(index++, getStringValue(familyIndex.getRelationshipWithIndex()));
+					map.put(index++, getStringValue(null));
+					map.put(index++, getStringValue(null));
+					map.put(index++, getStringValue(familyIndex.getModeOfNotification()));
+					map.put(index++, getStringValue(null));
+					map.put(index++, getStringValue(familyIndex.getElicitedClientKnownPositive()));
+					map.put(index++, getStringValue(familyIndex.getElicitedClientHivResult()));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getElicitedClientTestedHiv())));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getElicitedClientDateEnrolled())));
+					map.put(index++, getStringValue(familyIndex.getElicitedClientUniqueId()));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getDateEnrolledInOvc())));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getOvcId())));
+
+				} catch (Exception e) {
+					LOG.error("An error occurred when converting db records to excel");
+					LOG.error("The error message is: " + e.getMessage());
+				}
+				result.add(map);
+
+			}
+		}
+		Log.info("result: " + result.size()); // going to be one
+		return result;
+	}
+
 
 
 }
