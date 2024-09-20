@@ -69,10 +69,6 @@ const CustomReport = (props) => {
         organisationUnitName: "",
         currentDate: currentDate
     })
-    // const [objValues, setObjValues] = useState({
-    //     query: "",
-    //     reportName: ""
-    // })
     const [formData, setFormData] = useState(objValues)
 
     const loadFacilities = useCallback(async () => {
@@ -124,8 +120,6 @@ const CustomReport = (props) => {
 
     const handleCancel = (e) => {
         e.preventDefault();
-        // const objValuesWithTemplateStrings = containsTemplateStrings(objValues?.queryBody);
-        // const text = extractPatterns(objValues?.queryBody)
     }
 
     const handleDryRun = (e) => {
@@ -222,7 +216,6 @@ const CustomReport = (props) => {
             .then((response) => {
 
                 setObjValues(response.data)
-                // setObjValues(objValues?.reportName, objValues?.query)
             })
     }
 
@@ -230,7 +223,6 @@ const CustomReport = (props) => {
         e.preventDefault();
         var customQuery = objValues?.query;
         customQuery = replaceValues(customQuery, customDataFields);
-        // customQuery = customQuery.trim().concat(" LIMIT 5");
         setCustomQuery(customQuery);
         axios.post(
           `${baseUrl}customized-reports/generate-report`,
@@ -336,9 +328,6 @@ const CustomReport = (props) => {
                                 </div>
                                 <br />
                                 <div className="row">
-                                    {/* <div className="mb-3 col-md-2">
-                                        <Button type="submit" content='Cancel' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#FF0000", color: '#fff' }} onClick={handleCancel} />
-                                    </div> */}
                                     <div className="mb-3 col-md-2">
                                         <Button type="submit" content='Analyze' icon='up arrow' labelPosition='right' style={{ backgroundColor: "#014d88", color: '#fff' }} onClick={handleAnalyze} />
                                     </div>
@@ -350,8 +339,6 @@ const CustomReport = (props) => {
                                     </div>
 
                                     <div className="mb-3 col-md-2" >
-                                        {/* <Button type="submit" content='Generate' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#008000", color: '#fff' }} onClick={handleSubmit} hidden={objValues.organisationUnitId === "" ? true : false} /> */}
-
                                         <Button type="submit" content='Generate' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#008000", color: '#fff' }} onClick={handleSubmit} />
                                     </div>
                                 </div>

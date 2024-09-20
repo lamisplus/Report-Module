@@ -68,39 +68,18 @@ const PatientLineList = (props) => {
   useEffect(() => {
     Facilities();
   }, []);
-  //Get list of WhoStaging
   const Facilities = () => {
     axios
       .get(`${baseUrl}account`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        //console.log(response.data);
         setFacilities(response.data.applicationUserOrganisationUnits);
       })
       .catch((error) => {
-        //console.log(error);
       });
   };
 
-  // const handleInputChange = (e) => {
-  //   //1980-01-01
-  //   console.log(e.target.innerText, e.target.name, e.target.name);
-  //   if (e.target.name === "organisationUnitId") {
-  //     localStorage.setItem("facility", JSON.stringify(e.target.innerText));
-  //   } else {
-  //     setObjValues({
-  //       ...objValues,
-  //       [e.target.name]: e.target.value,
-  //       organisationUnitName: e.target.innerText,
-  //     });
-  //   }
-  //   setObjValues({
-  //     ...objValues,
-  //     [e.target.name]: e.target.value,
-  //     organisationUnitName: e.target.innerText,
-  //   });
-  // };
   const handleInputChange = (e) => {
     const selectedOption = e.target.options[e.target.selectedIndex];
     const selectedValue = e.target.value;
@@ -139,7 +118,6 @@ const PatientLineList = (props) => {
       .then((response) => {
         setLoading(false); 
         const facilityName = `${objValues.organisationUnitName}` ;
-        // console.log(facilityName);
         const fileName = `${facilityName} Radet ${currentDate}`;
         const responseData = response.data;
         let blob = new Blob([responseData], {
@@ -148,7 +126,6 @@ const PatientLineList = (props) => {
 
         FileSaver.saveAs(blob, `${fileName}.xlsx`);
         toast.success("Radet Report generated successful");
-        //props.setActiveContent('recent-history')
       })
       .catch((error) => {
         setLoading(false);
@@ -202,7 +179,6 @@ const PatientLineList = (props) => {
                     id="endDate"
                     min={"1980-01-01"}
                     max={currentDate}
-                    //min={objValues.startDate}
                     value={objValues.endDate}
                     onChange={handleInputChange}
                     style={{

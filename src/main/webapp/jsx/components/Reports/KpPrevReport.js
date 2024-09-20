@@ -3,8 +3,6 @@ import axios from "axios";
 import {FormGroup, Label , CardBody,Input} from "reactstrap";
 import {makeStyles} from "@material-ui/core/styles";
 import {Card} from "@material-ui/core";
-// import {Link, useHistory, useLocation} from "react-router-dom";
-// import {TiArrowBack} from 'react-icons/ti'
 import {token, url as baseUrl } from "../../../api";
 import 'react-phone-input-2/lib/style.css'
 import { Button} from 'semantic-ui-react'
@@ -68,7 +66,6 @@ const KpPrevReport = (props) => {
     useEffect(() => {
         Facilities()
       }, []);
-    //Get list of WhoStaging
     const Facilities =()=>{
     axios
         .get(`${baseUrl}account`,
@@ -79,7 +76,6 @@ const KpPrevReport = (props) => {
             setFacilities(response.data.applicationUserOrganisationUnits);
         })
         .catch((error) => {
-        //console.log(error);
         });
     }
     const handleInputChange = (e) => {
@@ -91,11 +87,6 @@ const KpPrevReport = (props) => {
           [e.target.name]: selectedValue,
         }));
     };
-
-    // const handleInputChange = e => {
-        //1980-01-01
-    //     setObjValues ({...objValues,  [e.target.name]: e.target.value, organisationUnitName: e.target.innerText});
-    // }
 
     const handleValueChange = () => {
         setStatus(!status)
@@ -111,8 +102,6 @@ const KpPrevReport = (props) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true)
-        //console.log(token);
-
         axios.post(`${baseUrl}kp-prev-report?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,objValues.organisationUnitId,
             { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
         )
@@ -174,7 +163,6 @@ const KpPrevReport = (props) => {
                                         id="endDate"
                                         min={"1980-01-01"}
                                         max={currentDate}
-                                        //min={objValues.startDate}
                                         value={objValues.endDate}
                                         onChange={handleInputChange}
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
@@ -215,7 +203,6 @@ const KpPrevReport = (props) => {
                             <div className="row">
                             <div className="form-group mb-3 col-md-6">
                             <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={handleSubmit} 
-                            // disabled={objValues.organisationUnitId==="" ? true : false}
                             disabled={objValues.organisationUnitId === "" || loading} 
                             />
                             </div>

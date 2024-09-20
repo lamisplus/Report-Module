@@ -3,8 +3,6 @@ import axios from "axios";
 import { FormGroup, Label, CardBody,Input } from "reactstrap";
 import { makeStyles } from "@material-ui/core/styles";
 import { Card } from "@material-ui/core";
-// import {Link, useHistory, useLocation} from "react-router-dom";
-// import {TiArrowBack} from 'react-icons/ti'
 import { token, url as baseUrl } from "../../../api";
 import "react-phone-input-2/lib/style.css";
 import { Button } from "semantic-ui-react";
@@ -81,9 +79,6 @@ const TbReport = (props) => {
         });
     }
 
-    // const handleInputChange = e => {
-    //     setObjValues ({...objValues,  [e.target.name]: e.target.value, organisationUnitName: e.target.innerText});
-    // }
     const handleInputChange = (e) => {
       const selectedOption = e.target.options[e.target.selectedIndex];
       const selectedValue = e.target.value;
@@ -102,7 +97,6 @@ const TbReport = (props) => {
         } else {
           setObjValues ({...objValues,  startDate: "", endDate: currentDate});
         }
-
     }
 
   const handleSubmit = (e) => {
@@ -123,8 +117,6 @@ const TbReport = (props) => {
         });
         FileSaver.saveAs(blob, `${fileName}.xlsx`);
         toast.success(" Report generated successful");
-        //toast.success(" Save successful");
-        //props.setActiveContent('recent-history')
       })
       .catch((error) => {
         setLoading(false);
@@ -176,7 +168,6 @@ const TbReport = (props) => {
                                         id="endDate"
                                         min={"1980-01-01"}
                                         max={currentDate}
-                                        //min={objValues.startDate}
                                         value={objValues.endDate}
                                         onChange={handleInputChange}
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
@@ -223,9 +214,6 @@ const TbReport = (props) => {
                     labelPosition="right"
                     style={{ backgroundColor: "#014d88", color: "#fff" }}
                     onClick={handleSubmit}
-                    // disabled={
-                    //   objValues.organisationUnitId === "" ? true : false
-                    // }
                     disabled={objValues.organisationUnitId === "" || loading} 
                   />
                 </div>

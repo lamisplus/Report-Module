@@ -3,8 +3,6 @@ import axios from "axios";
 import {FormGroup, Label , CardBody} from "reactstrap";
 import {makeStyles} from "@material-ui/core/styles";
 import {Card} from "@material-ui/core";
-// import {Link, useHistory, useLocation} from "react-router-dom";
-// import {TiArrowBack} from 'react-icons/ti'
 import {token, url as baseUrl } from "../../../api";
 import 'react-phone-input-2/lib/style.css'
 import { Button} from 'semantic-ui-react'
@@ -77,8 +75,6 @@ const PatientLineList = (props) => {
                 let blob = new Blob([responseData], {type: "application/octet-stream"});
                 FileSaver.saveAs(blob, `${fileName}.xlsx`);
                 toast.success(" Report generated successful");
-                  //toast.success(" Save successful");
-                  //props.setActiveContent('recent-history')
 
               })
               .catch(error => {
@@ -94,9 +90,6 @@ const PatientLineList = (props) => {
             
 
     }
-    // const handleInputChange = e => {
-    //     setObjValues ({...objValues,  [e.target.name]: e.target.value, organisationUnitName: e.target.innerText});
-    // }
     const handleInputChange = (e) => {
         const selectedOption = e.target.options[e.target.selectedIndex];
         const selectedValue = e.target.value;
@@ -109,7 +102,6 @@ const PatientLineList = (props) => {
     useEffect(() => {
         Facilities()
       }, []);
-    //Get list of WhoStaging
     const Facilities =()=>{
     axios
         .get(`${baseUrl}account`,
@@ -120,7 +112,6 @@ const PatientLineList = (props) => {
             setFacilities(response.data.applicationUserOrganisationUnits);
         })
         .catch((error) => {
-        //console.log(error);
         });
     
     }

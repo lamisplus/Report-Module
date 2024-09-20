@@ -3,8 +3,6 @@ import axios from "axios";
 import {FormGroup, Label , CardBody} from "reactstrap";
 import {makeStyles} from "@material-ui/core/styles";
 import {Card} from "@material-ui/core";
-// import {Link, useHistory, useLocation} from "react-router-dom";
-// import {TiArrowBack} from 'react-icons/ti'
 import {token, url as baseUrl } from "../../../api";
 import 'react-phone-input-2/lib/style.css'
 import { Button} from 'semantic-ui-react'
@@ -67,24 +65,19 @@ const LaboratoryReport = (props) => {
     useEffect(() => {
         Facilities()
       }, []);
-    //Get list of WhoStaging
     const Facilities =()=>{
     axios
         .get(`${baseUrl}account`,
             { headers: {"Authorization" : `Bearer ${token}`} }
         )
         .then((response) => {
-            //console.log(response.data);
             setFacilities(response.data.applicationUserOrganisationUnits);
         })
         .catch((error) => {
-        //console.log(error);
         });
     
     }
-    // const handleInputChange = e => {
-    //     setObjValues ({...objValues,  [e.target.name]: e.target.value, organisationUnitName: e.target.innerText});
-    // }
+
     const handleInputChange = (e) => {
         const selectedOption = e.target.options[e.target.selectedIndex];
         const selectedValue = e.target.value;
@@ -107,8 +100,6 @@ const LaboratoryReport = (props) => {
                 const responseData = response.data
                 let blob = new Blob([responseData], {type: "application/octet-stream"});
                 FileSaver.saveAs(blob, `${fileName}.xlsx`);
-                  //toast.success(" Save successful");
-                  //props.setActiveContent('recent-history')
 
               })
               .catch(error => {
@@ -121,8 +112,6 @@ const LaboratoryReport = (props) => {
                     toast.error("Something went wrong. Please try again...");
                   }
               });
-            
-
     }
     
 
@@ -131,7 +120,6 @@ const LaboratoryReport = (props) => {
             
             <Card >
                 <CardBody>
-    
                 <h2 style={{color:'#000'}}>LABORATORY REPORT</h2>
                 <br/>
                     < >

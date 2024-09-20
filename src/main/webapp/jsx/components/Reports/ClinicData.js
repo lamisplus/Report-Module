@@ -3,8 +3,6 @@ import axios from "axios";
 import { FormGroup, Label, CardBody } from "reactstrap";
 import { makeStyles } from "@material-ui/core/styles";
 import { Card } from "@material-ui/core";
-// import {Link, useHistory, useLocation} from "react-router-dom";
-// import {TiArrowBack} from 'react-icons/ti'
 import { token, url as baseUrl } from "../../../api";
 import "react-phone-input-2/lib/style.css";
 import { Button } from "semantic-ui-react";
@@ -68,7 +66,6 @@ const ClinicData = (props) => {
   useEffect(() => {
     Facilities();
   }, []);
-  //Get list of WhoStaging
   const Facilities = () => {
     axios
       .get(`${baseUrl}account`, {
@@ -79,18 +76,9 @@ const ClinicData = (props) => {
         setFacilities(response.data.applicationUserOrganisationUnits);
       })
       .catch((error) => {
-        //console.log(error);
       });
   };
 
-  // const handleInputChange = (e) => {
-    //1980-01-01
-  //   setObjValues({
-  //     ...objValues,
-  //     [e.target.name]: e.target.value,
-  //     organisationUnitName: e.target.innerText,
-  //   });
-  // };
   const handleInputChange = (e) => {
     const selectedOption = e.target.options[e.target.selectedIndex];
     const selectedValue = e.target.value;
@@ -118,7 +106,6 @@ const ClinicData = (props) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
-    //console.log(token);
 
     axios
       .get(`${baseUrl}reporting/clinic-data/${objValues.organisationUnitId}`, {
@@ -160,53 +147,6 @@ const ClinicData = (props) => {
           <br />
           <>
             <div className="row">
-              {/* <div className="form-group  col-md-6">
-                <FormGroup>
-                  <Label>From *</Label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    name="startDate"
-                    id="startDate"
-                    min={"1980-01-01"}
-                    max={currentDate}
-                    value={objValues.startDate}
-                    onChange={handleInputChange}
-                    style={{
-                      border: "1px solid #014D88",
-                      borderRadius: "0.2rem",
-                    }}
-                  />
-                </FormGroup>
-              </div>
-              <div className="form-group  col-md-6">
-                <FormGroup>
-                  <Label>To *</Label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    name="endDate"
-                    id="endDate"
-                    min={"1980-01-01"}
-                    max={currentDate}
-                    //min={objValues.startDate}
-                    value={objValues.endDate}
-                    onChange={handleInputChange}
-                    style={{
-                      border: "1px solid #014D88",
-                      borderRadius: "0.2rem",
-                    }}
-                  />
-                </FormGroup>
-              </div>
-              <div className="form-group  col-md-6">
-                <FormGroup check>
-                  <Label check>
-                    <Input type="checkbox" onChange={handleValueChange} />{" "}
-                    &nbsp;&nbsp;<span> As at Today.</span>
-                  </Label>
-                </FormGroup>
-              </div> */}
               <div className="form-group  col-md-6">
                 <FormGroup>
                   <Label>Facility*</Label>
@@ -230,7 +170,6 @@ const ClinicData = (props) => {
                   </select>
                 </FormGroup>
               </div>
-
               <br />
               <div className="row">
                 <div className="form-group mb-3 col-md-6">
@@ -241,14 +180,10 @@ const ClinicData = (props) => {
                     labelPosition="right"
                     style={{ backgroundColor: "#014d88", color: "#fff" }}
                     onClick={handleSubmit}
-                    // disabled={
-                    //   objValues.organisationUnitId === "" ? true : false
-                    // }
                     disabled={objValues.organisationUnitId === "" || loading} 
                   />
                 </div>
               </div>
-
               {loading && (
                 <Message icon>
                                   <Message.Content>

@@ -66,7 +66,6 @@ const HTSIndexReport = (props) => {
     useEffect(() => {
         Facilities()
       }, []);
-    //Get list of WhoStaging
     const Facilities =()=>{
     axios
         .get(`${baseUrl}account`,
@@ -77,14 +76,9 @@ const HTSIndexReport = (props) => {
             setFacilities(response.data.applicationUserOrganisationUnits);
         })
         .catch((error) => {
-        //console.log(error);
         });
     }
 
-    // const handleInputChange = e => {
-        //1980-01-01
-    //     setObjValues ({...objValues,  [e.target.name]: e.target.value, organisationUnitName: e.target.innerText});
-    // }
     const handleInputChange = (e) => {
         const selectedOption = e.target.options[e.target.selectedIndex];
         const selectedValue = e.target.value;
@@ -109,7 +103,6 @@ const HTSIndexReport = (props) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true)
-        //console.log(token);
 
         axios.post(`${baseUrl}family-index-report?facilityId=${objValues.organisationUnitId}`,objValues.organisationUnitId,
             { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
@@ -213,7 +206,6 @@ const HTSIndexReport = (props) => {
                             <div className="row">
                             <div className="form-group mb-3 col-md-6">
                             <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={handleSubmit} 
-                            // disabled={objValues.organisationUnitId==="" ? true : false}
                             disabled={objValues.organisationUnitId === "" || loading} 
                             />
                             </div>
