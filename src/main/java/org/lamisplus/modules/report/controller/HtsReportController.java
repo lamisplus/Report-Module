@@ -2,7 +2,6 @@ package org.lamisplus.modules.report.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.report.service.Constants;
@@ -36,13 +35,11 @@ public class HtsReportController {
 							@RequestParam("endDate") LocalDate end) throws IOException {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting HTS report");
 
-		//messagingTemplate.convertAndSend("/topic/hts", "start");
 
 		ByteArrayOutputStream baos = generateExcelService.generateHts(facility, start, end);
 
 		setStream(baos, response);
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating HTS report");
-		//messagingTemplate.convertAndSend("/topic/hts", "end");
 	}
 
 	private void setStream(ByteArrayOutputStream baos, HttpServletResponse response) throws IOException {

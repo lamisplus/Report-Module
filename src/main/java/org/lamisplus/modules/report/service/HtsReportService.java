@@ -2,7 +2,6 @@ package org.lamisplus.modules.report.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.lamisplus.modules.report.domain.FamilyIndexReportDtoProjection;
 import org.lamisplus.modules.report.domain.HtsReportDto;
 import org.lamisplus.modules.report.repository.ReportRepository;
 import org.lamisplus.modules.report.utility.DateUtil;
