@@ -48,7 +48,7 @@ public class TBReportQuery {
             "               ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY visit_date DESC) AS rowNums \n" +
             "            from hiv_art_clinical h \n" +
             "            join base_application_codeset b on b.id = cast(h.tb_screen->>'tbStatusId' as bigint) \n" +
-            "            where h.archived = 0 and h.visit_date between ?2 and ?3 and facility_id = ?1 AND h.tb_status != ''\n" +
+            "            where h.archived = 0 and h.visit_date between ?2 and ?3 and facility_id = ?1 AND h.tb_screen->>'tbStatusId' != '' AND h.tb_screen->>'tbStatusId' IS NOT NULL\n" +
             "        ) \n" +
             "        select * from h where rowNums = 1 \n" +
             "    ) \n" +
