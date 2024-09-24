@@ -5,8 +5,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
-import org.lamisplus.modules.hiv.repositories.ArtPharmacyRepository;
-import org.lamisplus.modules.hiv.repositories.HIVEacRepository;
 
 import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.report.config.Application;
@@ -288,21 +286,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		return null;
 	}
 
-	/*@Override
-	public ByteArrayOutputStream generatePrep(Long facilityId, LocalDate start, LocalDate end) {
-		LOG.info("Start generating prep for facility:" + getFacilityName(facilityId));
-		try {
-			List<PrepReportDto> prepReport = prepReportService.getPrepReport(facilityId, start, end);
-			LOG.error("Prep Size: {}", prepReport.size());
-			List<Map<Integer, Object>> data = excelDataHelper.fillPrepDataMapper(prepReport);
-			return excelService.generate(Constants.PREP_SHEET, data, Constants.PrEP_HEADER);
-		} catch (Exception e) {
-			LOG.error("Error Occurred when generating HTS !!!");
-			e.printStackTrace();
-		}
-		LOG.info("End generate patient HTS");
-		return null;
-	}*/
+
 
 	@Override
 	public ByteArrayOutputStream generatePrep(Long facilityId, LocalDate start, LocalDate end) {

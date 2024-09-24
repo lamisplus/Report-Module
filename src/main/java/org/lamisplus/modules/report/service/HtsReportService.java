@@ -22,8 +22,4 @@ public class HtsReportService {
         return reportRepository.getHtsReport(facilityId, start, dateUtil.datePadding(end));
     }
 
-//    public List<FamilyIndexReportDtoProjection> getFamilyIndexReport (Long facilityId){
-//
-//        return reportRepository.getFamilyIndexReport(facilityId);
-//    }
 }
