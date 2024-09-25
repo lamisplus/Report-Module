@@ -80,13 +80,15 @@ const NcdReport = (props) => {
     }
 
     const handleInputChange = (e) => {
-        const selectedOption = e.target.options[e.target.selectedIndex];
-        const selectedValue = e.target.value;
-        objValues.organisationUnitName = selectedOption.innerText;
-        setObjValues(prevValues => ({
+      const selectedOption = e.target.options ? e.target.options[e.target.selectedIndex] : null;
+      const selectedValue = e.target.value;
+      const name = e.target.name;
+    
+      setObjValues(prevValues => ({
           ...prevValues,
-          [e.target.name]: selectedValue,
-        }));
+          [name]: selectedValue,
+          organisationUnitName: name === "organisationUnitId" && selectedOption ? selectedOption.innerText : prevValues.organisationUnitName,
+      }));
     };
 
     const handleValueChange = () => {

@@ -78,14 +78,17 @@ const PharmacyReport = (props) => {
     
     }
     const handleInputChange = (e) => {
-        const selectedOption = e.target.options[e.target.selectedIndex];
+        const selectedOption = e.target.options ? e.target.options[e.target.selectedIndex] : null;
         const selectedValue = e.target.value;
-        objValues.organisationUnitName = selectedOption.innerText;
+        const name = e.target.name;
+      
         setObjValues(prevValues => ({
-          ...prevValues,
-          [e.target.name]: selectedValue,
+            ...prevValues,
+            [name]: selectedValue,
+            organisationUnitName: name === "organisationUnitId" && selectedOption ? selectedOption.innerText : prevValues.organisationUnitName,
         }));
-    };
+      };
+      
     const handleSubmit = (e) => {        
         e.preventDefault();
         setLoading(true)
