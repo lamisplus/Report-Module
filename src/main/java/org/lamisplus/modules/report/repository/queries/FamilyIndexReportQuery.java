@@ -35,7 +35,7 @@ public class FamilyIndexReportQuery {
             "\t\t'' AS modeOfNotification,\n" +
             "\t\thft.known_hiv_positive AS elicitedClientKnownPositive, \n" +
             "        hft.date_visit AS dateOfElicitation, \n" +
-            "        h.unique_id AS elicitedClientUniqueId, \n" +
+            "        '' AS elicitedClientUniqueId, \n" +
             "        hft.date_enrolled_in_ovc AS dateEnrolledInOvc, \n" +
             "        hft.ovc_id AS ovcId\n" +
             "    FROM hts_family_index hfi\n" +
@@ -44,7 +44,7 @@ public class FamilyIndexReportQuery {
             "\tLEFT JOIN hts_risk_stratification hts_rst ON hts.risk_stratification_code = hts_rst.code\n" +
             "    JOIN hts_family_index_testing_tracker hft ON hft.family_index_uuid = hfi.uuid\n" +
             "    JOIN patient_person p ON p.uuid = hts.person_uuid\n" +
-            "    JOIN hiv_enrollment h ON h.person_uuid = p.uuid\n" +
+            "    --JOIN hiv_enrollment h ON h.person_uuid = p.uuid\n" +
             "    LEFT JOIN base_organisation_unit facility ON facility.id = p.facility_id\n" +
             "    LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id\n" +
             "    LEFT JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id\n" +
@@ -72,16 +72,16 @@ public class FamilyIndexReportQuery {
             "        fhts.recency_testing AS recencyTesting, \n" +
             "        pns.accepted_pns AS acceptedTesting, \n" +
             "\t\t(select display from base_application_codeset where code = hts_rst.entry_point) AS entryPoint,\n" +
-            "        CAST(pns.hts_client_information->>'partnerAge' AS INTEGER) AS elicitedAge,\n" +
+            "        CASE WHEN pns.hts_client_information->>'partnerAge' ~ '^[0-9]+$' THEN CAST(pns.hts_client_information->>'partnerAge' AS INTEGER) ELSE 0 END AS elicitedAge,\n" +
             "        pns.hts_client_information->>'partnerName' AS elicitedClientName, \n" +
-            "        (select display from base_application_codeset where id = CAST(pns.hts_client_information->>'partnerSex' AS INTEGER)) AS elicitedClientSex, \n" +
+            "        (select display from base_application_codeset where id = CASE WHEN pns.hts_client_information->>'partnerSex' ~ '^[0-9]+$' THEN CAST(pns.hts_client_information->>'partnerSex' AS INTEGER) ELSE 0 END) AS elicitedClientSex, \n" +
             "        pns.hts_client_information->>'partnerAddress' AS elicitedClientAddress, \n" +
             "        pns.contact_tracing->>'partnerPhoneNumber' AS elicitedClientPhoneNumber,\n" +
             "        pns.date_partner_tested AS elicitedClientTestedHiv, \n" +
             "        pns.hiv_test_result AS elicitedClientHivResult, \n" +
             "        pns.date_enrollment_on_art AS elicitedClientDateEnrolled,\n" +
-            "        (select display from base_application_codeset where id = CAST(pns.hts_client_information->>'relativeToIndexClient' AS INTEGER)) AS relationshipWithIndex,\n" +
-            "        (select display from base_application_codeset where id = CAST(pns.notification_method AS INTEGER)) AS modeOfNotification, \n" +
+            "        (select display from base_application_codeset where id = CASE WHEN pns.hts_client_information->>'relativeToIndexClient' ~ '^[0-9]+$' THEN CAST(pns.hts_client_information->>'relativeToIndexClient' AS INTEGER) ELSE 0 END) AS relationshipWithIndex,\n" +
+            "        (select display from base_application_codeset where id = CASE WHEN pns.notification_method ~ '^[0-9]+$' THEN CAST(pns.notification_method AS INTEGER) ELSE 0 END ) AS modeOfNotification, \n" +
             "        pns.known_hiv_positive AS elicitedClientKnownPositive, \n" +
             "\t\tCAST (null AS DATE) AS dateOfElicitation,\n" +
             "        '' AS elicitedClientUniqueId,\n" +
@@ -92,12 +92,12 @@ public class FamilyIndexReportQuery {
             "    JOIN hts_client hts ON hts.uuid = pns.hts_client_uuid\n" +
             "    JOIN patient_person p ON p.uuid = hts.person_uuid\n" +
             "\tLEFT JOIN hts_risk_stratification hts_rst ON hts.risk_stratification_code = hts_rst.code\n" +
-            "    JOIN hiv_enrollment h ON h.person_uuid = p.uuid\n" +
+            "   -- JOIN hiv_enrollment h ON h.person_uuid = p.uuid\n" +
             "    LEFT JOIN base_organisation_unit facility ON facility.id = pns.facility_id\n" +
             "    LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id\n" +
             "    LEFT JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id\n" +
             "    LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id = pns.facility_id AND boui.name = 'DATIM_ID'\n" +
-            "\tWHERE h.archived = 0 AND pns.archived = 0\n" +
+            "\tWHERE pns.archived = 0 AND pns.hts_client_information->>'partnerAge' != '' AND pns.hts_client_information->>'partnerSex' !=''\n" +
             ")\n" +
             "SELECT * FROM (\n" +
             "SELECT * FROM familyIndex\n" +
