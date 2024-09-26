@@ -21,4 +21,5 @@ public class HtsReportService {
 
         return reportRepository.getHtsReport(facilityId, start, dateUtil.datePadding(end));
     }
+
 }

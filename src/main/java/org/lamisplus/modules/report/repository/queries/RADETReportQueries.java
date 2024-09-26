@@ -43,7 +43,7 @@ public class RADETReportQueries {
             "AND hac.visit_date < ?3\n" +
             "),\n" +
             "patient_lga as (select DISTINCT ON (personUuid) personUuid as personUuid11, \n" +
-            "case when (addr ~ '^[0-9\\\\\\\\.]+$') =TRUE \n" +
+            "case when (addr ~ '^[0-9\\\\\\\\\\\\\\\\.]+$') =TRUE \n" +
             " then (select name from base_organisation_unit where id = cast(addr as int)) ELSE\n" +
             "(select name from base_organisation_unit where id = cast(facilityLga as int)) end as lgaOfResidence \n" +
             "from (\n" +
@@ -94,7 +94,8 @@ public class RADETReportQueries {
             "     INNER JOIN hiv_enrollment he ON he.person_uuid = hac.person_uuid\n" +
             "     LEFT JOIN base_application_codeset bac ON bac.id = hac.clinical_stage_id\n" +
             "     LEFT JOIN base_application_codeset preg ON preg.code = hac.pregnancy_status\n" +
-            "     LEFT JOIN base_application_codeset tbs ON tbs.id = CAST(hac.tb_status AS INTEGER)\n" +
+//            "     LEFT JOIN base_application_codeset tbs ON tbs.id = CAST(hac.tb_status AS INTEGER)\n" +
+            "    LEFT JOIN base_application_codeset tbs ON tbs.id = CASE WHEN hac.tb_status ~ '^[0-9]+$' THEN CAST(hac.tb_status AS INTEGER) ELSE 0 END\n  " +
             "         WHERE\n" +
             "           hac.archived = 0\n" +
             "           AND he.archived = 0\n" +
@@ -270,7 +271,7 @@ public class RADETReportQueries {
             "FROM public.laboratory_sample  sm\n" +
             "         INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
             "         INNER JOIN  laboratory_labtest llt on llt.id = lt.lab_test_id\n" +
-            "WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58)\n" +
+            "WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73)\n" +
             "        AND sm.archived = 0\n" +
             "        AND sm. date_sample_collected <= ?3\n" +
             "        AND sm.facility_id = ?1\n" +
@@ -287,6 +288,7 @@ public class RADETReportQueries {
             "           MAX(CASE WHEN lab_test_id = 72 THEN tbDiagnosticResult END),\n" +
             "           MAX(CASE WHEN lab_test_id = 71 THEN tbDiagnosticResult END),\n" +
             "           MAX(CASE WHEN lab_test_id = 86 THEN tbDiagnosticResult END),\n" +
+            "           MAX(CASE WHEN lab_test_id = 73 THEN tbDiagnosticResult END),\n" +
             "           MAX(CASE WHEN lab_test_id = 68 THEN tbDiagnosticResult END)\n" +
             "       ) as tbDiagnosticResult ,\n" +
             "   coalesce(\n" +
@@ -297,6 +299,7 @@ public class RADETReportQueries {
             "           MAX(CASE WHEN lab_test_id = 72 THEN 'TrueNAT' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 71 THEN 'LF-LAM' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 86 THEN 'Cobas' END) ,\n" +
+            "           MAX(CASE WHEN lab_test_id = 73 THEN 'TB LAMP' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 58 THEN 'TB-LAM' END)\n" +
             "       ) as tbDiagnosticTestType\n" +
             "\n" +
@@ -306,7 +309,7 @@ public class RADETReportQueries {
             " lt.lab_test_id\n" +
             "     FROM laboratory_result  sm\n" +
             "  INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
-            "     WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58) and sm.archived = 0\n" +
+            "     WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73) and sm.archived = 0\n" +
             "       AND sm.date_result_reported is not null\n" +
             "       AND sm.facility_id = ?1\n" +
             "       AND sm.date_result_reported <= ?3\n" +
@@ -317,7 +320,7 @@ public class RADETReportQueries {
             "   where rnk = 1\n" +
             "     ),\n" +
             "     tbTreatment AS (\n" +
-            "\t\tSELECT * FROM (SELECT\n" +
+            "SELECT * FROM (SELECT\n" +
             "        COALESCE(NULLIF(CAST(data->'tbIptScreening'->>'treatementType' AS text), ''), '') as tbTreatementType,\n" +
             "        NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'tbTreatmentStartDate', '') AS DATE), NULL)as tbTreatmentStartDate,\n" +
             "        CAST(data->'tbIptScreening'->>'treatmentOutcome' AS text) as tbTreatmentOutcome,\n" +
@@ -328,31 +331,32 @@ public class RADETReportQueries {
             "          AND facility_id = ?1 and archived = 0\n" +
             "   ) tbTreatment WHERE row_number = 1\n" +
             "       AND tbTreatmentStartDate IS NOT NULL),\n" +
-            "\t   \n" +
+            "   \n" +
             "    tbTreatmentNew AS (\n" +
-            "\tWITH tb_start AS (\n" +
+            "WITH tb_start AS (\n" +
+            "\tSELECT * FROM (\n" +
             "    SELECT\n" +
             "        person_uuid AS person_uuid,\n" +
-            "\t    date_of_observation as screeningDate,\n" +
-            "        NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'tbTreatmentStartDate' , '') AS DATE), NULL) AS tbTreatmentStartDate,\n" +
+            "    date_of_observation as screeningDate,\n" +
+            "        NULLIF(CAST(NULLIF(data->'tptMonitoring'->>'tbTreatmentStartDate' , '') AS DATE), NULL) AS tbTreatmentStartDate,\n" +
             "        data->'tbIptScreening'->>'tbTestResult' AS tbDiagnosticResult,\n" +
-            "\t    data->'tbIptScreening'->>'chestXrayResult' as chestXrayResult,\n" +
+            "    data->'tbIptScreening'->>'chestXrayResult' as chestXrayResult,\n" +
             "        data->'tbIptScreening'->>'diagnosticTestType' AS tbDiagnosticTestType,\n" +
-            "\t    COALESCE(NULLIF(data->'tptMonitoring'->>'tbType',''), NULLIF(data->'tbIptScreening'->>'tbType','')) AS tbTreatmentType,\n" +
-            "\t    NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'dateSpecimenSent', '') AS DATE), NULL) AS specimenSentDate,\n" +
-            "\t    data->'tbIptScreening'->>'status' as screeningStatus,\n" +
-            "\t    data->'tbIptScreening'->>'dateOfDiagnosticTest' as dateOfDiagnosticTest, \n" +
-            "        data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType\n" +
+            "    COALESCE(NULLIF(data->'tptMonitoring'->>'tbType',''), NULLIF(data->'tbIptScreening'->>'tbType','')) AS tbTreatmentType,\n" +
+            "    NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'dateSpecimenSent', '') AS DATE), NULL) AS specimenSentDate,\n" +
+            "    data->'tbIptScreening'->>'status' as screeningStatus,\n" +
+            "    data->'tbIptScreening'->>'dateOfDiagnosticTest' as dateOfDiagnosticTest, \n" +
+            "        data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) as rnk3\n" +
             "    FROM\n" +
             "        hiv_observation\n" +
             "    WHERE archived = 0 AND\n" +
             "        (\n" +
-            "\t\t\t(data->'tbIptScreening'->>'status' = 'Presumptive TB and referred for evaluation' \n" +
-            "\t\t\t or data->'tbIptScreening'->>'status' = 'No signs or symptoms of TB')\n" +
-            "\t\t\tand\n" +
-            "        \t(data->'tbIptScreening'->>'outcome' = 'Presumptive TB' or data->'tbIptScreening'->>'outcome'='Not Presumptive' )\n" +
-            "\t\t)\n" +
-            "),\n" +
+            "(data->'tbIptScreening'->>'status' = 'Presumptive TB and referred for evaluation' \n" +
+            " or data->'tbIptScreening'->>'status' = 'No signs or symptoms of TB')\n" +
+            "and\n" +
+            "        (data->'tbIptScreening'->>'outcome' = 'Presumptive TB' or data->'tbIptScreening'->>'outcome'='Not Presumptive' )\n" +
+            ")\n" +
+            ")  subTc WHERE rnk3 = 1 ),\n" +
             "tb_completion AS (\n" +
             "    SELECT\n" +
             "        person_uuid AS person_uuid,\n" +
@@ -363,7 +367,7 @@ public class RADETReportQueries {
             "    WHERE\n" +
             "        (data->'tbIptScreening'->>'completionDate' IS NOT NULL AND data->'tbIptScreening'->>'completionDate' != '') AND\n" +
             "        (data->'tbIptScreening'->>'treatmentOutcome' IS NOT NULL AND data->'tbIptScreening'->>'treatmentOutcome' != '')\n" +
-            "\t    AND archived =0\n" +
+            "    AND archived =0\n" +
             ")\n" +
             "\n" +
             "SELECT\n" +
@@ -372,11 +376,11 @@ public class RADETReportQueries {
             "    COALESCE(ts.tbDiagnosticResult,ts.chestXrayResult) as tbDiagnosticResult,\n" +
             "    ts.tbDiagnosticTestType,\n" +
             "    ts.tbScreeningType,\n" +
-            "\tts.screeningStatus,\n" +
-            "\tts.tbTreatmentType,\n" +
-            "\tts.screeningDate,\n" +
-            "\tts.specimenSentDate,\n" +
-            "\tdateOfDiagnosticTest,\n" +
+            "ts.screeningStatus,\n" +
+            "ts.tbTreatmentType,\n" +
+            "ts.screeningDate,\n" +
+            "ts.specimenSentDate,\n" +
+            "dateOfDiagnosticTest,\n" +
             "    tc.completionDate,\n" +
             "    tc.treatmentOutcome\n" +
             "FROM\n" +
@@ -385,7 +389,7 @@ public class RADETReportQueries {
             "    tb_completion tc\n" +
             "ON\n" +
             "    ts.person_uuid = tc.person_uuid  order by screeningDate desc\n" +
-            "\t),\n" +
+            "),\n" +
             "     pharmacy_details_regimen AS (\n" +
             "         select * from (\n" +
             "   select *, ROW_NUMBER() OVER (PARTITION BY pr1.person_uuid40 ORDER BY pr1.lastPickupDate DESC) as rnk3\n" +
@@ -488,7 +492,7 @@ public class RADETReportQueries {
             "      ROW_NUMBER() OVER (PARTITION BY d.person_uuid ORDER BY d.date_devolved DESC ) AS row from dsd_devolvement d \n" +
             "   left join base_application_codeset bmt on bmt.code = d.dsd_type \n" +
             "where d.archived = 0 and d.date_devolved between ?2 and ?3) d2 \n" +
-            "join base_application_codeset bac on bac.code = d2.dsdOutlet where d2.row = 1 \n" +
+            "left join base_application_codeset bac on bac.code = d2.dsdOutlet where d2.row = 1 \n" +
             "), \n" +
             "biometric AS (\n" +
             "           SELECT \n" +
@@ -515,20 +519,20 @@ public class RADETReportQueries {
             "                  b.person_uuid\n" +
             "              ) biometric_count ON biometric_count.person_uuid = he.person_uuid \n" +
             "              LEFT JOIN (\n" +
-            "\t\t\t\tSELECT b.person_uuid, max_capture.max_capture_date AS recapture_date, b.recapture,\n" +
-            "\t\t\t\t CASE WHEN COUNT(b.person_uuid) > 10 THEN 10 ELSE COUNT(b.person_uuid) END\n" +
-            "\t\t\t\tFROM biometric b\n" +
-            "\t\t\t\tLEFT JOIN (select person_uuid,max(enrollment_date) max_capture_date from biometric group by person_uuid) max_capture\n" +
-            "\t\t\t\tON b.person_uuid=max_capture.person_uuid\n" +
-            "\t\t\t\twhere b.enrollment_date=max_capture.max_capture_date AND b.archived=0 AND b.recapture !=0 and b.recapture is NOT null --AND b.PERSON_UUID = '00736316-43f0-4bf7-a0a8-878853178c75' \n" +
-            "\t\t\t\tgroup by 1,2,3\n" +
-            "\t\t\t\torder by b.person_uuid\n" +
+            "SELECT b.person_uuid, max_capture.max_capture_date AS recapture_date, b.recapture,\n" +
+            " CASE WHEN COUNT(b.person_uuid) > 10 THEN 10 ELSE COUNT(b.person_uuid) END\n" +
+            "FROM biometric b\n" +
+            "LEFT JOIN (select person_uuid,max(enrollment_date) max_capture_date from biometric group by person_uuid) max_capture\n" +
+            "ON b.person_uuid=max_capture.person_uuid\n" +
+            "where b.enrollment_date=max_capture.max_capture_date AND b.archived=0 AND b.recapture !=0 and b.recapture is NOT null \n" +
+            "group by 1,2,3\n" +
+            "order by b.person_uuid\n" +
             "              ) recapture_count ON recapture_count.person_uuid = he.person_uuid \n" +
             "              LEFT JOIN (\n" +
             "            \n" +
             "            SELECT DISTINCT ON (person_id) person_id, biometric_status,\n" +
             "            MAX(status_date) OVER (PARTITION BY person_id ORDER BY status_date DESC) AS status_date \n" +
-            "\t\t\tFROM hiv_status_tracker \n" +
+            "FROM hiv_status_tracker \n" +
             "            WHERE archived=0 AND facility_id=?1\n" +
             "            \n" +
             "              ) bst ON bst.person_id = he.person_uuid \n" +
@@ -615,19 +619,19 @@ public class RADETReportQueries {
             " regiment_table.max_visit_date,\n" +
             " start_or_regimen\n" +
             "     ),\n" +
-            "\t \n" +
-            "\t \n" +
-            "\t \n" +
+            " \n" +
+            " \n" +
+            " \n" +
             "iptNew AS (\n" +
-           "WITH tpt_completed AS (\n" +
-            "\tSELECT * FROM (\n" +
+            "           WITH tpt_completed AS (\n" +
+            "SELECT * FROM (\n" +
             "    SELECT\n" +
             "        person_uuid AS person_uuid,\n" +
             "        data->'tptMonitoring'->>'endedTpt' AS endedTpt,\n" +
             "        NULLIF(CAST(NULLIF(data->'tptMonitoring'->>'dateTptEnded', '') AS DATE), NULL) AS tptCompletionDate,\n" +
             "        data->'tptMonitoring'->>'outComeOfIpt' AS tptCompletionStatus,\n" +
             "        data->'tbIptScreening'->>'outcome' AS completion_tptPreventionOutcome, \n" +
-            "\t \tROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY date_of_observation  DESC) rowNum\n" +
+            " ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY date_of_observation  DESC) rowNum\n" +
             "    FROM\n" +
             "        hiv_observation\n" +
             "    WHERE\n" +
@@ -635,11 +639,11 @@ public class RADETReportQueries {
             "        data->'tptMonitoring'->>'dateTptEnded' IS NOT NULL AND\n" +
             "        data->'tptMonitoring'->>'dateTptEnded' != ''\n" +
             "        AND archived = 0\n" +
-            "\t\t) subTc WHERE rowNum = 1\n" +
-            "),"+
+            ") subTc WHERE rowNum = 1\n" +
+            "),\n" +
             "pt_screened AS (\n" +
             "    SELECT\n" +
-            "        person_uuid AS person_uuid,  -- Use person_uuid to uniquely identify each record\n" +
+            "        person_uuid AS person_uuid, \n" +
             "        data->'tptMonitoring'->>'tptRegimen' AS tptType,\n" +
             "        NULLIF(CAST(NULLIF(data->'tptMonitoring'->>'dateTptStarted', '') AS DATE), NULL) AS tptStartDate,\n" +
             "        data->'tptMonitoring'->>'eligibilityTpt' AS eligibilityTpt\n" +
@@ -652,9 +656,9 @@ public class RADETReportQueries {
             "        AND data->'tbIptScreening'->>'outcome' != 'Currently on TPT')\n" +
             ")\n" +
             "SELECT\n" +
-            "    COALESCE(tc.person_uuid, ts.person_uuid) AS person_uuid,  -- Use COALESCE to get the person_uuid from either table\n" +
+            "    COALESCE(tc.person_uuid, ts.person_uuid) AS person_uuid,\n" +
             "    ts.tptType,\n" +
-            "\tts.tptStartDate,\n" +
+            "ts.tptStartDate,\n" +
             "    ts.eligibilityTpt,\n" +
             "    tc.endedTpt,\n" +
             "    tc.tptCompletionDate,\n" +
@@ -665,7 +669,7 @@ public class RADETReportQueries {
             "    tpt_completed tc\n" +
             "ON\n" +
             "    ts.person_uuid = tc.person_uuid\n" +
-            "),\t \n" +
+            "), \n" +
             "ipt as ( \n" +
             "    with ipt_c as ( \n" +
             "SELECT person_uuid, date_completed AS iptCompletionDate, iptCompletionStatus FROM \n" +
@@ -905,7 +909,7 @@ public class RADETReportQueries {
             "        (\n" +
             "CASE\n" +
             "    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%' THEN 'Died'\n" +
-            "    WHEN( stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %'))\n" +
+            "    WHEN( stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' OR stat.hiv_status ILIKE '%ART Transfer In%'))\n" +
             "        THEN stat.hiv_status\n" +
             "    ELSE pharmacy.status\n" +
             "    END\n" +
@@ -913,7 +917,7 @@ public class RADETReportQueries {
             "        (\n" +
             "CASE\n" +
             "    WHEN stat.hiv_status ILIKE '%DEATH%' OR stat.hiv_status ILIKE '%Died%'  THEN stat.status_date\n" +
-            "    WHEN(stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %')) THEN stat.status_date\n" +
+            "    WHEN(stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' OR stat.hiv_status ILIKE '%ART Transfer In%')) THEN stat.status_date\n" +
             "    ELSE pharmacy.visit_date\n" +
             "    END\n" +
             ") AS status_date,\n" +
@@ -1076,18 +1080,18 @@ public class RADETReportQueries {
             "           e.*,\n" +
             "           ca.dateOfCurrentRegimen,\n" +
             "           ca.person_uuid70,\n" +
-            "           COALESCE(CAST (iptN.tptStartDate AS DATE), ipt.dateOfIptStart) AS dateOfIptStart,\n" +
+            "           ipt.dateOfIptStart AS dateOfIptStart,\n" +
             "           COALESCE(CAST (iptN.tptCompletionDate AS DATE), ipt.iptCompletionDate) AS iptCompletionDate, \n" +
             "           COALESCE(iptN.tptCompletionStatus, ipt.iptCompletionStatus) AS iptCompletionStatus,\n" +
-            "           COALESCE(iptN.tptType, ipt.iptType) AS iptType,\n" +
+            "           ipt.iptType AS iptType,\n" +
             "           cc.*,\n" +
             "           dsd1.*, dsd2.*,  \n" +
             "           ov.*,\n" +
-            "\t\t   COALESCE(tbTmentNew.tbTreatmentType, tbTment.tbTreatementType) AS tbTreatementType,\n" +
-            "\t\t   COALESCE(tbTmentNew.tbTreatmentStartDate, tbTment.tbTreatmentStartDate) AS tbTreatmentStartDate,\n" +
-            "\t\t   COALESCE(tbTmentNew.treatmentOutcome, tbTment.tbTreatmentOutcome) AS tbTreatmentOutcome,\n" +
-            "\t\t   COALESCE(tbTmentNew.completionDate, tbTment.tbCompletionDate) AS tbCompletionDate,\n" +
-            "\t\t   COALESCE(tbTmentNew.person_uuid_tb, tbTment.tbTreatmentPersonUuid) AS tbTreatmentPersonUuid,\n" +
+            "   COALESCE(tbTmentNew.tbTreatmentType, tbTment.tbTreatementType) AS tbTreatementType,\n" +
+            "   COALESCE(tbTmentNew.tbTreatmentStartDate, tbTment.tbTreatmentStartDate) AS tbTreatmentStartDate,\n" +
+            "   COALESCE(tbTmentNew.treatmentOutcome, tbTment.tbTreatmentOutcome) AS tbTreatmentOutcome,\n" +
+            "   COALESCE(tbTmentNew.completionDate, tbTment.tbCompletionDate) AS tbCompletionDate,\n" +
+            "   COALESCE(tbTmentNew.person_uuid_tb, tbTment.tbTreatmentPersonUuid) AS tbTreatmentPersonUuid,\n" +
             "           tbSample.*,\n" +
             "           tbResult.*,\n" +
             "           tbS.*,\n" +
@@ -1129,6 +1133,8 @@ public class RADETReportQueries {
             "   ) AS DATE)AS previousStatusDate,\n" +
             "           (\n" +
             "   CASE\n" +
+            "       WHEN ct.status ILIKE '%ACTIVE%' THEN 'Active'"+
+            "       WHEN ct.status ILIKE '%ART Transfer In%' THEN ''" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN 'Died'\n" +
             "       WHEN prepre.status ILIKE '%out%' THEN 'Transferred Out'\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN 'Died'\n" +
@@ -1148,6 +1154,8 @@ public class RADETReportQueries {
             "   ) AS currentStatus,\n" +
             "           CAST((\n" +
             "   CASE\n" +
+            "       WHEN ct.status ILIKE '%ACTIVE%' THEN ct.status_date\n" +
+            "       WHEN ct.status ILIKE '%ART Transfer In%' THEN ct.status_date"+
             "       WHEN prepre.status ILIKE '%DEATH%' THEN prepre.status_date\n" +
             "       WHEN prepre.status ILIKE '%out%' THEN prepre.status_date\n" +
             "       WHEN pre.status ILIKE '%DEATH%' THEN pre.status_date\n" +

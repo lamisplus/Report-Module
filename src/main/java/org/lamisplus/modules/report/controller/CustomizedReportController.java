@@ -5,8 +5,6 @@ import io.swagger.annotations.ApiOperation;
 import org.lamisplus.modules.report.domain.dto.CustomizedReportDTO;
 import org.lamisplus.modules.report.domain.entity.CustomizedReport;
 import org.lamisplus.modules.report.service.CustomizedReportService;
-import org.lamisplus.modules.report.service.GenerateExcelService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,10 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/v1/customized-reports")

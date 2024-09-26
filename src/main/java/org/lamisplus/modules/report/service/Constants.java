@@ -20,7 +20,7 @@ public class Constants {
 	public static final String EAC_SHEET = "eac";
 	public static final String HTS_SHEET = "hts";
 
-	public static final String PREP_SHEET = "prep";
+	public static final String FAMILY_INDEX_SHEET = "family_index";
 
 	public static final String REPORT_GENERATION_PROGRESS_TOPIC = "/topic/report-generation-progress";
 	
@@ -267,6 +267,7 @@ public class Constants {
 					"Facility Id (Datim)",
 					"Facility",
 					"Client Code",
+					"Patient ID",
 					"First Name",
 					"Surname",
 					"Other Names",
@@ -447,14 +448,44 @@ public class Constants {
 
 	public static final List<String> TB_REPORT_HEADER =
 			Arrays.asList(
-					"State", "LGA", "Facility", "Patient ID", "Hospital Number",
+					"State",
+					"LGA",
+					"Facility",
+					"Patient ID",
+					"Hospital Number",
 					"Unique Id",
-					//"Surname", "Other Names",
-					"Sex", "Date of birth", "Age", "ART Start Date", "Date of Last Visit",
-					"Date of TB Screening", "TB Screening Type", "TB Status", "TB Diagnostic Evaluation",
-					"Date of TB Diagnostic Evaluation", "Date of TB Sample Collection (yyyy-mm-dd)", "TB Diagnostic Test Type", "Date Result Received",
-					"TB Diagnostic Result", "Date of TB Treatment", "TB Type (new, relapsed etc)",  "Date TB Treatment Outcome", "TB Treatment Outcome",
-					"Eligible for TPT", "Date of TPT Start (yyyy-mm-dd)", "TPT Type", "TPT completion status", "TPT completion date", "Weight At Start TPT"
+//"Surname", "Other Names",
+					"Sex",
+					"Date of birth",
+					"Age",
+					"ART Start Date",
+					"Date of Last Visit",
+					"Date of TB Screening",
+					"TB Screening Type",
+					"TB Screening Outcome",
+					"Date of TB Sample Collection (yyyy-mm-dd)",
+					"Date of Specimen sent",
+					"Type of specimen",
+					"TB Diagnostic Evaluation",
+					"Date of TB Diagnostic Evaluation",
+					"TB Diagnostic Test Type",
+					"Date Result Received",
+					"TB Diagnostic Result",
+					"Clinically Evaluated",
+					"Date of Clinical Evaluation",
+					"Clinical evaluation result",
+					"TB Type (new, relapsed etc)",
+					"Date of TB Treatment",
+					"TB Treatment Outcome",
+					"Date TB Treatment Outcome",
+					"Eligible for TPT",
+					"Contraindications for TPT",
+					"Contraindication Type",
+					"Date of TPT Start (yyyy-mm-dd)",
+					"TPT Type",
+					"TPT completion status",
+					"TPT completion date",
+					"Weight At Start TPT"
 			);
 
 	public static final List<String> EAC_REPORT_HEADER =
@@ -516,4 +547,45 @@ public class Constants {
 			"Date of Current Creatinine (yyyy-mm-dd)", "Date of Viral Load Sample Collection (yyyy-mm-dd)",
 			"Current Viral Load (c/ml)", "Date of Current Viral Load (yyyy-mm-dd)", "Viral Load Indication"
 	);
+
+
+	public static final List<String> FAMILY_INDEX_HEADER = Arrays.asList(
+			"State",
+			"LGA",
+			"Facility",
+			"Facility Id (Datim)",
+			"Index Client Surname",
+			"Index Client Other Names",
+			"Index client code/unique ID",
+			"Date of birth",
+			"Age",
+			"Sex",
+			"Marital Status",
+			"Date confirmed HIV positive",
+			"Date enrolled into HIV care",
+			"Index client entry point",
+			"Client Category",
+			"Recency testing",
+			"Date offered index testing",
+			"Accepted Index Testing",
+			"Date of Elicitation",
+			"Index contact's name",
+			"Index Contact's Age",
+			"Index Contact's Sex",
+			"Index Contact's Phone number",
+			"Index Contact's Address",
+			"Relationship of contact to index",
+			"Type of contact",
+			"History of IPV?",
+			"Mode of Notification",
+			"Counseling, Referral and Support services",
+			"HIV Test Status",
+			"HIV Test Result",
+			"Date of HTS (dd-mm-yyyy)",
+			"Date linked to Treatment & Care",
+			"Unique ART number (UAN)",
+			"Date Enrolled in OVC",
+			"OVC_Id"
+	);
+
 }

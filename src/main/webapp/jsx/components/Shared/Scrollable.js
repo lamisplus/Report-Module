@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {FormGroup, Label, Input} from "reactstrap";
+import {Label, Input} from "reactstrap";
 // import { Input } from '@material-ui/core';
 
 const ScrollableDiv = (props) => {

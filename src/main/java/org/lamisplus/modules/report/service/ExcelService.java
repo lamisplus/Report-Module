@@ -186,6 +186,7 @@ public class ExcelService {
 			write(listData);
 			Log.info("last row {}", workbook.getSheet(sheetName).getLastRowNum());
 			workbook.write(bao);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Writing report completed ... ");
 			//FileOutputStream fileOut = new FileOutputStream("runtime/" + sheetName + ".xlsx");
 			//workbook.write(fileOut);
 			//workbook.close();

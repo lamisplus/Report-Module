@@ -2,7 +2,6 @@ package org.lamisplus.modules.report.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.report.service.Constants;
@@ -36,13 +35,11 @@ public class HtsReportController {
 							@RequestParam("endDate") LocalDate end) throws IOException {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting HTS report");
 
-		//messagingTemplate.convertAndSend("/topic/hts", "start");
 
 		ByteArrayOutputStream baos = generateExcelService.generateHts(facility, start, end);
 
 		setStream(baos, response);
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating HTS report");
-		//messagingTemplate.convertAndSend("/topic/hts", "end");
 	}
 
 	private void setStream(ByteArrayOutputStream baos, HttpServletResponse response) throws IOException {
@@ -136,6 +133,16 @@ public class HtsReportController {
 		setStream(baos, response);
 
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating HIVST report");
+
+	}
+
+	@PostMapping(REPORT_URL_VERSION_ONE + "/family-index-report")
+	@ApiOperation(value = "Generate Family Index Report", notes = "This Api generates Family Index report", code = 200)
+	public void generateFamilyIndexReport (HttpServletResponse response, @RequestParam("facilityId") Long facility) throws IOException {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting Family Index report");
+		ByteArrayOutputStream baos = generateExcelService.generateFamilyIndex(facility);
+		setStream(baos, response);
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating Family Index report");
 
 	}
 
