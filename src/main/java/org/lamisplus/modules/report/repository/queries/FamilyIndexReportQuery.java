@@ -49,7 +49,7 @@ public class FamilyIndexReportQuery {
             "    LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id\n" +
             "    LEFT JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id\n" +
             "    LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id = p.facility_id AND boui.name = 'DATIM_ID'\n" +
-            "\tWHERE h.archived = 0 AND hfi.archived = 0\n" +
+            "\tWHERE hfi.archived = 0\n" +
             "),\n" +
             "partnerIndex AS (\n" +
             "    SELECT \n" +
