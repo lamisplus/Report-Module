@@ -24,12 +24,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
 
 
 @Component
@@ -702,6 +698,9 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPregnancyStatus())));
 //					map.put(index++, getStringValue(String.valueOf(htsReportDto.getBreastFeeding())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getIndexType())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPreviousVisitDate())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPreviousTestResult())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getHtsCount())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFinalHivTestResult())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPatientUuid())));
 					map.put(index++, htsReportDto.getDateOfHivTesting());
@@ -734,6 +733,8 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfLubricantsGiven())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getHtsLatitude())));
 					map.put(index, getStringValue(String.valueOf(htsReportDto.getHtsLongitude())));
+
+
 					result.add(map);
 						sn++;
 					}

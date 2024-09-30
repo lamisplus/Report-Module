@@ -72,5 +72,10 @@ public  interface HtsReportDto {
        String getTotalRiskScore();
        String getTesterName();
        String getRefferedForSti();
+       Integer getHtsCount();
+
+       LocalDate getPreviousVisitDate();
+
+       String getPreviousTestResult();
 
 }
