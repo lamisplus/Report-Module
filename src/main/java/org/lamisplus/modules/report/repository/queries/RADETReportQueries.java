@@ -120,7 +120,7 @@ public class RADETReportQueries {
             "    with tbscreening_cs as ( \n" +
             "        with cs as ( \n" +
             "            with LatestObservations AS (\n" +
-            "            SELECT id, person_uuid, date_of_observation AS dateOfTbScreened, data->'tbIptScreening'->>'status' AS tbStatus, \n" +
+            "            SELECT id, person_uuid, date_of_observation AS dateOfTbScreened, (CASE WHEN data->'tbIptScreening'->>'status' = 'Presumptive TB and referred for evaluation' THEN 'Presumptive TB' ELSE data->'tbIptScreening'->>'status' END) AS tbStatus, \n" +
             "                data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, \n" +
             "                ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS rowNums \n" +
             "        FROM hiv_observation \n" +
@@ -154,7 +154,7 @@ public class RADETReportQueries {
             "                  AND ho.date_of_observation BETWEEN lo.dateOfTbScreened - INTERVAL '6 months' AND lo.dateOfTbScreened\n" +
             "                  AND ho.data->'tbIptScreening'->>'status' ilike 'Presumptive TB%'\n" +
             "                  AND ho.facility_id = ?1\n" +
-            "            ) THEN 'Presumptive TB and referred for evaluation'\n" +
+            "            ) THEN 'Presumptive TB'\n" +
             "            ELSE lo.tbStatus\n" +
             "        END AS tbStatus\n" +
             "    FROM\n" +
