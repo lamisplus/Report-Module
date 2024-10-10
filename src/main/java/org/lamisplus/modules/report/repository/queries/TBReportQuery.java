@@ -324,7 +324,7 @@ public class TBReportQuery {
             "    bio.facility_name as facilityName, bio.datimId, bio.targetGroup, \n" +
             "    bio.enrollment_setting, bio.art_start_date AS artStartDate, \n" +
             "    bio.regimen_at_start AS regimen_at_start, bio.date_of_registration, \n" +
-            "    COALESCE(tbTmentNew.screeningStatus, tb.tb_status) AS tbStatus, COALESCE(tbTmentNew.tbScreeningType, tb.tb_screening_type) AS tbScreeningType, \n" +
+            "    (CASE WHEN COALESCE(tbTmentNew.screeningStatus, tb.tb_status)  = 'Presumptive TB and referred for evaluation' THEN 'Presumptive TB' ELSE COALESCE(tbTmentNew.screeningStatus, tb.tb_status) END) AS tbStatus, COALESCE(tbTmentNew.tbScreeningType, tb.tb_screening_type) AS tbScreeningType, \n" +
             "    COALESCE(tbTmentNew.screeningDate, tb.date_of_tb_screened) as dateOfTbScreened, COALESCE(iptN.eligibilityTpt,tb_treatement_start.eligible_for_tpt) as eligibleForTpt, \n" +
             "    COALESCE(tbTmentNew.tbTreatmentStartDate, tb_treatement_start.tb_treatment_start_date) AS tbTreatmentStartDate, \n" +
             "    COALESCE(tbTmentNew.tbTreatmentType,tb_treatement_start.tb_treatement_type) AS tbTreatmentType, \n" +
@@ -337,7 +337,7 @@ public class TBReportQuery {
             "    COALESCE(iptN.tptCompletionDate, ipt_cA.dateCompletedTpt) AS iptCompletionDate, \n" +
             "    tbTmentNew.specimenSentDate, tbTmentNew.specimenType, tbTmentNew.clinicallyEvaulated, tbTmentNew.chestXrayResultTest,\n" +
             "    tbTmentNew.dateOfChestXrayResultTestDone, tbTmentNew.contractionForTpt, tbTmentNew.contractionOptions," +
-            "    COALESCE(iptN.tptCompletionStatus, ipt_cA.iptCompletionStatus) AS iptCompletionStatus , COALESCE(iptN.tptWeight, weight.weight_at_start_tpt) as weightAtStartTpt \n" +
+            "    (CASE WHEN COALESCE(iptN.tptCompletionStatus, ipt_cA.iptCompletionStatus) = 'IPT Completed' THEN 'Treatment completed' ELSE COALESCE(iptN.tptCompletionStatus, ipt_cA.iptCompletionStatus) END) AS iptCompletionStatus , COALESCE(iptN.tptWeight, weight.weight_at_start_tpt) as weightAtStartTpt \n" +
             "FROM \n" +
             "    bio_data bio \n" +
             "LEFT JOIN tb_status tb ON bio.uuid = tb.person_uuid \n" +
