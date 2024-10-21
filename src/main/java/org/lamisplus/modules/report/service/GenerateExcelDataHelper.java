@@ -235,47 +235,29 @@ public class GenerateExcelDataHelper {
 				map.put(index++, eacReportProjection.getDateOfFourthEACSessionCompleted());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfFourthEACSession())));
 
-				map.put(index++, eacReportProjection.getDateOfCommencementOfFifthEAC());
-				map.put(index++, eacReportProjection.getDateOfFifthEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfFifthEACSession())));
-
-				map.put(index++, eacReportProjection.getDateOfCommencementOfSixthEAC());
-				map.put(index++, eacReportProjection.getDateOfSixthEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfSixthEACSession())));
 
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getNumberOfEACSessionsCompleted())));
 				map.put(index++, eacReportProjection.getDateOfRepeatViralLoadPostEACSampleCollected());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getRepeatViralLoadResultPostEAC())));
 				map.put(index++, eacReportProjection.getDateOfRepeatViralLoadResultPostEACVL());
 
+				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getEligibleForSwitch()))); // eligble for switch
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getReferredToSwitchCommittee())));
-				map.put(index++, eacReportProjection.getDateReferredToSwitchCommitted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getEligibleForSwitch())));
+				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getReferredToSwitchCommitteePostSwitchEAC())));
+				map.put(index++, eacReportProjection.getDateReferredToSwitchCommittedPostSwitchEAC());
 
-				map.put(index++, eacReportProjection.getDateOfCommencementOfSeventhPostSwitchCommitteeEAC());
-				map.put(index++, eacReportProjection.getDateOfSeventhPostSwitchCommitteeEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfSeventhPostSwitchCommitteeEACSession())));
-
-				map.put(index++, eacReportProjection.getDateOfCommencementOfEighthPostSwitchCommitteeEAC());
-				map.put(index++, eacReportProjection.getDateOfEighthPostSwitchCommitteeEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfEighthPostSwitchCommitteeEACSession())));
-
-				map.put(index++, eacReportProjection.getDateOfCommencementOfNinthPostSwitchCommitteeEAC());
-				map.put(index++, eacReportProjection.getDateOfNinthPostSwitchCommitteeEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfNinthPostSwitchCommitteeEACSession())));
+//				map.put(index++, eacReportProjection.getDateReferredToSwitchCommitted());
+				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfPostSwitchEACSession())));
 
 				map.put(index++, eacReportProjection.getDateOfRepeatViralLoadPostSwitchEACSampleCollected());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getRepeatViralLoadResultPostSwitchEAC())));
 				map.put(index++, eacReportProjection.getDateOfRepeatViralLoadResultPostSwitchEACVL());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfPostSwitchEACSession())));
 
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getReferredToSwitchCommitteePostSwitchEAC())));
-				map.put(index++, eacReportProjection.getDateReferredToSwitchCommittedPostSwitchEAC());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getEligibleForSwitchPostSwitchEAC())));
-
 				map.put(index++, eacReportProjection.getDateSwitched());
+
 				map.put(index++, eacReportProjection.getStartDateOfSwitchedRegimen());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getSwitchedARTRegimen())));
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getSwitchedARTRegimen())));
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getSwitchedARTRegimenLine())));
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getSwitchedARTRegimen())));
 
