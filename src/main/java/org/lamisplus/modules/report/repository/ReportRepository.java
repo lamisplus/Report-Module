@@ -195,6 +195,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
         @Query(value = EACReportQuery.EAC_REPORT_QUERY, nativeQuery = true)
         List<EACReportProjection> generateEACReport(Long facilityId, LocalDate start, LocalDate end);
 
+//    @Query(value = EACReportQuery.EAC_REPORT_QUERY, nativeQuery = true)
+//    List<EACReportProjection> generateEACReport();
+
         @Query(value = NCDReportQuery.NCD_REPORT_QUERY, nativeQuery = true)
         List<NCDReportProjection> generateNCDReport(Long facilityId, LocalDate start, LocalDate end);
 
