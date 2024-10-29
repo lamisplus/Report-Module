@@ -87,7 +87,7 @@ public class TBReportQuery {
             "and archived = 0) ttc where row_number = 1 \n" +
             "    and tb_completion_date is not null \n" +
             "\n" +
-            "), \n" +
+            "),\n" +
             "current_tb_result AS ( \n" +
             "    with cur_tb as ( \n" +
             "            select sm.patient_uuid, sm.result_reported AS tb_diagnostic_result, \n" +
