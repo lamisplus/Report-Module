@@ -94,6 +94,7 @@ public class TBReportQuery {
             "            CAST(sm.date_result_reported AS DATE) AS date_of_tb_diagnostic_result_received, \n" +
             "            CASE lt.lab_test_id \n" +
             "\t\t\tWHEN 65 THEN 'Gene Xpert'\n" +
+            "\t\t\tWHEN 66 THEN 'Chest X-ray'\n" +
             "\t\t\tWHEN 51 THEN 'TB-LAM'\n" +
             "\t\t\tWHEN 64 THEN 'AFB Smear Microscopy'\n" +
             "\t\t\tWHEN 67 THEN 'Gene Xpert'\n" +
@@ -107,7 +108,7 @@ public class TBReportQuery {
             "            laboratory_result sm \n" +
             "            INNER JOIN public.laboratory_test lt ON sm.test_id = lt.id \n" +
             "        WHERE \n" +
-            "            lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73) \n" +
+            "            lt.lab_test_id IN (65, 66, 51, 64, 67, 72, 71, 86, 58, 73) \n" +
             "            AND sm.archived = 0 \n" +
             "            AND sm.date_result_reported IS NOT NULL \n" +
             "            AND sm.facility_id = ?1 \n" +
@@ -215,7 +216,7 @@ public class TBReportQuery {
             "FROM public.laboratory_sample  sm\n" +
             "         INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
             "         INNER JOIN  laboratory_labtest llt on llt.id = lt.lab_test_id\n" +
-            "         WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73)\n" +
+            "         WHERE lt.lab_test_id IN (65, 66, 51, 64, 67, 72, 71, 86, 58, 73)\n" +
             "        AND sm.archived = 0\n" +
             "        AND sm. date_sample_collected <= ?3 \n" +
             "        AND sm.facility_id = ?1 \n" +

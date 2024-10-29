@@ -270,7 +270,7 @@ public class RADETReportQueries {
             "FROM public.laboratory_sample  sm\n" +
             "         INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
             "         INNER JOIN  laboratory_labtest llt on llt.id = lt.lab_test_id\n" +
-            "WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73)\n" +
+            "WHERE lt.lab_test_id IN (65, 66, 51, 64, 67, 72, 71, 86, 58, 73)\n" +
             "        AND sm.archived = 0\n" +
             "        AND sm. date_sample_collected <= ?3\n" +
             "        AND sm.facility_id = ?1\n" +
@@ -281,6 +281,7 @@ public class RADETReportQueries {
             "     current_tb_result AS (WITH tb_test as (SELECT personTbResult, dateofTbDiagnosticResultReceived,\n" +
             "   coalesce(\n" +
             "           MAX(CASE WHEN lab_test_id = 65 THEN tbDiagnosticResult END) ,\n" +
+            "           MAX(CASE WHEN lab_test_id = 66 THEN tbDiagnosticResult END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 51 THEN tbDiagnosticResult END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 64 THEN tbDiagnosticResult END),\n" +
             "           MAX(CASE WHEN lab_test_id = 67 THEN tbDiagnosticResult END),\n" +
@@ -292,6 +293,7 @@ public class RADETReportQueries {
             "       ) as tbDiagnosticResult ,\n" +
             "   coalesce(\n" +
             "           MAX(CASE WHEN lab_test_id = 65 THEN 'Gene Xpert' END) ,\n" +
+            "           MAX(CASE WHEN lab_test_id = 66 THEN 'Chest X-ray' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 51 THEN 'TB-LAM' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 64 THEN 'AFB Smear Microscopy' END),\n" +
             "           MAX(CASE WHEN lab_test_id = 67 THEN 'Gene Xpert' END) ,\n" +
@@ -308,7 +310,7 @@ public class RADETReportQueries {
             " lt.lab_test_id\n" +
             "     FROM laboratory_result  sm\n" +
             "  INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
-            "     WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73) and sm.archived = 0\n" +
+            "     WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73, 66) and sm.archived = 0\n" +
             "       AND sm.date_result_reported is not null\n" +
             "       AND sm.facility_id = ?1\n" +
             "       AND sm.date_result_reported <= ?3\n" +
