@@ -165,7 +165,7 @@ public class TBReportQuery {
             "        hiv_observation\n" +
             "    WHERE archived = 0 AND\n" +
             "        (\n" +
-            "(data->'tbIptScreening'->>'status' = 'Presumptive TB and referred for evaluation' \n" +
+            "(data->'tbIptScreening'->>'status' LIKE '%Presumptive TB' \n" +
             " or data->'tbIptScreening'->>'status' = 'No signs or symptoms of TB')\n" +
             "and\n" +
             "        (data->'tbIptScreening'->>'outcome' = 'Presumptive TB' or data->'tbIptScreening'->>'outcome'='Not Presumptive' )\n" +

@@ -94,7 +94,6 @@ public class RADETReportQueries {
             "     INNER JOIN hiv_enrollment he ON he.person_uuid = hac.person_uuid\n" +
             "     LEFT JOIN base_application_codeset bac ON bac.id = hac.clinical_stage_id\n" +
             "     LEFT JOIN base_application_codeset preg ON preg.code = hac.pregnancy_status\n" +
-//            "     LEFT JOIN base_application_codeset tbs ON tbs.id = CAST(hac.tb_status AS INTEGER)\n" +
             "    LEFT JOIN base_application_codeset tbs ON tbs.id = CASE WHEN hac.tb_status ~ '^[0-9]+$' THEN CAST(hac.tb_status AS INTEGER) ELSE 0 END\n  " +
             "         WHERE\n" +
             "           hac.archived = 0\n" +
@@ -351,7 +350,7 @@ public class RADETReportQueries {
             "        hiv_observation\n" +
             "    WHERE archived = 0 AND\n" +
             "        (\n" +
-            "(data->'tbIptScreening'->>'status' = 'Presumptive TB and referred for evaluation' \n" +
+            "(data->'tbIptScreening'->>'status' LIKE '%Presumptive TB' \n" +
             " or data->'tbIptScreening'->>'status' = 'No signs or symptoms of TB')\n" +
             "and\n" +
             "        (data->'tbIptScreening'->>'outcome' = 'Presumptive TB' or data->'tbIptScreening'->>'outcome'='Not Presumptive' )\n" +
