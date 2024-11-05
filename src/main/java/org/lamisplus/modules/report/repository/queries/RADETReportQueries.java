@@ -84,7 +84,7 @@ public class RADETReportQueries {
             "         person_uuid,\n" +
             "         MAX(hac.visit_date) AS MAXDATE\n" +
             "     FROM\n" +
-            "         hiv_art_clinical hac WHERE hac.archived = 0 AND hac.tb_status != ''\n" +
+            "         hiv_art_clinical hac WHERE hac.archived = 0 \n" +
             "     GROUP BY\n" +
             "         person_uuid\n" +
             "     ORDER BY\n" +
