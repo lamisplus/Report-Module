@@ -24,8 +24,6 @@ public  interface HtsReportDto {
       String getOccupation();
       LocalDate getDateVisit();
       String getFirstTimeVisit();
-//      Integer getNumberOfChildren();
-//      Integer getNumberOfWives();
       String getIndexClient();
 
       String getPreviouslyTested();
@@ -48,9 +46,7 @@ public  interface HtsReportDto {
       LocalDate getViralLoadSampleCollectionDate();
       String getViralLoadConfirmationResult();
     //End
-//      String getViralLoadResult();
       LocalDate getViralLoadConfirmationDate();
-//      String getAssessmentCode();
       String getModality();
       String getSyphilisTestResult();
       String getHepatitisBTestResult();
