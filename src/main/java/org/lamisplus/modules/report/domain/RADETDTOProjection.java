@@ -1,7 +1,6 @@
 package org.lamisplus.modules.report.domain;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 public interface RADETDTOProjection {
@@ -149,8 +148,6 @@ public interface RADETDTOProjection {
 	String getTreatmentMethodDate();
 	LocalDate getDateOfRegistration();
 	LocalDate getDateOfEnrollment();
-	LocalDate getDateOfLastTbLam();
-	String  getTbLamResult();
 
 	String getNdrPatientIdentifier();
 }

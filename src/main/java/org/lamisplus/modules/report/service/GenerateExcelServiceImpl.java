@@ -56,7 +56,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			return excelService.generate(Constants.PATIENT_LINE_LIST, fullData, Constants.PATIENT_LINE_LIST_HEADER);
 		} catch (Exception e) {
 			LOG.error("Error Occurred when generating PATIENT LINE LIST!!!");
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 		LOG.info("End generate patient line list ");
 		return null;
