@@ -69,7 +69,6 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
 		try {
 			List<ClientServiceDto> data = reportRepository.generateClientServiceList(facilityId);
-//			LOG.info("fullData 1: " + Arrays.toString(data.toArray()));
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> fullData = GenerateExcelDataHelper.fillClientServiceListDataMapper(data);
 			LOG.info("fullData 2: " + data.size());
