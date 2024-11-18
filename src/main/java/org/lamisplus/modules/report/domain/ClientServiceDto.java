@@ -10,7 +10,6 @@ public interface ClientServiceDto {
     String getAnyOfTheFollowingList();
     String getDateOfAttempt();
     String getVerificationAttempts();
-//    String getVerificationStatus();
     String getOutcome();
     String getDsdModel();
     String getComment();
