@@ -6,7 +6,6 @@ import org.lamisplus.modules.report.domain.entity.CustomizedReport;
 import org.lamisplus.modules.report.repository.CustomisedReportRepository;
 import org.lamisplus.modules.report.utility.ResultSetExtract;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;

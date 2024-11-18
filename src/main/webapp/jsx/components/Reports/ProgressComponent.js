@@ -1,22 +1,25 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react';
 import SockJsClient from 'react-stomp';
-import {wsUrl} from "../../../api";
+import { wsUrl } from "../../../api";
 
 function ProgressComponent() {
     const [message, setMessage] = useState("");
-    let onConnected = () => {
-        console.log("Connected!!")
-    }
-    let onMessageReceived = (msg) => {
-        console.log(msg)
+
+    const onConnected = () => {
+        console.log("Connected!!");
+    };
+
+    const onMessageReceived = (msg) => {
+        console.log("Message received: ", msg);
         if (msg) {
             setMessage(msg);
         }
+    };
 
-    }
-    let onDisconnected = () => {
+    const onDisconnected = () => {
         console.log("Disconnected!");
-    }
+    };
+
     return (
         <div>
             <SockJsClient
@@ -25,11 +28,11 @@ function ProgressComponent() {
                 onConnect={onConnected}
                 onDisconnect={onDisconnected}
                 onMessage={msg => onMessageReceived(msg)}
-                debug={false}
+                debug={true}  // Enable debugging
             />
             <div><h3>{message}</h3></div>
         </div>
     );
 }
 
-export default ProgressComponent
+export default ProgressComponent;

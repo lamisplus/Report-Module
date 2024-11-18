@@ -1,16 +1,14 @@
 import React, {useEffect, useState} from "react";
 import axios from "axios";
-import {FormGroup, Label , CardBody, Spinner,Input,Form} from "reactstrap";
+import {FormGroup, Label , CardBody, Input} from "reactstrap";
 import {makeStyles} from "@material-ui/core/styles";
 import {Card} from "@material-ui/core";
-// import {Link, useHistory, useLocation} from "react-router-dom";
-// import {TiArrowBack} from 'react-icons/ti'
 import {token, url as baseUrl } from "../../../api";
 import 'react-phone-input-2/lib/style.css'
 import { Button} from 'semantic-ui-react'
 import { toast} from "react-toastify";
 import FileSaver from "file-saver";
-import { Message, Icon } from 'semantic-ui-react'
+import { Message } from 'semantic-ui-react'
 import ProgressComponent from "./ProgressComponent"
 
 const useStyles = makeStyles((theme) => ({
@@ -68,7 +66,6 @@ const HTSIndexReport = (props) => {
     useEffect(() => {
         Facilities()
       }, []);
-    //Get list of WhoStaging
     const Facilities =()=>{
     axios
         .get(`${baseUrl}account`,
@@ -79,14 +76,20 @@ const HTSIndexReport = (props) => {
             setFacilities(response.data.applicationUserOrganisationUnits);
         })
         .catch((error) => {
-        //console.log(error);
         });
     }
 
-    const handleInputChange = e => {
-        //1980-01-01
-        setObjValues ({...objValues,  [e.target.name]: e.target.value, organisationUnitName: e.target.innerText});
-    }
+    const handleInputChange = (e) => {
+        const selectedOption = e.target.options ? e.target.options[e.target.selectedIndex] : null;
+        const selectedValue = e.target.value;
+        const name = e.target.name;
+      
+        setObjValues(prevValues => ({
+            ...prevValues,
+            [name]: selectedValue,
+            organisationUnitName: name === "organisationUnitId" && selectedOption ? selectedOption.innerText : prevValues.organisationUnitName,
+        }));
+      };
 
     const handleValueChange = () => {
         setStatus(!status)
@@ -102,19 +105,18 @@ const HTSIndexReport = (props) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true)
-        //console.log(token);
 
-        axios.post(`${baseUrl}hts-index-report?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,objValues.organisationUnitId,
+        axios.post(`${baseUrl}family-index-report?facilityId=${objValues.organisationUnitId}`,objValues.organisationUnitId,
             { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
         )
           .then(response => {
             setLoading(false)
-            const fileName =`${objValues.organisationUnitName} HTS Index Report ${currentDate}`
+            const fileName =`${objValues.organisationUnitName} HTS FAMILY Index Report ${currentDate}`
             const responseData = response.data
             let blob = new Blob([responseData], {type: "application/octet-stream"});
 
             FileSaver.saveAs(blob, `${fileName}.xlsx`);
-            toast.success("HTS Index Report generated successfully");
+            toast.success("HTS FAMILY Index Report generated successfully");
           })
           .catch(error => {
             setLoading(false)
@@ -134,11 +136,11 @@ const HTSIndexReport = (props) => {
             <Card >
                 <CardBody>
 
-                <h2 style={{color:'#000'}}>HTS Index REPORT</h2>
+                <h2 style={{color:'#000'}}>HTS INDEX REPORT</h2>
                 <br/>
-                    <form >
+                    < >
                         <div className="row">
-                        <div className="form-group  col-md-6">
+                        {/* <div className="form-group  col-md-6">
                                 <FormGroup>
                                     <Label>From *</Label>
                                     <input
@@ -179,7 +181,7 @@ const HTSIndexReport = (props) => {
                                      {' '} &nbsp;&nbsp;<span> As at Today.</span>
                                   </Label>
                                 </FormGroup>
-                            </div>
+                            </div> */}
                             <div className="form-group  col-md-6">
                                 <FormGroup>
                                     <Label>Facility*</Label>
@@ -205,7 +207,9 @@ const HTSIndexReport = (props) => {
                             <br />
                             <div className="row">
                             <div className="form-group mb-3 col-md-6">
-                            <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={handleSubmit} disabled={objValues.organisationUnitId==="" ? true : false}/>
+                            <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={handleSubmit} 
+                            disabled={objValues.organisationUnitId === "" || loading} 
+                            />
                             </div>
                             </div>
 
@@ -217,7 +221,7 @@ const HTSIndexReport = (props) => {
                                                 </Message>
                             )}
                         </div>
-                    </form>
+                    </>
 
                 </CardBody>
             </Card>

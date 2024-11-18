@@ -53,17 +53,17 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-const BiometricReport = (props) => {
+const PMTCTMonthlySummaryReport = (props) => {
   let currentDate = new Date().toISOString().split('T')[0]
   const classes = useStyles();
   const [loading, setLoading] = useState(false)
   const [facilities, setFacilities] = useState([]);
+
+
+  const[months, setMonths]=useState(['January','Febuary','March','April','May','June','July','August','September','October','November','December'])
   const [status, setStatus] = useState(true);
-  const [objValues, setObjValues]=useState({
-      organisationUnitId:"",
-      organisationUnitName:"",
-      startDate:"",
-      endDate: ""
+  const [objValues, setObjValues]=useState({ 
+      month: ""
   })
   useEffect(() => {
       Facilities()
@@ -82,16 +82,14 @@ const BiometricReport = (props) => {
   }
 
   const handleInputChange = (e) => {
-    const selectedOption = e.target.options ? e.target.options[e.target.selectedIndex] : null;
+    const selectedOption = e.target.options[e.target.selectedIndex];
     const selectedValue = e.target.value;
-    const name = e.target.name;
-  
+    objValues.organisationUnitName = selectedOption.innerText;
     setObjValues(prevValues => ({
-        ...prevValues,
-        [name]: selectedValue,
-        organisationUnitName: name === "organisationUnitId" && selectedOption ? selectedOption.innerText : prevValues.organisationUnitName,
+      ...prevValues,
+      [e.target.name]: selectedValue,
     }));
-  };
+};
 
   const handleValueChange = () => {
       setStatus(!status)
@@ -118,7 +116,6 @@ const BiometricReport = (props) => {
                 let blob = new Blob([responseData], {type: "application/octet-stream"});
                 FileSaver.saveAs(blob, `${fileName}.xlsx`);
                 toast.success(" Report generated successful");
-
               })
               .catch(error => {
                 setLoading(false)
@@ -130,76 +127,32 @@ const BiometricReport = (props) => {
                     toast.error("Something went wrong. Please try again...");
                   }
               });
-            
-
     }
     
-    
-
     return (
       <>
         <Card>
           <CardBody>
-            <h2 style={{ color: "#000" }}>BIOMETRIC REPORT</h2>
+            <h2 style={{ color: "#000" }}>PMTCT MONTHLY SUMMARY REPORT</h2>
             <br />
             < >
                         <div className="row">
-                        <div className="form-group  col-md-6">
-                                <FormGroup>
-                                    <Label>From *</Label>
-                                    <input
-                                        type="date"
-                                        className="form-control"
-                                        name="startDate"
-                                        id="startDate"
-                                        min={"1980-01-01"}
-                                        max={currentDate}
-                                        value={objValues.startDate}
-                                        onChange={handleInputChange}
-                                        style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
-                                    />
-
-                                </FormGroup>
-                            </div>
+       
                             <div className="form-group  col-md-6">
                                 <FormGroup>
-                                    <Label>To *</Label>
-                                    <input
-                                        type="date"
-                                        className="form-control"
-                                        name="endDate"
-                                        id="endDate"
-                                        min={"1980-01-01"}
-                                        max={currentDate}
-                                        value={objValues.endDate}
-                                        onChange={handleInputChange}
-                                        style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
-                                    />
-                                </FormGroup>
-                            </div>
-                            <div className="form-group  col-md-6">
-                                 <FormGroup check>
-                                  <Label check>
-                                    <Input type="checkbox" onChange={handleValueChange}/>
-                                     {' '} &nbsp;&nbsp;<span> As at Today.</span>
-                                  </Label>
-                                </FormGroup>
-                            </div>
-                            <div className="form-group  col-md-6">
-                                <FormGroup>
-                                    <Label>Facility*</Label>
+                                    <Label>Select Month*</Label>
                                     <select
                                         className="form-control"
-                                        name="organisationUnitId"
-                                        id="organisationUnitId"
+                                        name="month"
+                                        id="month"
                                         value={objValues.organisationUnitId}
                                         onChange={handleInputChange}
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
                                     >
                                         <option value={""}></option>
-                                        {facilities.map((value) => (
-                                            <option key={value.id} value={value.organisationUnitId}>
-                                                {value.organisationUnitName}
+                                        {months.map((value) => (
+                                            <option key={value} value={value}>
+                                                {value}
                                             </option>
                                         ))}
                                     </select>
@@ -239,4 +192,4 @@ const BiometricReport = (props) => {
     );
 };
 
-export default BiometricReport
+export default PMTCTMonthlySummaryReport

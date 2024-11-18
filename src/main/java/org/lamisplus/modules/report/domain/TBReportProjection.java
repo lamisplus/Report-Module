@@ -8,8 +8,6 @@ public interface TBReportProjection {
     String getState();
     String getHospitalNumber();
     LocalDate getArtStartDate();
-//    String getSurname();
-//    String getFirstName();
     String getUniqueId();
     int getAge();
     String getGender();
@@ -41,4 +39,17 @@ public interface TBReportProjection {
     String getRegimenName();
     LocalDate getIptCompletionDate();
     String getWeightAtStartTpt();
+
+    LocalDate getSpecimenSentDate();
+
+    String getSpecimenType();
+
+    String getClinicallyEvaulated();
+
+    String getChestXrayResultTest();
+
+   LocalDate getDateOfChestXrayResultTestDone();
+
+    String getContractionForTpt();
+    String getContractionOptions();
 }

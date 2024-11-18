@@ -42,4 +42,7 @@ public interface GenerateExcelService {
  ByteArrayOutputStream generateNCDReport(Long facilityId, LocalDate start, LocalDate end);
   ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException;
 
+ ByteArrayOutputStream generateFamilyIndex(Long facilityId);
+
+
 }

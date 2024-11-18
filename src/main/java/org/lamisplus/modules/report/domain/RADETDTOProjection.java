@@ -1,7 +1,6 @@
 package org.lamisplus.modules.report.domain;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 public interface RADETDTOProjection {
@@ -68,8 +67,6 @@ public interface RADETDTOProjection {
 
 	LocalDate getLastPickupDate();
 
-	//LocalDate getNextPickupDate();
-
 	// art status
 
 	LocalDate getCurrentStatusDate();
@@ -81,7 +78,6 @@ public interface RADETDTOProjection {
 	String getPreviousStatus();
 
 	String getClientVerificationOutCome();
-//	String getClientVerificationStatus();
 
 
 	//Biometric status
@@ -100,7 +96,6 @@ public interface RADETDTOProjection {
 	// LocalDate getDateSampleCollected();
 	String getRepeatViralLoadResult();
 	String getTbStatus();
-//	String getTbStatusOutCome();
 	LocalDate getDateOfTbScreened();
 	LocalDate getDateOfCurrentRegimen();
 	LocalDate getDateOfIptStart();
@@ -146,17 +141,13 @@ public interface RADETDTOProjection {
 	LocalDate getTbCompletionDate();
 	String getIptCompletionStatus();
 	String getTbScreeningType();
-	//Crytococal Antigen
-	// Date getDateOfLastCrytococalAntigen();
-	// String getLastCrytococalAntigen();
 
+	//Crytococal Antigen
 	String getCaseManager();
 	String getVaCauseOfDeath();
 	String getTreatmentMethodDate();
 	LocalDate getDateOfRegistration();
 	LocalDate getDateOfEnrollment();
-	LocalDate getDateOfLastTbLam();
-	String  getTbLamResult();
 
 	String getNdrPatientIdentifier();
 }
