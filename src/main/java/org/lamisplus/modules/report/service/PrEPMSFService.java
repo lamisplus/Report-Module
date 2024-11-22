@@ -39,7 +39,7 @@ public class PrEPMSFService {
         }
     }
 
-    public JsonNode fetchPrEPMSFReport1(Long facilityId, LocalDate startDate, LocalDate endDate) throws IOException {
+    public JsonNode fetchPrEPMSFReport(Long facilityId, LocalDate startDate, LocalDate endDate) throws IOException {
         String queryPath = "prep_msf_query.sql";
 
         // Read the SQL query from the file in the classpath
