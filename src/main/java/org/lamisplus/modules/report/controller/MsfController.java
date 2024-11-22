@@ -62,7 +62,7 @@ public class MsfController {
         List<? extends Serializable> headProperty = Arrays.asList(facilityName, lgaName, stateName, String.valueOf(month), String.valueOf(dateSelected.getYear()), "");
 
         try {
-            JsonNode rowData = prEPMSFService.fetchPrEPMSFReport1(facilityId, startDate, endDate);
+            JsonNode rowData = prEPMSFService.fetchPrEPMSFReport(facilityId, startDate, endDate);
 
             if (rowData.isEmpty()) {
                 throw new IllegalArgumentException("No data available for PDF generation.");
