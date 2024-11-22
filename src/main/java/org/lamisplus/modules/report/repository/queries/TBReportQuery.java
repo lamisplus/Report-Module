@@ -87,13 +87,14 @@ public class TBReportQuery {
             "and archived = 0) ttc where row_number = 1 \n" +
             "    and tb_completion_date is not null \n" +
             "\n" +
-            "), \n" +
+            "),\n" +
             "current_tb_result AS ( \n" +
             "    with cur_tb as ( \n" +
             "            select sm.patient_uuid, sm.result_reported AS tb_diagnostic_result, \n" +
             "            CAST(sm.date_result_reported AS DATE) AS date_of_tb_diagnostic_result_received, \n" +
             "            CASE lt.lab_test_id \n" +
             "\t\t\tWHEN 65 THEN 'Gene Xpert'\n" +
+            "\t\t\tWHEN 66 THEN 'Chest X-ray'\n" +
             "\t\t\tWHEN 51 THEN 'TB-LAM'\n" +
             "\t\t\tWHEN 64 THEN 'AFB Smear Microscopy'\n" +
             "\t\t\tWHEN 67 THEN 'Gene Xpert'\n" +
@@ -107,7 +108,7 @@ public class TBReportQuery {
             "            laboratory_result sm \n" +
             "            INNER JOIN public.laboratory_test lt ON sm.test_id = lt.id \n" +
             "        WHERE \n" +
-            "            lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73) \n" +
+            "            lt.lab_test_id IN (65, 66, 51, 64, 67, 72, 71, 86, 58, 73) \n" +
             "            AND sm.archived = 0 \n" +
             "            AND sm.date_result_reported IS NOT NULL \n" +
             "            AND sm.facility_id = ?1 \n" +
@@ -165,7 +166,7 @@ public class TBReportQuery {
             "        hiv_observation\n" +
             "    WHERE archived = 0 AND\n" +
             "        (\n" +
-            "(data->'tbIptScreening'->>'status' = 'Presumptive TB and referred for evaluation' \n" +
+            "(data->'tbIptScreening'->>'status' LIKE '%Presumptive TB' \n" +
             " or data->'tbIptScreening'->>'status' = 'No signs or symptoms of TB')\n" +
             "and\n" +
             "        (data->'tbIptScreening'->>'outcome' = 'Presumptive TB' or data->'tbIptScreening'->>'outcome'='Not Presumptive' )\n" +
@@ -215,7 +216,7 @@ public class TBReportQuery {
             "FROM public.laboratory_sample  sm\n" +
             "         INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
             "         INNER JOIN  laboratory_labtest llt on llt.id = lt.lab_test_id\n" +
-            "         WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73)\n" +
+            "         WHERE lt.lab_test_id IN (65, 66, 51, 64, 67, 72, 71, 86, 58, 73)\n" +
             "        AND sm.archived = 0\n" +
             "        AND sm. date_sample_collected <= ?3 \n" +
             "        AND sm.facility_id = ?1 \n" +
@@ -324,7 +325,7 @@ public class TBReportQuery {
             "    bio.facility_name as facilityName, bio.datimId, bio.targetGroup, \n" +
             "    bio.enrollment_setting, bio.art_start_date AS artStartDate, \n" +
             "    bio.regimen_at_start AS regimen_at_start, bio.date_of_registration, \n" +
-            "    COALESCE(tbTmentNew.screeningStatus, tb.tb_status) AS tbStatus, COALESCE(tbTmentNew.tbScreeningType, tb.tb_screening_type) AS tbScreeningType, \n" +
+            "    (CASE WHEN COALESCE(tbTmentNew.screeningStatus, tb.tb_status)  = 'Presumptive TB and referred for evaluation' THEN 'Presumptive TB' ELSE COALESCE(tbTmentNew.screeningStatus, tb.tb_status) END) AS tbStatus, COALESCE(tbTmentNew.tbScreeningType, tb.tb_screening_type) AS tbScreeningType, \n" +
             "    COALESCE(tbTmentNew.screeningDate, tb.date_of_tb_screened) as dateOfTbScreened, COALESCE(iptN.eligibilityTpt,tb_treatement_start.eligible_for_tpt) as eligibleForTpt, \n" +
             "    COALESCE(tbTmentNew.tbTreatmentStartDate, tb_treatement_start.tb_treatment_start_date) AS tbTreatmentStartDate, \n" +
             "    COALESCE(tbTmentNew.tbTreatmentType,tb_treatement_start.tb_treatement_type) AS tbTreatmentType, \n" +
@@ -337,7 +338,7 @@ public class TBReportQuery {
             "    COALESCE(iptN.tptCompletionDate, ipt_cA.dateCompletedTpt) AS iptCompletionDate, \n" +
             "    tbTmentNew.specimenSentDate, tbTmentNew.specimenType, tbTmentNew.clinicallyEvaulated, tbTmentNew.chestXrayResultTest,\n" +
             "    tbTmentNew.dateOfChestXrayResultTestDone, tbTmentNew.contractionForTpt, tbTmentNew.contractionOptions," +
-            "    COALESCE(iptN.tptCompletionStatus, ipt_cA.iptCompletionStatus) AS iptCompletionStatus , COALESCE(iptN.tptWeight, weight.weight_at_start_tpt) as weightAtStartTpt \n" +
+            "    (CASE WHEN COALESCE(iptN.tptCompletionStatus, ipt_cA.iptCompletionStatus) = 'IPT Completed' THEN 'Treatment completed' ELSE COALESCE(iptN.tptCompletionStatus, ipt_cA.iptCompletionStatus) END) AS iptCompletionStatus , COALESCE(iptN.tptWeight, weight.weight_at_start_tpt) as weightAtStartTpt \n" +
             "FROM \n" +
             "    bio_data bio \n" +
             "LEFT JOIN tb_status tb ON bio.uuid = tb.person_uuid \n" +
