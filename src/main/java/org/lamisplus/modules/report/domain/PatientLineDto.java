@@ -18,15 +18,7 @@ public interface PatientLineDto {
 	String getPersonUuid();
 	
 	String getHospitalNumber();
-	
-	// String uniqueID;
-	
-//	String getSurname();
-//
-//	String getOtherName();
-//
-//	String getFirstName();
-	
+
 	LocalDate getDateOfBirth();
 	
 	Integer getAge();
@@ -44,10 +36,7 @@ public interface PatientLineDto {
 	String getResidentialState();
 	
 	String getResidentialLga();
-	
-//	String getAddress();
-//	String getPhone();
-	
+
 	Boolean getArchived();
 	
 	String getCareEntryPoint();

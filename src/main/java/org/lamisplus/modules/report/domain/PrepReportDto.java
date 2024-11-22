@@ -35,12 +35,6 @@ public interface PrepReportDto {
     String getBaselineHeight();
     String getHIVStatusAtPrepInitiation();
     String getIndicationForPrep();
-    /*      String getRiskType();
-      String getEntryPoint();
-      String getFacilityReferredTo();
-      String getCurrentRegimenStart();
-      String getCurrentPrepStatus();
-      LocalDate getCurrentPrepStatusDate();*/
     LocalDate getCurrentUrinalysisDate();
     String getCurrentUrinalysis();
     LocalDate getBaseLineUrinalysisDate();
