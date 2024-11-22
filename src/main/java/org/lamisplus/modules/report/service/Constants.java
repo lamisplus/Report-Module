@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Constants {
+
 	
 	// EXTENSION
 	public static final String EXCEL_EXTENSION_XLSX = ".xlsx";
@@ -23,8 +24,15 @@ public class Constants {
 	public static final String FAMILY_INDEX_SHEET = "family_index";
 
 	public static final String REPORT_GENERATION_PROGRESS_TOPIC = "/topic/report-generation-progress";
-	
+
+	public static final List<String> PREP_MSF_HEADERS = Arrays.asList("Facility Name", "LGA", "State", "Month", "Year", "Reporting Officer");
+
 	// headers
+	public static final List<String> GENDER_HEADERS = Arrays.asList("Male", "Female", "Total");
+	public static final List<String> IDENTIFIERS = Arrays.asList("S/No.", "Indicators");
+	public static final List<String> AGE_GROUPS = Arrays.asList(
+			"15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49", "50+"
+	);
 	public static final List<String> PATIENT_LINE_LIST_HEADER = Arrays.asList(
 			"State",
 			"LGA",
