@@ -56,7 +56,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			return excelService.generate(Constants.PATIENT_LINE_LIST, fullData, Constants.PATIENT_LINE_LIST_HEADER);
 		} catch (Exception e) {
 			LOG.error("Error Occurred when generating PATIENT LINE LIST!!!");
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 		LOG.info("End generate patient line list ");
 		return null;
@@ -69,7 +69,6 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
 		try {
 			List<ClientServiceDto> data = reportRepository.generateClientServiceList(facilityId);
-//			LOG.info("fullData 1: " + Arrays.toString(data.toArray()));
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> fullData = GenerateExcelDataHelper.fillClientServiceListDataMapper(data);
 			LOG.info("fullData 2: " + data.size());

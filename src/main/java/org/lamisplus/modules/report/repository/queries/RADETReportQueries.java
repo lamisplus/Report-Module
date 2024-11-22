@@ -84,7 +84,7 @@ public class RADETReportQueries {
             "         person_uuid,\n" +
             "         MAX(hac.visit_date) AS MAXDATE\n" +
             "     FROM\n" +
-            "         hiv_art_clinical hac WHERE hac.archived = 0 AND hac.tb_status != ''\n" +
+            "         hiv_art_clinical hac WHERE hac.archived = 0 \n" +
             "     GROUP BY\n" +
             "         person_uuid\n" +
             "     ORDER BY\n" +
@@ -118,26 +118,43 @@ public class RADETReportQueries {
             "tbstatus as ( \n" +
             "    with tbscreening_cs as ( \n" +
             "        with cs as ( \n" +
-            "            with LatestObservations AS (\n" +
-            "            SELECT id, person_uuid, date_of_observation AS dateOfTbScreened, (CASE WHEN data->'tbIptScreening'->>'status' = 'Presumptive TB and referred for evaluation' THEN 'Presumptive TB' ELSE data->'tbIptScreening'->>'status' END) AS tbStatus, \n" +
-            "                data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, \n" +
-            "                ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS rowNums \n" +
-            "        FROM hiv_observation \n" +
-            "        WHERE type = 'Chronic Care' and data is not null and archived = 0 \n" +
-            "            and date_of_observation between ?2 and ?3 \n" +
-            "            and facility_id = ?1\n" +
-            "),\n" +
-            "FilteredLatestObservations AS (\n" +
-            "    SELECT\n" +
+            "     WITH FilteredObservations AS (\n" +
+            "    SELECT \n" +
             "        id,\n" +
             "        person_uuid,\n" +
-            "        dateOfTbScreened,\n" +
-            "        tbStatus,\n" +
+            "        date_of_observation AS dateOfTbScreened,\n" +
+            "        (CASE WHEN data->'tbIptScreening'->>'status' = 'Presumptive TB and referred for evaluation' THEN 'Presumptive TB' ELSE data->'tbIptScreening'->>'status' END) AS tbStatus,\n" +
+            "        data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType,\n" +
+            "        ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS rowNums\n" +
+            "    FROM \n" +
+            "        hiv_observation\n" +
+            "    WHERE \n" +
+            "        type = 'Chronic Care' \n" +
+            "        AND data IS NOT NULL \n" +
+            "        AND archived = 0 \n" +
+            "        AND date_of_observation BETWEEN ?2 AND ?3\n" +
+            "        AND facility_id = ?1\n" +
+            "),\n" +
+            "FilteredLatestObservations AS (\n" +
+            "    SELECT \n" +
+            "        id, \n" +
+            "        person_uuid, \n" +
+            "        dateOfTbScreened, \n" +
+            "        tbStatus, \n" +
             "        tbScreeningType\n" +
-            "    FROM\n" +
-            "        LatestObservations\n" +
-            "    WHERE\n" +
+            "    FROM \n" +
+            "        FilteredObservations\n" +
+            "    WHERE \n" +
             "        rowNums = 1\n" +
+            "),\n" +
+            "ReportingPeriod AS (\n" +
+            "    SELECT \n" +
+            "        CASE \n" +
+            "            WHEN EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 10 AND 12 OR EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 1 AND 3 \n" +
+            "                THEN 'October - March'\n" +
+            "            WHEN EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 4 AND 9 \n" +
+            "                THEN 'April - September'\n" +
+            "        END AS currentReportingPeriod\n" +
             "),\n" +
             "PresumptiveCheck AS (\n" +
             "    SELECT\n" +
@@ -146,20 +163,29 @@ public class RADETReportQueries {
             "            WHEN EXISTS (\n" +
             "                SELECT 1\n" +
             "                FROM hiv_observation ho\n" +
+            "                CROSS JOIN ReportingPeriod rp\n" +
             "                WHERE ho.person_uuid = lo.person_uuid\n" +
             "                  AND ho.type = 'Chronic Care'\n" +
             "                  AND ho.data IS NOT NULL\n" +
             "                  AND ho.archived = 0\n" +
-            "                  AND ho.date_of_observation BETWEEN lo.dateOfTbScreened - INTERVAL '6 months' AND lo.dateOfTbScreened\n" +
-            "                  AND ho.data->'tbIptScreening'->>'status' ilike 'Presumptive TB%'\n" +
-            "                  AND ho.facility_id = ?1\n" +
+            "                  AND (\n" +
+            "                      CASE \n" +
+            "                          WHEN EXTRACT(MONTH FROM ho.date_of_observation) BETWEEN 10 AND 12 \n" +
+            "                               OR EXTRACT(MONTH FROM ho.date_of_observation) BETWEEN 1 AND 3 \n" +
+            "                          THEN 'October - March'\n" +
+            "                          WHEN EXTRACT(MONTH FROM ho.date_of_observation) BETWEEN 4 AND 9 \n" +
+            "                          THEN 'April - September'\n" +
+            "                      END\n" +
+            "                  ) = rp.currentReportingPeriod\n" +
+            "                  AND ho.data->'tbIptScreening'->>'status' ILIKE 'Presumptive TB%'\n" +
+            "                   AND ho.facility_id = ?1\n" +
             "            ) THEN 'Presumptive TB'\n" +
             "            ELSE lo.tbStatus\n" +
             "        END AS tbStatus\n" +
             "    FROM\n" +
-            "        FilteredLatestObservations lo\n" +
+            "        FilteredLatestObservations lo \n" +
             ")\n" +
-            "SELECT\n" +
+            "SELECT \n" +
             "    lo.id,\n" +
             "    lo.person_uuid,\n" +
             "    lo.dateOfTbScreened,\n" +
@@ -168,7 +194,7 @@ public class RADETReportQueries {
             "FROM\n" +
             "    FilteredLatestObservations lo\n" +
             "JOIN\n" +
-            "    PresumptiveCheck pc ON lo.person_uuid = pc.person_uuid\n" +
+            "    PresumptiveCheck pc ON lo.person_uuid = pc.person_uuid" +
             "        ) \n" +
             "        select * from cs \n" +
             "    ), \n" +
@@ -620,9 +646,6 @@ public class RADETReportQueries {
             " regiment_table.max_visit_date,\n" +
             " start_or_regimen\n" +
             "     ),\n" +
-            " \n" +
-            " \n" +
-            " \n" +
             "iptNew AS (\n" +
             "           WITH tpt_completed AS (\n" +
             "SELECT * FROM (\n" +

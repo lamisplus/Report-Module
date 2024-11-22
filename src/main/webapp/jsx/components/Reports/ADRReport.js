@@ -3,8 +3,6 @@ import axios from "axios";
 import {FormGroup, Label , CardBody, Input} from "reactstrap";
 import {makeStyles} from "@material-ui/core/styles";
 import {Card} from "@material-ui/core";
-// import {Link, useHistory, useLocation} from "react-router-dom";
-// import {TiArrowBack} from 'react-icons/ti'
 import {token, url as baseUrl } from "../../../api";
 import 'react-phone-input-2/lib/style.css'
 import { Button} from 'semantic-ui-react'
@@ -84,9 +82,6 @@ const ADRReport = (props) => {
 
     }
 
-    // const handleInputChange = e => {
-    //     setObjValues ({...objValues,  [e.target.name]: e.target.value, organisationUnitName: e.target.innerText});
-    // }
 
     const handleInputChange = (e) => {
         const selectedOption = e.target.options ? e.target.options[e.target.selectedIndex] : null;
