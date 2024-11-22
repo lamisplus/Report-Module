@@ -1,9 +1,5 @@
 package org.lamisplus.modules.report.utility;
 
-//import com.itextpdf.kernel.pdf.PdfDocument;
-//import com.itextpdf.kernel.pdf.PdfWriter;
-//import com.itextpdf.layout.Document;
-//import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Paragraph;
@@ -25,7 +21,6 @@ public class PdfUtil {
             document.open();
 
             // Add title to the document
-//            document.add(new Paragraph("Object Data").setF.setFontSize(18));
 
             // Convert object data to string and add it to the PDF
             String objectData = getObjectDataAsString(object);
@@ -81,67 +76,4 @@ public class PdfUtil {
         return sb.toString();
     }
 
-
-
-
-
-
-
-    // Method to generate PDF from a simple POJO object
-//    public static <T> void generatePdfFromObject(T object, String filePath) {
-//        try {
-//            // Initialize PDF writer
-//            PdfWriter writer = new PdfWriter(new FileOutputStream(filePath));
-//            // Initialize PDF document
-//            PdfDocument pdfDocument = new PdfDocument(writer);
-//            // Initialize document layout
-//            Document document = new Document(pdfDocument);
-//
-//            // Add title to the document
-//            document.add(new Paragraph("Object Data").setBold().setFontSize(18));
-//
-//            // Convert object data to string and add it to the PDF
-//            String objectData = getObjectDataAsString(object);
-//            document.add(new Paragraph(objectData));
-//
-//            // Close document
-//            document.close();
-//            System.out.println("PDF generated successfully.");
-//        } catch (IOException e) {
-//            System.out.println("Error generating PDF: " + e.getMessage());
-//        }
-//    }
-
-//    public static <T> void generatePdfFromObject(T object, String filePath) {
-//        try (PdfWriter writer = new PdfWriter(new FileOutputStream(filePath));
-//             PdfDocument pdfDocument = new PdfDocument(writer);
-//             Document document = new Document(pdfDocument)) {
-//
-//            // Add title to the document
-//            document.add(new Paragraph("Object Data").setBold().setFontSize(18));
-//
-//            // Convert object data to string and add it to the PDF
-//            String objectData = getObjectDataAsString(object);
-//            document.add(new Paragraph(objectData));
-//
-//            System.out.println("PDF generated successfully.");
-//
-//        } catch (IOException e) {
-//            System.out.println("Error generating PDF: " + e.getMessage());
-//        }
-//    }
-//
-//    // Utility method to convert object to string format
-//    private static <T> String getObjectDataAsString(T object) {
-//        StringBuilder data = new StringBuilder();
-//        for (var field : object.getClass().getDeclaredFields()) {
-//            field.setAccessible(true); // Bypass private field access
-//            try {
-//                data.append(field.getName()).append(": ").append(field.get(object)).append("\n");
-//            } catch (IllegalAccessException e) {
-//                data.append(field.getName()).append(": [ERROR ACCESSING FIELD]\n");
-//            }
-//        }
-//        return data.toString();
-//    }
 }
