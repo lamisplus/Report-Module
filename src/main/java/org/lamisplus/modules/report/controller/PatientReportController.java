@@ -43,8 +43,6 @@ public class PatientReportController {
 	private final GenerateExcelService generateExcelService;
 	
 	private final StatusManagementService statusManagementService;
-	private final DemoMsfService demoMsfService;
-
 
 	
 	@PostMapping("/patient-line-list")
