@@ -94,7 +94,6 @@ public class RADETReportQueries {
             "     INNER JOIN hiv_enrollment he ON he.person_uuid = hac.person_uuid\n" +
             "     LEFT JOIN base_application_codeset bac ON bac.id = hac.clinical_stage_id\n" +
             "     LEFT JOIN base_application_codeset preg ON preg.code = hac.pregnancy_status\n" +
-//            "     LEFT JOIN base_application_codeset tbs ON tbs.id = CAST(hac.tb_status AS INTEGER)\n" +
             "    LEFT JOIN base_application_codeset tbs ON tbs.id = CASE WHEN hac.tb_status ~ '^[0-9]+$' THEN CAST(hac.tb_status AS INTEGER) ELSE 0 END\n  " +
             "         WHERE\n" +
             "           hac.archived = 0\n" +
