@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
@@ -195,12 +196,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
         @Query(value = EACReportQuery.EAC_REPORT_QUERY, nativeQuery = true)
         List<EACReportProjection> generateEACReport(Long facilityId, LocalDate start, LocalDate end);
 
-//    @Query(value = EACReportQuery.EAC_REPORT_QUERY, nativeQuery = true)
-//    List<EACReportProjection> generateEACReport();
 
         @Query(value = NCDReportQuery.NCD_REPORT_QUERY, nativeQuery = true)
         List<NCDReportProjection> generateNCDReport(Long facilityId, LocalDate start, LocalDate end);
 
-//        @Query(value = AHDReportQuery.AHD_QUERY, nativeQuery = true)
-//        List<AHDDTOProjection> generateAHDReport (Long facilityId, LocalDate start, LocalDate end);
+        @Query(value = "SELECT parent_organisation_unit_id FROM base_organisation_unit\n" +
+                "WHERE id = ?1", nativeQuery = true)
+        Optional<Long> getParentId (Long facilityId);
 }
