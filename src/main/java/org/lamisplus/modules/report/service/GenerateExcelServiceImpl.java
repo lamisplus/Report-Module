@@ -56,7 +56,6 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			return excelService.generate(Constants.PATIENT_LINE_LIST, fullData, Constants.PATIENT_LINE_LIST_HEADER);
 		} catch (Exception e) {
 			LOG.error("Error Occurred when generating PATIENT LINE LIST!!!");
-//			e.printStackTrace();
 		}
 		LOG.info("End generate patient line list ");
 		return null;
@@ -66,16 +65,16 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	@SneakyThrows
 	public ByteArrayOutputStream generateClientServiceList(HttpServletResponse response, Long facilityId) {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
-		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
+		LOG.info("Start generating client service list for facility: {}", getFacilityName(facilityId));
 		try {
 			List<ClientServiceDto> data = reportRepository.generateClientServiceList(facilityId);
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
 			List<Map<Integer, Object>> fullData = GenerateExcelDataHelper.fillClientServiceListDataMapper(data);
-			LOG.info("fullData 2: " + data.size());
+			LOG.info("fullData 2: {}", data.size());
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.CLIENT_SERVICE_LIST, fullData, Constants.CLIENT_SERVICE_HEADER);
 		} catch (Exception e) {
-			LOG.error("Error Occurred when generating CLIENT SERVICE LIST!!!");
+			LOG.info("Error Occurred when generating CLIENT SERVICE LIST!!!");
 		}
 		LOG.info("End generate client service list ");
 		return null;
@@ -97,8 +96,8 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.TB_SHEET, data, Constants.TB_REPORT_HEADER);
 		} catch (Exception e) {
-			LOG.error("An error Occurred when generating TB report...");
-			LOG.error("Error message: " + e.getMessage());
+			LOG.info("An error Occurred when generating TB report...");
+			LOG.info("Error message: {}", e.getMessage());
 			e.printStackTrace();
 		}
 		LOG.info("End generate patient TB report");
@@ -108,7 +107,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	@Override
 	@SneakyThrows
 	public ByteArrayOutputStream generateNCDReport(Long facilityId, LocalDate start, LocalDate end) {
-		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
+		LOG.info("Start generating client service list for facility: {}", getFacilityName(facilityId));
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			List<NCDReportProjection> ncdReportProjections = reportRepository.generateNCDReport(facilityId, start, end);
@@ -118,9 +117,8 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.NCD_SHEET, data, Constants.NCD_REPORT_HEADER);
 		} catch (Exception e) {
-			LOG.error("An error Occurred when generating NCD report...");
-			LOG.error("Error message: " + e.getMessage());
-			e.printStackTrace();
+			LOG.info("An error Occurred when generating NCD report...");
+			LOG.error("Error message: {}", e.getMessage());
 		}
 		LOG.info("End generate patient NCD report");
 		return null;
@@ -129,7 +127,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	@Override
 	@SneakyThrows
 	public ByteArrayOutputStream generateEACReport(Long facilityId, LocalDate start, LocalDate end) {
-		LOG.info("Start generating client service list for facility: " + getFacilityName(facilityId));
+		LOG.info("Start generating client service list for facility: {}", getFacilityName(facilityId));
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			List<EACReportProjection> eacReportProjections = reportRepository.generateEACReport(facilityId, start, end);
@@ -139,9 +137,8 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.EAC_SHEET, data, Constants.EAC_REPORT_HEADER);
 		} catch (Exception e) {
-			LOG.error("An error Occurred when generating EAC report...");
-			LOG.error("Error message: " + e.getMessage());
-			e.printStackTrace();
+			LOG.info("An error Occurred when generating EAC report...");
+			LOG.error("Error message: {}", e.getMessage());
 		}
 		LOG.info("End generate patient EAC report");
 		return null;
@@ -150,7 +147,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	@Override
 	@SneakyThrows
 	public ByteArrayOutputStream generateRadet(Long facilityId, LocalDate start, LocalDate end) {
-		LOG.info("Start generating patient RADET for facility:" + getFacilityName(facilityId));
+		LOG.info("Start generating patient RADET for facility:{}", getFacilityName(facilityId));
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			List<RADETDTOProjection> radetDtos = radetService.getRadetDtos(facilityId, start, end);
@@ -162,9 +159,8 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
 
 		} catch (Exception e) {
-			LOG.error("An error Occurred when generating RADET...");
-			LOG.error("Error message: " + e.getMessage());
-			e.printStackTrace();
+			LOG.info("An error Occurred when generating RADET...");
+			LOG.error("Error message: {}", e.getMessage());
 		}
 		LOG.info("End generate patient Radet");
 		return null;
@@ -182,7 +178,6 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			return excelService.generate(Constants.PHARMACY_SHEET, data, Constants.PHARMACY_HEADER);
 		} catch (Exception e) {
 			LOG.info("Error Occurred when generating Pharmacy");
-			e.printStackTrace();
 		}
 		LOG.info("End generate Pharmacy");
 		return null;
