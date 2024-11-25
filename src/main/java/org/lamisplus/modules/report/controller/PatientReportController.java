@@ -8,11 +8,15 @@ import org.lamisplus.modules.report.domain.AppointmentReportDto;
 
 import org.lamisplus.modules.report.domain.PatientLineListDto;
 import org.lamisplus.modules.report.service.*;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
@@ -39,7 +43,6 @@ public class PatientReportController {
 	private final GenerateExcelService generateExcelService;
 	
 	private final StatusManagementService statusManagementService;
-
 
 	
 	@PostMapping("/patient-line-list")
@@ -254,6 +257,4 @@ public class PatientReportController {
 		messagingTemplate.convertAndSend("/topic/clinic-data", "end");
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating Clinic report");
 	}
-	
-	
 }

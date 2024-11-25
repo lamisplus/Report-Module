@@ -80,7 +80,6 @@ public interface RADETDTOProjection {
 	String getClientVerificationOutCome();
 
 
-	//Biometric status
 	LocalDate getDateBiometricsEnrolled();
 	Integer getNumberOfFingersCaptured();
 	LocalDate getDateBiometricsRecaptured();
@@ -93,7 +92,6 @@ public interface RADETDTOProjection {
 	LocalDate getDateOfExtendEACCompletion();
 	LocalDate getDateOfRepeatViralLoadResult();
 	LocalDate getDateOfRepeatViralLoadEACSampleCollection();
-	// LocalDate getDateSampleCollected();
 	String getRepeatViralLoadResult();
 	String getTbStatus();
 	LocalDate getDateOfTbScreened();
@@ -131,10 +129,8 @@ public interface RADETDTOProjection {
 	String getCurrentDsdOutlet();
 
 	LocalDate getDateReturnToSite();
-	// String getDsdModel();
 	LocalDate getDateofTbDiagnosticResultReceived();
 
-	//TB Treatment
 	String  getTbTreatementType();
 	String  getTbTreatmentOutcome();
 	LocalDate getTbTreatmentStartDate();
@@ -142,7 +138,6 @@ public interface RADETDTOProjection {
 	String getIptCompletionStatus();
 	String getTbScreeningType();
 
-	//Crytococal Antigen
 	String getCaseManager();
 	String getVaCauseOfDeath();
 	String getTreatmentMethodDate();

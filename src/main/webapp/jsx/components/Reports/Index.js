@@ -39,6 +39,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Divider from '@mui/material/Divider';
+import PrEPMSF from "./PrEPMSF";
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -70,6 +71,11 @@ const Reports = (props) => {
     setActiveItem1(value);
     console.log(value); // This should print the selected option
   };
+
+  const reportMsfs = [
+    { key: 'prep-msf', value: 'prep-msf', text: 'PrEP Monthly Summary Form' },
+  ]
+
 
   const reportSurveillance = [
     { key: 'hts-report', value: 'hts-report', text: 'HTS REPORT' },
@@ -182,8 +188,10 @@ const Reports = (props) => {
         return <ADRReport handleItemClick={handleItemClick1} setCompleted={setCompleted} completed={completed} />;
       case "custom-report":
         return <CustomReport handleItemClick={handleItemClick1} setCompleted={setCompleted} completed={completed} />;
-        case 'PMTCT-MSF':
+      case 'PMTCT-MSF':
           return <PMTCTMonthlySummaryReport handleItemClick={handleItemClick1} setCompleted={setCompleted} completed={completed} />;
+      case 'prep-msf':
+            return <PrEPMSF handleItemClick={handleItemClick1} setCompleted={setCompleted} completed={completed} />;
       default:
         return null;
     }
@@ -325,6 +333,26 @@ const Reports = (props) => {
         </AccordionSummary>
         <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
           {Object.values(reportPsychosocial).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
+            <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
+    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: activeItem1 === option.value ? "grey" : "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>
+  ))}
+        </AccordionDetails>
+      </Accordion>
+
+      <Accordion expanded={expanded === 'panel7'} onChange={handleChange('panel7')} style={{ backgroundColor: "#014D88" }}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel3bh-content"
+          id="panel3bh-header"
+        >
+         
+          <Typography sx={{  flexShrink: 0, color: "#fff" }}>
+          Monthly Summary Form Report
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
+          {Object.values(reportMsfs).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
             <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
     <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: activeItem1 === option.value ? "grey" : "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
     <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>

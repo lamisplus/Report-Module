@@ -44,16 +44,7 @@ public class ExcelService {
 		}
 	}
 	
-	private int createCellHeader(Row row, int columnCount, String value){
-		Font font = getFont();
-		CellStyle style = workbook.createCellStyle();
-		style.setFont(font);
-		Cell cell = row.createCell(columnCount);
-		cell.setCellValue(value);
-		cell.setCellStyle(style);
-		return 0;
-	}
-	
+
 	@NotNull
 	private Font getFont() {
 		Font font  = workbook.createFont();
@@ -191,7 +182,5 @@ public class ExcelService {
 		}
 		return bao;
 	}
-	
-	
 	
 }

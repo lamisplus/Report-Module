@@ -2,6 +2,8 @@ package org.lamisplus.modules.report.repository.queries;
 
 public class RADETReportQueries {
 
+    private RADETReportQueries() {}
+
 
     public static final String RADET_REPORT_QUERY = "WITH bio_data AS (SELECT DISTINCT (p.uuid) AS personUuid,p.hospital_number AS hospitalNumber, h.unique_id as uniqueId,\n" +
             "EXTRACT(YEAR FROM  AGE(NOW(), date_of_birth)) AS age,\n" +
