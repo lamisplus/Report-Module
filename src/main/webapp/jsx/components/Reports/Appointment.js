@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import axios from "axios";
-import {FormGroup, Label , CardBody, Spinner,Input,Form} from "reactstrap";
+import {FormGroup, Label , CardBody} from "reactstrap";
 import {makeStyles} from "@material-ui/core/styles";
 import {Card} from "@material-ui/core";
 // import {Link, useHistory, useLocation} from "react-router-dom";
@@ -28,7 +28,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import 'react-widgets/dist/css/react-widgets.css';
 import { forwardRef } from 'react';
 import { toast} from "react-toastify";
-import { Message, Icon } from 'semantic-ui-react'
+import { Message } from 'semantic-ui-react'
 import ProgressComponent from "./ProgressComponent"
 
 const tableIcons = {
@@ -173,7 +173,7 @@ const Appointment = (props) => {
     
                 <h2 style={{color:'#000'}}>APPOINTMENT REPORT</h2>
                 <br/>
-                    <form >
+                    < >
                         <div className="row">
 
                             <div className="form-group  col-md-6">
@@ -249,12 +249,12 @@ const Appointment = (props) => {
                             <div className="row">
                             <div className="form-group mb-3 col-md-6">
                             <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={handleSubmit}
-                                disabled={objValues.facilityId==="" || objValues.startDate==="" || objValues.endDate===""  || objValues.type==="" ? true : false}
+                                disabled={objValues.facilityId==="" || objValues.startDate==="" || objValues.endDate===""  || objValues.type==="" ? true : false || loading} 
                             />
                             </div>
                             </div>
                         </div>
-                    </form>
+                    </>
 
                     <br/>
                     {loading && (

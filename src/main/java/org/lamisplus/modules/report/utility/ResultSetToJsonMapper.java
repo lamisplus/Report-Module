@@ -8,7 +8,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -35,52 +34,16 @@ public class ResultSetToJsonMapper {
         while(resultSet.next())
         {
             Map<Integer, Object> map = new HashMap<>();
-            //jsonObject = new JSONObject();
-            //if(resultSet.next()) {
                 for (int index = 1; index <= columnCount; index++) {
                     String column = rsmd.getColumnName(index);
-                    //LOG.info("column is {}", column);
-                    //exclude column
                     if (excludedColumn != null && excludedColumn.contains(column)) {
                         continue;
                     }
-
-
                     Object value = resultSet.getObject(column);
-                    //LOG.info("Object is {}", value);
-                    /*if (value == null) {
-                        value = "";
-                        jsonObject.put(column, value);
-                    } else if (value instanceof Integer) {
-                        jsonObject.put(column, (Integer) value);
-                    } else if (value instanceof String) {
-                        jsonObject.put(column, (String) value);
-                    } else if (value instanceof Boolean) {
-                        jsonObject.put(column, (Boolean) value);
-                    } else if (value instanceof Date) {
-                        jsonObject.put(column, value.toString());
-                    } else if (value instanceof Long) {
-                        jsonObject.put(column, (Long) value);
-                    } else if (value instanceof Double) {
-                        jsonObject.put(column, (Double) value);
-                    } else if (value instanceof Float) {
-                        jsonObject.put(column, (Float) value);
-                    } else if (value instanceof BigDecimal) {
-                        jsonObject.put(column, (BigDecimal) value);
-                    } else if (value instanceof Byte) {
-                        jsonObject.put(column, (Byte) value);
-                    } else if (value instanceof byte[]) {
-                        jsonObject.put(column, (byte[]) value);
-                    } else if (rsmd.getColumnType(index) == 1111) {
-                        jsonObject.put(column, value);
-                    } else {
-                        throw new IllegalArgumentException("Unmappable object type: " + value.getClass());
-                    }*/
                     map.put(index, value);
                 }
-            //}
             result.add(map);
-        }//while(resultSet.next());
+        }
 
         return result;
     }

@@ -6,23 +6,26 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.formula.functions.Today;
 import org.audit4j.core.util.Log;
 import org.lamisplus.modules.hiv.domain.dto.*;
 import org.lamisplus.modules.report.domain.*;
+import org.lamisplus.modules.report.domain.LabReport;
+import org.lamisplus.modules.report.domain.PatientLineDto;
+import org.lamisplus.modules.report.domain.PharmacyReport;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.utility.Scrambler;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Component;
+import scala.util.Try;
 
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
 
 
 @Component
@@ -33,6 +36,10 @@ public class GenerateExcelDataHelper {
 
 	private final Scrambler scrambler;
 	private final SimpMessageSendingOperations messagingTemplate;
+	private final ExcelService excelService;
+	public static final String RESULT_OUTPUT = "Results:";
+	public static final String ERROR_OUTPUT = "The error message is: ";
+	public static final String RECORD_OUTPUT = "Done converting db records total size {}";
 
 	public static List<Map<Integer, Object>> fillPatientLineListDataMapper(@NonNull List<PatientLineDto> listFinalResult) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
@@ -49,8 +56,6 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(patient.getPersonUuid())));
 				map.put(index++, getStringValue(String.valueOf(patient.getHospitalNumber())));
 				map.put(index++, getStringValue(String.valueOf(patient.getUniqueId())));
-//				map.put(index++, getStringValue(String.valueOf(patient.getSurname())));
-//				map.put(index++, getStringValue(String.valueOf(patient.getFirstName())));
 				map.put(index++, patient.getDateOfBirth());
 				map.put(index++, getStringValue(String.valueOf(patient.getAge())));
 				map.put(index++, getStringValue(String.valueOf(patient.getGender())));
@@ -59,8 +64,6 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(patient.getOccupation())));
 				map.put(index++, getStringValue(String.valueOf(patient.getResidentialState())));
 				map.put(index++, getStringValue(String.valueOf(patient.getResidentialLga())));
-//				map.put(index++, getStringValue(String.valueOf(patient.getAddress() != null ? patient.getAddress().replace("\"", ""):null)));
-//				map.put(index++, getStringValue(String.valueOf(patient.getPhone())));
 				map.put(index++, getStringValue(String.valueOf(patient.getArchived())));
 				map.put(index++, getStringValue(String.valueOf(patient.getCareEntryPoint())));
 				map.put(index++, (patient.getDateOfConfirmedHIVTest()));
@@ -102,15 +105,15 @@ public class GenerateExcelDataHelper {
 				map.put(index++, patient.getLastViralLoad());
 				map.put(index++, vlDate);
 				map.put(index++, patient.getViralLoadType());
-				map.put(index, "");
+				map.put(index, getStringValue(patient.getCmName()));
 				result.add(map);
 			}
 		}
-		Log.info("result: " + result.size()); // going to be one
+		Log.info(RESULT_OUTPUT+ result.size());
 		return result;
 	}
 
-	public static List<Map<Integer, Object>> fillTBReportDataMapper(@NonNull List<TBReportProjection> tbReportProjections, LocalDate end) {
+	public static List<Map<Integer, Object>> fillTBReportDataMapper(@NonNull List<TBReportProjection> tbReportProjections) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		for (TBReportProjection tbReportProjection : tbReportProjections) {
 			if (tbReportProjection != null) {
@@ -125,8 +128,6 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getHospitalNumber())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getUniqueId())));
 
-				//map.put(index++, getStringValue(String.valueOf(tbReportProjection.getSurname())));
-				//map.put(index++, getStringValue(String.valueOf(tbReportProjection.getFirstName())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getGender())));
 				map.put(index++, tbReportProjection.getDateOfBirth());
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getAge())));
@@ -141,39 +142,45 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbScreeningType())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbStatus())));
 
+				map.put(index++, tbReportProjection.getDateOfTbSampleCollection());
+				map.put(index++, tbReportProjection.getSpecimenSentDate());
+				map.put(index++, tbReportProjection.getSpecimenType());
+
 				map.put(index++, (tbReportProjection.getDateOfTbDiagnosticResultReceived() != null) ? "Yes" : "No");
-				// Date of TB Diagnostic Evaluation
 
 				map.put(index++, tbReportProjection.getDateOfTbDiagnosticResultReceived());
-
-				map.put(index++, tbReportProjection.getDateOfTbSampleCollection());
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticTestType())));
 				map.put(index++, tbReportProjection.getDateOfTbDiagnosticResultReceived());
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticResult())));
 
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getClinicallyEvaulated())));
+				map.put(index++, tbReportProjection.getDateOfChestXrayResultTestDone());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getChestXrayResultTest())));
 
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentStartDate())));
+
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentType())));
-				map.put(index++, tbReportProjection.getTbTreatmentCompletionDate());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentStartDate())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentOutcome())));
+				map.put(index++, tbReportProjection.getTbTreatmentCompletionDate());
 
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getEligibleForTPT())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getContractionForTpt())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getContractionOptions())));
+
 				map.put(index++, tbReportProjection.getDateOfIptStart());
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getRegimenName())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getIptCompletionStatus())));
-
 				map.put(index++, tbReportProjection.getIptCompletionDate());
-
 				map.put(index, tbReportProjection.getWeightAtStartTpt());
 
 				result.add(map);
 			}
 		}
-		Log.info("result: " + result.size()); // going to be one
+		Log.info(RESULT_OUTPUT + result.size());
 		return result;
 	}
 
-	public static List<Map<Integer, Object>> fillEACReportDataMapper(@NonNull List<EACReportProjection> eacReportProjections, LocalDate end) {
+	public static List<Map<Integer, Object>> fillEACReportDataMapper(@NonNull List<EACReportProjection> eacReportProjections) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		for (EACReportProjection eacReportProjection : eacReportProjections) {
 			if (eacReportProjection != null) {
@@ -199,14 +206,10 @@ public class GenerateExcelDataHelper {
 				map.put(index++, eacReportProjection.getLastPickupDateBeforeUnsuppressedVLR());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMonthOfARVRefillOfLastPickupDateBeforeUnsuppressedVLR())));
 
-
 				map.put(index++, eacReportProjection.getDateOfVLSCOfUnsuppressedVLR());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMostRecentUnsuppressedVLR())));
 				map.put(index++, eacReportProjection.getDateOfUnsuppressedVLR());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getUnsuppressedVLRIndication())));
-
-				// map.put(index++, getStringValue(String.valueOf(eacReportProjection.getCurrentArtStatus())));
-				// map.put(index++, eacReportProjection.getDateOfCurrentArtStatus());
 
 				map.put(index++, eacReportProjection.getDateOfCommencementOfFirstEAC());
 				map.put(index++, eacReportProjection.getDateOfFirstEACSessionCompleted());
@@ -224,62 +227,40 @@ public class GenerateExcelDataHelper {
 				map.put(index++, eacReportProjection.getDateOfFourthEACSessionCompleted());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfFourthEACSession())));
 
-				map.put(index++, eacReportProjection.getDateOfCommencementOfFifthEAC());
-				map.put(index++, eacReportProjection.getDateOfFifthEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfFifthEACSession())));
-
-				map.put(index++, eacReportProjection.getDateOfCommencementOfSixthEAC());
-				map.put(index++, eacReportProjection.getDateOfSixthEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfSixthEACSession())));
-
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getNumberOfEACSessionsCompleted())));
 				map.put(index++, eacReportProjection.getDateOfRepeatViralLoadPostEACSampleCollected());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getRepeatViralLoadResultPostEAC())));
 				map.put(index++, eacReportProjection.getDateOfRepeatViralLoadResultPostEACVL());
 
+				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getEligibleForSwitch()))); // eligble for switch
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getReferredToSwitchCommittee())));
-				map.put(index++, eacReportProjection.getDateReferredToSwitchCommitted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getEligibleForSwitch())));
+				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getReferredToSwitchCommitteePostSwitchEAC())));
+				map.put(index++, eacReportProjection.getDateReferredToSwitchCommittedPostSwitchEAC());
 
-				map.put(index++, eacReportProjection.getDateOfCommencementOfSeventhPostSwitchCommitteeEAC());
-				map.put(index++, eacReportProjection.getDateOfSeventhPostSwitchCommitteeEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfSeventhPostSwitchCommitteeEACSession())));
-
-				map.put(index++, eacReportProjection.getDateOfCommencementOfEighthPostSwitchCommitteeEAC());
-				map.put(index++, eacReportProjection.getDateOfEighthPostSwitchCommitteeEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfEighthPostSwitchCommitteeEACSession())));
-
-				map.put(index++, eacReportProjection.getDateOfCommencementOfNinthPostSwitchCommitteeEAC());
-				map.put(index++, eacReportProjection.getDateOfNinthPostSwitchCommitteeEACSessionCompleted());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfNinthPostSwitchCommitteeEACSession())));
+				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfPostSwitchEACSession())));
 
 				map.put(index++, eacReportProjection.getDateOfRepeatViralLoadPostSwitchEACSampleCollected());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getRepeatViralLoadResultPostSwitchEAC())));
 				map.put(index++, eacReportProjection.getDateOfRepeatViralLoadResultPostSwitchEACVL());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfPostSwitchEACSession())));
 
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getReferredToSwitchCommitteePostSwitchEAC())));
-				map.put(index++, eacReportProjection.getDateReferredToSwitchCommittedPostSwitchEAC());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getEligibleForSwitchPostSwitchEAC())));
-
 				map.put(index++, eacReportProjection.getDateSwitched());
+
 				map.put(index++, eacReportProjection.getStartDateOfSwitchedRegimen());
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getSwitchedARTRegimen())));
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getSwitchedARTRegimenLine())));
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getSwitchedARTRegimen())));
 
 				map.put(index, getStringValue(String.valueOf(eacReportProjection.getCaseManager())));
 
-
 				result.add(map);
 			}
 		}
-		Log.info("result: " + result.size()); // going to be one
+		Log.info(RESULT_OUTPUT + result.size());
 		return result;
 	}
 
 
-	public static List<Map<Integer, Object>> fillNCDReportDataMapper(@NonNull List<NCDReportProjection> ncdReportProjections, LocalDate end) {
+	public static List<Map<Integer, Object>> fillNCDReportDataMapper(@NonNull List<NCDReportProjection> ncdReportProjections) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		for (NCDReportProjection ncdReportProjection : ncdReportProjections) {
 			if (ncdReportProjection != null) {
@@ -293,8 +274,6 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getPatientId())));
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getHospitalNumber())));
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getUniqueId())));
-				//map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getSurname())));
-				//map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getOtherName())));
 				map.put(index++, ncdReportProjection.getDateOfBirth());
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getAge())));
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getSex())));
@@ -303,8 +282,6 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getOccupation())));
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getStateOfResidence())));
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getLgaOfResidence())));
-				//map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getAddress())));
-				//map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getPhoneNumber())));
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getPregnancyStatus())));
 				map.put(index++, ncdReportProjection.getArtStartDate());
 
@@ -346,7 +323,6 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentHtnRegimen())));
 				map.put(index++, ncdReportProjection.getLastHtnPickUpDate());
 
-				// Months of HTN Medication Refill missing
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getMonthsOfHTNRefill())));
 				map.put(index++, getStringValue(String.valueOf(ncdReportProjection.getCurrentHtnStatus())));
 				map.put(index++, ncdReportProjection.getDateCurrentHtnStatus());
@@ -398,11 +374,11 @@ public class GenerateExcelDataHelper {
 				result.add(map);
 			}
 		}
-		Log.info("result: " + result.size()); // going to be one
+		Log.info(RESULT_OUTPUT+ result.size());
 		return result;
 	}
 
-	public  List<Map<Integer, Object>> fillRadetDataMapper(@NonNull List<RADETDTOProjection> reportDtos, LocalDate endDate) {
+	public  List<Map<Integer, Object>> fillRadetDataMapper(@NonNull List<RADETDTOProjection> reportDtos) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		deleteErrorFile();
 		int sn = 1;
@@ -440,16 +416,6 @@ public class GenerateExcelDataHelper {
 						|| previousStatus.contains("stop"))){
 					previousStatus = "Stopped Treatment";
 				}
-//				if(radetReportDto.getTbStatus() != null){
-//					if(radetReportDto.getTbStatus().contains("No")){
-//						tbStatusOutCome ="No sign or symptoms of TB";
-//						//LOG.info("tbStatusOutCome {}", radetReportDto.getTbStatus());
-//					}else {
-//						tbStatusOutCome = "TB Suspected and referred for evaluation";
-//						//LOG.info("tbStatusOutCome {}", radetReportDto.getTbStatus());
-//					}
-//				}
-
 				map.put(index++, sn);
 				map.put(index++, radetReportDto.getState());
 				map.put(index++, radetReportDto.getLga());
@@ -501,8 +467,6 @@ public class GenerateExcelDataHelper {
 				map.put(index++, currentStatus);
 				map.put(index++, radetReportDto.getCurrentStatusDate());
 				map.put(index++, radetReportDto.getClientVerificationOutCome());
-//				map.put(index++, radetReportDto.getClientVerificationStatus());
-				// map.put(index++, radetReportDto.getBiometricStatus());
 
 				map.put(index++, radetReportDto.getCauseOfDeath());
 				map.put(index++, radetReportDto.getVaCauseOfDeath());
@@ -517,7 +481,6 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getDateOfTbScreened());
 				map.put(index++, radetReportDto.getTbScreeningType());
 				map.put(index++, radetReportDto.getTbStatus());
-				// map.put(index++, radetReportDto.getTbStatusOutCome());
 				//tb lab
 				map.put(index++, radetReportDto.getDateOfTbSampleCollection());
 				map.put(index++, radetReportDto.getTbDiagnosticTestType());
@@ -528,9 +491,6 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getTbTreatementType());
 				map.put(index++, radetReportDto.getTbCompletionDate());
 				map.put(index++, radetReportDto.getTbTreatmentOutcome());
-				// map.put(index++, radetReportDto.getDateOfLastTbLam());
-				// map.put(index++, radetReportDto.getTbLamResult());
-
 
 				//TPT
 				map.put(index++, radetReportDto.getDateOfIptStart());
@@ -554,8 +514,6 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getCurrentDSDModel());
 				map.put(index++, radetReportDto.getCurrentDsdOutlet());
 				map.put(index++, radetReportDto.getDateReturnToSite());
-//				map.put(index++, null);
-
 
 				//chronic care
 				map.put(index++, null);
@@ -570,15 +528,12 @@ public class GenerateExcelDataHelper {
 				map.put(index++, treatmentMethodDateValue);
 				map.put(index++, radetReportDto.getCervicalCancerTreatmentScreened());
 
-				// map.put(index++, radetReportDto.getLastCrytococalAntigen());
-				// map.put(index++, radetReportDto.getDateOfLastCrytococalAntigen());
 
 				//biometrics
 				map.put(index++, radetReportDto.getDateBiometricsEnrolled());
 				map.put(index++, radetReportDto.getNumberOfFingersCaptured());
 				map.put(index++, radetReportDto.getDateBiometricsRecaptured());
 				map.put(index++, radetReportDto.getNumberOfFingersRecaptured());
-				// map.put(index++, null);
 
 				//case manager
 				map.put(index, radetReportDto.getCaseManager());
@@ -589,10 +544,10 @@ public class GenerateExcelDataHelper {
 			} catch (Exception e) {
 				LOG.error("An error occurred when converting db record to excel for patient id {}", currentRecord.getPersonUuid());
 				writeToErrorFile(currentRecord);
-				LOG.error("The error message is: " + e.getMessage());
+				LOG.error(ERROR_OUTPUT + e.getMessage());
 			}
 		}
-		LOG.info("Done converting db records total size "+ result.size());
+		LOG.info(RECORD_OUTPUT + result.size());
 		return result;
 	}
 
@@ -606,6 +561,7 @@ public class GenerateExcelDataHelper {
 			e.printStackTrace();
 		}
 	}
+
 
 	private void deleteErrorFile(){
 		File file = new File("radet_error.json");
@@ -640,11 +596,11 @@ public class GenerateExcelDataHelper {
 				if (htsReportDto != null) {
 					Map<Integer, Object> map = new HashMap<>();
 					int index = 0;
-
 					map.put(index++, String.valueOf(sn));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getDatimCode())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFacility())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getClientCode())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPatientId())));
 					map.put(index++, getStringValue(String.valueOf(scrambler.scrambleCharacters(htsReportDto.getFirstName()))));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getSurname() != null ? scrambler.scrambleCharacters(htsReportDto.getSurname()) :"")));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getOtherName() != null ? scrambler.scrambleCharacters(htsReportDto.getOtherName()): "")));
@@ -653,7 +609,6 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getAge())));
 					map.put(index++, htsReportDto.getDateOfBirth());
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPhoneNumber() != null ? scrambler.scrambleNumbers(htsReportDto.getPhoneNumber()) : "")));
-//					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPhoneNumber()) != null ? scrambler.scrambleNumbers(htsReportDto.getPhoneNumber() :""))));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getMaritalStatus())));
 					map.put(index++, htsReportDto.getClientAddress() != null ? getStringValue(String.valueOf(scrambler.scrambleCharacters(htsReportDto.getClientAddress()))).replace("\"", ""):"");
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getLgaOfResidence())));
@@ -663,8 +618,6 @@ public class GenerateExcelDataHelper {
 					map.put(index++, htsReportDto.getDateVisit());
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFirstTimeVisit())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getEntryPoint())));
-//					map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfWives())));
-//					map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfChildren())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getIndexClient())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPreviouslyTested())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getReferredFrom())));
@@ -672,8 +625,10 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getModality())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getCounselingType())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPregnancyStatus())));
-//					map.put(index++, getStringValue(String.valueOf(htsReportDto.getBreastFeeding())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getIndexType())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPreviousVisitDate())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPreviousTestResult())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getHtsCount())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFinalHivTestResult())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPatientUuid())));
 					map.put(index++, htsReportDto.getDateOfHivTesting());
@@ -683,12 +638,9 @@ public class GenerateExcelDataHelper {
 					map.put(index++, htsReportDto.getRecencyTestDate());
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getRecencyInterpretation())));
 					map.put(index++, htsReportDto.getViralLoadSampleCollectionDate());
-//					map.put(index++, getStringValue(String.valueOf(htsReportDto.getViralLoadResult())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getViralLoadConfirmationResult())));
-//					map.put(index++, htsReportDto.getViralLoadConfirmationDate());
 					map.put(index++, htsReportDto.getViralLoadReceivedResultDate());
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFinalRecencyResult())));
-//					map.put(index++, getStringValue(String.valueOf(htsReportDto.getAssessmentCode())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getSyphilisTestResult())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getHepatitisBTestResult())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getHepatitisCTestResult())));
@@ -706,136 +658,24 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfLubricantsGiven())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getHtsLatitude())));
 					map.put(index, getStringValue(String.valueOf(htsReportDto.getHtsLongitude())));
+
 					result.add(map);
-					sn++;
+						sn++;
+					}
 				}
-			}
-			LOG.info("Done converting db records total size {}", result.size());
-			return result;
-		}catch (Exception e) {
+				LOG.info(RECORD_OUTPUT, result.size());
+				return result;
+			}catch (Exception e) {
 			LOG.error("An error occurred when converting db records to excel");
-			LOG.error("The error message is: " + e.getMessage());
+			LOG.error(ERROR_OUTPUT + e.getMessage());
 			e.printStackTrace();
 		}
 		return result;
 	}
 
-
-	public  List<Map<Integer, Object>> fillPrepDataMapper(@NonNull List<PrepReportDto> prepReportDtos) {
-		List<Map<Integer, Object>> result = new ArrayList<>();
-		int sn = 1;
-		Log.info("converting PrEP db records to excel ....");
-		try {
-			for (PrepReportDto prepReportDto : prepReportDtos) {
-				if (prepReportDto != null) {
-					Map<Integer, Object> map = new HashMap<>();
-					int index = 0;
-
-					map.put(index++, String.valueOf(sn));
-					map.put(index++, String.valueOf(String.valueOf(prepReportDto.getDatimId())));
-					map.put(index++, String.valueOf(String.valueOf(prepReportDto.getState())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getLga())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getFacilityName())));
-					map.put(index++, String.valueOf(String.valueOf(prepReportDto.getPersonUuid())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getHospitalNumber())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getFirstName())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getSurname())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getOtherName())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getSex())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getTargetGroup())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getAge())));
-					map.put(index++,prepReportDto.getDateOfBirth());
-					map.put(index++,getStringValue(String.valueOf(prepReportDto.getPhone())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getMaritalStatus())));
-					map.put(index++, getStringValue(prepReportDto.getAddress() != null?prepReportDto.getAddress().replace("\"", ""):""));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getResidentialLga())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getResidentialState())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getEducation())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getOccupation())));
-					map.put(index++, prepReportDto.getDateOfRegistration());
-					map.put(index++, prepReportDto.getPrepCommencementDate());
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaseLineRegimen())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getPrepType())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getPrepDistributionSetting())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineSystolicBp())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineDiastolicBp())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineWeight())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaselineHeight())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaseLineCreatinine())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaseLineHepatitisB())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaseLineHepatitisC())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getHIVStatusAtPrepInitiation())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getBaseLineUrinalysis())));
-					map.put(index++, prepReportDto.getBaseLineUrinalysisDate());
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getIndicationForPrep())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentRegimen())));
-					map.put(index++, prepReportDto.getDateOfLastPickup());
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentStatus())));
-					map.put(index++, prepReportDto.getDateOfCurrentStatus());
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentSystolicBp())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentDiastolicBp())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentWeight())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentHeight())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentHIVStatus())));
-					map.put(index++, prepReportDto.getDateOfCurrentHIVStatus());
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getCurrentUrinalysis())));
-					map.put(index++, prepReportDto.getCurrentUrinalysisDate());
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getPregnancyStatus())));
-					map.put(index++, getStringValue(String.valueOf(prepReportDto.getInterruptionReason())));
-					map.put(index++, prepReportDto.getInterruptionDate());
-					map.put(index, prepReportDto.getHivEnrollmentDate());
-
-					result.add(map);
-					sn++;
-				}
-			}
-			LOG.info("Done converting db records total size {}", result.size());
-			return result;
-		}catch (Exception e) {
-			LOG.error("An error occurred when converting db records to excel");
-			LOG.error("The error message is: " + e.getMessage());
-			e.printStackTrace();
-		}
-		return result;
-	}
-
-
-	public static List<Map<Integer, Object>> fillBiometricDataMapper(@NonNull List<BiometricReportDto> biometrics) {
-		List<Map<Integer, Object>> result = new ArrayList<>();
-		int sn = 1;
-		Log.info("converting Biometric db records to excel ....");
-		try {
-			for (BiometricReportDto dto : biometrics) {
-				Map<Integer, Object> map = new HashMap<>();
-				int index = 0;
-				map.put(index++, String.valueOf(sn));
-				map.put(index++, dto.getState());
-				map.put(index++, dto.getFacilityName());
-				map.put(index++, dto.getDatimId());
-				map.put(index++, dto.getHospitalNum());
-				map.put(index++, getStringValue(dto.getName()));
-				map.put(index++, dto.getDateBirth());
-				map.put(index++, getStringValue(String.valueOf(dto.getAge())));
-				map.put(index++, dto.getSex());
-				map.put(index++, dto.getAddress());
-				map.put(index++, dto.getPhone());
-				map.put(index++, dto.getEnrollDate());
-				map.put(index++, getStringValue(String.valueOf(dto.getFingers())));
-				map.put(index, dto.getValid());
-				result.add(map);
-				sn++;
-			}
-			LOG.info("Done converting db records total size {}", result.size());
-			return result;
-		}catch (Exception e) {
-			LOG.error("An error occurred when converting db records to excel");
-			LOG.error("The error message is: " + e.getMessage());
-		}
-		return result;
-	}
 
 	private static String getStringValue(String value) {
-		return value.replace("null", "");
+		return value!= null ? value.replace("null", "") : "";
 	}
 
 	public static List<Map<Integer, Object>> fillClinicDataMapper(
@@ -870,11 +710,11 @@ public class GenerateExcelDataHelper {
 				result.add(map);
 				sn++;
 			}
-			LOG.info("Done converting db records total size {}", result.size());
+			LOG.info(RECORD_OUTPUT + result.size());
 			return result;
 		}catch (Exception e) {
 			LOG.error("An error occurred when converting db records to excel");
-			LOG.error("The error message is: " + e.getMessage());
+			LOG.error(ERROR_OUTPUT + e.getMessage());
 		}
 		return result;
 	}
@@ -903,11 +743,11 @@ public class GenerateExcelDataHelper {
 				result.add(map);
 				sn++;
 			}
-			LOG.info("Done converting db records total size {}", result.size());
+			LOG.info(RECORD_OUTPUT, result.size());
 			return result;
 		}catch (Exception e) {
 			LOG.error("An error occurred when converting db records to excel");
-			LOG.error("The error message is: " + e.getMessage());
+			LOG.error(ERROR_OUTPUT + e.getMessage());
 		}
 		return result;
 	}
@@ -934,60 +774,124 @@ public class GenerateExcelDataHelper {
 				result.add(map);
 				sn++;
 			}
-			LOG.info("Done converting db records total size {}", result.size());
+			LOG.info(RECORD_OUTPUT, result.size());
 			return result;
 		}catch (Exception e) {
 			LOG.error("An error occurred when converting db records to excel");
-			LOG.error("The error message is: " + e.getMessage());
+			LOG.error(ERROR_OUTPUT + e.getMessage());
 		}
 		return result;
 	}
 
-	public static List<Map<Integer, Object>> fillClientServiceListDataMapper(@NonNull List<ClientServiceDto> listFinalResult) {
+	public static List<Map<Integer, Object>> fillClientServiceListDataMapper(@NonNull List<ClientServiceDto> listFinalResult)  {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		for (ClientServiceDto clientService : listFinalResult) {
 			if (clientService != null) {
 				Map<Integer, Object> map = new HashMap<>();
 				int index = 0;
-				map.put(index++, getStringValue(clientService.getFacilityState()));
-				map.put(index++, getStringValue(clientService.getFacilityName()));
-				map.put(index++, getStringValue(clientService.getSerialEnrollmentNo()));
-				map.put(index++, getStringValue(clientService.getPersonUuid()));
-//				map.put(index++, radetReportDto.getHospitalNumber());
-				map.put(index++, clientService.getHospitalNumber());
-				map.put(index++, getStringValue(String.valueOf(clientService.getDateOfObservation())));
-				map.put(index++, getStringValue(clientService.getAnyOfTheFollowingList()));
-				map.put(index++, getStringValue(clientService.getDateOfAttempt()));
-				map.put(index++, getStringValue(clientService.getNoAttempts()));
-				map.put(index++, getStringValue(clientService.getVerificationAttempts()));
-//				map.put(index++, getStringValue(clientService.getVerificationStatus()));
-				map.put(index++, getStringValue(clientService.getOutcome()));
-				map.put(index++, getStringValue(clientService.getDsdModel()));
-				map.put(index++, getStringValue(clientService.getComment()));
-				map.put(index++, getStringValue(clientService.getReturnedToCare()));
-				map.put(index++, getStringValue(clientService.getReferredTo()));
-				map.put(index++, getStringValue(clientService.getDiscontinuation()));
-				map.put(index++, getStringValue(clientService.getDateOfDiscontinuation()));
-				map.put(index++, getStringValue(clientService.getReasonForDiscontinuation()));
-				//Client Verification triggers
-				map.put(index++, getStringValue(clientService.getNoInitBiometric()));
-				map.put(index++, getStringValue(clientService.getDuplicatedDemographic()));
-				map.put(index++, getStringValue(clientService.getLastVisitIsOver18M()));
-				map.put(index++, getStringValue(clientService.getIncompleteVisitData()));
-				map.put(index++, getStringValue(clientService.getNoRecapture()));
-				map.put(index++, getStringValue(clientService.getLongIntervalsARVPickup()));
-				map.put(index++, getStringValue(clientService.getSameSexDOBARTStartDate()));
-				map.put(index++, getStringValue(clientService.getPickupByProxy()));
-				map.put(index++, getStringValue(clientService.getRepeatEncounterNoPrint()));
-				map.put(index++, getStringValue(clientService.getOtherSpecifyForCV()));
+				try {
+					map.put(index++, getStringValue(clientService.getFacilityState()));
+					map.put(index++, getStringValue(clientService.getFacilityName()));
+					map.put(index++, getStringValue(clientService.getSerialEnrollmentNo()));
+					map.put(index++, getStringValue(clientService.getPersonUuid()));
+					map.put(index++, clientService.getHospitalNumber());
+					map.put(index++, getStringValue(String.valueOf(clientService.getDateOfObservation())));
+					map.put(index++, getStringValue(clientService.getAnyOfTheFollowingList()));
+					map.put(index++, getStringValue(clientService.getDateOfAttempt()));
+					map.put(index++, getStringValue(clientService.getNoAttempts()));
+					map.put(index++, getStringValue(clientService.getVerificationAttempts()));
+					map.put(index++, getStringValue(clientService.getOutcome()));
+					map.put(index++, getStringValue(clientService.getDsdModel()));
+					map.put(index++, getStringValue(clientService.getComment()));
+					map.put(index++, getStringValue(clientService.getReturnedToCare()));
+					map.put(index++, getStringValue(clientService.getReferredTo()));
+					map.put(index++, getStringValue(clientService.getDiscontinuation()));
+					map.put(index++, getStringValue(clientService.getDateOfDiscontinuation()));
+					map.put(index++, getStringValue(clientService.getReasonForDiscontinuation()));
+					//Client Verification triggers
+					map.put(index++, getStringValue(clientService.getNoInitBiometric()));
+					map.put(index++, getStringValue(clientService.getDuplicatedDemographic()));
+					map.put(index++, getStringValue(clientService.getLastVisitIsOver18M()));
+					map.put(index++, getStringValue(clientService.getIncompleteVisitData()));
+					map.put(index++, getStringValue(clientService.getNoRecapture()));
+					map.put(index++, getStringValue(clientService.getLongIntervalsARVPickup()));
+					map.put(index++, getStringValue(clientService.getSameSexDOBARTStartDate()));
+					map.put(index++, getStringValue(clientService.getPickupByProxy()));
+					map.put(index++, getStringValue(clientService.getRepeatEncounterNoPrint()));
+					map.put(index++, getStringValue(clientService.getOtherSpecifyForCV()));
 
-				result.add(map);
+					result.add(map);
+				} catch (Exception e) {
+					try (FileWriter writer = new FileWriter(System.getProperty("user.home") + "/Downloads/Client_Verification_Report_error_log_" + LocalDate.now() +".txt" , true)) {
+						writer.write("ID: " + clientService.getHospitalNumber() + "\n");
+						writer.write("Error Message: " + e.getMessage() + "\n");
+						writer.write("Client Verification Row: " + new ObjectMapper().writeValueAsString(clientService) + "\n");
+						writer.write("-------------------------------\n");
+
+					} catch (IOException io) {
+						Log.error("Error writing to log file", io);
+					}
+				}
 			}
 		}
-		Log.info("result: " + result.size()); // going to be one
+		Log.info(RESULT_OUTPUT + result.size());
 		return result;
 	}
 
 
+	public static List<Map<Integer, Object>> fillFamilyIndexMapper(@NonNull List<FamilyIndexReportDtoProjection> listFinalResult)  {
+		List<Map<Integer, Object>> result = new ArrayList<>();
+		for (FamilyIndexReportDtoProjection familyIndex : listFinalResult) {
+			if (familyIndex != null) {
+				Map<Integer, Object> map = new HashMap<>();
+				int index = 0;
+				try {
+					map.put(index++, getStringValue(familyIndex.getState()));
+					map.put(index++, getStringValue(familyIndex.getLga()));
+					map.put(index++, getStringValue(familyIndex.getFacilityName()));
+					map.put(index++, getStringValue(familyIndex.getDatimId()));
+					map.put(index++, getStringValue(familyIndex.getPatientName()));
+					map.put(index++, getStringValue(familyIndex.getOtherName()));
+					map.put(index++, getStringValue(familyIndex.getHospitalNumber()));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getDateOfBirth())));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getAge())));
+					map.put(index++, getStringValue(familyIndex.getSex()));
+					map.put(index++, getStringValue(familyIndex.getMaritalStatus()));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getDateConfirmedHiv())));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getDateEnrolled())));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getEntryPoint())));
+					map.put(index++, getStringValue(null));
+					map.put(index++, getStringValue(familyIndex.getRecencyTesting()));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getDateOfferIndex())));
+					map.put(index++, getStringValue(familyIndex.getAcceptedTesting()));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getDateOfElicitation())));
+					map.put(index++, getStringValue(familyIndex.getElicitedClientName()));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getElicitedAge())));
+					map.put(index++, getStringValue(familyIndex.getElicitedClientSex()));
+					map.put(index++, getStringValue(familyIndex.getElicitedClientPhoneNumber()));
+					map.put(index++, getStringValue(familyIndex.getElicitedClientAddress()));
+					map.put(index++, getStringValue(familyIndex.getRelationshipWithIndex()));
+					map.put(index++, getStringValue(null));
+					map.put(index++, getStringValue(null));
+					map.put(index++, getStringValue(familyIndex.getModeOfNotification()));
+					map.put(index++, getStringValue(null));
+					map.put(index++, getStringValue(familyIndex.getElicitedClientKnownPositive()));
+					map.put(index++, getStringValue(familyIndex.getElicitedClientHivResult()));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getElicitedClientTestedHiv())));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getElicitedClientDateEnrolled())));
+					map.put(index++, getStringValue(null));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getDateEnrolledInOvc())));
+					map.put(index, getStringValue(String.valueOf(familyIndex.getOvcId())));
 
+				} catch (Exception e) {
+					LOG.error("An error occurred when converting db records to excel");
+					LOG.error(ERROR_OUTPUT + e.getMessage());
+				}
+				result.add(map);
+
+			}
+		}
+		Log.info(RESULT_OUTPUT + result.size());
+		return result;
+	}
 }

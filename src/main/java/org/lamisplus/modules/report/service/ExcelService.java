@@ -40,21 +40,11 @@ public class ExcelService {
 		Font font = getFont();
 		style.setFont(font);
 		for (int i = 0; i < headers.size(); i++) {
-			// O(n)T  || O(1)
 			createCell(row, i, headers.get(i),style);
 		}
 	}
 	
-	private int createCellHeader(Row row, int columnCount, String value){
-		Font font = getFont();
-		CellStyle style = workbook.createCellStyle();
-		style.setFont(font);
-		Cell cell = row.createCell(columnCount);
-		cell.setCellValue(value);
-		cell.setCellStyle(style);
-		return 0;
-	}
-	
+
 	@NotNull
 	private Font getFont() {
 		Font font  = workbook.createFont();
@@ -186,17 +176,11 @@ public class ExcelService {
 			write(listData);
 			Log.info("last row {}", workbook.getSheet(sheetName).getLastRowNum());
 			workbook.write(bao);
-			//FileOutputStream fileOut = new FileOutputStream("runtime/" + sheetName + ".xlsx");
-			//workbook.write(fileOut);
-			//workbook.close();
-			//bao.close();
-			//return bao;
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Writing report completed ... ");
 		}catch (Exception e){
 			e.printStackTrace();
 		}
 		return bao;
 	}
-	
-	
 	
 }

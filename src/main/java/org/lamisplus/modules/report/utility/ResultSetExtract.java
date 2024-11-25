@@ -2,7 +2,6 @@ package org.lamisplus.modules.report.utility;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -23,11 +22,10 @@ public class ResultSetExtract {
         try {
             conn = dataSource.getConnection();
             Statement stmt = conn.createStatement();
-            //LOG.info("query is - {}", query);
             resultSet = stmt.executeQuery(query);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException(e);
+            throw new RuntimeException("An error occurred while executing query: " + query, e);
         }finally {
             if(conn != null) conn.close();
         }
@@ -40,13 +38,12 @@ public class ResultSetExtract {
             int columnCount = rsmd.getColumnCount();
             for (int index = 1; index <= columnCount; index++) {
                 String column = rsmd.getColumnName(index);
-                //LOG.info("column header is - {}", column);
                 headers.add(column);
             }
             return headers;
         }catch (Exception e){
             e.printStackTrace();
-            throw new RuntimeException(e);
+            throw new RuntimeException("An error occurred while executing query: " + rs, e);
         }
 
     }

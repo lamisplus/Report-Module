@@ -10,7 +10,6 @@ import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.module.ModuleService;
 import org.lamisplus.modules.base.service.ApplicationCodesetService;
 import org.lamisplus.modules.base.service.OrganisationUnitService;
-import org.lamisplus.modules.hiv.domain.dto.PatientLineDto;
 import org.lamisplus.modules.hiv.domain.dto.ViralLoadRadetDto;
 import org.lamisplus.modules.hiv.domain.entity.ARTClinical;
 import org.lamisplus.modules.hiv.domain.entity.ArtPharmacy;
@@ -18,6 +17,7 @@ import org.lamisplus.modules.hiv.domain.entity.HivEnrollment;
 import org.lamisplus.modules.hiv.domain.entity.Regimen;
 import org.lamisplus.modules.hiv.repositories.*;
 import org.lamisplus.modules.patient.domain.entity.Person;
+import org.lamisplus.modules.report.domain.PatientLineDto;
 import org.lamisplus.modules.report.domain.PatientLineListDto;
 import org.lamisplus.modules.report.repository.ReportRepository;
 import org.lamisplus.modules.triage.domain.entity.VitalSign;
@@ -67,10 +67,10 @@ public class PatientReportService {
 		
 	}
 	
-	public List<PatientLineDto> getPatientLine(Long facilityId) {
-		System.out.println("start: fetching records from db: ");
+	public List<org.lamisplus.modules.report.domain.PatientLineDto> getPatientLine(Long facilityId) {
+		LOG.info("start: fetching records from db: ");
 		List<PatientLineDto> patientLineDtoList = reportRepository.getPatientLineByFacilityId(facilityId);
-		System.out.println("Total size:  " + patientLineDtoList.size());
+		LOG.info("Total size:  {}", patientLineDtoList.size());
 		return patientLineDtoList;
 	}
 	
@@ -212,7 +212,6 @@ public class PatientReportService {
 				.sorted(Comparator.comparing(ARTClinical::getId).reversed())
 				.findFirst();
 		lastClinicVisit.ifPresent(artClinical -> {
-			//LOG.info("current clinic visit {}", artClinical.getVisitDate());
 			Long clinicalStageId = artClinical.getClinicalStageId();
 			if (clinicalStageId != null && clinicalStageId > 0) {
 				ApplicationCodesetDTO clinicalStage = applicationCodesetService.getApplicationCodeset(clinicalStageId);
@@ -242,15 +241,11 @@ public class PatientReportService {
 			Set<Regimen> regimens = currentRefill1.getRegimens();
 			regimens.forEach(regimen -> setCurrentRegimen(patientLineListDto, regimen));
 			patientLineListDto.setCurrentStatus("Active");
-			//LOG.info("current date {}", currentDate);
-			//LOG.info("next appointment date {}", nextAppointment);
 			if (nextAppointment.isBefore(currentDate)) {
-				///
 				long days = ChronoUnit.DAYS.between(nextAppointment, currentDate);
 				if (days >= 29) {
 					patientLineListDto.setCurrentStatus("IIT");
 				}
-				//LOG.info("number of days after appointment {}", days);
 			}
 			
 		});
@@ -309,8 +304,6 @@ public class PatientReportService {
 			firstRegimen.ifPresent(regimen -> {
 				String regimenLine = regimen.getRegimenType().getDescription();
 				String regimenName = regimen.getDescription();
-				//LOG.info("regimenLine {}", regimenLine);
-				//LOG.info("regimenName {}", regimenName);
 				patientLineListDto.setFirstRegimenLine(regimenLine);
 				patientLineListDto.setFirstRegimen(regimenName);
 			});
@@ -325,18 +318,15 @@ public class PatientReportService {
 			
 		});
 	}
-	//current viral load
-	
+
 	private void processAndSetVl(PatientLineListDto patientLineListDto, Long personId) {
 		boolean labExist = moduleService.exist("Lab");
 		if (labExist) {
-			//Log.info(" in lab info {}", labExist);
 			LocalDateTime start = LocalDateTime.of(1984, 1, 1, 0, 0);
 			
 			Optional<ViralLoadRadetDto> viralLoadDetails =
 					hIVEacRepository.getPatientCurrentViralLoadDetails(personId, start, LocalDateTime.now());
 			viralLoadDetails.ifPresent(currentViralLoad -> {
-				//Log.info("current viral load indication {}", currentViralLoad.getIndicationId() + " : result :=> " + currentViralLoad.getResult());
 				Long indicationId = currentViralLoad.getIndicationId();
 				if (indicationId != null && indicationId > 0) {
 					String viralLoadIndication =

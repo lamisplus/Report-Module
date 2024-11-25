@@ -1,6 +1,6 @@
-import React, {useCallback, useEffect, useState, forwardRef } from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import axios from "axios";
-import { FormGroup, Label, CardBody, Spinner, Input, Form } from "reactstrap";
+import { FormGroup, Label, CardBody, Input } from "reactstrap";
 import { makeStyles } from "@material-ui/core/styles";
 import { Card } from "@material-ui/core";
 import { token, url as baseUrl } from "../../../api";
@@ -8,7 +8,7 @@ import 'react-phone-input-2/lib/style.css'
 import { Button } from 'semantic-ui-react'
 import { toast } from "react-toastify";
 import FileSaver from "file-saver";
-import { Message, Icon, TextArea, Dropdown } from 'semantic-ui-react'
+import { Message, TextArea, Dropdown } from 'semantic-ui-react'
 import ScrollableDiv from "../Shared/Scrollable"
 import ProgressComponent from "./ProgressComponent"
 
@@ -69,10 +69,6 @@ const CustomReport = (props) => {
         organisationUnitName: "",
         currentDate: currentDate
     })
-    // const [objValues, setObjValues] = useState({
-    //     query: "",
-    //     reportName: ""
-    // })
     const [formData, setFormData] = useState(objValues)
 
     const loadFacilities = useCallback(async () => {
@@ -124,8 +120,6 @@ const CustomReport = (props) => {
 
     const handleCancel = (e) => {
         e.preventDefault();
-        // const objValuesWithTemplateStrings = containsTemplateStrings(objValues?.queryBody);
-        // const text = extractPatterns(objValues?.queryBody)
     }
 
     const handleDryRun = (e) => {
@@ -222,7 +216,6 @@ const CustomReport = (props) => {
             .then((response) => {
 
                 setObjValues(response.data)
-                // setObjValues(objValues?.reportName, objValues?.query)
             })
     }
 
@@ -230,7 +223,6 @@ const CustomReport = (props) => {
         e.preventDefault();
         var customQuery = objValues?.query;
         customQuery = replaceValues(customQuery, customDataFields);
-        // customQuery = customQuery.trim().concat(" LIMIT 5");
         setCustomQuery(customQuery);
         axios.post(
           `${baseUrl}customized-reports/generate-report`,
@@ -290,7 +282,7 @@ const CustomReport = (props) => {
                             options={listOfReport}
                         />
                     </FormGroup>
-                    <form >
+                    < >
                         <div className="row">
                             <div className="form-group  col-md-6">
                                 <FormGroup>
@@ -336,9 +328,6 @@ const CustomReport = (props) => {
                                 </div>
                                 <br />
                                 <div className="row">
-                                    {/* <div className="mb-3 col-md-2">
-                                        <Button type="submit" content='Cancel' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#FF0000", color: '#fff' }} onClick={handleCancel} />
-                                    </div> */}
                                     <div className="mb-3 col-md-2">
                                         <Button type="submit" content='Analyze' icon='up arrow' labelPosition='right' style={{ backgroundColor: "#014d88", color: '#fff' }} onClick={handleAnalyze} />
                                     </div>
@@ -350,8 +339,6 @@ const CustomReport = (props) => {
                                     </div>
 
                                     <div className="mb-3 col-md-2" >
-                                        {/* <Button type="submit" content='Generate' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#008000", color: '#fff' }} onClick={handleSubmit} hidden={objValues.organisationUnitId === "" ? true : false} /> */}
-
                                         <Button type="submit" content='Generate' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#008000", color: '#fff' }} onClick={handleSubmit} />
                                     </div>
                                 </div>
@@ -365,7 +352,7 @@ const CustomReport = (props) => {
                                 )}
                             </div>
                         </div>
-                    </form>
+                    </>
 
                 </CardBody>
             </Card>

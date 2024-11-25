@@ -77,12 +77,7 @@ public class BiometricReportService {
 		String firstChar = addressDetails.substring(0, 1).toUpperCase();
 		return firstChar + addressDetails.substring(1).toLowerCase();
 	}
-	
-	
-	private static JsonNode getAddress1(Person person) {
-		JsonNode address = person.getAddress();
-		return address.get("address");
-	}
+
 	
 	@NotNull
 	private static BiometricReportDto getBiometricReportDto(

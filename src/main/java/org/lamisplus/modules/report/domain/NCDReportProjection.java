@@ -10,16 +10,12 @@ public interface NCDReportProjection {
     String getPatientId();
     String getHospitalNumber();
     String getUniqueId();
-//    String getSurname();
-//    String getOtherName();
     LocalDate getDateOfBirth();
     String getAge();
     String getSex();
     String getMaritalStatus();
     String getEducation();
     String getOccupation();
-//    String getAddress();
-//    String getPhoneNumber();
     String getDatimId();
     String getTargetGroup();
     String getEnrollmentSetting();
