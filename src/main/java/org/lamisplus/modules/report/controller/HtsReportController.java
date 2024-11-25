@@ -23,7 +23,7 @@ import java.time.LocalDate;
 @Api(value = "HTS Report", description = "Suite of Endpoints that generated HTS Related Reports")
 public class HtsReportController {
 
-	final static String REPORT_URL_VERSION_ONE = "/api/v1";
+	public static final String REPORT_URL_VERSION_ONE = "/api/v1";
 	private final SimpMessageSendingOperations messagingTemplate;
 	private final GenerateExcelService generateExcelService;
 	
@@ -58,14 +58,12 @@ public class HtsReportController {
 							@RequestParam("endDate") LocalDate end) throws IOException {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting index-elicitation report");
 
-		//messagingTemplate.convertAndSend("/topic/hts", "start");
 
 		ByteArrayOutputStream baos = generateExcelService.generateIndexQueryLine(facility, start, end);
 
 		setStream(baos, response);
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating index-elicitation  report");
 
-		//messagingTemplate.convertAndSend("/topic/hts", "end");
 	}
 
 	@PostMapping(REPORT_URL_VERSION_ONE + "/ahd-reporting")
@@ -75,14 +73,11 @@ public class HtsReportController {
 								   @RequestParam("endDate") LocalDate end) throws IOException {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting AHD report");
 
-//		messagingTemplate.convertAndSend("/topic/ahd", "start");
-
 		ByteArrayOutputStream baos = generateExcelService.generateAhdReport( facility, start, end);
 
 		setStream(baos, response);
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating AHD report");
 
-//		messagingTemplate.convertAndSend("/topic/hts", "end");
 	}
 
 	@PostMapping(REPORT_URL_VERSION_ONE + "/adr-reporting")
@@ -92,14 +87,12 @@ public class HtsReportController {
 								   @RequestParam("endDate") LocalDate end) throws IOException {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting ADR report");
 
-//		messagingTemplate.convertAndSend("/topic/ahd", "start");
 
 		ByteArrayOutputStream baos = generateExcelService.generateAdrReport( facility, start, end);
 
 		setStream(baos, response);
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating ADR report");
 
-//		messagingTemplate.convertAndSend("/topic/hts", "end");
 	}
 
 	@PostMapping(REPORT_URL_VERSION_ONE + "/hts-register")
@@ -145,7 +138,5 @@ public class HtsReportController {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating Family Index report");
 
 	}
-
-
 
 }
