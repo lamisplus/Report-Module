@@ -93,7 +93,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			List<TBReportProjection> tbReportProjections = reportRepository.generateTBReport(facilityId, start, end);
 			LOG.info("TB Size {}", tbReportProjections.size());
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
-			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillTBReportDataMapper(tbReportProjections, end);
+			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillTBReportDataMapper(tbReportProjections);
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.TB_SHEET, data, Constants.TB_REPORT_HEADER);
 		} catch (Exception e) {
@@ -114,7 +114,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			List<NCDReportProjection> ncdReportProjections = reportRepository.generateNCDReport(facilityId, start, end);
 			LOG.info("TB Size {}", ncdReportProjections.size());
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
-			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillNCDReportDataMapper(ncdReportProjections, end);
+			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillNCDReportDataMapper(ncdReportProjections);
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.NCD_SHEET, data, Constants.NCD_REPORT_HEADER);
 		} catch (Exception e) {
@@ -135,7 +135,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			List<EACReportProjection> eacReportProjections = reportRepository.generateEACReport(facilityId, start, end);
 			LOG.info("EAC Size {}", eacReportProjections.size());
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
-			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillEACReportDataMapper(eacReportProjections, end);
+			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillEACReportDataMapper(eacReportProjections);
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.EAC_SHEET, data, Constants.EAC_REPORT_HEADER);
 		} catch (Exception e) {
@@ -157,7 +157,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 
 			LOG.info("RADET Size {}", radetDtos.size());
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
-			List<Map<Integer, Object>> data = excelDataHelper.fillRadetDataMapper(radetDtos,end);
+			List<Map<Integer, Object>> data = excelDataHelper.fillRadetDataMapper(radetDtos);
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.RADET_SHEET, data, Constants.RADET_HEADER);
 
