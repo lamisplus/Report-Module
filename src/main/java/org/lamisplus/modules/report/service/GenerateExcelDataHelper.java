@@ -38,6 +38,8 @@ public class GenerateExcelDataHelper {
 	private final SimpMessageSendingOperations messagingTemplate;
 	private final ExcelService excelService;
 	public static final String RESULT_OUTPUT = "Results:";
+	public static final String ERROR_OUTPUT = "The error message is: ";
+	public static final String RECORD_OUTPUT = "Done converting db records total size {}";
 
 	public static List<Map<Integer, Object>> fillPatientLineListDataMapper(@NonNull List<PatientLineDto> listFinalResult) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
@@ -103,7 +105,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, patient.getLastViralLoad());
 				map.put(index++, vlDate);
 				map.put(index++, patient.getViralLoadType());
-				map.put(index++, getStringValue(patient.getCmName()));
+				map.put(index, getStringValue(patient.getCmName()));
 				result.add(map);
 			}
 		}
@@ -111,7 +113,7 @@ public class GenerateExcelDataHelper {
 		return result;
 	}
 
-	public static List<Map<Integer, Object>> fillTBReportDataMapper(@NonNull List<TBReportProjection> tbReportProjections, LocalDate end) {
+	public static List<Map<Integer, Object>> fillTBReportDataMapper(@NonNull List<TBReportProjection> tbReportProjections) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		for (TBReportProjection tbReportProjection : tbReportProjections) {
 			if (tbReportProjection != null) {
@@ -178,7 +180,7 @@ public class GenerateExcelDataHelper {
 		return result;
 	}
 
-	public static List<Map<Integer, Object>> fillEACReportDataMapper(@NonNull List<EACReportProjection> eacReportProjections, LocalDate end) {
+	public static List<Map<Integer, Object>> fillEACReportDataMapper(@NonNull List<EACReportProjection> eacReportProjections) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		for (EACReportProjection eacReportProjection : eacReportProjections) {
 			if (eacReportProjection != null) {
@@ -258,7 +260,7 @@ public class GenerateExcelDataHelper {
 	}
 
 
-	public static List<Map<Integer, Object>> fillNCDReportDataMapper(@NonNull List<NCDReportProjection> ncdReportProjections, LocalDate end) {
+	public static List<Map<Integer, Object>> fillNCDReportDataMapper(@NonNull List<NCDReportProjection> ncdReportProjections) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		for (NCDReportProjection ncdReportProjection : ncdReportProjections) {
 			if (ncdReportProjection != null) {
@@ -376,7 +378,7 @@ public class GenerateExcelDataHelper {
 		return result;
 	}
 
-	public  List<Map<Integer, Object>> fillRadetDataMapper(@NonNull List<RADETDTOProjection> reportDtos, LocalDate endDate) {
+	public  List<Map<Integer, Object>> fillRadetDataMapper(@NonNull List<RADETDTOProjection> reportDtos) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		deleteErrorFile();
 		int sn = 1;
@@ -542,10 +544,10 @@ public class GenerateExcelDataHelper {
 			} catch (Exception e) {
 				LOG.error("An error occurred when converting db record to excel for patient id {}", currentRecord.getPersonUuid());
 				writeToErrorFile(currentRecord);
-				LOG.error("The error message is: " + e.getMessage());
+				LOG.error(ERROR_OUTPUT + e.getMessage());
 			}
 		}
-		LOG.info("Done converting db records total size "+ result.size());
+		LOG.info(RECORD_OUTPUT + result.size());
 		return result;
 	}
 
@@ -661,11 +663,11 @@ public class GenerateExcelDataHelper {
 						sn++;
 					}
 				}
-				LOG.info("Done converting db records total size {}", result.size());
+				LOG.info(RECORD_OUTPUT, result.size());
 				return result;
 			}catch (Exception e) {
 			LOG.error("An error occurred when converting db records to excel");
-			LOG.error("The error message is: " + e.getMessage());
+			LOG.error(ERROR_OUTPUT + e.getMessage());
 			e.printStackTrace();
 		}
 		return result;
@@ -708,11 +710,11 @@ public class GenerateExcelDataHelper {
 				result.add(map);
 				sn++;
 			}
-			LOG.info("Done converting db records total size {}", result.size());
+			LOG.info(RECORD_OUTPUT + result.size());
 			return result;
 		}catch (Exception e) {
 			LOG.error("An error occurred when converting db records to excel");
-			LOG.error("The error message is: " + e.getMessage());
+			LOG.error(ERROR_OUTPUT + e.getMessage());
 		}
 		return result;
 	}
@@ -741,11 +743,11 @@ public class GenerateExcelDataHelper {
 				result.add(map);
 				sn++;
 			}
-			LOG.info("Done converting db records total size {}", result.size());
+			LOG.info(RECORD_OUTPUT, result.size());
 			return result;
 		}catch (Exception e) {
 			LOG.error("An error occurred when converting db records to excel");
-			LOG.error("The error message is: " + e.getMessage());
+			LOG.error(ERROR_OUTPUT + e.getMessage());
 		}
 		return result;
 	}
@@ -772,11 +774,11 @@ public class GenerateExcelDataHelper {
 				result.add(map);
 				sn++;
 			}
-			LOG.info("Done converting db records total size {}", result.size());
+			LOG.info(RECORD_OUTPUT, result.size());
 			return result;
 		}catch (Exception e) {
 			LOG.error("An error occurred when converting db records to excel");
-			LOG.error("The error message is: " + e.getMessage());
+			LOG.error(ERROR_OUTPUT + e.getMessage());
 		}
 		return result;
 	}
@@ -883,7 +885,7 @@ public class GenerateExcelDataHelper {
 
 				} catch (Exception e) {
 					LOG.error("An error occurred when converting db records to excel");
-					LOG.error("The error message is: " + e.getMessage());
+					LOG.error(ERROR_OUTPUT + e.getMessage());
 				}
 				result.add(map);
 
