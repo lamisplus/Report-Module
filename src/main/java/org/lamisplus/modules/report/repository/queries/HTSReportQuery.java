@@ -2,6 +2,8 @@ package org.lamisplus.modules.report.repository.queries;
 
 public class HTSReportQuery {
 
+    private HTSReportQuery(){}
+
 
     public static final String HTS_REPORT_QUERY = "WITH htsReport AS (\n" +
             "SELECT hc.client_code AS clientCode, htsCounts.numberOfCounts AS htsCount,\n" +
