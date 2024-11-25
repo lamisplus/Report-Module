@@ -42,10 +42,8 @@ public  interface HtsReportDto {
       String getRecencyInterpretation();
       String getFinalRecencyResult();
 
-    //added started
       LocalDate getViralLoadSampleCollectionDate();
       String getViralLoadConfirmationResult();
-    //End
       LocalDate getViralLoadConfirmationDate();
       String getModality();
       String getSyphilisTestResult();
