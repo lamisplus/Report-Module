@@ -38,7 +38,6 @@ public class HtsReportController {
 							@RequestParam("endDate") LocalDate end) throws IOException {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting HTS report");
 
-
 		ByteArrayOutputStream baos = generateExcelService.generateHts(facility, start, end);
 
 		setStream(baos, response);
@@ -60,7 +59,6 @@ public class HtsReportController {
 							@RequestParam("startDate") LocalDate start,
 							@RequestParam("endDate") LocalDate end) throws IOException {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting index-elicitation report");
-
 
 		ByteArrayOutputStream baos = generateExcelService.generateIndexQueryLine(facility, start, end);
 
@@ -89,7 +87,6 @@ public class HtsReportController {
 								   @RequestParam("startDate") LocalDate start,
 								   @RequestParam("endDate") LocalDate end) throws IOException {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting ADR report");
-
 
 		ByteArrayOutputStream baos = generateExcelService.generateAdrReport( facility, start, end);
 
