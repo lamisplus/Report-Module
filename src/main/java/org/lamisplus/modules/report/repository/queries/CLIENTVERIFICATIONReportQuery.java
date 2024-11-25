@@ -2,6 +2,8 @@ package org.lamisplus.modules.report.repository.queries;
 
 public class CLIENTVERIFICATIONReportQuery {
 
+    private CLIENTVERIFICATIONReportQuery() {}
+
     public static final String CLIENT_VERIFICATION_QUERY = "WITH clientVerification AS (SELECT DISTINCT ON (h.person_uuid) h.person_uuid AS personUuid, \n" +
             "CASE WHEN facility_state.name IS NULL THEN '' ELSE facility_state.name END AS facilityState, \n" +
             "u.name AS facilityName, \n" +
