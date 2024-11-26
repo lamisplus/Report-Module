@@ -119,9 +119,6 @@ const handleInputChange = (e) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
-
-    console.log(objValues);
-
     axios
       .get(
         `${baseUrl}reporting/radet?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
