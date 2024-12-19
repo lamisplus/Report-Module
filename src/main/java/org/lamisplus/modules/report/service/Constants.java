@@ -299,6 +299,8 @@ public class Constants {
 					"Prep Accepted",
 					"Number of condoms given",
 					"Number of lubricant given",
+					"Ml Score",
+					"Ml Status",
 					"HTS Latitude",
 					"HTS Longitude"
 			);
