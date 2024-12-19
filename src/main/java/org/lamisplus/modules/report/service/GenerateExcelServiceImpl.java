@@ -262,14 +262,14 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	}
 
 	@Override
-	public ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, LocalDate end) {
+	public ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, LocalDate end, String reportType) {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		LOG.info("Start generating hts for facility:" + getFacilityName(facilityId));
 		try {
 			List<HtsReportDto> htsReport = htsReportService.getHtsReport(facilityId, start, end);
 			LOG.error("Hts Size: {}", htsReport.size());
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
-			List<Map<Integer, Object>> data = excelDataHelper.fillHtsDataMapper(htsReport);
+			List<Map<Integer, Object>> data = excelDataHelper.fillHtsDataMapper(htsReport, reportType);
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.HTS_SHEET, data, Constants.HTS_HEADER);
 		} catch (Exception e) {
