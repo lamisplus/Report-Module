@@ -2,6 +2,8 @@ package org.lamisplus.modules.report.repository.queries;
 
 public class CLINICALReportQuery {
 
+    private CLINICALReportQuery() {}
+
     public static final String CLINICAL_REPORT_QUERY = "SELECT  DISTINCT (p.uuid) AS patientId, \n" +
             "p.hospital_number AS hospitalNumber, \n" +
             "EXTRACT(YEAR FROM AGE(NOW(), date_of_birth)) AS age, \n" +

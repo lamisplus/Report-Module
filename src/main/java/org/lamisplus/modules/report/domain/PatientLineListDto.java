@@ -70,19 +70,4 @@ public class PatientLineListDto {
     private LocalDateTime dateCurrentVl;
     private  String vlIndication;
 
-//            "Adherence",
-//            "Waist Circumference(cm)",
-//            "First Regimen Line",
-//            "First Regimen",
-//            "First NRTI",
-//            "First NNRTI",
-//            "Current Regimen Line",
-//            "Current Regimen",
-//            "Current NRTI",
-//            "Current NNRTI",
-//            "Date Substituted/Switched (yyyy-mm-dd)",
-//            "Date of Last Refill",
-//            "Last Refill Duration (days)",
-//            "Date of Next Refill (yyyy-mm-dd)",
-
 }

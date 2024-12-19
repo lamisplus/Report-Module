@@ -123,7 +123,7 @@ const Reports = (props) => {
     { key: 'tb-report', value: 'tb-report', text: 'TB REPORT' },
     { key: 'ncd-report', value: 'ncd-report', text: 'NCD Report' },
     { key: 'eac-report', value: 'eac-report', text: 'EAC Report' },
-    { key: 'index-elicitation', value: 'index-elicitation', text: 'INDEX ELICITATION' },
+    // { key: 'index-elicitation', value: 'index-elicitation', text: 'INDEX ELICITATION' },
     { key: 'ahd-report', value: 'ahd-report', text: 'AHD REPORT' },
     { key: 'adr-report', value: 'adr-report', text: 'ADR REPORT' },
     { key: 'custom-report', value: 'custom-report', text: 'CUSTOM REPORT' },
@@ -234,7 +234,7 @@ const Reports = (props) => {
           id="panel2bh-header"
         >
           <Typography sx={{marginTop:0, color: "#fff"}}>
-          Select Surveillance Report
+           Surveillance Report
           </Typography>
         </AccordionSummary>
         <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
@@ -253,7 +253,7 @@ const Reports = (props) => {
           id="panel1bh-header"
           sx={{marginTop:0}}
         >
-          <Typography sx={{marginTop:0, color: "#fff"}}>Select Treatment Report</Typography>
+          <Typography sx={{marginTop:0, color: "#fff"}}>Treatment Report</Typography>
         </AccordionSummary>
         <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
           {Object.values(reportOptions).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
@@ -272,7 +272,7 @@ const Reports = (props) => {
         >
          
           <Typography sx={{  flexShrink: 0, color: "#fff" }}>
-          Select Biometric Report
+           Biometric Report
           </Typography>
         </AccordionSummary>
         <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
@@ -295,7 +295,7 @@ const Reports = (props) => {
         >
          
           <Typography sx={{  flexShrink: 0, color: "#fff" }}>
-          Select Prevention Report
+           Prevention Report
           </Typography>
         </AccordionSummary>
         <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
@@ -314,7 +314,7 @@ const Reports = (props) => {
         >
          
           <Typography sx={{  flexShrink: 0, color: "#fff" }}>
-          Select PMTCT Report
+           PMTCT Report
           </Typography>
         </AccordionSummary>
         <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
@@ -333,7 +333,7 @@ const Reports = (props) => {
         >
          
           <Typography sx={{  flexShrink: 0, color: "#fff" }}>
-          Select Psychosocial Report
+          Psychosocial Report
           </Typography>
         </AccordionSummary>
         <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>

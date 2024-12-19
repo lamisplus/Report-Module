@@ -1,7 +1,6 @@
 package org.lamisplus.modules.report.domain;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 public interface RADETDTOProjection {
@@ -68,8 +67,6 @@ public interface RADETDTOProjection {
 
 	LocalDate getLastPickupDate();
 
-	//LocalDate getNextPickupDate();
-
 	// art status
 
 	LocalDate getCurrentStatusDate();
@@ -81,10 +78,8 @@ public interface RADETDTOProjection {
 	String getPreviousStatus();
 
 	String getClientVerificationOutCome();
-//	String getClientVerificationStatus();
 
 
-	//Biometric status
 	LocalDate getDateBiometricsEnrolled();
 	Integer getNumberOfFingersCaptured();
 	LocalDate getDateBiometricsRecaptured();
@@ -97,10 +92,8 @@ public interface RADETDTOProjection {
 	LocalDate getDateOfExtendEACCompletion();
 	LocalDate getDateOfRepeatViralLoadResult();
 	LocalDate getDateOfRepeatViralLoadEACSampleCollection();
-	// LocalDate getDateSampleCollected();
 	String getRepeatViralLoadResult();
 	String getTbStatus();
-//	String getTbStatusOutCome();
 	LocalDate getDateOfTbScreened();
 	LocalDate getDateOfCurrentRegimen();
 	LocalDate getDateOfIptStart();
@@ -136,27 +129,20 @@ public interface RADETDTOProjection {
 	String getCurrentDsdOutlet();
 
 	LocalDate getDateReturnToSite();
-	// String getDsdModel();
 	LocalDate getDateofTbDiagnosticResultReceived();
 
-	//TB Treatment
 	String  getTbTreatementType();
 	String  getTbTreatmentOutcome();
 	LocalDate getTbTreatmentStartDate();
 	LocalDate getTbCompletionDate();
 	String getIptCompletionStatus();
 	String getTbScreeningType();
-	//Crytococal Antigen
-	// Date getDateOfLastCrytococalAntigen();
-	// String getLastCrytococalAntigen();
 
 	String getCaseManager();
 	String getVaCauseOfDeath();
 	String getTreatmentMethodDate();
 	LocalDate getDateOfRegistration();
 	LocalDate getDateOfEnrollment();
-	LocalDate getDateOfLastTbLam();
-	String  getTbLamResult();
 
 	String getNdrPatientIdentifier();
 }

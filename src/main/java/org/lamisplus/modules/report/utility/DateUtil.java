@@ -18,7 +18,7 @@ public class DateUtil {
         LocalDate suppliedDate = date;
         LOG.info("current date is {}", currentDate);
         LOG.info("supplied date is {}", date);
-        //Add one day if current day to carter for patient registered today
+
         if(currentDate.isEqual(suppliedDate)) date=date.plusDays(1);
         return date;
     }

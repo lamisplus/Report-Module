@@ -2,6 +2,8 @@ package org.lamisplus.modules.report.repository.queries;
 
 public class RADETReportQueries {
 
+    private RADETReportQueries() {}
+
 
     public static final String RADET_REPORT_QUERY = "WITH bio_data AS (SELECT DISTINCT (p.uuid) AS personUuid,p.hospital_number AS hospitalNumber, h.unique_id as uniqueId,\n" +
             "EXTRACT(YEAR FROM  AGE(NOW(), date_of_birth)) AS age,\n" +
@@ -33,7 +35,7 @@ public class RADETReportQueries {
             "INNER JOIN hiv_art_clinical hac ON hac.hiv_enrollment_uuid = h.uuid\n" +
             "AND hac.archived = 0\n" +
             "INNER JOIN hiv_regimen hr ON hr.id = hac.regimen_id\n" +
-            "INNER JOIN hiv_regimen_type hrt ON hrt.id = hac.regimen_type_id AND hac.regimen_type_id IN (1,2,3,4,14)\n" +
+            "INNER JOIN hiv_regimen_type hrt ON hrt.id = hac.regimen_type_id AND hac.regimen_type_id IN (1,2,3,4,14, 16)\n" +
             "WHERE\n" +
             "h.archived = 0\n" +
             "AND p.archived = 0\n" +
@@ -84,7 +86,7 @@ public class RADETReportQueries {
             "         person_uuid,\n" +
             "         MAX(hac.visit_date) AS MAXDATE\n" +
             "     FROM\n" +
-            "         hiv_art_clinical hac WHERE hac.archived = 0 AND hac.tb_status != ''\n" +
+            "         hiv_art_clinical hac WHERE hac.archived = 0 \n" +
             "     GROUP BY\n" +
             "         person_uuid\n" +
             "     ORDER BY\n" +
@@ -118,26 +120,43 @@ public class RADETReportQueries {
             "tbstatus as ( \n" +
             "    with tbscreening_cs as ( \n" +
             "        with cs as ( \n" +
-            "            with LatestObservations AS (\n" +
-            "            SELECT id, person_uuid, date_of_observation AS dateOfTbScreened, (CASE WHEN data->'tbIptScreening'->>'status' = 'Presumptive TB and referred for evaluation' THEN 'Presumptive TB' ELSE data->'tbIptScreening'->>'status' END) AS tbStatus, \n" +
-            "                data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, \n" +
-            "                ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS rowNums \n" +
-            "        FROM hiv_observation \n" +
-            "        WHERE type = 'Chronic Care' and data is not null and archived = 0 \n" +
-            "            and date_of_observation between ?2 and ?3 \n" +
-            "            and facility_id = ?1\n" +
-            "),\n" +
-            "FilteredLatestObservations AS (\n" +
-            "    SELECT\n" +
+            "     WITH FilteredObservations AS (\n" +
+            "    SELECT \n" +
             "        id,\n" +
             "        person_uuid,\n" +
-            "        dateOfTbScreened,\n" +
-            "        tbStatus,\n" +
+            "        date_of_observation AS dateOfTbScreened,\n" +
+            "        (CASE WHEN data->'tbIptScreening'->>'status' = 'Presumptive TB and referred for evaluation' THEN 'Presumptive TB' ELSE data->'tbIptScreening'->>'status' END) AS tbStatus,\n" +
+            "        data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType,\n" +
+            "        ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS rowNums\n" +
+            "    FROM \n" +
+            "        hiv_observation\n" +
+            "    WHERE \n" +
+            "        type = 'Chronic Care' \n" +
+            "        AND data IS NOT NULL \n" +
+            "        AND archived = 0 \n" +
+            "        AND date_of_observation BETWEEN ?2 AND ?3\n" +
+            "        AND facility_id = ?1\n" +
+            "),\n" +
+            "FilteredLatestObservations AS (\n" +
+            "    SELECT \n" +
+            "        id, \n" +
+            "        person_uuid, \n" +
+            "        dateOfTbScreened, \n" +
+            "        tbStatus, \n" +
             "        tbScreeningType\n" +
-            "    FROM\n" +
-            "        LatestObservations\n" +
-            "    WHERE\n" +
+            "    FROM \n" +
+            "        FilteredObservations\n" +
+            "    WHERE \n" +
             "        rowNums = 1\n" +
+            "),\n" +
+            "ReportingPeriod AS (\n" +
+            "    SELECT \n" +
+            "        CASE \n" +
+            "            WHEN EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 10 AND 12 OR EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 1 AND 3 \n" +
+            "                THEN 'October - March'\n" +
+            "            WHEN EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 4 AND 9 \n" +
+            "                THEN 'April - September'\n" +
+            "        END AS currentReportingPeriod\n" +
             "),\n" +
             "PresumptiveCheck AS (\n" +
             "    SELECT\n" +
@@ -146,20 +165,29 @@ public class RADETReportQueries {
             "            WHEN EXISTS (\n" +
             "                SELECT 1\n" +
             "                FROM hiv_observation ho\n" +
+            "                CROSS JOIN ReportingPeriod rp\n" +
             "                WHERE ho.person_uuid = lo.person_uuid\n" +
             "                  AND ho.type = 'Chronic Care'\n" +
             "                  AND ho.data IS NOT NULL\n" +
             "                  AND ho.archived = 0\n" +
-            "                  AND ho.date_of_observation BETWEEN lo.dateOfTbScreened - INTERVAL '6 months' AND lo.dateOfTbScreened\n" +
-            "                  AND ho.data->'tbIptScreening'->>'status' ilike 'Presumptive TB%'\n" +
-            "                  AND ho.facility_id = ?1\n" +
+            "                  AND (\n" +
+            "                      CASE \n" +
+            "                          WHEN EXTRACT(MONTH FROM ho.date_of_observation) BETWEEN 10 AND 12 \n" +
+            "                               OR EXTRACT(MONTH FROM ho.date_of_observation) BETWEEN 1 AND 3 \n" +
+            "                          THEN 'October - March'\n" +
+            "                          WHEN EXTRACT(MONTH FROM ho.date_of_observation) BETWEEN 4 AND 9 \n" +
+            "                          THEN 'April - September'\n" +
+            "                      END\n" +
+            "                  ) = rp.currentReportingPeriod\n" +
+            "                  AND ho.data->'tbIptScreening'->>'status' ILIKE 'Presumptive TB%'\n" +
+            "                   AND ho.facility_id = ?1\n" +
             "            ) THEN 'Presumptive TB'\n" +
             "            ELSE lo.tbStatus\n" +
             "        END AS tbStatus\n" +
             "    FROM\n" +
-            "        FilteredLatestObservations lo\n" +
+            "        FilteredLatestObservations lo \n" +
             ")\n" +
-            "SELECT\n" +
+            "SELECT \n" +
             "    lo.id,\n" +
             "    lo.person_uuid,\n" +
             "    lo.dateOfTbScreened,\n" +
@@ -168,7 +196,7 @@ public class RADETReportQueries {
             "FROM\n" +
             "    FilteredLatestObservations lo\n" +
             "JOIN\n" +
-            "    PresumptiveCheck pc ON lo.person_uuid = pc.person_uuid\n" +
+            "    PresumptiveCheck pc ON lo.person_uuid = pc.person_uuid" +
             "        ) \n" +
             "        select * from cs \n" +
             "    ), \n" +
@@ -270,7 +298,7 @@ public class RADETReportQueries {
             "FROM public.laboratory_sample  sm\n" +
             "         INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
             "         INNER JOIN  laboratory_labtest llt on llt.id = lt.lab_test_id\n" +
-            "WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73)\n" +
+            "WHERE lt.lab_test_id IN (65, 66, 51, 64, 67, 72, 71, 86, 58, 73)\n" +
             "        AND sm.archived = 0\n" +
             "        AND sm. date_sample_collected <= ?3\n" +
             "        AND sm.facility_id = ?1\n" +
@@ -281,6 +309,7 @@ public class RADETReportQueries {
             "     current_tb_result AS (WITH tb_test as (SELECT personTbResult, dateofTbDiagnosticResultReceived,\n" +
             "   coalesce(\n" +
             "           MAX(CASE WHEN lab_test_id = 65 THEN tbDiagnosticResult END) ,\n" +
+            "           MAX(CASE WHEN lab_test_id = 66 THEN tbDiagnosticResult END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 51 THEN tbDiagnosticResult END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 64 THEN tbDiagnosticResult END),\n" +
             "           MAX(CASE WHEN lab_test_id = 67 THEN tbDiagnosticResult END),\n" +
@@ -292,6 +321,7 @@ public class RADETReportQueries {
             "       ) as tbDiagnosticResult ,\n" +
             "   coalesce(\n" +
             "           MAX(CASE WHEN lab_test_id = 65 THEN 'Gene Xpert' END) ,\n" +
+            "           MAX(CASE WHEN lab_test_id = 66 THEN 'Chest X-ray' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 51 THEN 'TB-LAM' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 64 THEN 'AFB Smear Microscopy' END),\n" +
             "           MAX(CASE WHEN lab_test_id = 67 THEN 'Gene Xpert' END) ,\n" +
@@ -308,7 +338,7 @@ public class RADETReportQueries {
             " lt.lab_test_id\n" +
             "     FROM laboratory_result  sm\n" +
             "  INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
-            "     WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73) and sm.archived = 0\n" +
+            "     WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73, 66) and sm.archived = 0\n" +
             "       AND sm.date_result_reported is not null\n" +
             "       AND sm.facility_id = ?1\n" +
             "       AND sm.date_result_reported <= ?3\n" +
@@ -350,7 +380,7 @@ public class RADETReportQueries {
             "        hiv_observation\n" +
             "    WHERE archived = 0 AND\n" +
             "        (\n" +
-            "(data->'tbIptScreening'->>'status' = 'Presumptive TB and referred for evaluation' \n" +
+            "(data->'tbIptScreening'->>'status' LIKE '%Presumptive TB' \n" +
             " or data->'tbIptScreening'->>'status' = 'No signs or symptoms of TB')\n" +
             "and\n" +
             "        (data->'tbIptScreening'->>'outcome' = 'Presumptive TB' or data->'tbIptScreening'->>'outcome'='Not Presumptive' )\n" +
@@ -403,7 +433,7 @@ public class RADETReportQueries {
             "         INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id\n" +
             "         INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id\n" +
             "left JOIN base_application_codeset ds_model on ds_model.code = p.dsd_model_type \n" +
-            "WHERE r.regimen_type_id in (1,2,3,4,14)\n" +
+            "WHERE r.regimen_type_id in (1,2,3,4,14, 16)\n" +
             "  AND  p.archived = 0\n" +
             "  AND  p.facility_id = ?1\n" +
             "  AND  p.visit_date >= ?2\n" +
@@ -581,7 +611,7 @@ public class RADETReportQueries {
             " public.hiv_art_pharmacy_regimens AS hapr\n" +
             "     INNER JOIN hiv_regimen AS hr ON hapr.regimens_id = hr.id\n" +
             "         WHERE\n" +
-            "     hr.regimen_type_id IN (1,2,3,4,14)\n" +
+            "     hr.regimen_type_id IN (1,2,3,4,14, 16)\n" +
             "         GROUP BY\n" +
             " art_pharmacy_id,\n" +
             " regimens_id,\n" +
@@ -589,7 +619,7 @@ public class RADETReportQueries {
             "     ) AS hapr ON hap.id = hapr.art_pharmacy_id and hap.archived=0\n" +
             "         INNER JOIN hiv_regimen AS hivreg ON hapr.regimens_id = hivreg.id\n" +
             "         INNER JOIN hiv_regimen_type AS hivregtype ON hivreg.regimen_type_id = hivregtype.id\n" +
-            "         AND hivreg.regimen_type_id IN (1,2,3,4,14)\n" +
+            "         AND hivreg.regimen_type_id IN (1,2,3,4,14,16)\n" +
             " ORDER BY\n" +
             "     person_uuid,\n" +
             "     visit_date\n" +
@@ -618,9 +648,6 @@ public class RADETReportQueries {
             " regiment_table.max_visit_date,\n" +
             " start_or_regimen\n" +
             "     ),\n" +
-            " \n" +
-            " \n" +
-            " \n" +
             "iptNew AS (\n" +
             "           WITH tpt_completed AS (\n" +
             "SELECT * FROM (\n" +
@@ -685,7 +712,7 @@ public class RADETReportQueries {
             "    FROM hiv_art_pharmacy h \n" +
             "    INNER JOIN jsonb_array_elements(h.extra -> 'regimens') WITH ORDINALITY p(pharmacy_object) ON TRUE \n" +
             "    INNER JOIN hiv_regimen hr ON hr.description = CAST(p.pharmacy_object ->> 'regimenName' AS VARCHAR) \n" +
-            "    INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id  AND hrt.id = 15 AND hrt.id NOT IN (1,2,3,4,14) \n" +
+            "    INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id  AND hrt.id = 15 AND hrt.id NOT IN (1,2,3,4,14, 16) \n" +
             "    WHERE hrt.id = 15 AND h.archived = 0 and h.ipt ->> 'type' ILIKE '%INITIATION%' OR ipt ->> 'type' ILIKE 'START_REFILL' \n" +
             "    ) AS ic \n" +
             "    WHERE ic.rnk = 1 ), \n" +
@@ -793,7 +820,7 @@ public class RADETReportQueries {
             "            INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
             "            INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
             "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
-            "            WHERE r.regimen_type_id in (1,2,3,4,14) \n" +
+            "            WHERE r.regimen_type_id in (1,2,3,4,14, 16) \n" +
             "            AND hap.archived = 0                \n" +
             "            AND hap.visit_date < ?3\n" +
             "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
@@ -875,7 +902,7 @@ public class RADETReportQueries {
             "            INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
             "            INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
             "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
-            "            WHERE r.regimen_type_id in (1,2,3,4,14) \n" +
+            "            WHERE r.regimen_type_id in (1,2,3,4,14, 16) \n" +
             "            AND hap.archived = 0                \n" +
             "            AND hap.visit_date < ?4\n" +
             "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
@@ -947,7 +974,7 @@ public class RADETReportQueries {
             "            INNER JOIN hiv_enrollment h ON h.person_uuid = hap.person_uuid AND h.archived = 0 \n" +
             "            INNER JOIN public.hiv_regimen r on r.id = pr.regimens_id \n" +
             "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
-            "            WHERE r.regimen_type_id in (1,2,3,4,14) \n" +
+            "            WHERE r.regimen_type_id in (1,2,3,4,14, 16) \n" +
             "            AND hap.archived = 0                \n" +
             "            AND hap.visit_date < ?3\n" +
             "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
@@ -990,7 +1017,7 @@ public class RADETReportQueries {
             "         INNER JOIN hiv_regimen_type hrt ON hrt.id=hr.regimen_type_id\n" +
             "         INNER JOIN hiv_regimen_resolver hrr ON hrr.regimensys=hr.description\n" +
             "        ON hapr.art_pharmacy_id=hap.id\n" +
-            "      WHERE hap.archived=0 AND hrt.id IN (1,2,3,4,14) AND hap.facility_id = ?1 ) pharm\n" +
+            "      WHERE hap.archived=0 AND hrt.id IN (1,2,3,4,14, 16) AND hap.facility_id = ?1 ) pharm\n" +
             ")ph WHERE ph.row_number=1\n" +
             "         )ph ON ph.person_uuid=pp.uuid\n" +
             "         WHERE pp.uuid NOT IN (\n" +
@@ -1081,7 +1108,7 @@ public class RADETReportQueries {
             "           ca.person_uuid70,\n" +
             "           ipt.dateOfIptStart AS dateOfIptStart,\n" +
             "           COALESCE(CAST (iptN.tptCompletionDate AS DATE), ipt.iptCompletionDate) AS iptCompletionDate, \n" +
-            "           COALESCE(iptN.tptCompletionStatus, ipt.iptCompletionStatus) AS iptCompletionStatus,\n" +
+            "           (CASE WHEN COALESCE(iptN.tptCompletionStatus, ipt.iptCompletionStatus) = 'IPT Completed' THEN 'Treatment completed' ELSE COALESCE(iptN.tptCompletionStatus, ipt.iptCompletionStatus) END) AS iptCompletionStatus,\n" +
             "           ipt.iptType AS iptType,\n" +
             "           cc.*,\n" +
             "           dsd1.*, dsd2.*,  \n" +
@@ -1132,6 +1159,7 @@ public class RADETReportQueries {
             "   ) AS DATE)AS previousStatusDate,\n" +
             "           (\n" +
             "   CASE\n" +
+            "       WHEN ((pre.status ILIKE '%IIT%' OR pre.status ILIKE '%stop%') AND (ct.status ILIKE '%ACTIVE%')) THEN 'Active Restart'\n" +
             "       WHEN ct.status ILIKE '%ACTIVE%' THEN 'Active'"+
             "       WHEN ct.status ILIKE '%ART Transfer In%' THEN ''" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN 'Died'\n" +
@@ -1141,11 +1169,6 @@ public class RADETReportQueries {
             "       WHEN ct.status ILIKE '%IIT%' THEN 'IIT'\n" +
             "       WHEN ct.status ILIKE '%out%' THEN 'Transferred Out'\n" +
             "       WHEN ct.status ILIKE '%DEATH%' THEN 'Died'\n" +
-            "       WHEN (\n" +
-            "pre.status ILIKE '%IIT%'\n" +
-            "        OR pre.status ILIKE '%stop%'\n" +
-            "    )\n" +
-            "           AND (ct.status ILIKE '%ACTIVE%') THEN 'Active Restart'\n" +
             "       WHEN pre.status ILIKE '%ACTIVE%'\n" +
             "           AND ct.status ILIKE '%ACTIVE%' THEN 'Active'\n" +
             "       ELSE REPLACE(ct.status, '_', ' ')\n" +
