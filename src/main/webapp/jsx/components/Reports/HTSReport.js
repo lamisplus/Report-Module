@@ -209,7 +209,7 @@ const HTSReport = (props) => {
       onChange={handleReportType} 
       required
     />
-    {' '} &nbsp;&nbsp;<span> Pepfar Report.</span>
+    {' '} &nbsp;&nbsp;<span>  PEPFAR report.</span>
   </Label>
 </FormGroup>
 </div>
