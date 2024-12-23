@@ -96,7 +96,7 @@ public class HTSReportQuery {
             "WHEN  hc.hiv_test_result ='Negative' THEN 'Negative'\n" +
             "WHEN  hc.hiv_test_result ='Positive' AND hc.hiv_test_result2='Negative' THEN 'Negative'\n" +
             "WHEN  hc.hiv_test_result ='Positive' AND hc.hiv_test_result2 IS NULL THEN 'Positive'\n" +
-            "WHEN hc.test1->>'result' ILIKE 'Yes' THEN 'Positive' ELSE 'Negative' END) AS finalHIVTestResult,  \n" +
+            "WHEN hc.test1->>'result' ILIKE 'Yes' THEN 'Positive' ELSE hc.hiv_test_result END) AS finalHIVTestResult,  \n" +
             "he.person_uuid AS patientUuid,\n" +
             "(CASE WHEN LENGTH(hc.test1->>'date') > 0 AND hc.test1->>'date' !=''  THEN CAST(NULLIF(hc.test1->>'date', '') AS DATE)  \n" +
             "WHEN hc.date_visit IS NOT NULL THEN hc.date_visit ELSE NULL END)dateOfHIVTesting,  \n" +
@@ -172,7 +172,7 @@ public class HTSReportQuery {
             ") dt ) lgaOfResidence ON lgaOfResidence.personUuid11 = hc.person_uuid\n" +
             "LEFT JOIN hiv_enrollment he ON he.person_uuid = hc.person_uuid\n" +
             "LEFT JOIN (\n" +
-            "SELECT person_uuid, COUNT(person_uuid) AS numberOfCounts from hts_client where archived = 0\n" +
+            "SELECT person_uuid, COUNT(person_uuid) AS numberOfCounts from hts_client where archived = 0 AND hiv_test_result is not null AND hiv_test_result != ''\n" +
             "group by 1\n" +
             ") htsCounts ON htsCounts.person_uuid = hc.person_uuid\n" +
             "LEFT JOIN (\n" +
@@ -180,7 +180,7 @@ public class HTSReportQuery {
             "select person_uuid,date_visit, hiv_test_result,   \n" +
             "ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY date_visit DESC) AS rnk\n" +
             "FROM hts_client \n" +
-            "WHERE archived = 0\n" +
+            "WHERE archived = 0 AND hiv_test_result is not null AND hiv_test_result != ''\n" +
             "GROUP BY person_uuid,date_visit, hiv_test_result \n" +
             ") pre where rnk = 2\n" +
             ") htsPrevious ON htsPrevious.person_uuid = hc.person_uuid\n" +
