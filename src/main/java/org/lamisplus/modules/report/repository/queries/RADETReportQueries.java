@@ -1159,6 +1159,7 @@ public class RADETReportQueries {
             "   ) AS DATE)AS previousStatusDate,\n" +
             "           (\n" +
             "   CASE\n" +
+            "       WHEN ((pre.status ILIKE '%IIT%' OR pre.status ILIKE '%stop%') AND (ct.status ILIKE '%ACTIVE%')) THEN 'Active Restart'\n" +
             "       WHEN ct.status ILIKE '%ACTIVE%' THEN 'Active'"+
             "       WHEN ct.status ILIKE '%ART Transfer In%' THEN ''" +
             "       WHEN prepre.status ILIKE '%DEATH%' THEN 'Died'\n" +
@@ -1168,11 +1169,6 @@ public class RADETReportQueries {
             "       WHEN ct.status ILIKE '%IIT%' THEN 'IIT'\n" +
             "       WHEN ct.status ILIKE '%out%' THEN 'Transferred Out'\n" +
             "       WHEN ct.status ILIKE '%DEATH%' THEN 'Died'\n" +
-            "       WHEN (\n" +
-            "pre.status ILIKE '%IIT%'\n" +
-            "        OR pre.status ILIKE '%stop%'\n" +
-            "    )\n" +
-            "           AND (ct.status ILIKE '%ACTIVE%') THEN 'Active Restart'\n" +
             "       WHEN pre.status ILIKE '%ACTIVE%'\n" +
             "           AND ct.status ILIKE '%ACTIVE%' THEN 'Active'\n" +
             "       ELSE REPLACE(ct.status, '_', ' ')\n" +

@@ -1,6 +1,6 @@
-import React, {useEffect, useState, useCallback} from "react";
+import React, {useEffect, useState} from "react";
 import axios from "axios";
-import {FormGroup, Label , CardBody,Input} from "reactstrap";
+import {FormGroup, Label , CardBody, Input} from "reactstrap";
 import {makeStyles} from "@material-ui/core/styles";
 import {Card} from "@material-ui/core";
 import {token, url as baseUrl } from "../../../api";
@@ -51,19 +51,17 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const HTSReport = (props) => {
+const MlIITReport = (props) => {
     let currentDate = new Date().toISOString().split('T')[0]
     const classes = useStyles();
     const [loading, setLoading] = useState(false)
     const [facilities, setFacilities] = useState([]);
     const [status, setStatus] = useState(true);
-    // const [reportType, setReportType] = useState('');
     const [objValues, setObjValues]=useState({
         organisationUnitId:"",
         organisationUnitName:"",
         startDate:"",
-        endDate: "",
-        reportType: ""
+        endDate: ""
     })
     useEffect(() => {
         Facilities()
@@ -79,8 +77,8 @@ const HTSReport = (props) => {
         })
         .catch((error) => {
         });
-
     }
+
     const handleInputChange = (e) => {
         const selectedOption = e.target.options ? e.target.options[e.target.selectedIndex] : null;
         const selectedValue = e.target.value;
@@ -93,11 +91,6 @@ const HTSReport = (props) => {
         }));
       };
 
-    const handleReportType = useCallback((event) => {
-        const selectedReportType = event.target.value;
-        setObjValues((prevObjValues) => ({ ...prevObjValues, reportType: selectedReportType }));
-      }, [setObjValues]);
-
     const handleValueChange = () => {
         setStatus(!status)
 
@@ -106,23 +99,24 @@ const HTSReport = (props) => {
         } else {
           setObjValues ({...objValues,  startDate: "", endDate: currentDate});
         }
+
     }
+
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true)
-        console.log(token);
 
-        axios.post(`${baseUrl}hts-reporting?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}&reportType=${objValues.reportType}`,objValues.organisationUnitId,
+        axios.get(`${baseUrl}hiv/iit-ml/download-report?startDate=${objValues.startDate}&endDate=${objValues.endDate}&facility=${objValues.organisationUnitId}`,
             { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
         )
           .then(response => {
             setLoading(false)
-            const fileName = `${objValues.organisationUnitName} HTS ${currentDate}`
+            const fileName = `${objValues.organisationUnitName} ML IIT ${currentDate}`
             const responseData = response.data
             let blob = new Blob([responseData], {type: "application/octet-stream"});
 
             FileSaver.saveAs(blob, `${fileName}.xlsx`);
-            toast.success("HTS Report generated successfully");
+            toast.success("ML IIT Report generated successfully");
           })
           .catch(error => {
             setLoading(false)
@@ -136,13 +130,15 @@ const HTSReport = (props) => {
           });
     }
 
+
+
     return (
         <>
 
             <Card >
                 <CardBody>
 
-                <h2 style={{color:'#000'}}>HTS REPORT</h2>
+                <h2 style={{color:'#000'}}>ML/AI - IIT REPORT</h2>
                 <br/>
                     < >
                         <div className="row">
@@ -179,7 +175,7 @@ const HTSReport = (props) => {
                                     />
                                 </FormGroup>
                             </div>
-                            <div className="form-group  col-md-2">
+                            <div className="form-group  col-md-6">
                                  <FormGroup check>
                                   <Label check>
                                     <Input type="checkbox" onChange={handleValueChange}/>
@@ -187,32 +183,6 @@ const HTSReport = (props) => {
                                   </Label>
                                 </FormGroup>
                             </div>
-                            <div className="form-group col-md-4">
-                            <FormGroup check>
-  <Label check>
-    <Input 
-      type="radio" 
-      name="reportType" 
-      value="GoN" 
-      checked={objValues.reportType === "GoN"} 
-      onChange={handleReportType} 
-      required
-    />
-    {' '} &nbsp;<span> GoN Report.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-  </Label>
-  <Label check>
-    <Input 
-      type="radio" 
-      name="reportType" 
-      value="Pepfar" 
-      checked={objValues.reportType === "Pepfar"} 
-      onChange={handleReportType} 
-      required
-    />
-    {' '} &nbsp;&nbsp;<span>  PEPFAR report.</span>
-  </Label>
-</FormGroup>
-</div>
                             <div className="form-group  col-md-6">
                                 <FormGroup>
                                     <Label>Facility*</Label>
@@ -238,18 +208,16 @@ const HTSReport = (props) => {
                             <br />
                             <div className="row">
                             <div className="form-group mb-3 col-md-6">
-                            <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={handleSubmit} 
-                            disabled={objValues.organisationUnitId === "" || objValues.reportType === "" || loading} 
-                            />
+                            <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={handleSubmit} disabled={objValues.organisationUnitId === "" || loading} />
                             </div>
                             </div>
 
                             {loading && (
                                 <Message icon>
-                                                  <Message.Content>
-                                                        <ProgressComponent/>
-                                                  </Message.Content>
-                                                </Message>
+                                  <Message.Content>
+                                        <ProgressComponent/>
+                                  </Message.Content>
+                                </Message>
                             )}
                         </div>
                     </>
@@ -260,4 +228,4 @@ const HTSReport = (props) => {
     );
 };
 
-export default HTSReport
+export default MlIITReport

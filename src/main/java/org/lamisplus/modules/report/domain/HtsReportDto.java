@@ -72,4 +72,9 @@ public  interface HtsReportDto {
 
        String getPreviousTestResult();
 
+       String getGonModalities();
+       String getPepfarModalities();
+       String getMlScore();
+       String getMlStatus();
+
 }

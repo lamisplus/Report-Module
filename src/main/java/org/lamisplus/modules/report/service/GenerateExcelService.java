@@ -17,7 +17,7 @@ public interface GenerateExcelService {
  ByteArrayOutputStream generateLabReport(Long facilityId) throws IOException;
  ByteArrayOutputStream generateClinicReport(Long facilityId) throws IOException;
  String getFacilityName(Long facilityId);
- ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, LocalDate end);
+ ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, LocalDate end, String reportType);
 
  ByteArrayOutputStream generatePrep(Long facilityId, LocalDate start, LocalDate end);
 

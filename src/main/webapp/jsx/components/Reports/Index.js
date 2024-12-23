@@ -40,6 +40,7 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Divider from '@mui/material/Divider';
 import PrEPMSF from "./PrEPMSF";
+import MlIITReport from "./MLIITReport";
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -75,8 +76,10 @@ const Reports = (props) => {
   const reportMsfs = [
     { key: 'prep-msf', value: 'prep-msf', text: 'PrEP Monthly Summary Form' },
   ]
-
-
+//List of ML/AI Report
+  const mlReports = [
+    { key: 'ml-iit', value: 'ml-iit', text: 'ML/AI Report' },
+  ]
   const reportSurveillance = [
     { key: 'hts-report', value: 'hts-report', text: 'HTS REPORT' },
     { key: 'hts-register', value: 'hts-register', text: 'HTS REGISTER' },
@@ -192,6 +195,8 @@ const Reports = (props) => {
           return <PMTCTMonthlySummaryReport handleItemClick={handleItemClick1} setCompleted={setCompleted} completed={completed} />;
       case 'prep-msf':
             return <PrEPMSF handleItemClick={handleItemClick1} setCompleted={setCompleted} completed={completed} />;
+      case 'ml-iit':
+        return <MlIITReport handleItemClick={handleItemClick1} setCompleted={setCompleted} completed={completed} />;
       default:
         return null;
     }
@@ -360,6 +365,25 @@ const Reports = (props) => {
         </AccordionDetails>
       </Accordion>
 
+      <Accordion expanded={expanded === 'panel8'} onChange={handleChange('panel8')} style={{ backgroundColor: "#014D88" }}>
+        <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel3bh-content"
+            id="panel3bh-header"
+        >
+
+          <Typography sx={{  flexShrink: 0, color: "#fff" }}>
+            ML/AI Reports
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
+          {Object.values(mlReports).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
+                <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
+                <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: activeItem1 === option.value ? "grey" : "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
+                <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>
+          ))}
+        </AccordionDetails>
+      </Accordion>
 
 
 
