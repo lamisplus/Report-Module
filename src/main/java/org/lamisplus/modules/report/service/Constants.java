@@ -375,7 +375,7 @@ public class Constants {
 					"Date of Last Visit",
 					"Date of TB Screening",
 					"TB Screening Type",
-					"TB Screening Outcome",
+					"TB Status",
 					"Date of TB Sample Collection (yyyy-mm-dd)",
 					"Date of Specimen sent",
 					"Type of specimen",
