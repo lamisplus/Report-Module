@@ -13,7 +13,7 @@ public class NCDReportQuery {
                 "                                    p.surname, " +
                 "                                    p.other_name, " +
                 "                                    p.date_of_birth AS dateOfBirth, " +
-                "                                    EXTRACT(YEAR FROM  AGE(NOW(), date_of_birth)) AS age, " +
+                "                                    EXTRACT(YEAR FROM  AGE(?3, date_of_birth)) AS age, " +
                 "                                    INITCAP(p.sex) AS Sex, " +
                 "                                    p.marital_status ->> 'display' as maritalStatus, " +
                 "                                    p.education ->> 'display' as education, " +
@@ -248,14 +248,12 @@ public class NCDReportQuery {
                 "               NULL AS currentWaistCircumferenceDate, " +
                 "               NULL AS waistHipRatio, " +
                 "               NULL AS WaistHipRatioDate, " +
-                "               CASE " +
-                "                   WHEN tvs.height != 0 THEN " +
-                "                       ROUND( " +
-                "                           CAST(tvs.body_weight AS DECIMAL(5, 0)) / " +
-                "                           POWER(CAST(tvs.height AS DECIMAL(5, 0)) / 100, 2), 2 " +
-                "                       ) " +
-                "                   ELSE NULL " +
-                "               END AS currentBMI, " +
+                "               (CASE \n" +
+                "               WHEN (tvs.height IS NULL OR tvs.height != 0) THEN NULL ELSE\n" +
+                "               ROUND(\n" +
+                "               CAST(NULLIF(tvs.body_weight, 0) AS DECIMAL(5, 0)) / \n" +
+                "               POWER( CAST(NULLIF(tvs.height, 0) AS DECIMAL(5, 0)) / 100, 2 ),  2)\n" +
+                "                   END) AS currentBMI, " +
                 "               CASE WHEN tvs.body_weight IS NOT NULL THEN tvs.capture_date ELSE NULL END AS currentBMIDate, " +
                 "               tvs.diastolic, " +
                 "               CASE WHEN tvs.diastolic IS NOT NULL THEN tvs.capture_date ELSE NULL END AS currentDiastolicDate, " +
