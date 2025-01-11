@@ -457,7 +457,8 @@ public class GenerateExcelDataHelper {
 				//vl
 				map.put(index++, radetReportDto.getDateOfViralLoadSampleCollection());
 				map.put(index++, radetReportDto.getDateOfCurrentViralLoadSample());
-				map.put(index++, currentVl);
+//				map.put(index++, currentVl);
+				map.put(index++, radetReportDto.getCurrentViralLoad());
 				map.put(index++, radetReportDto.getDateOfCurrentViralLoad());
 				map.put(index++, radetReportDto.getViralLoadIndication());
 				map.put(index++, radetReportDto.getVlEligibilityStatus());
