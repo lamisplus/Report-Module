@@ -11,7 +11,7 @@ public class HTSReportQuery {
             "(CASE WHEN hc.person_uuid IS NULL THEN INITCAP(hc.extra->>'middile_name') ELSE INITCAP(pp.other_name) END) AS otherName,  \n" +
             "(CASE WHEN hc.person_uuid IS NULL THEN INITCAP(hc.extra->>'gender') ELSE INITCAP(pp.sex) END) AS sex,  \n" +
             "(CASE WHEN hc.person_uuid IS NULL THEN CAST(hc.extra->>'age' AS INTEGER)   \n" +
-            "ELSE CAST(EXTRACT(YEAR from AGE(NOW(),  pp.date_of_birth)) AS INTEGER )  \n" +
+            "ELSE CAST(EXTRACT(YEAR from AGE(?3,  pp.date_of_birth)) AS INTEGER )  \n" +
             "END) AS age,  \n" +
             "(CASE WHEN hc.person_uuid IS NOT NULL THEN pp.date_of_birth  \n" +
             "WHEN hc.person_uuid IS NULL AND LENGTH(hc.extra->>'date_of_birth') > 0  \n" +
@@ -104,7 +104,7 @@ public class HTSReportQuery {
             "CAST(post_test_counseling->>'lubricantProvidedToClientCount' AS VARCHAR) AS numberOfLubricantsGiven,\n" +
             "CAST (riskScore.totalRiskScore AS VARCHAR) AS totalRiskScore, hc.source, hc.referred_for_sti AS refferedForSti, \n" +
             "hc.others->>'adhocCode' AS TesterName,\n" +
-            "(CASE WHEN hrs.entry_point = 'HTS_ENTRY_POINT_FACILITY' AND hc.testing_setting IN ('FACILITY_HTS_TEST_SETTING_ANC', 'FACILITY_HTS_TEST_SETTING_RETESTING', 'FACILITY_HTS_TEST_SETTING_L&D', 'FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING') THEN ''\n" +
+            "(CASE WHEN hrs.entry_point = 'HTS_ENTRY_POINT_FACILITY' AND hrs.testing_setting IN ('FACILITY_HTS_TEST_SETTING_ANC', 'FACILITY_HTS_TEST_SETTING_RETESTING', 'FACILITY_HTS_TEST_SETTING_L&D', 'FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING') THEN ''\n" +
             "WHEN hrs.entry_point = 'HTS_ENTRY_POINT_FACILITY' AND hrs.testing_setting = 'FACILITY_HTS_TEST_SETTING_WARD_INPATIENT' THEN 'Inpatient'\n" +
             "WHEN hrs.entry_point = 'HTS_ENTRY_POINT_FACILITY' AND hrs.testing_setting = 'FACILITY_HTS_TEST_SETTING_CT' THEN 'CT'\n" +
             "WHEN hrs.entry_point = 'HTS_ENTRY_POINT_FACILITY' AND hrs.testing_setting = 'FACILITY_HTS_TEST_SETTING_TB' THEN 'TB'\n" +
