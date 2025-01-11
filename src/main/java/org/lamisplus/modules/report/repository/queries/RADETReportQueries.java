@@ -6,7 +6,7 @@ public class RADETReportQueries {
 
 
     public static final String RADET_REPORT_QUERY = "WITH bio_data AS (SELECT DISTINCT (p.uuid) AS personUuid,p.hospital_number AS hospitalNumber, h.unique_id as uniqueId,\n" +
-            "EXTRACT(YEAR FROM  AGE(NOW(), date_of_birth)) AS age,\n" +
+            "EXTRACT(YEAR FROM  AGE(?3, date_of_birth)) AS age,\n" +
             "INITCAP(p.sex) AS gender,\n" +
             "p.date_of_birth AS dateOfBirth,\n" +
             "facility.name AS facilityName,\n" +
@@ -317,7 +317,7 @@ public class RADETReportQueries {
             "           MAX(CASE WHEN lab_test_id = 71 THEN tbDiagnosticResult END),\n" +
             "           MAX(CASE WHEN lab_test_id = 86 THEN tbDiagnosticResult END),\n" +
             "           MAX(CASE WHEN lab_test_id = 73 THEN tbDiagnosticResult END),\n" +
-            "           MAX(CASE WHEN lab_test_id = 68 THEN tbDiagnosticResult END)\n" +
+            "           MAX(CASE WHEN lab_test_id = 58 THEN tbDiagnosticResult END)\n" +
             "       ) as tbDiagnosticResult ,\n" +
             "   coalesce(\n" +
             "           MAX(CASE WHEN lab_test_id = 65 THEN 'Gene Xpert' END) ,\n" +
@@ -698,22 +698,23 @@ public class RADETReportQueries {
             "), \n" +
             "ipt as ( \n" +
             "    with ipt_c as ( \n" +
-            "SELECT person_uuid, date_completed AS iptCompletionDate, iptCompletionStatus FROM \n" +
-            "        (SELECT person_uuid, CASE WHEN (ipt->>'dateCompleted' is not null and ipt->>'dateCompleted' != 'null' and ipt->>'dateCompleted' != '' \n" +
-            "        AND TRIM(ipt->>'dateCompleted') <> '')THEN CAST(ipt ->> 'dateCompleted' AS DATE) ELSE NULL END AS date_completed,\n" +
-            "        COALESCE(NULLIF(CAST(ipt ->> 'completionStatus' AS text), ''), '') AS iptCompletionStatus,ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY visit_date DESC) AS rnk FROM \n" +
-            "        hiv_art_pharmacy WHERE archived = 0 ) ic WHERE ic.rnk = 1\n" +
+            "    select person_uuid, date_completed as iptCompletionDate, iptCompletionStatus from ( \n" +
+            "select person_uuid, cast(ipt->>'dateCompleted' as date) as date_completed, \n" +
+            "COALESCE(NULLIF(CAST(ipt->>'completionStatus' AS text), ''), '') AS iptCompletionStatus, \n" +
+            "row_number () over (partition by person_uuid order by cast(ipt->>'dateCompleted' as date) desc) as rnk \n" +
+            "from hiv_art_pharmacy where (ipt->>'dateCompleted' is not null and ipt->>'dateCompleted' != 'null' and ipt->>'dateCompleted' != '' AND TRIM(ipt->>'dateCompleted') <> '') \n" +
+            "and archived = 0) ic where ic.rnk = 1\n" +
             "    ), \n" +
             "    ipt_s as ( \n" +
             "    SELECT person_uuid, visit_date as dateOfIptStart, regimen_name as iptType \n" +
             "    FROM ( \n" +
             "    SELECT h.person_uuid, h.visit_date, CAST(pharmacy_object ->> 'regimenName' AS VARCHAR) AS regimen_name, \n" +
-            "    ROW_NUMBER() OVER (PARTITION BY h.person_uuid ORDER BY h.visit_date DESC) AS rnk \n" +
+            "    ROW_NUMBER() OVER (PARTITION BY h.person_uuid ORDER BY h.visit_date ASC) AS rnk \n" +
             "    FROM hiv_art_pharmacy h \n" +
             "    INNER JOIN jsonb_array_elements(h.extra -> 'regimens') WITH ORDINALITY p(pharmacy_object) ON TRUE \n" +
             "    INNER JOIN hiv_regimen hr ON hr.description = CAST(p.pharmacy_object ->> 'regimenName' AS VARCHAR) \n" +
             "    INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id  AND hrt.id = 15 AND hrt.id NOT IN (1,2,3,4,14, 16) \n" +
-            "    WHERE hrt.id = 15 AND h.archived = 0 and h.ipt ->> 'type' ILIKE '%INITIATION%' OR ipt ->> 'type' ILIKE 'START_REFILL' \n" +
+            "    WHERE hrt.id = 15 AND h.archived = 0 \n" +
             "    ) AS ic \n" +
             "    WHERE ic.rnk = 1 ), \n" +
             "    ipt_c_cs as ( \n" +
@@ -748,6 +749,18 @@ public class RADETReportQueries {
             "    from ipt_c \n" +
             "    left join ipt_s on ipt_s.person_uuid = ipt_c.person_uuid \n" +
             "    left join ipt_c_cs on ipt_s.person_uuid = ipt_c_cs.person_uuid ), \n" +
+            "    ipt_s as ( \n" +
+            "    SELECT person_uuid, visit_date as dateOfIptStart, regimen_name as iptType \n" +
+            "    FROM ( \n" +
+            "    SELECT h.person_uuid, h.visit_date, CAST(pharmacy_object ->> 'regimenName' AS VARCHAR) AS regimen_name, \n" +
+            "    ROW_NUMBER() OVER (PARTITION BY h.person_uuid ORDER BY h.visit_date ASC) AS rnk \n" +
+            "    FROM hiv_art_pharmacy h \n" +
+            "    INNER JOIN jsonb_array_elements(h.extra -> 'regimens') WITH ORDINALITY p(pharmacy_object) ON TRUE \n" +
+            "    INNER JOIN hiv_regimen hr ON hr.description = CAST(p.pharmacy_object ->> 'regimenName' AS VARCHAR) \n" +
+            "    INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id  AND hrt.id = 15 AND hrt.id NOT IN (1,2,3,4,14, 16) \n" +
+            "    WHERE hrt.id = 15 AND h.archived = 0 \n" +
+            "    ) AS ic \n" +
+            "    WHERE ic.rnk = 1 ),\n"+
             " cervical_cancer AS (select * from (select  ho.person_uuid AS person_uuid90, ho.date_of_observation AS dateOfCervicalCancerScreening, \n" +
             "    ho.data ->> 'screenTreatmentMethodDate' AS treatmentMethodDate,cc_type.display AS cervicalCancerScreeningType, \n" +
             "    cc_method.display AS cervicalCancerScreeningMethod, cc_trtm.display AS cervicalCancerTreatmentScreened, \n" +
@@ -1106,14 +1119,14 @@ public class RADETReportQueries {
             "           e.*,\n" +
             "           ca.dateOfCurrentRegimen,\n" +
             "           ca.person_uuid70,\n" +
-            "           ipt.dateOfIptStart AS dateOfIptStart,\n" +
+            "           iptStart.dateOfIptStart AS dateOfIptStart,\n" +
             "           COALESCE(CAST (iptN.tptCompletionDate AS DATE), ipt.iptCompletionDate) AS iptCompletionDate, \n" +
             "           (CASE WHEN COALESCE(iptN.tptCompletionStatus, ipt.iptCompletionStatus) = 'IPT Completed' THEN 'Treatment completed' ELSE COALESCE(iptN.tptCompletionStatus, ipt.iptCompletionStatus) END) AS iptCompletionStatus,\n" +
-            "           ipt.iptType AS iptType,\n" +
+            "           iptStart.iptType AS iptType,\n" +
             "           cc.*,\n" +
             "           dsd1.*, dsd2.*,  \n" +
             "           ov.*,\n" +
-            "   COALESCE(tbTmentNew.tbTreatmentType, tbTment.tbTreatementType) AS tbTreatementType,\n" +
+            "   (CASE WHEN COALESCE(tbTmentNew.tbTreatmentType, tbTment.tbTreatementType) IN ('New', 'Relapse', 'Relapsed') THEN 'New/Relapse' ELSE COALESCE(tbTmentNew.tbTreatmentType, tbTment.tbTreatementType) END)  AS tbTreatementType,\n" +
             "   COALESCE(tbTmentNew.tbTreatmentStartDate, tbTment.tbTreatmentStartDate) AS tbTreatmentStartDate,\n" +
             "   COALESCE(tbTmentNew.treatmentOutcome, tbTment.tbTreatmentOutcome) AS tbTreatmentOutcome,\n" +
             "   COALESCE(tbTmentNew.completionDate, tbTment.tbCompletionDate) AS tbCompletionDate,\n" +
@@ -1370,5 +1383,6 @@ public class RADETReportQueries {
             "        LEFT JOIN  dsd2 dsd2  on dsd2.person_uuid_dsd_2 = bd.personUuid \n" +
             "        LEFT JOIN case_manager cm on cm.caseperson= bd.personUuid\n" +
             "        LEFT JOIN client_verification cvl on cvl.person_uuid = bd.personUuid \n" +
-            "        LEFT JOIN vaCauseOfDeath vaod ON vaod.person_id = bd.personUuid";
+            "        LEFT JOIN vaCauseOfDeath vaod ON vaod.person_id = bd.personUuid \n"+
+            "        LEFT JOIN ipt_s iptStart ON iptStart.person_uuid = bd.personUuid";
 }
