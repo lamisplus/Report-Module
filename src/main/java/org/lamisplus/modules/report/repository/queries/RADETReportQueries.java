@@ -118,113 +118,89 @@ public class RADETReportQueries {
             "           AND (sample.archived is null OR sample.archived = 0) \n" +
             "           AND sample.facility_id = ?1 ), \n" +
             "tbstatus as ( \n" +
-            "    with tbscreening_cs as ( \n" +
-            "        with cs as ( \n" +
-            "     WITH FilteredObservations AS (\n" +
-            "    SELECT \n" +
+            "WITH cs AS (\n" +
+            "  WITH \n" +
+            "    FilteredObservations AS (\n" +
+            "      SELECT \n" +
             "        id,\n" +
             "        person_uuid,\n" +
             "        date_of_observation AS dateOfTbScreened,\n" +
-            "        (CASE WHEN data->'tbIptScreening'->>'status' = 'Presumptive TB and referred for evaluation' THEN 'Presumptive TB' ELSE data->'tbIptScreening'->>'status' END) AS tbStatus,\n" +
+            "        (CASE \n" +
+            "          WHEN data->'tbIptScreening'->>'status' = 'Presumptive TB and referred for evaluation' \n" +
+            "          THEN 'Presumptive TB' \n" +
+            "          ELSE data->'tbIptScreening'->>'status' \n" +
+            "        END) AS tbStatus,\n" +
+            "CASE \n" +
+            "          WHEN EXTRACT(MONTH FROM CAST (date_of_observation AS DATE)) BETWEEN 10 AND 12 \n" +
+            "            OR EXTRACT(MONTH FROM CAST (date_of_observation AS DATE)) BETWEEN 1 AND 3 \n" +
+            "          THEN 'October - March' \n" +
+            "          WHEN EXTRACT(MONTH FROM CAST (date_of_observation AS DATE)) BETWEEN 4 AND 9 \n" +
+            "          THEN 'April - September' \n" +
+            "        END AS reportingPeriod,\n" +
+            "       EXTRACT(YEAR FROM date_of_observation) AS yearOfReporting,\n" +
             "        data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType,\n" +
             "        ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS rowNums\n" +
-            "    FROM \n" +
+            "      FROM \n" +
             "        hiv_observation\n" +
-            "    WHERE \n" +
+            "      WHERE \n" +
             "        type = 'Chronic Care' \n" +
             "        AND data IS NOT NULL \n" +
-            "        AND archived = 0 \n" +
-            "        AND date_of_observation BETWEEN ?2 AND ?3\n" +
-            "        AND facility_id = ?1\n" +
-            "),\n" +
-            "FilteredLatestObservations AS (\n" +
-            "    SELECT \n" +
-            "        id, \n" +
-            "        person_uuid, \n" +
-            "        dateOfTbScreened, \n" +
-            "        tbStatus, \n" +
-            "        tbScreeningType\n" +
-            "    FROM \n" +
+            "        AND archived = 0\n" +
+            "AND date_of_observation BETWEEN (CAST (?3 AS DATE) - INTERVAL '6 MONTHS') AND CAST(?3 AS DATE)\n" +
+            "    ),\n" +
+            "    FilteredLatestObservations AS (\n" +
+            "      SELECT \n" +
+            "        id,\n" +
+            "        person_uuid,\n" +
+            "        dateOfTbScreened,\n" +
+            "        tbStatus,\n" +
+            "        tbScreeningType,\n" +
+            "reportingPeriod,\n" +
+            "yearOfReporting\n" +
+            "      FROM \n" +
             "        FilteredObservations\n" +
-            "    WHERE \n" +
+            "      WHERE \n" +
             "        rowNums = 1\n" +
-            "),\n" +
-            "ReportingPeriod AS (\n" +
-            "    SELECT \n" +
+            "    ),\n" +
+            "    ReportingPeriod AS (\n" +
+            "      SELECT \n" +
             "        CASE \n" +
-            "            WHEN EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 10 AND 12 OR EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 1 AND 3 \n" +
-            "                THEN 'October - March'\n" +
-            "            WHEN EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 4 AND 9 \n" +
-            "                THEN 'April - September'\n" +
+            "          WHEN EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 10 AND 12 \n" +
+            "            OR EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 1 AND 3 \n" +
+            "          THEN 'October - March' \n" +
+            "          WHEN EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 4 AND 9 \n" +
+            "          THEN 'April - September' \n" +
             "        END AS currentReportingPeriod\n" +
-            "),\n" +
-            "PresumptiveCheck AS (\n" +
-            "    SELECT\n" +
-            "        lo.person_uuid,\n" +
+            "    ),\n" +
+            "    PresumptiveCheck AS ( SELECT\n" +
+            "        lo.person_uuid, \n" +
             "        CASE \n" +
             "            WHEN EXISTS (\n" +
-            "                SELECT 1\n" +
+            "                SELECT 1, lo.dateOfTbScreened\n" +
             "                FROM hiv_observation ho\n" +
-            "                CROSS JOIN ReportingPeriod rp\n" +
             "                WHERE ho.person_uuid = lo.person_uuid\n" +
             "                  AND ho.type = 'Chronic Care'\n" +
             "                  AND ho.data IS NOT NULL\n" +
             "                  AND ho.archived = 0\n" +
-            "                  AND (\n" +
-            "                      CASE \n" +
-            "                          WHEN EXTRACT(MONTH FROM ho.date_of_observation) BETWEEN 10 AND 12 \n" +
-            "                               OR EXTRACT(MONTH FROM ho.date_of_observation) BETWEEN 1 AND 3 \n" +
-            "                          THEN 'October - March'\n" +
-            "                          WHEN EXTRACT(MONTH FROM ho.date_of_observation) BETWEEN 4 AND 9 \n" +
-            "                          THEN 'April - September'\n" +
-            "                      END\n" +
-            "                  ) = rp.currentReportingPeriod\n" +
             "                  AND ho.data->'tbIptScreening'->>'status' ILIKE 'Presumptive TB%'\n" +
-            "                   AND ho.facility_id = ?1\n" +
             "            ) THEN 'Presumptive TB'\n" +
             "            ELSE lo.tbStatus\n" +
             "        END AS tbStatus\n" +
             "    FROM\n" +
-            "        FilteredLatestObservations lo \n" +
-            ")\n" +
-            "SELECT \n" +
+            "        FilteredLatestObservations lo\n" +
+            "    )\n" +
+            "  SELECT \n" +
             "    lo.id,\n" +
             "    lo.person_uuid,\n" +
-            "    lo.dateOfTbScreened,\n" +
-            "    pc.tbStatus,\n" +
-            "    lo.tbScreeningType\n" +
-            "FROM\n" +
+            "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod THEN pc.tbStatus ELSE NULL END AS tbStatus,\n" +
+            "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod THEN lo.dateOfTbScreened ELSE NULL END AS dateOfTbScreened,\n" +
+            "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod THEN lo.tbScreeningType ELSE NULL END AS tbScreeningType\n" +
+            "  FROM \n" +
             "    FilteredLatestObservations lo\n" +
-            "JOIN\n" +
-            "    PresumptiveCheck pc ON lo.person_uuid = pc.person_uuid" +
-            "        ) \n" +
-            "        select * from cs \n" +
-            "    ), \n" +
-            "    tbscreening_hac as ( \n" +
-            "        with h as (\n" +
-            "            select h.id, h.person_uuid, h.visit_date, cast(h.tb_screen->>'tbStatusId' as bigint) as tb_status_id, \n" +
-            "               b.display as h_status, \n" +
-            "               ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY visit_date DESC) AS rowNums \n" +
-            "            from hiv_art_clinical h \n" +
-            "            join base_application_codeset b on b.id = cast(h.tb_screen->>'tbStatusId' as bigint) \n" +
-            "            where h.archived = 0 and h.visit_date between ?2 and ?3 and facility_id = ?1 and h.tb_screen->>'tbStatusId' !='' and h.tb_screen->>'tbStatusId' IS NOT NULL \n" +
-            "        ) \n" +
-            "        select * from h where rowNums = 1 \n" +
-            "    ) \n" +
-            "    select \n" +
-            "         tcs.person_uuid, \n" +
-            "         case \n" +
-            "             when tcs.tbStatus is not null then tcs.tbStatus \n" +
-            "             when tcs.tbStatus is null and th.h_status is not null then th.h_status \n" +
-            "         end as tbStatus, \n" +
-            "         case \n" +
-            "             when tcs.tbStatus is not null then tcs.dateOfTbScreened \n" +
-            "             when tcs.tbStatus is null and th.h_status is not null then th.visit_date \n" +
-            "         end as dateOfTbScreened, \n" +
-            "        tcs.tbScreeningType \n" +
-            "        from tbscreening_cs tcs \n" +
-            "             left join tbscreening_hac th on th.person_uuid = tcs.person_uuid \n" +
-            "),\n" +
+            "    JOIN PresumptiveCheck pc ON lo.person_uuid = pc.person_uuid\n" +
+            "    CROSS JOIN ReportingPeriod rp\n" +
+            ")\n" +
+            "SELECT * FROM cs ),\n" +
             "tblam AS (\n" +
             "  SELECT \n" +
             "    * \n" +
