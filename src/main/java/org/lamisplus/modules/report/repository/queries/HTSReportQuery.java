@@ -143,7 +143,7 @@ public class HTSReportQuery {
             "LEFT JOIN base_application_codeset tg ON tg.code = hc.target_group  \n" +
             "LEFT JOIN base_application_codeset it ON it.id = hc.relation_with_index_client\n" +
             "LEFT JOIN base_application_codeset rf ON rf.id = hc.referred_from  \n" +
-            "LEFT JOIN base_application_codeset ts ON ts.code = hc.testing_setting  \n" +
+            "LEFT JOIN base_application_codeset ts ON ts.code = hrs.testing_setting  \n" +
             "LEFT JOIN base_application_codeset tc ON tc.id = hc.type_counseling  \n" +
             "LEFT JOIN base_application_codeset preg ON preg.id = hc.pregnant  \n" +
             "LEFT JOIN base_application_codeset relation ON relation.id = hc.relation_with_index_client\n" +
