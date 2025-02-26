@@ -109,7 +109,6 @@ const PmtctHtsReport = (props) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true)
-        console.log("token" + objValues);
 
         axios.post(`${baseUrl}pmtct-hts-reporting?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}&reportType=${objValues.reportType}`,objValues.organisationUnitId,
             { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
