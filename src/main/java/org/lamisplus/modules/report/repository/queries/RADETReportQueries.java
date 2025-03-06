@@ -150,43 +150,64 @@ public class RADETReportQueries {
             "        rowNums = 1\n" +
             "),\n" +
             "ReportingPeriod AS (\n" +
-            "    SELECT \n" +
-            "        CASE \n" +
-            "            WHEN EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 10 AND 12 OR EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 1 AND 3 \n" +
-            "                THEN 'October - March'\n" +
-            "            WHEN EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 4 AND 9 \n" +
-            "                THEN 'April - September'\n" +
-            "        END AS currentReportingPeriod\n" +
+            "SELECT\n" +
+            "EXTRACT(YEAR FROM CAST ('01/01/2027' AS DATE)) AS currentYear,\n" +
+            "CASE\n" +
+            "WHEN EXTRACT(MONTH FROM CAST ('01/01/2027' AS DATE)) BETWEEN 10 AND 12\n" +
+            "OR EXTRACT(MONTH FROM CAST ('01/01/2027' AS DATE)) BETWEEN 1 AND 3\n" +
+            "THEN 'October - March'\n" +
+            "WHEN EXTRACT(MONTH FROM CAST ('01/01/2027' AS DATE)) BETWEEN 4 AND 9\n" +
+            "THEN 'April - September'\n" +
+            "END AS currentReportingPeriod\n" +
+            "),\n" +
+            "LatestPresumptiveCheck AS (\n" +
+            "SELECT\n" +
+            "ho.person_uuid,\n" +
+            "MAX(ho.date_of_observation) AS latest_observation_date\n" +
+            "FROM hiv_observation ho\n" +
+            "WHERE ho.type = 'Chronic Care'\n" +
+            "AND ho.data IS NOT NULL\n" +
+            "AND ho.archived = 0\n" +
+            "AND ho.data->'tbIptScreening'->>'status' ILIKE 'Presumptive TB%'\n" +
+            "GROUP BY ho.person_uuid\n" +
             "),\n" +
             "PresumptiveCheck AS (\n" +
-            "    SELECT\n" +
-            "        lo.person_uuid,\n" +
-            "        CASE \n" +
-            "            WHEN EXISTS (\n" +
-            "                SELECT 1\n" +
-            "                FROM hiv_observation ho\n" +
-            "                CROSS JOIN ReportingPeriod rp\n" +
-            "                WHERE ho.person_uuid = lo.person_uuid\n" +
-            "                  AND ho.type = 'Chronic Care'\n" +
-            "                  AND ho.data IS NOT NULL\n" +
-            "                  AND ho.archived = 0\n" +
-            "                  AND (\n" +
-            "                      CASE \n" +
-            "                          WHEN EXTRACT(MONTH FROM ho.date_of_observation) BETWEEN 10 AND 12 \n" +
-            "                               OR EXTRACT(MONTH FROM ho.date_of_observation) BETWEEN 1 AND 3 \n" +
-            "                          THEN 'October - March'\n" +
-            "                          WHEN EXTRACT(MONTH FROM ho.date_of_observation) BETWEEN 4 AND 9 \n" +
-            "                          THEN 'April - September'\n" +
-            "                      END\n" +
-            "                  ) = rp.currentReportingPeriod\n" +
-            "                  AND ho.data->'tbIptScreening'->>'status' ILIKE 'Presumptive TB%'\n" +
-            "                   AND ho.facility_id = ?1\n" +
-            "            ) THEN 'Presumptive TB'\n" +
-            "            ELSE lo.tbStatus\n" +
-            "        END AS tbStatus\n" +
-            "    FROM\n" +
-            "        FilteredLatestObservations lo \n" +
+            "SELECT\n" +
+            "lo.person_uuid,\n" +
+            "CASE\n" +
+            "WHEN EXISTS (\n" +
+            "SELECT 1\n" +
+            "FROM hiv_observation ho\n" +
+            "JOIN LatestPresumptiveCheck lpc\n" +
+            "ON ho.person_uuid = lpc.person_uuid\n" +
+            "AND ho.date_of_observation = lpc.latest_observation_date -- Ensure we pick the latest observation\n" +
+            "CROSS JOIN ReportingPeriod rp\n" +
+            "WHERE (\n" +
+            "CASE\n" +
+            "WHEN EXTRACT(MONTH FROM ho.date_of_observation) BETWEEN 10 AND 12 THEN 'October - March'\n" +
+            "WHEN EXTRACT(MONTH FROM ho.date_of_observation) BETWEEN 1 AND 3 THEN 'October - March'\n" +
+            "WHEN EXTRACT(MONTH FROM ho.date_of_observation) BETWEEN 4 AND 9 THEN 'April - September'\n" +
+            "END\n" +
+            ") = rp.currentReportingPeriod\n" +
+            "AND (\n" +
+            "(rp.currentReportingPeriod = 'April - September'\n" +
+            "AND EXTRACT(YEAR FROM ho.date_of_observation) = rp.currentYear)\n" +
+            "OR\n" +
+            "(rp.currentReportingPeriod = 'October - March'\n" +
+            "AND (\n" +
+            "(EXTRACT(MONTH FROM ho.date_of_observation) BETWEEN 10 AND 12 AND EXTRACT(YEAR FROM ho.date_of_observation) = rp.currentYear - 1)\n" +
+            "OR\n" +
+            "(EXTRACT(MONTH FROM ho.date_of_observation) BETWEEN 1 AND 3 AND EXTRACT(YEAR FROM ho.date_of_observation) = rp.currentYear)\n" +
             ")\n" +
+            ")\n" +
+            ")\n" +
+            ")\n" +
+            "THEN 'Presumptive TB'\n" +
+            "ELSE lo.tbStatus\n" +
+            "END AS tbStatus\n" +
+            "FROM FilteredLatestObservations lo\n" +
+            ")\n" +
+
             "SELECT \n" +
             "    lo.id,\n" +
             "    lo.person_uuid,\n" +
