@@ -18,7 +18,7 @@ public class LABORATORYReportQuery {
             "INNER JOIN base_organisation_unit_identifier oi ON oi.organisation_unit_id=a.facility_id AND oi.name = 'DATIM_ID'\n" +
             "inner join laboratory_sample d on a.id=d.test_id\n" +
             "where b.result_reported != '' and a.facility_id =?1 " +
-            "and test.archived = 0\n" +
-            "and sample.archived = 0\n" +
-            "and result.archived = 0";
+            "and a.archived = 0\n" +
+            "and b.archived = 0\n" +
+            "and d.archived = 0";
 }
