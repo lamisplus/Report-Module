@@ -49,7 +49,11 @@ public class HTSReportQuery {
             "rf.display AS referredFrom,  \n" +
             "(select display from base_application_codeset where code = hrs.testing_setting) AS testingSetting,  \n" +
             "tc.display AS counselingType,  \n" +
-            "preg.display AS pregnancyStatus, (select display from base_application_codeset where code = hrs.entry_point) AS entryPoint, \n" +
+            "(CASE \n" +
+            "WHEN INITCAP(pp.sex) = 'Male' THEN NULL\n" +
+            "WHEN preg.display IS NOT NULL THEN preg.display \n" +
+            "END ) AS pregnancyStatus, \n" +
+            "(select display from base_application_codeset where code = hrs.entry_point) AS entryPoint, \n" +
             "(CASE \n" +
             "WHEN preg.display='Breastfeeding' THEN 'Yes'  \n" +
             "WHEN preg.display IS NULL THEN NULL \n" +
@@ -172,7 +176,7 @@ public class HTSReportQuery {
             ") dt ) lgaOfResidence ON lgaOfResidence.personUuid11 = hc.person_uuid\n" +
             "LEFT JOIN hiv_enrollment he ON he.person_uuid = hc.person_uuid\n" +
             "LEFT JOIN (\n" +
-            "SELECT person_uuid, COUNT(person_uuid) AS numberOfCounts from hts_client where archived = 0\n" +
+            "SELECT person_uuid, COUNT(person_uuid) AS numberOfCounts from hts_client where archived = 0 AND hiv_test_result IS NOT NULL\n" +
             "group by 1\n" +
             ") htsCounts ON htsCounts.person_uuid = hc.person_uuid\n" +
             "LEFT JOIN (\n" +
