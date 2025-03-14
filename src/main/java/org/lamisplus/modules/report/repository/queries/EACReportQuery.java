@@ -7,7 +7,7 @@ public class EACReportQuery {
             "    SELECT " +
             "        facility_lga.name AS lga, facility_state.name AS state, " +
             "        p.uuid as patientId, p.hospital_number as hospitalNumber, h.unique_id as uniqueId, " +
-            "        EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS age, " +
+            "        EXTRACT(YEAR FROM AGE(?3, p.date_of_birth)) AS age, " +
             "        INITCAP(p.sex) AS sex, p.date_of_birth as dateOfBirth, " +
             "        facility.name AS facilityName, boui.code AS datimId, " +
             "        tgroup.display AS targetGroup, eSetting.display AS enrollmentSetting, " +

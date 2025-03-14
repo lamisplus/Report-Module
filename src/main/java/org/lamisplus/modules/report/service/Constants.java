@@ -21,6 +21,7 @@ public class Constants {
 	public static final String NCD_SHEET = "ncd";
 	public static final String EAC_SHEET = "eac";
 	public static final String HTS_SHEET = "hts";
+	public static final String PMTCT_HTS_SHEET = "pmtct-hts";
 
 	public static final String FAMILY_INDEX_SHEET = "family_index";
 
@@ -299,6 +300,8 @@ public class Constants {
 					"Prep Accepted",
 					"Number of condoms given",
 					"Number of lubricant given",
+					"Ml Score",
+					"Ml Status",
 					"HTS Latitude",
 					"HTS Longitude"
 			);
@@ -373,7 +376,7 @@ public class Constants {
 					"Date of Last Visit",
 					"Date of TB Screening",
 					"TB Screening Type",
-					"TB Screening Outcome",
+					"TB Status",
 					"Date of TB Sample Collection (yyyy-mm-dd)",
 					"Date of Specimen sent",
 					"Type of specimen",
@@ -527,6 +530,49 @@ public class Constants {
 			"Unique ART number (UAN)",
 			"Date Enrolled in OVC",
 			"OVC_Id"
+	);
+
+	public static final List<String> PMTCT_HTS_HEADER = Arrays.asList(
+			"S/No",
+			"State",
+			"LGA",
+			"Facility",
+			"Patient ID",
+			"ANC Number",
+			"Mother's Hospital Num",
+			"Mother's Date  of Birth",
+			"Age",
+			"Marital Status",
+			"ANC Setting",
+			"Point of Entry",
+			"Modality",
+			"Date of registration in index pregnancy",
+			"Gestational Age (Weeks) @ First ANC visit",
+			"Gravida",
+			"Parity",
+			"Date Tested for HIV",
+			"HIV Test Result",
+			"Date Tested for Hepatitis B",
+			"Hepatitis B Test Result",
+			"Date Tested for Hepatitis C",
+			"Hepatitis C Test Result",
+			"Date tested for Syphillis",
+			"Syphillis Test Result",
+			"If Recency Testing Opt In",
+			"Recency ID",
+			"Recency Test Type",
+			"Recency Test Date (yyyy_mm_dd)",
+			"Recency Interpretation",
+			"Viral Load Sample Collection Date",
+			"Viral Load Confirmation Result",
+			"Viral Load Confirmation Date (yyyyy-mm-dd)",
+			"Final Recency Result",
+			"Date Of Maternal Retesting",
+			"Maternal Retesting Result",
+			"Mother''s ART Start Date",
+			"Previously Known HIV Status",
+			"Mother''s Unique ID",
+			"Linked to Syphilis Treatment"
 	);
 
 }
