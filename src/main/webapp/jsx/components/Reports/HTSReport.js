@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useCallback} from "react";
 import axios from "axios";
 import {FormGroup, Label , CardBody,Input} from "reactstrap";
 import {makeStyles} from "@material-ui/core/styles";
@@ -57,11 +57,13 @@ const HTSReport = (props) => {
     const [loading, setLoading] = useState(false)
     const [facilities, setFacilities] = useState([]);
     const [status, setStatus] = useState(true);
+    // const [reportType, setReportType] = useState('');
     const [objValues, setObjValues]=useState({
         organisationUnitId:"",
         organisationUnitName:"",
         startDate:"",
-        endDate: ""
+        endDate: "",
+        reportType: ""
     })
     useEffect(() => {
         Facilities()
@@ -91,6 +93,11 @@ const HTSReport = (props) => {
         }));
       };
 
+    const handleReportType = useCallback((event) => {
+        const selectedReportType = event.target.value;
+        setObjValues((prevObjValues) => ({ ...prevObjValues, reportType: selectedReportType }));
+      }, [setObjValues]);
+
     const handleValueChange = () => {
         setStatus(!status)
 
@@ -105,7 +112,7 @@ const HTSReport = (props) => {
         setLoading(true)
         console.log(token);
 
-        axios.post(`${baseUrl}hts-reporting?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,objValues.organisationUnitId,
+        axios.post(`${baseUrl}hts-reporting?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}&reportType=${objValues.reportType}`,objValues.organisationUnitId,
             { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
         )
           .then(response => {
@@ -172,7 +179,7 @@ const HTSReport = (props) => {
                                     />
                                 </FormGroup>
                             </div>
-                            <div className="form-group  col-md-6">
+                            <div className="form-group  col-md-2">
                                  <FormGroup check>
                                   <Label check>
                                     <Input type="checkbox" onChange={handleValueChange}/>
@@ -180,6 +187,32 @@ const HTSReport = (props) => {
                                   </Label>
                                 </FormGroup>
                             </div>
+                            <div className="form-group col-md-4">
+                            <FormGroup check>
+  <Label check>
+    <Input 
+      type="radio" 
+      name="reportType" 
+      value="GoN" 
+      checked={objValues.reportType === "GoN"} 
+      onChange={handleReportType} 
+      required
+    />
+    {' '} &nbsp;<span> GoN Report.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+  </Label>
+  <Label check>
+    <Input 
+      type="radio" 
+      name="reportType" 
+      value="Pepfar" 
+      checked={objValues.reportType === "Pepfar"} 
+      onChange={handleReportType} 
+      required
+    />
+    {' '} &nbsp;&nbsp;<span> Pepfar Report.</span>
+  </Label>
+</FormGroup>
+</div>
                             <div className="form-group  col-md-6">
                                 <FormGroup>
                                     <Label>Facility*</Label>
@@ -206,7 +239,7 @@ const HTSReport = (props) => {
                             <div className="row">
                             <div className="form-group mb-3 col-md-6">
                             <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={handleSubmit} 
-                            disabled={objValues.organisationUnitId === "" || loading} 
+                            disabled={objValues.organisationUnitId === "" || objValues.reportType === "" || loading} 
                             />
                             </div>
                             </div>

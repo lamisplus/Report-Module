@@ -35,13 +35,26 @@ public class HtsReportController {
 	@ApiOperation(value = "Generate HTS Report", notes = "This Api generates HTS report", code = 200)
 	public void htsLineList(HttpServletResponse response, @RequestParam("facilityId") Long facility,
 							@RequestParam("startDate") LocalDate start,
-							@RequestParam("endDate") LocalDate end) throws IOException {
+							@RequestParam("endDate") LocalDate end, @RequestParam("reportType") String reportType) throws IOException {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting HTS report");
 
-		ByteArrayOutputStream baos = generateExcelService.generateHts(facility, start, end);
+		ByteArrayOutputStream baos = generateExcelService.generateHts(facility, start, end, reportType);
 
 		setStream(baos, response);
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating HTS report");
+	}
+
+
+	@PostMapping(REPORT_URL_VERSION_ONE + "/pmtct-hts-reporting")
+	@ApiOperation(value = "Generate PMTCT HTS Report", notes = "This Api generates PMTCT HTS report", code = 200)
+	public void generatePmtctHts (HttpServletResponse response, @RequestParam("facilityId") Long facility,
+							@RequestParam("startDate") LocalDate start,
+							@RequestParam("endDate") LocalDate end, @RequestParam("reportType") String reportType) throws IOException {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting PMTCT HTS report");
+		ByteArrayOutputStream baos = generateExcelService.generatePmtctHts(facility, start, end, reportType);
+
+		setStream(baos, response);
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating PMTCT HTS report");
 	}
 
 	private void setStream(ByteArrayOutputStream baos, HttpServletResponse response) throws IOException {

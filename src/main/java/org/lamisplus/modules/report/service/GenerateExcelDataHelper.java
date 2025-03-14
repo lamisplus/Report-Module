@@ -457,7 +457,8 @@ public class GenerateExcelDataHelper {
 				//vl
 				map.put(index++, radetReportDto.getDateOfViralLoadSampleCollection());
 				map.put(index++, radetReportDto.getDateOfCurrentViralLoadSample());
-				map.put(index++, currentVl);
+//				map.put(index++, currentVl);
+				map.put(index++, radetReportDto.getCurrentViralLoad());
 				map.put(index++, radetReportDto.getDateOfCurrentViralLoad());
 				map.put(index++, radetReportDto.getViralLoadIndication());
 				map.put(index++, radetReportDto.getVlEligibilityStatus());
@@ -587,7 +588,72 @@ public class GenerateExcelDataHelper {
 				&& ! value.equalsIgnoreCase("null");
 	}
 
-	public  List<Map<Integer, Object>> fillHtsDataMapper(@NonNull List<HtsReportDto> htsReportDtos) {
+	public  List<Map<Integer, Object>> fillPmtctHtsDataMapper(@NonNull List<PmtctDto> pmtctHtsReportDtos, String reportType) {
+		List<Map<Integer, Object>> result = new ArrayList<>();
+		int sn = 1;
+		Log.info("converting HTS db records to excel ....");
+		try {
+			for (PmtctDto pmtctDto : pmtctHtsReportDtos) {
+				if (pmtctDto != null) {
+					Map<Integer, Object> map = new HashMap<>();
+					int index = 0;
+					map.put(index++, String.valueOf(sn));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getState())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getLga())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getFacilityName())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getPersonUuid())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getAncNo())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getHospitalNumber())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getMotherDob())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getMotherAge())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getMaritalStatus())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getAncSettingAnc())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getEntryPoint())));
+					map.put(index++, reportType.equals("GoN")  ? getStringValue(String.valueOf(pmtctDto.getGonModalities())) : getStringValue(String.valueOf(pmtctDto.getPepfarModalities())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getPmtctEnrollmentDate())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getGaweeksAnc())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getGravidaAnc())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getParityAnc())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getDateOfVisit())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getHivTestResult())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getDateOfVisit())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getHepatitisBTestResult())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getDateOfVisit())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getHepatitisCTestResult())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getFirstAncDate())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getSyphillisStatus())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getOptOutRTRIStatus())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getOptOutRTRIStatus())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getRencencyId())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getSampleType())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getRencencyTestDate())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getRencencyInterpretation())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getDateOfViralLoad())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getResultReported())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getDateResultReported())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getFinalRecencyResult())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getRetestingVisitDate())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getRetestResult())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getHivEnrollmentDate())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getHivUniqueId())));
+					map.put(index, getStringValue(String.valueOf(pmtctDto.getSyphilisTreatmentStatus())));
+
+					result.add(map);
+					sn++;
+				}
+			}
+			LOG.info(RECORD_OUTPUT, result.size());
+			return result;
+		}catch (Exception e) {
+			LOG.error("An error occurred when converting db records to excel");
+			LOG.error(ERROR_OUTPUT + e.getMessage());
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+
+	public  List<Map<Integer, Object>> fillHtsDataMapper(@NonNull List<HtsReportDto> htsReportDtos, String reportType) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		int sn = 1;
 		Log.info("converting HTS db records to excel ....");
@@ -622,7 +688,10 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPreviouslyTested())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getReferredFrom())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getTestingSetting())));
-					map.put(index++, getStringValue(String.valueOf(htsReportDto.getModality())));
+//					map.put(index++, getStringValue(String.valueOf(htsReportDto.getModality())));
+
+					map.put(index++, reportType.equals("GoN")  ? getStringValue(String.valueOf(htsReportDto.getGonModalities())) : getStringValue(String.valueOf(htsReportDto.getPepfarModalities())));
+
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getCounselingType())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPregnancyStatus())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getIndexType())));
@@ -656,8 +725,11 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPrepAccepted())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfCondomsGiven())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getNumberOfLubricantsGiven())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getMlScore())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getMlStatus())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getHtsLatitude())));
 					map.put(index, getStringValue(String.valueOf(htsReportDto.getHtsLongitude())));
+
 
 					result.add(map);
 						sn++;
