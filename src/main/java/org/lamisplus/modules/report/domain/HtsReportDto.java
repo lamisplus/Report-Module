@@ -27,7 +27,7 @@ public  interface HtsReportDto {
       String getIndexClient();
 
       String getPreviouslyTested();
-      String getTargetGroup();
+      //String getTargetGroup();
       String getReferredFrom();
       String getTestingSetting();
       String getCounselingType();

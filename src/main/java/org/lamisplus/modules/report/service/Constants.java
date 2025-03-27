@@ -249,7 +249,7 @@ public class Constants {
 					"Surname",
 					"Other Names",
 					"Sex",
-					"Target Group",
+					//"Target Group",
 					"Age",
 					"Date Of Birth (yyyy-mm-dd)",
 					"Phone Number",
