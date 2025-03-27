@@ -17,7 +17,7 @@ public class ARTPATIENTReportQuery {
             "AGE(NOW(), date_of_birth)\n" +
             ") as age, \n" +
             "p.other_name as otherName, \n" +
-            "p.sex as gender, \n" +
+            "p.sex as sex, \n" +
             "p.date_of_birth as dateOfBirth, \n" +
             "p.date_of_registration as dateOfRegistration, \n" +
             "p.marital_status ->> 'display' as maritalStatus, \n" +
