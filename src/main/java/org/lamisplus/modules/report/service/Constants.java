@@ -23,7 +23,7 @@ public class Constants {
 	public static final String HTS_SHEET = "hts";
 	public static final String PMTCT_HTS_SHEET = "pmtct-hts";
 
-	public static final String FAMILY_INDEX_SHEET = "family_index";
+	public static final String FAMILY_INDEX_SHEET = "hts_index";
 
 	public static final String REPORT_GENERATION_PROGRESS_TOPIC = "/topic/report-generation-progress";
 
@@ -45,7 +45,7 @@ public class Constants {
 			"Unique ID",
 			"Date Of Birth (yyyy-mm-dd)",
 			"Age",
-			"Gender",
+			"Sex",
 			"Marital Status",
 			"Education",
 			"Occupation",
