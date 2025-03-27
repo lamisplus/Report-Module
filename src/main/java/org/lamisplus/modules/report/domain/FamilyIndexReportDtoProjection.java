@@ -24,7 +24,7 @@ public interface FamilyIndexReportDtoProjection {
 
     String getEntryPoint();
     Integer getElicitedAge();
-    String getElicitedClientName();
+    //String getElicitedClientName();
     String getElicitedClientSex();
     String getElicitedClientAddress();
     String getElicitedClientPhoneNumber();
