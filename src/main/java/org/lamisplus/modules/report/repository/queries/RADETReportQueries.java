@@ -21,7 +21,7 @@ public class RADETReportQueries {
             "h.date_of_registration as dateOfEnrollment,\n" +
             "h.ovc_number AS ovcUniqueId,\n" +
             "h.house_hold_number AS householdUniqueNo,\n" +
-            "ecareEntry.display AS careEntry,\n" +
+            "(CASE WHEN ecareEntry.display IN ('MHPSS/GBV', 'FP') THEN NULL ELSE ecareEntry.display END) AS careEntry,\n" +
             "hrt.description AS regimenLineAtStart\n" +
             "FROM patient_person p\n" +
             "INNER JOIN base_organisation_unit facility ON facility.id = facility_id\n" +
