@@ -27,7 +27,7 @@ import EACReport from "./EACReport";
 import AhdReport from "./AhdReport";
 import PrepLongitudinalReport from "./PrepLongitudinalReport";
 import MhpssReport from "./MhpssReport";
-import KpPrevReport from "./KpPrevReport";
+// import KpPrevReport from "./KpPrevReport";
 import HIVST from "./HIVSTReport";
 import HTSIndexReport from "./HTSIndexReport";
 import CustomReport from "./CustomReport";
@@ -95,7 +95,7 @@ const Reports = (props) => {
   const reportPrevention = [
     { key: 'prep-report', value: 'prep-report', text: 'Prep REPORT' },
     { key: 'prep-longitudinal-report', value: 'prep-longitudinal-report', text: 'PrEP LONGITUDINAL REPORT' },
-    { key: 'kp-prev-report', value: 'kp-prev-report', text: 'KP PREV REPORT' },
+    // { key: 'kp-prev-report', value: 'kp-prev-report', text: 'KP PREV REPORT' },
   ]
 
   const reportPMTCT = [
@@ -600,13 +600,13 @@ const Reports = (props) => {
                   />
                 )
                 }
-                {activeItem === "kp-prev-report" && (
+                {/* {activeItem === "kp-prev-report" && (
                   <KpPrevReport
                     handleItemClick={handleItemClick}
                     setCompleted={setCompleted}
                     completed={completed}
                   />
-                )}
+                )} */}
                 {activeItem === "hivst-report" && (
                   <HIVST
                     handleItemClick={handleItemClick}
