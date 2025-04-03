@@ -120,7 +120,7 @@ const PrepReport = props => {
       )
       .then(response => {
         setLoading(false);
-        const fileName = `${objValues.organisationUnitName} Prep ${currentDate}`;
+        const fileName = `${objValues.organisationUnitName} PrEP-PBFW ${currentDate}`;
         const responseData = response.data;
         let blob = new Blob([responseData], {
           type: 'application/octet-stream',
