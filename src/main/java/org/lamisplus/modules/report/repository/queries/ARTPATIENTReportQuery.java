@@ -76,7 +76,7 @@ public class ARTPATIENTReportQuery {
             " enrollment_details AS (\n" +
             " SELECT h.person_uuid,h.unique_id as uniqueId,  sar.display as statusAtRegistration, date_confirmed_hiv as dateOfConfirmedHiv,\n" +
             "\n" +
-            " ep.display as entryPoint, date_of_registration as dateOfRegistration\n" +
+            " (CASE WHEN ep.display IN ('MHPSS/GBV', 'FP') THEN NULL ELSE ep.display END) as entryPoint, date_of_registration as dateOfRegistration\n" +
             " FROM hiv_enrollment h\n" +
             " LEFT JOIN base_application_codeset sar ON sar.id=h.status_at_registration_id\n" +
             " LEFT JOIN base_application_codeset ep ON ep.id=h.entry_point_id\n" +
