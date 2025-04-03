@@ -177,8 +177,8 @@ const Reports = (props) => {
       case "mhpss-report":
         return <MhpssReport handleItemClick={handleItemClick1} setCompleted={setCompleted} completed={completed} />;
 
-      case "kp-prev-report":
-        return <KpPrevReport handleItemClick={handleItemClick1} setCompleted={setCompleted} completed={completed} />;
+      // case "kp-prev-report":
+      //   return <KpPrevReport handleItemClick={handleItemClick1} setCompleted={setCompleted} completed={completed} />;
       case "hivst-report":
         return <HIVST handleItemClick={handleItemClick1} setCompleted={setCompleted} completed={completed} />;
       case "hts-index-report":
