@@ -33,6 +33,41 @@ import HTSIndexReport from './HTSIndexReport';
 import CustomReport from './CustomReport';
 import ADRReport from './ADRReport';
 import PMTCTMonthlySummaryReport from './PMTCTMonthlySummaryReport';
+import React, { useState } from 'react';
+import { Card, CardBody } from 'reactstrap';
+import { makeStyles } from '@material-ui/core/styles';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import 'react-widgets/dist/css/react-widgets.css';
+import 'react-phone-input-2/lib/style.css';
+import { Menu } from 'semantic-ui-react';
+import 'semantic-ui-css/semantic.min.css';
+import PatientLineList from './PatientLineList';
+import Appointment from './Appointment';
+import Radet from './Radet';
+import BiometricReport from './BiometricReport';
+import PharmacyReport from './PharmacyReport';
+import LaboratoryReport from './LaboratoryReport';
+import HTSReport from './HTSReport';
+import HtsRegister from './HtsRegister';
+import PrepReport from './PrepReport';
+import ClinicData from './ClinicData';
+import ClientVerification from './ClientVerification';
+import TbReport from './TbReport';
+import IndexElicitation from './IndexElicitation';
+import PmtctHtsReport from './PmtctHtsReport';
+import PmtctMaternalCohortReport from './PmtctMaternalCohortReport';
+import NcdReport from './NcdReport';
+import EACReport from './EACReport';
+import AhdReport from './AhdReport';
+import PrepLongitudinalReport from './PrepLongitudinalReport';
+import MhpssReport from './MhpssReport';
+// import KpPrevReport from "./KpPrevReport";
+import HIVST from './HIVSTReport';
+import HTSIndexReport from './HTSIndexReport';
+import CustomReport from './CustomReport';
+import ADRReport from './ADRReport';
+import PMTCTMonthlySummaryReport from './PMTCTMonthlySummaryReport';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -100,7 +135,7 @@ const Reports = props => {
       value: 'prep-longitudinal-report',
       text: 'PrEP LONGITUDINAL REPORT',
     },
-    { key: 'kp-prev-report', value: 'kp-prev-report', text: 'KP PREV REPORT' },
+    // { key: 'kp-prev-report', value: 'kp-prev-report', text: 'KP PREV REPORT' },
   ];
 
   const reportPMTCT = [
@@ -321,6 +356,25 @@ const Reports = props => {
             completed={completed}
           />
         );
+      case 'hivst-report':
+        return (
+          <HIVST
+            handleItemClick={handleItemClick1}
+            setCompleted={setCompleted}
+            completed={completed}
+          />
+        );
+      case 'hts-index-report':
+        return (
+          <HTSIndexReport
+            handleItemClick={handleItemClick1}
+            setCompleted={setCompleted}
+            completed={completed}
+          />
+        );
+
+      // case "kp-prev-report":
+      //   return <KpPrevReport handleItemClick={handleItemClick1} setCompleted={setCompleted} completed={completed} />;
       case 'hivst-report':
         return (
           <HIVST
@@ -1094,13 +1148,13 @@ const Reports = props => {
                     completed={completed}
                   />
                 )}
-                {activeItem === 'kp-prev-report' && (
+                {/* {activeItem === "kp-prev-report" && (
                   <KpPrevReport
                     handleItemClick={handleItemClick}
                     setCompleted={setCompleted}
                     completed={completed}
                   />
-                )}
+                )} */}
                 {activeItem === 'hivst-report' && (
                   <HIVST
                     handleItemClick={handleItemClick}

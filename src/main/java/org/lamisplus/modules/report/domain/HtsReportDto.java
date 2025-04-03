@@ -27,7 +27,7 @@ public  interface HtsReportDto {
       String getIndexClient();
 
       String getPreviouslyTested();
-      String getTargetGroup();
+      //String getTargetGroup();
       String getReferredFrom();
       String getTestingSetting();
       String getCounselingType();
@@ -59,7 +59,7 @@ public  interface HtsReportDto {
       String getHtsLatitude();
       String getHtsLongitude();
       String getNumberOfCondomsGiven();
-      String getNumberOfLubricantsGiven();
+      //String getNumberOfLubricantsGiven();
        LocalDate getViralLoadReceivedResultDate();
        String getSource();
        String getPatientUuid();
