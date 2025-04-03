@@ -282,19 +282,7 @@ public class RADETReportQueries {
             "      WHERE sample.rnkk = 1\n" +
             "     ),\n" +
             "\n" +
-            "     current_tb_result AS (WITH tb_test as (SELECT personTbResult, dateofTbDiagnosticResultReceived,\n" +
-            "   coalesce(\n" +
-            "           MAX(CASE WHEN lab_test_id = 65 THEN tbDiagnosticResult END) ,\n" +
-            "           MAX(CASE WHEN lab_test_id = 66 THEN tbDiagnosticResult END) ,\n" +
-            "           MAX(CASE WHEN lab_test_id = 51 THEN tbDiagnosticResult END) ,\n" +
-            "           MAX(CASE WHEN lab_test_id = 64 THEN tbDiagnosticResult END),\n" +
-            "           MAX(CASE WHEN lab_test_id = 67 THEN tbDiagnosticResult END),\n" +
-            "           MAX(CASE WHEN lab_test_id = 72 THEN tbDiagnosticResult END),\n" +
-            "           MAX(CASE WHEN lab_test_id = 71 THEN tbDiagnosticResult END),\n" +
-            "           MAX(CASE WHEN lab_test_id = 86 THEN tbDiagnosticResult END),\n" +
-            "           MAX(CASE WHEN lab_test_id = 73 THEN tbDiagnosticResult END),\n" +
-            "           MAX(CASE WHEN lab_test_id = 58 THEN tbDiagnosticResult END)\n" +
-            "       ) as tbDiagnosticResult ,\n" +
+            "     current_tb_result AS (WITH tb_test as (SELECT personTbResult, dateofTbDiagnosticResultReceived, dateOfTbSampleCollected, tbDiagnosticResult,\n" +
             "   coalesce(\n" +
             "           MAX(CASE WHEN lab_test_id = 65 THEN 'Gene Xpert' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 66 THEN 'Chest X-ray' END) ,\n" +
@@ -310,20 +298,17 @@ public class RADETReportQueries {
             "\n" +
             "        FROM (\n" +
             "     SELECT  sm.patient_uuid as personTbResult, sm.result_reported as tbDiagnosticResult,\n" +
-            " CAST(sm.date_result_reported AS DATE) as dateofTbDiagnosticResultReceived,\n" +
-            " lt.lab_test_id\n" +
+            " CAST(sm.date_result_reported AS DATE) as dateofTbDiagnosticResultReceived,cast(ls.date_sample_collected as date) AS dateOfTbSampleCollected,\n" +
+            " lt.lab_test_id, ROW_NUMBER() OVER (PARTITION BY  sm.patient_uuid ORDER BY ls.date_sample_collected DESC) AS rnkkk\n" +
             "     FROM laboratory_result  sm\n" +
             "  INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
-            "     WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73, 66) and sm.archived = 0\n" +
-            "       AND sm.date_result_reported is not null\n" +
-            "       AND sm.facility_id = ?1\n" +
-            "       AND sm.date_result_reported <= ?3\n" +
-            " ) as dt\n" +
-            "        GROUP BY dt.personTbResult, dt.dateofTbDiagnosticResultReceived)\n" +
-            "   select * from (select *, row_number() over (partition by personTbResult\n" +
-            "         order by dateofTbDiagnosticResultReceived desc ) as rnk from tb_test) as dt\n" +
-            "   where rnk = 1\n" +
-            "     ),\n" +
+            "  left join laboratory_sample ls on ls.test_id = lt.id\n" +
+            "     WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73, 66) and sm.archived = 0 AND ls.date_sample_collected IS NOT NULL\n" +
+            "\t  AND sm.facility_id = ?1\n" +
+            "      AND sm.date_result_reported <= ?3\n" +
+            "\t ) AS tbSubQ where rnkkk = 1 \n" +
+            "\t GROUP BY tbSubQ.personTbResult, tbSubQ.dateofTbDiagnosticResultReceived, tbSubQ.dateOfTbSampleCollected, tbDiagnosticResult)\n" +
+            "\t SELECT * FROM tb_test),\n" +
             "     tbTreatment AS (\n" +
             "SELECT * FROM (SELECT\n" +
             "        COALESCE(NULLIF(CAST(data->'tbIptScreening'->>'treatementType' AS text), ''), '') as tbTreatementType,\n" +
