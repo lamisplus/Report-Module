@@ -513,7 +513,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getModelDevolvedTo());
 				map.put(index++, radetReportDto.getDateOfCurrentDSD());
 				map.put(index++, radetReportDto.getCurrentDSDModel());
-				map.put(index++, radetReportDto.getCurrentDsdOutlet());
+				map.put(index++, radetReportDto.getDsdOutlet());
 				map.put(index++, radetReportDto.getDateReturnToSite());
 
 				//chronic care

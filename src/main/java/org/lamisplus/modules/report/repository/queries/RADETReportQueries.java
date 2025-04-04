@@ -477,7 +477,7 @@ public class RADETReportQueries {
             "where d.archived = 0 and d.date_devolved between  ?2 and ?3) d1 where row = 1 \n" +
             " ), \n" +
             "dsd2 as ( \n" +
-            "select d2.person_uuid as person_uuid_dsd_2, d2.dateOfCurrentDSD, d2.currentDSDModel, d2.dateReturnToSite, bac.display as currentDsdOutlet \n" +
+            "select d2.person_uuid as person_uuid_dsd_2, d2.dateOfCurrentDSD, d2.currentDSDModel, d2.dateReturnToSite, bac.display as currentDsdOutlet, dsdOutlet \n" +
             "from (select d.person_uuid, d.date_devolved as dateOfCurrentDSD, bmt.display as currentDSDModel, d.date_return_to_site AS dateReturnToSite, outlet_name as dsdOutlet, \n" +
             "      ROW_NUMBER() OVER (PARTITION BY d.person_uuid ORDER BY d.date_devolved DESC ) AS row from dsd_devolvement d \n" +
             "   left join base_application_codeset bmt on bmt.code = d.dsd_type \n" +
