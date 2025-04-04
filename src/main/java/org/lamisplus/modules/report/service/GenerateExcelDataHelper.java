@@ -196,7 +196,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getHospitalNumber())));
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getUniqueId())));
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getSex())));
-				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getTargetGroup())));
+//				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getTargetGroup())));
 				map.put(index++, eacReportProjection.getDateOfBirth());
 				map.put(index++, eacReportProjection.getArtStartDate());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getRegimenAtArtStart())));

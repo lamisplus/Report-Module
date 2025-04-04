@@ -413,7 +413,7 @@ public class Constants {
 					"Hospital Number",
 					"Unique Id",
 					"Sex",
-					"Target group",
+//					"Target group",
 					"Date Birth (yyyy-mm-dd)",
 					"ART Start Date (yyyy-mm-dd)",
 					"Regimen at ART Start",
