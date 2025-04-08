@@ -290,7 +290,7 @@ public class RADETReportQueries {
             "           MAX(CASE WHEN lab_test_id = 64 THEN 'AFB Smear Microscopy' END),\n" +
             "           MAX(CASE WHEN lab_test_id = 67 THEN 'Gene Xpert' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 72 THEN 'TrueNAT' END) ,\n" +
-            "           MAX(CASE WHEN lab_test_id = 71 THEN 'LF-LAM' END) ,\n" +
+            "           MAX(CASE WHEN lab_test_id = 71 THEN 'TB-LAM' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 86 THEN 'Cobas' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 73 THEN 'TB LAMP' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 58 THEN 'TB-LAM' END)\n" +
