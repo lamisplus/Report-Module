@@ -14,7 +14,7 @@ public class ARTPATIENTReportQuery {
             "EXTRACT(\n" +
             "  YEAR \n" +
             "  from \n" +
-            "AGE(NOW(), date_of_birth)\n" +
+            "AGE(?3, date_of_birth)\n" +
             ") as age, \n" +
             "p.other_name as otherName, \n" +
             "p.sex as sex, \n" +
@@ -218,7 +218,7 @@ public class ARTPATIENTReportQuery {
             "             b.firstName,\n" +
             "             b.age,\n" +
             "             b.otherName,\n" +
-            "             b.gender,\n" +
+            "             b.sex,\n" +
             "             b.dateOfBirth,\n" +
             "             b.maritalStatus,\n" +
             "             b.education,\n" +
