@@ -102,7 +102,8 @@ public class TBReportQuery {
             "  SELECT \n" +
             "lo.id,\n" +
             "lo.person_uuid,\n" +
-            "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod THEN pc.tbStatus ELSE NULL END AS tbStatus,\n" +
+            "CASE WHEN (lo.reportingPeriod = rp.currentReportingPeriod AND lo.tbStatus IN ('Confirmed TB', 'Currently on TB treatment')) THEN lo.tbStatus \n" +
+            "WHEN lo.reportingPeriod = rp.currentReportingPeriod THEN pc.tbStatus ELSE NULL END AS tbStatus,\n" +
             "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod THEN lo.dateOfTbScreened ELSE NULL END AS dateOfTbScreened,\n" +
             "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod THEN lo.tbScreeningType ELSE NULL END AS tbScreeningType\n" +
             "  FROM \n" +
