@@ -109,7 +109,7 @@ public class RADETReportQueries {
             "     SELECT lt.viral_load_indication, sm.facility_id,sm.date_sample_collected, sm.patient_uuid, sm.archived, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_sample_collected DESC) as rnkk\n" +
             "     FROM public.laboratory_sample  sm\n" +
             "  INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
-            "     WHERE lt.lab_test_id=16\n" +
+            "     WHERE lt.lab_test_id=16 AND sm.archived = 0 \n" +
             "       AND  lt.viral_load_indication !=719\n" +
             "       AND date_sample_collected IS NOT null\n" +
             "       AND date_sample_collected <= ?3\n" +

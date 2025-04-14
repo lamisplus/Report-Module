@@ -393,10 +393,10 @@ public class GenerateExcelDataHelper {
 				Double currentVl = null;
 				String tbStatusOutCome = null;
 				int index = 0;
-				boolean isCurrentVlValid = isValidResult(radetReportDto.getCurrentViralLoad());
-				currentVl = isCurrentVlValid ? Double.parseDouble(radetReportDto.getCurrentViralLoad()) : null;
-				boolean isRepeatValidNumber = isValidResult(radetReportDto.getRepeatViralLoadResult());
-				repeatVl = isRepeatValidNumber ? Double.parseDouble(radetReportDto.getRepeatViralLoadResult()) : null;
+//				boolean isCurrentVlValid = isValidResult(radetReportDto.getCurrentViralLoad());
+//				currentVl = isCurrentVlValid ? Double.parseDouble(radetReportDto.getCurrentViralLoad()) : null;
+//				boolean isRepeatValidNumber = isValidResult(radetReportDto.getRepeatViralLoadResult());
+//				repeatVl = isRepeatValidNumber ? Double.parseDouble(radetReportDto.getRepeatViralLoadResult()) : null;
 				String treatmentMethodDate = radetReportDto.getTreatmentMethodDate();
 				LocalDate treatmentMethodDateValue =  null;
 				if(StringUtils.isNotBlank(treatmentMethodDate)){
