@@ -187,7 +187,6 @@ public class Constants {
 
 
 	public static final String PHARMACY_SHEET = "pharmacy-report";
-	public static final String BIOMETRIC_SHEET_SHEET = "biometric-report";
 	public static final String LAB_SHEET_NAME = "laboratory-report";
 	public static final List<String> PHARMACY_HEADER =
 			Arrays.asList(
@@ -204,25 +203,7 @@ public class Constants {
 					"Next Appointment (yyyy-mm-dd)",
 					"DSD Model"
 			);
-	public static final List<String> BIOMETRIC_HEADER =
-			Arrays.asList(
-					"S/No.",
-					"State",
-					"Facility Name",
-					"DATIM Id",
-					"Hospital Number",
-					"Name",
-					"Date of Birth",
-					"Age",
-					"Sex",
-					"Address",
-					"Phone Number",
-					"Enrollment Date (yyyy-mm-dd)",
-					"Number of Fingers Captured",
-					"Fingers Valid",
-					"Biometric Status"
-			);
-	
+
 	public static final List<String> LAB_HEADER =
 			Arrays.asList(
 					"S/No",
@@ -249,7 +230,6 @@ public class Constants {
 					"Surname",
 					"Other Names",
 					"Sex",
-					//"Target Group",
 					"Age",
 					"Date Of Birth (yyyy-mm-dd)",
 					"Phone Number",
@@ -299,7 +279,6 @@ public class Constants {
 					"Prep Offered",
 					"Prep Accepted",
 					"Number of condoms given",
-					//"Number of lubricant given",
 					"Ml Score",
 					"Ml Status",
 					"HTS Latitude",
@@ -413,7 +392,6 @@ public class Constants {
 					"Hospital Number",
 					"Unique Id",
 					"Sex",
-//					"Target group",
 					"Date Birth (yyyy-mm-dd)",
 					"ART Start Date (yyyy-mm-dd)",
 					"Regimen at ART Start",
@@ -513,7 +491,6 @@ public class Constants {
 			"Date offered index testing",
 			"Accepted Index Testing",
 			"Date of Elicitation",
-//			"Index contact's name",
 			"Index Contact's Age",
 			"Index Contact's Sex",
 			"Index Contact's Phone number",
@@ -539,9 +516,7 @@ public class Constants {
 			"LGA",
 			"Facility",
 			"Patient ID",
-//			"ANC Number",
 			"Mother's Hospital Num",
-//			"Mother's Date  of Birth",
 			"Age",
 			"Marital Status",
 			"ANC Setting",
@@ -551,22 +526,18 @@ public class Constants {
 			"Gestational Age (Weeks) @ First ANC visit",
 			"Gravida",
 			"Parity",
-//			"Date Tested for HIV",
-//			"HIV Test Result",
+			"Date Tested for HIV",
+			"HIV Test Result",
 			"Date Tested for Hepatitis B",
 			"Hepatitis B Test Result",
 			"Date Tested for Hepatitis C",
 			"Hepatitis C Test Result",
-//			"Date tested for Syphillis",
 			"Syphillis Test Result",
 			"If Recency Testing Opt In",
-//			"Recency ID",
 			"Recency Test Type",
-//			"Recency Test Date (yyyy_mm_dd)",
 			"Recency Interpretation",
 			"Viral Load Sample Collection Date",
 			"Viral Load Confirmation Result",
-//			"Viral Load Confirmation Date (yyyyy-mm-dd)",
 			"Final Recency Result",
 			"Date Of Maternal Retesting",
 			"Maternal Retesting Result",
