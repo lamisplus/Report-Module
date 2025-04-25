@@ -35,7 +35,7 @@ public class PMTCTReportQuery {
             "END AS optOutRTRIStatus,\n" +
             "recency->>'rencencyId' AS rencencyId,\n" +
             "recency->>'sampleType' AS sampleType,\n" +
-            "recency->>'optOutRTRITestDate' AS rencencyTestDate,\n" +
+            "recency->>'optOutRTRITestDate' AS rencencyTestDate, recency->>'optOutRTRITestName' AS rencencyTestType,\n" +
             "recency->>'rencencyInterpretation' AS rencencyInterpretation,\n" +
             "recency->>'finalRecencyResult' AS finalRecencyResult,\n" +
             "(CASE WHEN (hiv_test_result2 IS NOT NULL OR hiv_test_result2 != '') THEN\n" +
@@ -77,7 +77,12 @@ public class PMTCTReportQuery {
             "WHEN hts_risk.entry_point = 'HTS_ENTRY_POINT_COMMUNITY' AND hts_risk.testing_setting = 'COMMUNITY_HTS_TEST_SETTING_SNS' THEN 'SNS'\n" +
             "WHEN hts_risk.entry_point = 'HTS_ENTRY_POINT_COMMUNITY' AND hts_risk.testing_setting = 'COMMUNITY_HTS_TEST_SETTING_CT' THEN 'VCT'\n" +
             "WHEN hts_risk.entry_point = 'HTS_ENTRY_POINT_COMMUNITY' AND hts_risk.testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OUTREACH' THEN 'Mobile'\n" +
-            "END)AS pepfarModalities, hts_retest.retestingVisitDate, hts_retest.retestResult,\n" +
+            "END)AS pepfarModalities, hts_retest.visitDateIntial, hts_retest.hivResultInital,\n" +
+            "retestingOpt.reVisitDate, retestingOpt.reHivResult,\n" +
+            "(CASE WHEN AGE(hts_retest.visitDateIntial, retestingOpt.reVisitDate) <= INTERVAL '2 years' THEN retestingOpt.reVisitDate ELSE NULL \n" +
+            "END) AS maternalRetestingDate,\n" +
+            "(CASE WHEN AGE(hts_retest.visitDateIntial, retestingOpt.reVisitDate) <= INTERVAL '2 years' THEN retestingOpt.reHivResult ELSE NULL \n" +
+            "END) AS maternalRetestingResult,\n" +
             "ROW_NUMBER() OVER ( PARTITION BY hc.person_uuid ORDER BY date_visit DESC) AS rnk,\n" +
             "date_visit, hc.facility_id\n" +
             "FROM hts_client hc\n" +
@@ -86,25 +91,32 @@ public class PMTCTReportQuery {
             "LEFT JOIN pmtct_enrollment pmtctenroll ON hc.person_uuid = pmtctenroll.person_uuid\n" +
             "LEFT JOIN pmtct_mother_visitation pmtctdov ON hc.person_uuid = pmtctdov.person_uuid\n" +
             "LEFT JOIN laboratory_order labOrder ON hc.person_uuid = labOrder.patient_uuid\n" +
-            "LEFT JOIN laboratory_test labTest ON labOrder.id = labTest.lab_order_id\n" +
-            "LEFT JOIN laboratory_result labResult ON labResult.test_id = labTest.id\n" +
+            "LEFT JOIN laboratory_test labTest ON labOrder.id = labTest.lab_order_id AND labTest.lab_test_id = 16\n" +
+            "LEFT JOIN laboratory_result labResult ON labResult.test_id = labTest.id AND labResult.archived = 0 \n" +
             "LEFT JOIN (\n" +
-            " SELECT hct.person_uuid, hct.date_visit AS retestingVisitDate, (CASE WHEN (hct.hiv_test_result2 IS NULL OR hct.hiv_test_result2 = '') THEN hct.hiv_test_result ELSE hct.hiv_test_result2 END) as retestResult, hct.risk_stratification_code,\n" +
+            "SELECT hct.person_uuid, hct.date_visit AS visitDateIntial, (CASE WHEN (hct.hiv_test_result2 IS NULL OR hct.hiv_test_result2 = '') THEN hct.hiv_test_result ELSE hct.hiv_test_result2 END) AS hivResultInital,risk.testing_setting, hct.risk_stratification_code, \n" +
             "ROW_NUMBER() OVER (PARTITION BY hct.person_uuid ORDER BY date_visit DESC) AS rowNums\n" +
             "FROM hts_client hct\n" +
             "LEFT JOIN hts_risk_stratification risk ON hct.risk_stratification_code = risk.code AND risk.archived = 0\n" +
-            "WHERE risk.testing_setting IN ('FACILITY_HTS_TEST_SETTING_ANC', 'COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX', 'COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW', 'COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING', 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES', 'FACILITY_HTS_TEST_SETTING_L&D', 'FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING','FACILITY_HTS_TEST_SETTING_RETESTING')\n" +
+            "WHERE hct.pregnant IN (73,74,75) AND risk.testing_setting IN ('FACILITY_HTS_TEST_SETTING_ANC', 'COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX', 'COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW', 'COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING', 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES', 'FACILITY_HTS_TEST_SETTING_L&D', 'FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING')\n" +
             "AND hct.date_visit BETWEEN ?2 AND ?3\n" +
-            ") as hts_retest ON hc.person_uuid = hts_retest.person_uuid AND rowNums > 1\n" +
+            ") as hts_retest ON hc.person_uuid = hts_retest.person_uuid\n" +
+            "LEFT JOIN (\n" +
+            "SELECT hct.person_uuid, hct.date_visit AS reVisitDate, (CASE WHEN (hct.hiv_test_result2 IS NULL OR hct.hiv_test_result2 = '') THEN hct.hiv_test_result ELSE hct.hiv_test_result2 END) AS reHivResult,risk.testing_setting, hct.risk_stratification_code, \n" +
+            "ROW_NUMBER() OVER (PARTITION BY hct.person_uuid ORDER BY date_visit DESC) AS rowNums\n" +
+            "FROM hts_client hct\n" +
+            "LEFT JOIN hts_risk_stratification risk ON hct.risk_stratification_code = risk.code AND risk.archived = 0\n" +
+            "WHERE hct.pregnant IN (73,74,75) AND risk.testing_setting IN ('FACILITY_HTS_TEST_SETTING_RETESTING')\n" +
+            ") AS retestingOpt ON hc.person_uuid = retestingOpt.person_uuid \n"+
             "WHERE hc.archived = 0 AND hts_risk.testing_setting IN ('FACILITY_HTS_TEST_SETTING_ANC', 'COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX', 'COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW', 'COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING', 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES', 'FACILITY_HTS_TEST_SETTING_L&D', 'FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING','FACILITY_HTS_TEST_SETTING_RETESTING')\n" +
             "GROUP BY hc.person_uuid, hc.date_visit, hc.hiv_test_result, hc.hiv_test_result2,hc.risk_stratification_code,hc.hepatitis_testing,hc.date_created,hc.recency, hts_risk.testing_setting, hts_risk.entry_point, hc.facility_id,\n" +
-            "he.date_started,he.date_of_registration,he.date_confirmed_hiv, he.date_started, pmtctenroll.pmtct_enrollment_date, pmtctdov.date_of_viral_load, labResult.result_reported,labResult.date_result_reported, hts_retest.retestingVisitDate, hts_retest.retestResult, he.unique_id\n" +
+            "he.date_started,he.date_of_registration,he.date_confirmed_hiv, he.date_started, pmtctenroll.pmtct_enrollment_date, pmtctdov.date_of_viral_load, labResult.result_reported,labResult.date_result_reported, he.unique_id, hts_retest.visitDateIntial, hts_retest.hivResultInital, retestingOpt.reVisitDate, retestingOpt.reHivResult\n" +
             ") rr WHERE rnk = 1 AND facility_id = ?1 AND date_visit BETWEEN ?2 AND ?3\n" +
             "),\n" +
             "ancClient AS (\n" +
             "SELECT * FROM (\n" +
             "SELECT person_uuid AS person_uuid_anc,\n" +
-            "(select display from base_application_codeset where code = anc_setting) AS ancSettingAnc,\n" +
+            "(CASE WHEN community_setting = 'PMTCT (ANC1 Only)' THEN 'PMTCT (ANC1 Only)' ELSE (select display from base_application_codeset where code = community_setting) END) AS ancSettingAnc,\n" +
             "previously_known_hiv_status AS previouslyKnownHivStatus,\n" +
             "first_anc_date AS firstAncDate,\n" +
             "gaweeks AS gaweeksAnc,\n" +
@@ -126,13 +138,13 @@ public class PMTCTReportQuery {
             "pmtct_hts_info->>'dateTestedHivPositive' AS dateTestedHivPositive,\n" +
             "pmtct_hts_info->>'receivedHivRetestedResult' AS receivedHivRetestedResult,\n" +
             "pmtct_hts_info->>'previouslyKnownHIVPositive' AS previouslyKnownHIVPositive,\n" +
-            "anc_no AS ancNo,\n" +
+            "anc_no AS ancNo, treated_hepatitisb AS treatedHepatitisB,\n" +
             "static_hiv_status AS staticHivStatus,\n" +
             "ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY first_anc_date DESC) AS rnk1,\n" +
             "MAX(created_date) AS max_created_date_anc\n" +
             "FROM pmtct_anc\n" +
             "GROUP BY person_uuid, anc_setting, first_anc_date, gaweeks, gravida, parity, tested_syphilis, test_result_syphilis, partner_information, anc_no, static_hiv_status, \n" +
-            "pmtct_hts_info,syphilisTreatmentStatus,previously_known_hiv_status ) anc WHERE rnk1 = 1 AND firstAncDate BETWEEN ?2 AND ?3\n" +
+            "pmtct_hts_info,syphilisTreatmentStatus,previously_known_hiv_status, treated_hepatitisb, community_setting ) anc WHERE rnk1 = 1 AND firstAncDate BETWEEN ?2 AND ?3\n" +
             "),\n" +
             "delivery AS (\n" +
             "SELECT * FROM (\n" +
