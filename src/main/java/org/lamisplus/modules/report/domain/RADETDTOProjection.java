@@ -118,7 +118,7 @@ public interface RADETDTOProjection {
 	LocalDate getDateOfVlEligibilityStatus();
 
 	String  getTbDiagnosticTestType();
-//	LocalDate getDateOfTbSampleCollection();
+	LocalDate getDateOfTbSampleCollection();
 	LocalDate getDateOfTbSampleCollected();
 	String  getTbDiagnosticResult();
 
