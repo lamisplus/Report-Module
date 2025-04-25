@@ -3,7 +3,7 @@ package org.lamisplus.modules.report.repository.queries;
 public class ARTPATIENTReportQuery {
 
     public static final String ART_PATIENT_REPORT_QUERY =  "WITH bio_data AS (\n" +
-            "  SELECT \n" +
+            "SELECT \n" +
             "DISTINCT ON (p.uuid) p.uuid as personUuid, \n" +
             "p.id, \n" +
             "CAST(p.archived AS BOOLEAN) as archived, \n" +
@@ -14,7 +14,7 @@ public class ARTPATIENTReportQuery {
             "EXTRACT(\n" +
             "  YEAR \n" +
             "  from \n" +
-            "AGE(?3, date_of_birth)\n" +
+            "AGE(NOW(), date_of_birth)\n" +
             ") as age, \n" +
             "p.other_name as otherName, \n" +
             "p.sex as sex, \n" +
@@ -68,7 +68,7 @@ public class ARTPATIENTReportQuery {
             "\n" +
             " LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(CASE WHEN r.lgaId ~ '^[0-9.]+$' THEN r.lgaId ELSE NULL END AS BIGINT)\n" +
             "\n" +
-            " INNER JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=?1 AND boui.name='DATIM_ID'\n" +
+            " INNER JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=facility.id AND boui.name='DATIM_ID'\n" +
             "\n" +
             " INNER JOIN hiv_enrollment h ON h.person_uuid = p.uuid\n" +
             " WHERE p.archived=0 AND h.archived=0 AND h.facility_id=?1\n" +
@@ -76,7 +76,7 @@ public class ARTPATIENTReportQuery {
             " enrollment_details AS (\n" +
             " SELECT h.person_uuid,h.unique_id as uniqueId,  sar.display as statusAtRegistration, date_confirmed_hiv as dateOfConfirmedHiv,\n" +
             "\n" +
-            " (CASE WHEN ep.display IN ('MHPSS/GBV', 'FP') THEN NULL ELSE ep.display END) as entryPoint, date_of_registration as dateOfRegistration\n" +
+            " ep.display AS entryPoint, date_of_registration as dateOfRegistration\n" +
             " FROM hiv_enrollment h\n" +
             " LEFT JOIN base_application_codeset sar ON sar.id=h.status_at_registration_id\n" +
             " LEFT JOIN base_application_codeset ep ON ep.id=h.entry_point_id\n" +
