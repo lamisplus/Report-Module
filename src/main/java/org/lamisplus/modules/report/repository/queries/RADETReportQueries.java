@@ -21,7 +21,7 @@ public class RADETReportQueries {
             "h.date_of_registration as dateOfEnrollment,\n" +
             "h.ovc_number AS ovcUniqueId,\n" +
             "h.house_hold_number AS householdUniqueNo,\n" +
-            "(CASE WHEN ecareEntry.display IN ('MHPSS/GBV', 'FP') THEN NULL ELSE ecareEntry.display END) AS careEntry,\n" +
+            "ecareEntry.display AS careEntry,\n" +
             "hrt.description AS regimenLineAtStart\n" +
             "FROM patient_person p\n" +
             "INNER JOIN base_organisation_unit facility ON facility.id = facility_id\n" +
@@ -42,7 +42,7 @@ public class RADETReportQueries {
             "AND h.facility_id = ?1\n" +
             "AND hac.is_commencement = TRUE\n" +
             "AND hac.visit_date >= ?2\n" +
-            "AND hac.visit_date < ?3\n" +
+            "AND hac.visit_date <= ?3\n" +
             "),\n" +
             "patient_lga as (select DISTINCT ON (personUuid) personUuid as personUuid11, \n" +
             "case when (addr ~ '^[0-9\\\\\\\\\\\\\\\\.]+$') =TRUE \n" +
@@ -100,7 +100,7 @@ public class RADETReportQueries {
             "         WHERE\n" +
             "           hac.archived = 0\n" +
             "           AND he.archived = 0\n" +
-            "           AND hac.visit_date < ?3 \n" +
+            "           AND hac.visit_date <= ?3 \n" +
             "           AND he.facility_id = ?1\n" +
             "     ),\n" +
             "\n" +
@@ -276,8 +276,8 @@ public class RADETReportQueries {
             "         INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
             "         INNER JOIN  laboratory_labtest llt on llt.id = lt.lab_test_id\n" +
             "WHERE lt.lab_test_id IN (65, 66, 51, 64, 67, 72, 71, 86, 58, 73)\n" +
-            "        AND sm.archived = 0\n" +
-            "        AND sm. date_sample_collected <= ?3\n" +
+            "        AND sm.archived = 0 AND date_sample_collected IS NOT null \n" +
+            "        AND sm.date_sample_collected <= ?3\n" +
             "        AND sm.facility_id = ?1\n" +
             "        )as sample\n" +
             "      WHERE sample.rnkk = 1\n" +
@@ -296,20 +296,18 @@ public class RADETReportQueries {
             "           MAX(CASE WHEN lab_test_id = 73 THEN 'TB LAMP' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 58 THEN 'TB-LAM' END)\n" +
             "       ) as tbDiagnosticTestType\n" +
-            "\n" +
             "        FROM (\n" +
-            "     SELECT  sm.patient_uuid as personTbResult, sm.result_reported as tbDiagnosticResult,\n" +
-            " CAST(sm.date_result_reported AS DATE) as dateofTbDiagnosticResultReceived,cast(ls.date_sample_collected as date) AS dateOfTbSampleCollected,\n" +
-            " lt.lab_test_id, ROW_NUMBER() OVER (PARTITION BY  sm.patient_uuid ORDER BY ls.date_sample_collected DESC) AS rnkkk\n" +
-            "     FROM laboratory_result  sm\n" +
-            "  INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
-            "  left join laboratory_sample ls on ls.test_id = lt.id\n" +
-            "     WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73, 66) and sm.archived = 0 AND ls.date_sample_collected IS NOT NULL\n" +
-            "\t  AND sm.facility_id = ?1\n" +
-            "      AND sm.date_result_reported <= ?3\n" +
-            "\t ) AS tbSubQ where rnkkk = 1 \n" +
-            "\t GROUP BY tbSubQ.personTbResult, tbSubQ.dateofTbDiagnosticResultReceived, tbSubQ.dateOfTbSampleCollected, tbDiagnosticResult)\n" +
-            "\t SELECT * FROM tb_test),\n" +
+            "SELECT sm.patient_uuid as personTbResult, CASE WHEN (CAST(lr.date_result_reported AS DATE) > ?3 AND lr.result_reported IS NOT NULL) THEN NULL ELSE lr.result_reported END  as tbDiagnosticResult,\n" +
+            "CASE WHEN CAST(lr.date_result_reported AS DATE) > ?3 THEN NULL ELSE CAST(lr.date_result_reported AS DATE) END  as dateofTbDiagnosticResultReceived,cast(sm.date_sample_collected as date) AS dateOfTbSampleCollected,\n" +
+            "lt.lab_test_id, sm.date_sample_collected, ROW_NUMBER() OVER (PARTITION BY  sm.patient_uuid ORDER BY sm.date_sample_collected DESC) AS rnkkk\n" +
+            "     FROM laboratory_sample sm\n" +
+            "\t INNER JOIN laboratory_test lt on lt.id = sm.test_id\n" +
+            "\t LEFT JOIN laboratory_result lr ON lt.id = lr.test_id\n" +
+            "\t WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73, 66) and sm.archived = 0 AND sm.date_sample_collected IS NOT NULL\n" +
+            "  AND sm.facility_id = ?1\n" +
+            ") AS tbSubQ where rnkkk = 1 \n" +
+            "GROUP BY tbSubQ.personTbResult, tbSubQ.dateofTbDiagnosticResultReceived, tbSubQ.dateOfTbSampleCollected, tbDiagnosticResult)\n" +
+            "SELECT * FROM tb_test),\n" +
             "     tbTreatment AS (\n" +
             "SELECT * FROM (SELECT\n" +
             "        COALESCE(NULLIF(CAST(data->'tbIptScreening'->>'treatementType' AS text), ''), '') as tbTreatementType,\n" +
@@ -399,7 +397,7 @@ public class RADETReportQueries {
             "  AND  p.archived = 0\n" +
             "  AND  p.facility_id = ?1\n" +
             "  AND  p.visit_date >= ?2\n" +
-            "  AND  p.visit_date  < ?3\n" +
+            "  AND  p.visit_date  <= ?3\n" +
             "        ) as pr1\n" +
             "           ) as pr2\n" +
             "         where pr2.rnk3 = 1\n" +
@@ -797,7 +795,7 @@ public class RADETReportQueries {
             "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
             "            WHERE r.regimen_type_id in (1,2,3,4,14, 16) \n" +
             "            AND hap.archived = 0                \n" +
-            "            AND hap.visit_date < ?3\n" +
+            "            AND hap.visit_date <= ?3\n" +
             "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
             "      AND MAX.rnkkk3 = 1\n" +
             "     WHERE\n" +
@@ -928,13 +926,13 @@ public class RADETReportQueries {
             "         SELECT\n" +
             " (\n" +
             "     CASE\n" +
-            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?3 THEN 'IIT'\n" +
+            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' <= ?3 THEN 'IIT'\n" +
             "         ELSE 'Active'\n" +
             "         END\n" +
             "     ) status,\n" +
             " (\n" +
             "     CASE\n" +
-            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?3 THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
+            "         WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' <= ?3 THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
             "         ELSE hp.visit_date\n" +
             "         END\n" +
             "     ) AS visit_date,\n" +
@@ -951,12 +949,12 @@ public class RADETReportQueries {
             "            INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
             "            WHERE r.regimen_type_id in (1,2,3,4,14, 16) \n" +
             "            AND hap.archived = 0                \n" +
-            "            AND hap.visit_date < ?3\n" +
+            "            AND hap.visit_date <= ?3\n" +
             "             ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
             "      AND MAX.rnkkk3 = 1\n" +
             "     WHERE\n" +
             "     hp.archived = 0\n" +
-            "     AND hp.visit_date < ?3\n" +
+            "     AND hp.visit_date <= ?3\n" +
             "     ) pharmacy\n" +
             "\n" +
             "         LEFT JOIN (\n" +
@@ -974,7 +972,7 @@ public class RADETReportQueries {
             "     WHERE s.row_number=1\n" +
             " ) hst\n" +
             "     INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
-            "         WHERE hst.status_date < ?3\n" +
+            "         WHERE hst.status_date <= ?3\n" +
             "     ) stat ON stat.person_id = pharmacy.person_uuid\n" +
             "     ),\n" +
             "\n" +
@@ -1048,7 +1046,7 @@ public class RADETReportQueries {
             "     WHERE s.row_number=1\n" +
             " ) hst\n" +
             "     INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
-            "         WHERE hst.status_date < ?3\n" +
+            "         WHERE hst.status_date <= ?3\n" +
             "),\n" +
             "case_manager AS (\n" +
             " SELECT DISTINCT ON (cmp.person_uuid)person_uuid AS caseperson, cmp.case_manager_id, CONCAT(cm.first_name, ' ', cm.last_name) AS caseManager FROM (SELECT person_uuid, case_manager_id,\n" +
