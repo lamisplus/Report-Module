@@ -56,9 +56,10 @@ public interface PmtctDto {
     String getDateResultReported();
     String getGonModalities();
     String getPepfarModalities();
-    String getRetestingVisitDate();
-    String getRetestResult();
+    String getMaternalRetestingDate();
+    String getMaternalRetestingResult();
     String getHivUniqueId();
+    String getRencencyTestType();
 
 
 }
