@@ -120,14 +120,14 @@ const PrepReport = props => {
       )
       .then(response => {
         setLoading(false);
-        const fileName = `${objValues.organisationUnitName} PrEP-PBFW ${currentDate}`;
+        const fileName = `${objValues.organisationUnitName} PrEP-PBFW Cross Sectional Report ${currentDate}`;
         const responseData = response.data;
         let blob = new Blob([responseData], {
           type: 'application/octet-stream',
         });
 
         FileSaver.saveAs(blob, `${fileName}.xlsx`);
-        toast.success('PrEP-PBFW Report generated successfully');
+        toast.success('PrEP-PBFW Cross Sectional Report generated successfully');
       })
       .catch(error => {
         setLoading(false);
@@ -148,7 +148,7 @@ const PrepReport = props => {
     <>
       <Card>
         <CardBody>
-          <h2 style={{ color: '#000' }}>PrEP-PBFW Report </h2>
+          <h2 style={{ color: '#000' }}>PrEP-PBFW Cross Sectional Report</h2>
           <br />
           <>
             <div className="row">
