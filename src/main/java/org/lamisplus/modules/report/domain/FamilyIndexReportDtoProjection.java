@@ -39,4 +39,5 @@ public interface FamilyIndexReportDtoProjection {
     String getDateEnrolledInOvc();
     String getOvcId();
     String getNoOfAttempts();
+    String getContactId();
 }
