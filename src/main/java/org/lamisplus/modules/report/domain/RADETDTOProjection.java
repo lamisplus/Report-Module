@@ -93,12 +93,17 @@ public interface RADETDTOProjection {
 	LocalDate getDateOfRepeatViralLoadResult();
 	LocalDate getDateOfRepeatViralLoadEACSampleCollection();
 	String getRepeatViralLoadResult();
+	//tb screening
+	Integer getCadScore();
 	String getTbStatus();
 	LocalDate getDateOfTbScreened();
 	LocalDate getDateOfCurrentRegimen();
 	LocalDate getDateOfIptStart();
 	LocalDate getIptCompletionDate();
 	String getIptType();
+	String getResultTbScoreCad();
+	LocalDate getDateTbScoreCad();
+
 	String getResultOfCervicalCancerScreening();
 	String getCervicalCancerScreeningType();
 
