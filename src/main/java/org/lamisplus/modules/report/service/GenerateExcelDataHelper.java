@@ -479,12 +479,17 @@ public class GenerateExcelDataHelper {
 				//TB
 				map.put(index++, radetReportDto.getDateOfTbScreened());
 				map.put(index++, radetReportDto.getTbScreeningType());
+				map.put(index++, radetReportDto.getCadScore());
 				map.put(index++, radetReportDto.getTbStatus());
 				//tb lab
 				map.put(index++, radetReportDto.getDateOfTbSampleCollected());
 				map.put(index++, radetReportDto.getTbDiagnosticTestType());
 				map.put(index++, radetReportDto.getDateofTbDiagnosticResultReceived());
 				map.put(index++, radetReportDto.getTbDiagnosticResult());
+
+				map.put(index++, radetReportDto.getDateTbScoreCad());
+				map.put(index++, radetReportDto.getResultTbScoreCad());
+
 
 				map.put(index++, radetReportDto.getTbTreatmentStartDate());
 				map.put(index++, radetReportDto.getTbTreatementType());
@@ -616,7 +621,7 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getHepatitisBTestResult())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getDateOfVisit())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getHepatitisCTestResult())));
-					map.put(index++, getStringValue(String.valueOf(pmtctDto.getSyphillisStatus())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getTestResultSyphilisAnc())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getOptOutRTRIStatus())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getRencencyTestType())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getRencencyInterpretation())));
@@ -926,6 +931,7 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(familyIndex.getDateOfferIndex())));
 					map.put(index++, getStringValue(familyIndex.getAcceptedTesting()));
 					map.put(index++, getStringValue(String.valueOf(familyIndex.getDateOfElicitation())));
+					map.put(index++, getStringValue(String.valueOf(familyIndex.getContactId())));
 					map.put(index++, getStringValue(String.valueOf(familyIndex.getElicitedAge())));
 					map.put(index++, getStringValue(familyIndex.getElicitedClientSex()));
 					map.put(index++, getStringValue(familyIndex.getElicitedClientPhoneNumber()));
