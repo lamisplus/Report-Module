@@ -36,7 +36,7 @@ public class FamilyIndexReportQuery {
             "\t\thft.known_hiv_positive AS elicitedClientKnownPositive, \n" +
             "        hft.date_visit AS dateOfElicitation, \n" +
             "        '' AS elicitedClientUniqueId, \n" +
-            "        hft.date_enrolled_in_ovc AS dateEnrolledInOvc, \n" +
+            "        hft.date_enrolled_in_ovc AS dateEnrolledInOvc, hfi.contact_id AS contactId,\n" +
             "        hft.ovc_id AS ovcId, (select display from base_application_codeset where code = hft.attempt) AS noOfAttempts\n" +
             "    FROM hts_family_index hfi\n" +
             "    JOIN hts_family_index_testing fhts ON fhts.uuid = hfi.family_index_testing_uuid\n" +
@@ -83,9 +83,9 @@ public class FamilyIndexReportQuery {
             "        (select display from base_application_codeset where id = CASE WHEN pns.hts_client_information->>'relativeToIndexClient' ~ '^[0-9]+$' THEN CAST(pns.hts_client_information->>'relativeToIndexClient' AS INTEGER) ELSE 0 END) AS relationshipWithIndex,\n" +
             "        (select display from base_application_codeset where id = CASE WHEN pns.notification_method ~ '^[0-9]+$' THEN CAST(pns.notification_method AS INTEGER) ELSE 0 END ) AS modeOfNotification, \n" +
             "        pns.known_hiv_positive AS elicitedClientKnownPositive, \n" +
-            "\t\tCAST (null AS DATE) AS dateOfElicitation,\n" +
+            "\t\tCAST (pns.date_of_elicitation AS DATE) AS dateOfElicitation,\n" +
             "        '' AS elicitedClientUniqueId,\n" +
-            "        CAST (null AS DATE) AS dateEnrolledInOvc, \n" +
+            "        CAST (null AS DATE) AS dateEnrolledInOvc, pns.partner_id AS contactId,\n" +
             "        '' AS ovcId, '' AS noOfAttempts\n" +
             "    FROM hts_pns_index_client_partner pns\n" +
             "    JOIN hts_family_index_testing fhts ON fhts.hts_client_uuid = pns.hts_client_uuid\n" +
