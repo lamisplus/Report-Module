@@ -144,7 +144,8 @@ public class Constants {
 					"Date of TB Screening (yyyy-mm-dd)",
 					"TB Screening Type",
 					"CAD Score",
-					"TB status",
+					"TB Status - Chest Xray with CAD",
+					"TB Status - Symptom Screening alone",
 					"Date of TB Sample Collection (yyyy-mm-dd)",
 					"TB Diagnostic Test Type",
 					"Date of TB Diagnostic Result Received (yyyy-mm-dd)",
@@ -185,6 +186,7 @@ public class Constants {
 					"Date Biometrics Recapture (yyyy-mm-dd)",
 					"Number of Fingers Recaptured",
 					"Case Manager"
+//					"File version"
 
 			);
 
@@ -359,6 +361,9 @@ public class Constants {
 					"Date of TB Screening",
 					"TB Screening Type",
 					"TB Status",
+					"CAD Score",
+//					"TB Status - Chest Xray with CAD",
+//					"TB Status - Symptom Screening alone",
 					"Date of TB Sample Collection (yyyy-mm-dd)",
 					"Date of Specimen sent",
 					"Type of specimen",
@@ -367,6 +372,8 @@ public class Constants {
 					"TB Diagnostic Test Type",
 					"Date Result Received",
 					"TB Diagnostic Result",
+					"Date of Additional TB Diagnosis Result using XRAY (for client with negative lab results with CAD score of 40 & above)",
+					"Additional TB Diagnosis Result using XRAY (for client with negative lab results with CAD score of 40 & above)",
 					"Clinically Evaluated",
 					"Date of Clinical Evaluation",
 					"Clinical evaluation result",

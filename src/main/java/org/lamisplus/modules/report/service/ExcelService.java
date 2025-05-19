@@ -163,6 +163,38 @@ public class ExcelService {
 		nonNumericStyle.setFont(font);
 		return nonNumericStyle;
 	}
+
+
+	private void addWaterMark (String watermarkText) {
+		// Create watermark style
+		CellStyle style = workbook.createCellStyle();
+		Font font = workbook.createFont();
+		font.setFontHeightInPoints((short) 24);
+		font.setColor(IndexedColors.GREY_25_PERCENT.getIndex());
+		font.setItalic(true);
+		font.setBold(true);
+		style.setFont(font);
+		style.setAlignment(HorizontalAlignment.CENTER);
+		style.setVerticalAlignment(VerticalAlignment.CENTER);
+
+		// Add watermark text diagonally across the sheet
+		for (int rowIdx = 0; rowIdx < sheet.getLastRowNum(); rowIdx += 5) {
+			Row row = sheet.getRow(rowIdx);
+			if (row == null) {
+				row = sheet.createRow(rowIdx);
+			}
+
+			Cell cell = row.createCell(rowIdx % 10); // Diagonal-ish pattern
+			cell.setCellValue(watermarkText);
+			cell.setCellStyle(style);
+		}
+
+		// Optional: Add watermark text to the center header
+		Header header = sheet.getHeader();
+		header.setCenter(watermarkText);
+	}
+
+
 	
 	public ByteArrayOutputStream generate(
 			String sheetName,
