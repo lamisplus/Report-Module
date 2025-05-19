@@ -115,7 +115,7 @@ const PmtctHtsReport = (props) => {
         )
           .then(response => {
             setLoading(false)
-            const fileName = `${objValues.organisationUnitName} PMTCT_HTS_ ${objValues.reportType} ${currentDate}`
+            const fileName = `${objValues.organisationUnitName} PMTCT_HTS_${objValues.reportType} ${currentDate}`
             const responseData = response.data
             let blob = new Blob([responseData], {type: "application/octet-stream"});
 
