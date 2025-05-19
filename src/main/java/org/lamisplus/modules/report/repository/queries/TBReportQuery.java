@@ -28,88 +28,95 @@ public class TBReportQuery {
             "AND hac.visit_date >= ?2 \n" +
             "AND hac.visit_date < ?3 \n" +
             "), \n" +
-            "tb_status as (" +
-            "WITH cs AS (\n" +
-            "  WITH FilteredObservations AS (\n" +
-            "  SELECT \n" +
-            "id,\n" +
-            "person_uuid,\n" +
-            "date_of_observation AS dateOfTbScreened,\n" +
-            "(CASE \n" +
-            "  WHEN data->'tbIptScreening'->>'status' = 'Presumptive TB and referred for evaluation' \n" +
-            "  THEN 'Presumptive TB' \n" +
-            "  ELSE data->'tbIptScreening'->>'status' \n" +
-            "END) AS tbStatus,\n" +
+            "tb_status as (WITH cs AS (\n" +
+            "  WITH \n" +
+            "    FilteredObservations AS (\n" +
+            "      SELECT \n" +
+            "        id,\n" +
+            "        person_uuid,\n" +
+            "        date_of_observation AS dateOfTbScreened,\n" +
+            "        (CASE \n" +
+            "          WHEN data->'tbIptScreening'->>'status' = 'Presumptive TB and referred for evaluation' \n" +
+            "          THEN 'Presumptive TB' \n" +
+            "          ELSE data->'tbIptScreening'->>'status' \n" +
+            "        END) AS tbStatus,\n" +
             "CASE \n" +
-            "  WHEN EXTRACT(MONTH FROM CAST (date_of_observation AS DATE)) BETWEEN 10 AND 12 \n" +
-            "OR EXTRACT(MONTH FROM CAST (date_of_observation AS DATE)) BETWEEN 1 AND 3 \n" +
-            "  THEN 'October - March' \n" +
-            "  WHEN EXTRACT(MONTH FROM CAST (date_of_observation AS DATE)) BETWEEN 4 AND 9 \n" +
-            "  THEN 'April - September' \n" +
-            "END AS reportingPeriod,\n" +
-            "   EXTRACT(YEAR FROM date_of_observation) AS yearOfReporting,\n" +
-            "data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType,\n" +
-            "ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS rowNums\n" +
-            "  FROM \n" +
-            "hiv_observation\n" +
-            "  WHERE \n" +
-            "type = 'Chronic Care' \n" +
-            "AND data IS NOT NULL \n" +
-            "AND archived = 0\n" +
-            "AND date_of_observation BETWEEN (CAST (?3 AS DATE) - INTERVAL '6 MONTHS') AND CAST(?3 AS DATE)\n" +
-            "),\n" +
-            "FilteredLatestObservations AS (\n" +
-            "  SELECT \n" +
-            "id,\n" +
-            "person_uuid,\n" +
-            "dateOfTbScreened,\n" +
-            "tbStatus,\n" +
-            "tbScreeningType,\n" +
+            "          WHEN EXTRACT(MONTH FROM CAST (date_of_observation AS DATE)) BETWEEN 10 AND 12 \n" +
+            "            OR EXTRACT(MONTH FROM CAST (date_of_observation AS DATE)) BETWEEN 1 AND 3 \n" +
+            "          THEN 'October - March' \n" +
+            "          WHEN EXTRACT(MONTH FROM CAST (date_of_observation AS DATE)) BETWEEN 4 AND 9 \n" +
+            "          THEN 'April - September' \n" +
+            "        END AS reportingPeriod,\n" +
+            "       EXTRACT(YEAR FROM date_of_observation) AS yearOfReporting,\n" +
+            "        data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType,\n" +
+            "        ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) AS rowNums\n" +
+            "      FROM \n" +
+            "        hiv_observation\n" +
+            "      WHERE \n" +
+            "        type = 'Chronic Care' \n" +
+            "        AND data IS NOT NULL \n" +
+            "        AND archived = 0\n" +
+            "       AND date_of_observation BETWEEN (CAST (?3 AS DATE) - INTERVAL '6 MONTHS') AND CAST(?3 AS DATE)\n" +
+            "    ),\n" +
+            "    FilteredLatestObservations AS (\n" +
+            "      SELECT \n" +
+            "        id,\n" +
+            "        person_uuid,\n" +
+            "        dateOfTbScreened,\n" +
+            "        tbStatus,\n" +
+            "        tbScreeningType,\n" +
             "reportingPeriod,\n" +
             "yearOfReporting\n" +
-            "  FROM \n" +
-            "FilteredObservations\n" +
-            "  WHERE \n" +
-            "rowNums = 1\n" +
-            "),\n" +
-            "ReportingPeriod AS (\n" +
+            "      FROM \n" +
+            "        FilteredObservations\n" +
+            "      WHERE \n" +
+            "        rowNums = 1\n" +
+            "    ),\n" +
+            "    ReportingPeriod AS (\n" +
+            "      SELECT \n" +
+            "        CASE \n" +
+            "          WHEN EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 10 AND 12 \n" +
+            "            OR EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 1 AND 3 \n" +
+            "          THEN 'October - March' \n" +
+            "          WHEN EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 4 AND 9 \n" +
+            "          THEN 'April - September' \n" +
+            "        END AS currentReportingPeriod\n" +
+            "    ),\n" +
+            "    PresumptiveCheck AS ( SELECT\n" +
+            "        lo.person_uuid, \n" +
+            "        CASE \n" +
+            "            WHEN EXISTS (\n" +
+            "                SELECT 1, lo.dateOfTbScreened\n" +
+            "                FROM hiv_observation ho\n" +
+            "                WHERE ho.person_uuid = lo.person_uuid\n" +
+            "                  AND ho.type = 'Chronic Care'\n" +
+            "                  AND ho.data IS NOT NULL\n" +
+            "                  AND ho.archived = 0\n" +
+            "                  AND ho.archived = 0 AND ho.date_of_observation BETWEEN (CAST (?3 AS DATE) - INTERVAL '6 MONTHS') AND CAST(?3 AS DATE)\n" +
+            "                  AND ho.data->'tbIptScreening'->>'status' ILIKE 'Presumptive TB%'\n" +
+            "            ) THEN 'Presumptive TB'\n" +
+            "            ELSE lo.tbStatus\n" +
+            "        END AS tbStatus\n" +
+            "    FROM\n" +
+            "        FilteredLatestObservations lo\n" +
+            "    )\n" +
             "  SELECT \n" +
-            "CASE \n" +
-            "  WHEN EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 10 AND 12 \n" +
-            "OR EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 1 AND 3 \n" +
-            "  THEN 'October - March' \n" +
-            "  WHEN EXTRACT(MONTH FROM CAST (?3 AS DATE)) BETWEEN 4 AND 9 \n" +
-            "  THEN 'April - September' \n" +
-            "END AS currentReportingPeriod\n" +
-            "),\n" +
-            "PresumptiveCheck AS ( SELECT\n" +
-            "lo.person_uuid, \n" +
-            "CASE \n" +
-            "WHEN EXISTS (\n" +
-            "SELECT 1, lo.dateOfTbScreened\n" +
-            "FROM hiv_observation ho\n" +
-            "WHERE ho.person_uuid = lo.person_uuid\n" +
-            "  AND ho.type = 'Chronic Care'\n" +
-            "  AND ho.data IS NOT NULL\n" +
-            "  AND ho.archived = 0\n" +
-            "  AND ho.data->'tbIptScreening'->>'status' ILIKE 'Presumptive TB%'\n" +
-            ") THEN 'Presumptive TB'\n" +
-            "ELSE lo.tbStatus\n" +
-            "END AS tbStatus\n" +
-            "FROM\n" +
-            "FilteredLatestObservations lo\n" +
-            ")\n" +
-            "  SELECT \n" +
-            "lo.id,\n" +
-            "lo.person_uuid,\n" +
-            "CASE WHEN (lo.reportingPeriod = rp.currentReportingPeriod AND lo.tbStatus IN ('Confirmed TB', 'Currently on TB treatment')) THEN lo.tbStatus \n" +
+            "    lo.id,\n" +
+            "    lo.person_uuid,\n" +
+            "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod AND lo.tbScreeningType = 'Symptom screen (alone)' THEN pc.tbStatus\n" +
+            "WHEN lo.reportingPeriod = rp.currentReportingPeriod AND lo.tbScreeningType = 'Symptom screen (alone)' THEN lo.tbStatus\n" +
+            "ELSE NULL END AS symptomScreen,\n" +
+            "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod AND lo.tbScreeningType ILIKE '%Chest X-ray with CAD%' THEN pc.tbStatus\n" +
+            "WHEN lo.reportingPeriod = rp.currentReportingPeriod AND lo.tbScreeningType ILIKE '%Chest X-ray with CAD%' THEN lo.tbStatus\n" +
+            "ELSE NULL END AS withCADScreen,\n" +
+            "CASE WHEN (lo.reportingPeriod = rp.currentReportingPeriod AND lo.tbStatus IN ('Confirmed TB', 'Currently on TB treatment')) THEN lo.tbStatus\n" +
             "WHEN lo.reportingPeriod = rp.currentReportingPeriod THEN pc.tbStatus ELSE NULL END AS tbStatus,\n" +
             "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod THEN lo.dateOfTbScreened ELSE NULL END AS dateOfTbScreened,\n" +
             "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod THEN lo.tbScreeningType ELSE NULL END AS tbScreeningType\n" +
             "  FROM \n" +
-            "FilteredLatestObservations lo\n" +
-            "JOIN PresumptiveCheck pc ON lo.person_uuid = pc.person_uuid\n" +
-            "CROSS JOIN ReportingPeriod rp\n" +
+            "    FilteredLatestObservations lo\n" +
+            "    JOIN PresumptiveCheck pc ON lo.person_uuid = pc.person_uuid\n" +
+            "    CROSS JOIN ReportingPeriod rp\n" +
             ")\n" +
             "SELECT * FROM cs),\n" +
             "tb_treatement_start as ( \n" +
@@ -143,7 +150,6 @@ public class TBReportQuery {
             "WITH tb_test as (SELECT personTbResult, dateofTbDiagnosticResultReceived,\n" +
             "   coalesce(\n" +
             "           MAX(CASE WHEN lab_test_id = 65 THEN tbDiagnosticResult END) ,\n" +
-            "           MAX(CASE WHEN lab_test_id = 66 THEN tbDiagnosticResult END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 51 THEN tbDiagnosticResult END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 64 THEN tbDiagnosticResult END),\n" +
             "           MAX(CASE WHEN lab_test_id = 67 THEN tbDiagnosticResult END),\n" +
@@ -155,28 +161,26 @@ public class TBReportQuery {
             "       ) as tbDiagnosticResult ,\n" +
             "   coalesce(\n" +
             "           MAX(CASE WHEN lab_test_id = 65 THEN 'Gene Xpert' END) ,\n" +
-            "           MAX(CASE WHEN lab_test_id = 66 THEN 'Chest X-ray' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 51 THEN 'TB-LAM' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 64 THEN 'AFB Smear Microscopy' END),\n" +
             "           MAX(CASE WHEN lab_test_id = 67 THEN 'Gene Xpert' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 72 THEN 'TrueNAT' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 71 THEN 'LF-LAM' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 86 THEN 'Cobas' END) ,\n" +
-            "           MAX(CASE WHEN lab_test_id = 73 THEN 'TB LAMP' END) ,\n" +
+            "           MAX(CASE WHEN lab_test_id = 73 THEN 'TB LAM' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 58 THEN 'TB-LAM' END)\n" +
             "       ) as tbDiagnosticTestType\n" +
-            "\n" +
             "        FROM (\n" +
             "     SELECT  sm.patient_uuid as personTbResult, sm.result_reported as tbDiagnosticResult,\n" +
             " CAST(sm.date_result_reported AS DATE) as dateofTbDiagnosticResultReceived,\n" +
             " lt.lab_test_id\n" +
             "     FROM laboratory_result  sm\n" +
             "  INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id AND lt.archived = 0\n" +
-            "     WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73, 66) and sm.archived = 0\n" +
+            "     WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73) and sm.archived = 0\n" +
             "       AND sm.date_result_reported is not null\n" +
             "       AND sm.facility_id = ?1 \n" +
-            "       AND sm.date_result_reported <= ?3 \n" +
-            "\t   AND sm.archived = 0\n" +
+            "       AND sm.date_result_reported <= ?3\n" +
+            "   AND sm.archived = 0\n" +
             " ) as dt\n" +
             "        GROUP BY dt.personTbResult, dt.dateofTbDiagnosticResultReceived)\n" +
             "   select * from (select *, row_number() over (partition by personTbResult\n" +
@@ -199,8 +203,7 @@ public class TBReportQuery {
             "    ) \n" +
             "    select person_uuid, date_of_ipt_start, regimen_name from tpt \n" +
             "), \n" +
-            "tbTreatmentNew AS (\n" +
-            "WITH tb_start AS (\n" +
+            "tbTreatmentNew AS (WITH tb_start AS (\n" +
             "SELECT * FROM (\n" +
             "SELECT\n" +
             "person_uuid AS person_uuid,\n" +
@@ -211,12 +214,15 @@ public class TBReportQuery {
             "data->'tbIptScreening'->>'diagnosticTestType' AS tbDiagnosticTestType,\n" +
             "COALESCE(NULLIF(data->'tptMonitoring'->>'tbType',''), NULLIF(data->'tbIptScreening'->>'tbType','')) AS tbTreatmentType,\n" +
             "NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'dateSpecimenSent', '') AS DATE), NULL) AS specimenSentDate,\n" +
-            "data->'tbIptScreening'->>'specimenType' AS specimenType,\n" +
-            "data->'tbIptScreening'->>'clinicallyEvaulated' as clinicallyEvaulated,\n" +
-            "data->'tbIptScreening'->>'chestXrayResultTest' AS chestXrayResultTest,\n" +
-            "NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'dateOfChestXrayResultTestDone' , '') AS DATE), NULL) AS dateOfChestXrayResultTestDone,\n" +
-            "data->'tptMonitoring'->>'contractionForTpt' AS contractionForTpt,\n" +
             "data->'tbIptScreening'->>'status' as screeningStatus,\n" +
+            "data->'tbIptScreening'->>'dateOfDiagnosticTest' as dateOfDiagnosticTest, \n" +
+            "data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, CAST(data->'tptMonitoring'->>'cadScore' AS INTEGER) AS cadScore, \n" +
+            "data->'tptMonitoring'->>'clinicallyEvaulated' AS clinicallyEvaulated,\n" +
+            "data->'tbIptScreening'->>'chestXrayDone' AS chestXrayDone,\n" +
+            "data->'tbIptScreening'->>'chestXrayResultTest' AS chestXrayResultTest,\n" +
+            "NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'dateOfChestXrayResultTestDone', '') AS DATE), NULL) AS dateOfChestXrayResultTestDone,\n" +
+            "data->'tbIptScreening'->>'specimenType' AS specimenType,\n" +
+            "data->'tptMonitoring'->>'contractionForTpt' AS contractionForTpt,\n" +
             "TRIM(BOTH ',' FROM\n" +
             "COALESCE(\n" +
             "CASE WHEN (data->'tptMonitoring'->>'liverSymptoms' IS NOT NULL AND data->'tptMonitoring'->>'liverSymptoms' != '' AND data->'tptMonitoring'->>'liverSymptoms' != 'No') THEN ',Liver Symptoms' ELSE '' END ||\n" +
@@ -226,32 +232,30 @@ public class TBReportQuery {
             "''\n" +
             ")\n" +
             ") AS contractionOptions,\n" +
-            "data->'tbIptScreening'->>'dateOfDiagnosticTest' as dateOfDiagnosticTest, \n" +
-            "data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) as rnk3\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) as rnk3\n" +
             "FROM\n" +
-            "hiv_observation\n" +
-            "WHERE archived = 0 AND\n" +
+            "   hiv_observation\n" +
+            "WHERE archived = 0 AND date_of_observation BETWEEN ?2 AND ?3 AND \n" +
             "(\n" +
             "(data->'tbIptScreening'->>'status' LIKE '%Presumptive TB' \n" +
-            " or data->'tbIptScreening'->>'status' = 'No signs or symptoms of TB')\n" +
+            "or data->'tbIptScreening'->>'status' = 'No signs or symptoms of TB')\n" +
             "and\n" +
             "(data->'tbIptScreening'->>'outcome' = 'Presumptive TB' or data->'tbIptScreening'->>'outcome'='Not Presumptive' )\n" +
             ")\n" +
-            ")subTc WHERE rnk3 = 1 ),\n" +
+            ")  subTc WHERE rnk3 = 1 ),\n" +
             "tb_completion AS (\n" +
             "SELECT\n" +
             "person_uuid AS person_uuid,\n" +
-            "NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'completionDate', '') AS DATE), NULL)AS completionDate,\n" +
+            "NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'completionDate', '') AS DATE), NULL)  AS completionDate,\n" +
             "data->'tbIptScreening'->>'treatmentOutcome' AS treatmentOutcome\n" +
             "FROM\n" +
-            "hiv_observation\n" +
+            "    hiv_observation\n" +
             "WHERE\n" +
-            "(data->'tbIptScreening'->>'completionDate' IS NOT NULL AND data->'tbIptScreening'->>'completionDate' != '') AND\n" +
-            "(data->'tbIptScreening'->>'treatmentOutcome' IS NOT NULL AND data->'tbIptScreening'->>'treatmentOutcome' != '')\n" +
+            "   (data->'tbIptScreening'->>'treatmentOutcome' IS NOT NULL AND data->'tbIptScreening'->>'treatmentOutcome' != '')\n" +
             "AND archived =0\n" +
             ")\n" +
             "SELECT\n" +
-            "COALESCE(ts.person_uuid, tc.person_uuid) AS person_uuid_tb,-- Use COALESCE to get the person_uuid from either table\n" +
+            "COALESCE(ts.person_uuid, tc.person_uuid) AS person_uuid_tb,  -- Use COALESCE to get the person_uuid from either table\n" +
             "ts.tbTreatmentStartDate,\n" +
             "COALESCE(ts.tbDiagnosticResult,ts.chestXrayResult) as tbDiagnosticResult,\n" +
             "ts.tbDiagnosticTestType,\n" +
@@ -260,32 +264,25 @@ public class TBReportQuery {
             "ts.tbTreatmentType,\n" +
             "ts.screeningDate,\n" +
             "ts.specimenSentDate,\n" +
-            "ts.specimenType,\n" +
-            "ts.clinicallyEvaulated,\n" +
-            "ts.chestXrayResultTest,\n" +
-            "ts.dateOfChestXrayResultTestDone,\n" +
-            "ts.contractionForTpt,\n" +
-            "ts.contractionOptions,\n" +
             "dateOfDiagnosticTest,\n" +
-            "tc.completionDate,\n" +
-            "tc.treatmentOutcome\n" +
+            "tc.completionDate, ts.specimenType, ts.contractionForTpt, ts.contractionOptions,\n" +
+            "tc.treatmentOutcome, ts.cadScore, ts.clinicallyEvaulated, ts.chestXrayDone, ts.chestXrayResultTest, ts.dateOfChestXrayResultTestDone \n" +
             "FROM\n" +
             "tb_start ts\n" +
             "FULL OUTER JOIN\n" +
             "tb_completion tc\n" +
             "ON\n" +
-            "ts.person_uuid = tc.person_uuid order by screeningDate desc\n" +
-            "),\n" +
-            "tb_sample_collection AS (SELECT sample.created_by,CAST(sample.date_sample_collected AS DATE) as dateOfTbSampleCollection, patient_uuid as personTbSample FROM (\n" +
+            "ts.person_uuid = tc.person_uuid  order by screeningDate desc),\n" +
+            "tb_sample_collection AS (SELECT sample.created_by,CAST(sample.date_sample_collected AS DATE) as dateOfTbSampleCollection, patient_uuid as personTbSample  FROM (\n" +
             "SELECT llt.lab_test_name,sm.created_by, lt.viral_load_indication, sm.facility_id,sm.date_sample_collected, sm.patient_uuid, sm.archived, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_sample_collected DESC) as rnkk\n" +
-            "FROM public.laboratory_sample sm\n" +
-            " INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id AND lt.archived = 0\n" +
-            " INNER JOIN laboratory_labtest llt on llt.id = lt.lab_test_id\n" +
-            " WHERE lt.lab_test_id IN (65, 66, 51, 64, 67, 72, 71, 86, 58, 73)\n" +
-            "AND sm.archived = 0\n" +
-            "AND sm. date_sample_collected <= ?3 \n" +
-            "AND sm.facility_id = ?1 \n" +
-            ")as sample\n" +
+            "FROM public.laboratory_sample  sm\n" +
+            "   INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
+            "   INNER JOIN  laboratory_labtest llt on llt.id = lt.lab_test_id\n" +
+            "WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73)\n" +
+            "  AND sm.archived = 0 AND date_sample_collected IS NOT null \n" +
+            "  AND sm.date_sample_collected <= NOW()\n" +
+            "  AND sm.facility_id = ?1\n" +
+            "  )as sample\n" +
             "WHERE sample.rnkk = 1\n" +
             " ),\n" +
             "iptNew AS (\n" +
@@ -373,6 +370,15 @@ public class TBReportQuery {
             "coalesce(ipt_c_cs.iptCompletionSCS, ipt_c.iptCompletionStatus) as iptCompletionStatus \n" +
             "from ipt_c \n" +
             "left join ipt_c_cs on ipt_c.person_uuid = ipt_c_cs.person_uuid ), \n" +
+            "negativeTbDiagnosticResults AS (\n" +
+            "SELECT sm.patient_uuid as personTbResult, CASE WHEN (CAST(lr.date_result_reported AS DATE) > ?3 AND lr.result_reported IS NOT NULL) THEN NULL ELSE lr.result_reported END  as tbDiagnosticResult,\n" +
+            "CASE WHEN CAST(lr.date_result_reported AS DATE) > ?3 THEN NULL ELSE CAST(lr.date_result_reported AS DATE) END  as dateofTbDiagnosticResultReceived,cast(sm.date_sample_collected as date) AS dateOfTbSampleCollected,\n" +
+            "lt.lab_test_id, sm.date_sample_collected, ROW_NUMBER() OVER (PARTITION BY  sm.patient_uuid ORDER BY sm.date_sample_collected DESC) AS rnkkk\n" +
+            "     FROM laboratory_sample sm\n" +
+            " INNER JOIN laboratory_test lt on lt.id = sm.test_id\n" +
+            " LEFT JOIN laboratory_result lr ON lt.id = lr.test_id\n" +
+            " WHERE lt.lab_test_id IN (86, 65, 67, 64, 58, 51, 73, 72) and sm.archived = 0 AND sm.date_sample_collected IS NOT NULL AND (lr.result_reported ILIKE '%negative%' OR lr.result_reported ILIKE '%MTB not detected%')\n" +
+            "),\n" +
             "weight as (\n" +
             "select * from (select CAST(ho.data -> 'tbIptScreening' ->> 'weightAtStartTPT' AS text) AS weight_at_start_tpt, ho.person_uuid\n" +
             "from hiv_observation ho\n" +
@@ -387,13 +393,15 @@ public class TBReportQuery {
             "bio.facility_name as facilityName, bio.datimId, bio.targetGroup, \n" +
             "bio.enrollment_setting, bio.art_start_date AS artStartDate, \n" +
             "bio.regimen_at_start AS regimen_at_start, bio.date_of_registration, \n" +
-            "tb.tbStatus AS tbStatus, tb.tbScreeningType AS tbScreeningType, \n" +
+            "tb.tbStatus AS tbStatus, tb.symptomScreen, tb.withCADScreen, tb.tbScreeningType AS tbScreeningType, \n" +
             "tb.dateOfTbScreened as dateOfTbScreened, COALESCE(iptN.eligibilityTpt,tb_treatement_start.eligible_for_tpt) as eligibleForTpt, \n" +
             "COALESCE(tbTmentNew.tbTreatmentStartDate, tb_treatement_start.tb_treatment_start_date) AS tbTreatmentStartDate, \n" +
             "(CASE WHEN COALESCE(tbTmentNew.tbTreatmentType, tb_treatement_start.tb_treatement_type) IN ('New', 'Relapse', 'Relapsed') THEN 'New/Relapse' ELSE COALESCE(tbTmentNew.tbTreatmentType, tb_treatement_start.tb_treatement_type) END) AS tbTreatmentType, \n" +
             "COALESCE(tbTmentNew.completionDate , tb_treatement_completion.tb_completion_date) AS tbTreatmentCompletionDate, \n" +
             "COALESCE(tbTmentNew.treatmentOutcome, tb_treatement_completion.tb_treatment_outcome) AS tbTreatmentOutcome, \n" +
             "COALESCE(current_tb_result.tbDiagnosticResult, tbTmentNew.tbDiagnosticResult) AS tbDiagnosticResult, \n" +
+            "(CASE WHEN (tbTmentNew.clinicallyEvaulated = 'Yes' AND tbTmentNew.tbScreeningType ILIKE '%Chest X-ray with CAD%' AND tbTmentNew.chestXrayDone = 'Yes' AND negativeTb.tbDiagnosticResult IS NOT NULL AND tbTmentNew.cadScore >= 40) THEN CAST(tbTmentNew.dateOfChestXrayResultTestDone AS DATE) ELSE NULL END)  AS dateTbScoreCad, (CASE WHEN (tbTmentNew.clinicallyEvaulated = 'Yes' AND tbTmentNew.tbScreeningType ILIKE '%Chest X-ray with CAD%' AND tbTmentNew.chestXrayDone = 'Yes' AND tbTmentNew.cadScore >= 40 AND negativeTb.tbDiagnosticResult IS NOT NULL) THEN tbTmentNew.chestXrayResultTest ELSE NULL END) AS resultTbScoreCad,\n" +
+            "tbTmentNew.cadScore,\n" +
             "current_tb_result.dateofTbDiagnosticResultReceived AS dateOfTbDiagnosticResultReceived, tbSample.dateOfTbSampleCollection, \n" +
             "current_tb_result.tbDiagnosticTestType AS tbDiagnosticTestType, \n" +
             "ipt_start.date_of_ipt_start AS dateOfIptStart, ipt_start.regimen_name as regimenName, \n" +
@@ -412,5 +420,6 @@ public class TBReportQuery {
             "LEFT JOIN ipt_cA on ipt_cA.person_uuid = bio.uuid\n" +
             "LEFT JOIN iptNew iptN ON bio.uuid= iptN.person_uuid\n" +
             "LEFT JOIN tbTreatmentNew tbTmentNew ON tbTmentNew.person_uuid_tb = bio.uuid\n" +
-            "LEFT JOIN tb_sample_collection tbSample ON tbSample.personTbSample = bio.uuid";
+            "LEFT JOIN negativeTbDiagnosticResults negativeTb ON negativeTb.personTbResult = bio.uuid AND negativeTb.dateOfTbSampleCollected = tbTmentNew.specimenSentDate\n" +
+            "LEFT JOIN tb_sample_collection tbSample ON tbSample.personTbSample = bio.uuid\n";
 }

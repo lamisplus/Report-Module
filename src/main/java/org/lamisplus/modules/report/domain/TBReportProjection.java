@@ -52,4 +52,10 @@ public interface TBReportProjection {
 
     String getContractionForTpt();
     String getContractionOptions();
+
+    String getResultTbScoreCad();
+    LocalDate getDateTbScoreCad();
+    String getSymptomScreen();
+    String getWithCADScreen();
+    Integer getCadScore();
 }
