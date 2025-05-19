@@ -6,18 +6,16 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.formula.functions.Today;
 import org.audit4j.core.util.Log;
-import org.lamisplus.modules.hiv.domain.dto.*;
 import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.report.domain.LabReport;
 import org.lamisplus.modules.report.domain.PatientLineDto;
 import org.lamisplus.modules.report.domain.PharmacyReport;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
+//import org.lamisplus.modules.report.utility.JsonEncryptor;
 import org.lamisplus.modules.report.utility.Scrambler;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Component;
-import scala.util.Try;
 
 
 import java.io.File;
@@ -37,6 +35,7 @@ public class GenerateExcelDataHelper {
 	private final Scrambler scrambler;
 	private final SimpMessageSendingOperations messagingTemplate;
 	private final ExcelService excelService;
+//	private final JsonEncryptor jsonEncryptor;
 	public static final String RESULT_OUTPUT = "Results:";
 	public static final String ERROR_OUTPUT = "The error message is: ";
 	public static final String RECORD_OUTPUT = "Done converting db records total size {}";
@@ -141,6 +140,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, tbReportProjection.getDateOfTbScreened());
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbScreeningType())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbStatus())));
+				map.put(index++, tbReportProjection.getCadScore());
 
 				map.put(index++, tbReportProjection.getDateOfTbSampleCollection());
 				map.put(index++, tbReportProjection.getSpecimenSentDate());
@@ -152,9 +152,11 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticTestType())));
 				map.put(index++, tbReportProjection.getDateOfTbDiagnosticResultReceived());
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticResult())));
+				map.put(index++, tbReportProjection.getDateTbScoreCad());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getResultTbScoreCad())));
 
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getClinicallyEvaulated())));
-				map.put(index++, tbReportProjection.getDateOfChestXrayResultTestDone());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getDateOfChestXrayResultTestDone())));
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getChestXrayResultTest())));
 
 
@@ -480,7 +482,8 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getDateOfTbScreened());
 				map.put(index++, radetReportDto.getTbScreeningType());
 				map.put(index++, radetReportDto.getCadScore());
-				map.put(index++, radetReportDto.getTbStatus());
+				map.put(index++, radetReportDto.getWithCADScreen());
+				map.put(index++, radetReportDto.getSymptomScreen());
 				//tb lab
 				map.put(index++, radetReportDto.getDateOfTbSampleCollected());
 				map.put(index++, radetReportDto.getTbDiagnosticTestType());
@@ -542,6 +545,9 @@ public class GenerateExcelDataHelper {
 				//case manager
 				map.put(index, radetReportDto.getCaseManager());
 
+				// File versioning
+//				map.put(index, encryptData(String.valueOf(currentRecord)));
+
 
 				result.add(map);
 				sn++;
@@ -554,6 +560,19 @@ public class GenerateExcelDataHelper {
 		LOG.info(RECORD_OUTPUT + result.size());
 		return result;
 	}
+
+//	private Object encryptData (String obj) {
+//		try {
+//			JsonEncryptor server = new JsonEncryptor();
+//			server.initFromStrings("CHuO1Fjd8YgJqTyapibFBQ==", "e3IYYJC2hxe24/EO");
+//			String encryptedMessage = server.encrypt(obj);
+//			System.err.println("Encrypted Message : " + encryptedMessage);
+//		} catch (Exception ignored) {
+//		}
+//		return null;
+//	}
+
+
 
 	private void writeToErrorFile(Object obj){
 		ObjectMapper objectMapper = new ObjectMapper();
