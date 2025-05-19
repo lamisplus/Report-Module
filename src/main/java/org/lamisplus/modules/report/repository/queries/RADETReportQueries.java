@@ -181,7 +181,7 @@ public class RADETReportQueries {
             "                WHERE ho.person_uuid = lo.person_uuid\n" +
             "                  AND ho.type = 'Chronic Care'\n" +
             "                  AND ho.data IS NOT NULL\n" +
-            "                  AND ho.archived = 0\n" +
+            "                  AND ho.archived = 0 AND ho.date_of_observation BETWEEN (CAST (?3 AS DATE) - INTERVAL '6 MONTHS') AND CAST(?3 AS DATE)\n" +
             "                  AND ho.data->'tbIptScreening'->>'status' ILIKE 'Presumptive TB%'\n" +
             "            ) THEN 'Presumptive TB'\n" +
             "            ELSE lo.tbStatus\n" +
@@ -192,6 +192,12 @@ public class RADETReportQueries {
             "  SELECT \n" +
             "    lo.id,\n" +
             "    lo.person_uuid,\n" +
+            "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod AND lo.tbScreeningType = 'Symptom screen (alone)' THEN pc.tbStatus\n" +
+            "WHEN lo.reportingPeriod = rp.currentReportingPeriod AND lo.tbScreeningType = 'Symptom screen (alone)' THEN lo.tbStatus\n" +
+            "ELSE NULL END AS symptomScreen,\n" +
+            "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod AND lo.tbScreeningType ILIKE '%Chest X-ray with CAD%' THEN pc.tbStatus\n" +
+            "WHEN lo.reportingPeriod = rp.currentReportingPeriod AND lo.tbScreeningType ILIKE '%Chest X-ray with CAD%' THEN lo.tbStatus\n" +
+            "ELSE NULL END AS withCADScreen,\n" +
             "CASE WHEN (lo.reportingPeriod = rp.currentReportingPeriod AND lo.tbStatus IN ('Confirmed TB', 'Currently on TB treatment')) THEN lo.tbStatus\n" +
             "WHEN lo.reportingPeriod = rp.currentReportingPeriod THEN pc.tbStatus ELSE NULL END AS tbStatus,\n" +
             "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod THEN lo.dateOfTbScreened ELSE NULL END AS dateOfTbScreened,\n" +
@@ -286,7 +292,6 @@ public class RADETReportQueries {
             "     current_tb_result AS (WITH tb_test as (SELECT personTbResult, dateofTbDiagnosticResultReceived, dateOfTbSampleCollected, tbDiagnosticResult,\n" +
             "   coalesce(\n" +
             "           MAX(CASE WHEN lab_test_id = 65 THEN 'Gene Xpert' END) ,\n" +
-            "           MAX(CASE WHEN lab_test_id = 66 THEN 'Chest X-ray' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 51 THEN 'TB-LAM' END) ,\n" +
             "           MAX(CASE WHEN lab_test_id = 64 THEN 'AFB Smear Microscopy' END),\n" +
             "           MAX(CASE WHEN lab_test_id = 67 THEN 'Gene Xpert' END) ,\n" +
@@ -303,7 +308,7 @@ public class RADETReportQueries {
             "     FROM laboratory_sample sm\n" +
             " INNER JOIN laboratory_test lt on lt.id = sm.test_id\n" +
             " LEFT JOIN laboratory_result lr ON lt.id = lr.test_id\n" +
-            " WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73, 66) and sm.archived = 0 AND sm.date_sample_collected IS NOT NULL\n" +
+            " WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73) and sm.archived = 0 AND sm.date_sample_collected IS NOT NULL\n" +
             "  AND sm.facility_id = ?1\n" +
             ") AS tbSubQ where rnkkk = 1 \n" +
             "GROUP BY tbSubQ.personTbResult, tbSubQ.dateofTbDiagnosticResultReceived, tbSubQ.dateOfTbSampleCollected, tbDiagnosticResult)\n" +

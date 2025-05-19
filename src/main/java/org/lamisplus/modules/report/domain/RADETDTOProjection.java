@@ -103,6 +103,8 @@ public interface RADETDTOProjection {
 	String getIptType();
 	String getResultTbScoreCad();
 	LocalDate getDateTbScoreCad();
+	String getSymptomScreen();
+	String getWithCADScreen();
 
 	String getResultOfCervicalCancerScreening();
 	String getCervicalCancerScreeningType();
