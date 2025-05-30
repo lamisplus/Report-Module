@@ -97,11 +97,11 @@ const Reports = props => {
     { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary' },
   ];
   const reportPrevention = [
-    { key: 'prep-report', value: 'prep-report', text: 'PrEP-PBFW Cross Sectional' },
+    { key: 'prep-report', value: 'prep-report', text: 'PrEP Cross Sectional' },
     {
       key: 'prep-longitudinal-report',
       value: 'prep-longitudinal-report',
-      text: 'PrEP-PBFW Longitudinal REPORT',
+      text: 'PrEP Longitudinal REPORT',
     },
     // { key: 'kp-prev-report', value: 'kp-prev-report', text: 'KP PREV REPORT' },
   ];
@@ -961,7 +961,7 @@ const Reports = props => {
                         activeItem === 'prep-report' ? '#000' : '',
                     }}
                   >
-                    <span style={{ color: '#fff' }}>PrEP-PBFW Report</span>
+                    <span style={{ color: '#fff' }}>PrEP Cross Sectional Report</span>
                   </Menu.Item>
                 </Menu>
               </div>
