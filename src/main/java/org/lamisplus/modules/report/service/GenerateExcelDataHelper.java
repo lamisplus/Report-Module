@@ -482,8 +482,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getDateOfTbScreened());
 				map.put(index++, radetReportDto.getTbScreeningType());
 				map.put(index++, radetReportDto.getCadScore());
-				map.put(index++, radetReportDto.getWithCADScreen());
-				map.put(index++, radetReportDto.getSymptomScreen());
+				map.put(index++, radetReportDto.getTbStatus());
 				//tb lab
 				map.put(index++, radetReportDto.getDateOfTbSampleCollected());
 				map.put(index++, radetReportDto.getTbDiagnosticTestType());
