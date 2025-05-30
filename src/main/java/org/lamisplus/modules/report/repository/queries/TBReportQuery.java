@@ -96,23 +96,43 @@ public class TBReportQuery {
             "                  AND ho.data->'tbIptScreening'->>'status' ILIKE 'Presumptive TB%'\n" +
             "            ) THEN 'Presumptive TB'\n" +
             "            ELSE lo.tbStatus\n" +
-            "        END AS tbStatus\n" +
+            "        END AS tbStatus,\n" +
+            "    (\n" +
+            "      SELECT ho.data->'tbIptScreening'->>'tbScreeningType'\n" +
+            "      FROM hiv_observation ho\n" +
+            "      WHERE ho.person_uuid = lo.person_uuid\n" +
+            "        AND ho.type = 'Chronic Care'\n" +
+            "        AND ho.data IS NOT NULL\n" +
+            "        AND ho.archived = 0\n" +
+            "        AND ho.archived = 0 AND ho.date_of_observation BETWEEN (CAST (?3 AS DATE) - INTERVAL '6 MONTHS') AND CAST(?3 AS DATE)\n" +
+            "        AND ho.data->'tbIptScreening'->>'status' ILIKE 'Presumptive TB%'\n" +
+            "      ORDER BY ho.date_of_observation DESC\n" +
+            "      LIMIT 1\n" +
+            "    ) AS screeningType,\n" +
+            "(\n" +
+            "      SELECT ho.date_of_observation\n" +
+            "      FROM hiv_observation ho\n" +
+            "      WHERE ho.person_uuid = lo.person_uuid\n" +
+            "        AND ho.type = 'Chronic Care'\n" +
+            "        AND ho.data IS NOT NULL\n" +
+            "        AND ho.archived = 0\n" +
+            "        AND ho.archived = 0 AND ho.date_of_observation BETWEEN (CAST (?3 AS DATE) - INTERVAL '6 MONTHS') AND CAST(?3 AS DATE)\n" +
+            "        AND ho.data->'tbIptScreening'->>'status' ILIKE 'Presumptive TB%'\n" +
+            "      ORDER BY ho.date_of_observation DESC\n" +
+            "      LIMIT 1\n" +
+            "    ) AS presumptiveDate\n" +
             "    FROM\n" +
             "        FilteredLatestObservations lo\n" +
             "    )\n" +
             "  SELECT \n" +
             "    lo.id,\n" +
             "    lo.person_uuid,\n" +
-            "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod AND lo.tbScreeningType = 'Symptom screen (alone)' THEN pc.tbStatus\n" +
-            "WHEN lo.reportingPeriod = rp.currentReportingPeriod AND lo.tbScreeningType = 'Symptom screen (alone)' THEN lo.tbStatus\n" +
-            "ELSE NULL END AS symptomScreen,\n" +
-            "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod AND lo.tbScreeningType ILIKE '%Chest X-ray with CAD%' THEN pc.tbStatus\n" +
-            "WHEN lo.reportingPeriod = rp.currentReportingPeriod AND lo.tbScreeningType ILIKE '%Chest X-ray with CAD%' THEN lo.tbStatus\n" +
-            "ELSE NULL END AS withCADScreen,\n" +
             "CASE WHEN (lo.reportingPeriod = rp.currentReportingPeriod AND lo.tbStatus IN ('Confirmed TB', 'Currently on TB treatment')) THEN lo.tbStatus\n" +
             "WHEN lo.reportingPeriod = rp.currentReportingPeriod THEN pc.tbStatus ELSE NULL END AS tbStatus,\n" +
-            "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod THEN lo.dateOfTbScreened ELSE NULL END AS dateOfTbScreened,\n" +
-            "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod THEN lo.tbScreeningType ELSE NULL END AS tbScreeningType\n" +
+            "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod AND pc.presumptiveDate IS NOT NULL THEN pc.presumptiveDate\n" +
+            "WHEN lo.reportingPeriod = rp.currentReportingPeriod THEN lo.dateOfTbScreened ELSE NULL END AS dateOfTbScreened,\n" +
+            "CASE WHEN lo.reportingPeriod = rp.currentReportingPeriod AND pc.screeningType IS NOT NULL THEN pc.screeningType\n" +
+            "WHEN lo.reportingPeriod = rp.currentReportingPeriod THEN lo.tbScreeningType ELSE NULL END AS tbScreeningType\n" +
             "  FROM \n" +
             "    FilteredLatestObservations lo\n" +
             "    JOIN PresumptiveCheck pc ON lo.person_uuid = pc.person_uuid\n" +
@@ -239,8 +259,6 @@ public class TBReportQuery {
             "(\n" +
             "(data->'tbIptScreening'->>'status' LIKE '%Presumptive TB' \n" +
             "or data->'tbIptScreening'->>'status' = 'No signs or symptoms of TB')\n" +
-            "and\n" +
-            "(data->'tbIptScreening'->>'outcome' = 'Presumptive TB' or data->'tbIptScreening'->>'outcome'='Not Presumptive' )\n" +
             ")\n" +
             ")  subTc WHERE rnk3 = 1 ),\n" +
             "tb_completion AS (\n" +
@@ -377,7 +395,7 @@ public class TBReportQuery {
             "     FROM laboratory_sample sm\n" +
             " INNER JOIN laboratory_test lt on lt.id = sm.test_id\n" +
             " LEFT JOIN laboratory_result lr ON lt.id = lr.test_id\n" +
-            " WHERE lt.lab_test_id IN (86, 65, 67, 64, 58, 51, 73, 72) and sm.archived = 0 AND sm.date_sample_collected IS NOT NULL AND (lr.result_reported ILIKE '%negative%' OR lr.result_reported ILIKE '%MTB not detected%')\n" +
+            " WHERE lt.lab_test_id IN (86, 65, 67, 64, 58, 51, 73, 72, 71) and sm.archived = 0 AND sm.date_sample_collected IS NOT NULL AND (lr.result_reported ILIKE '%negative%' OR lr.result_reported ILIKE '%MTB not detected%')\n" +
             "),\n" +
             "weight as (\n" +
             "select * from (select CAST(ho.data -> 'tbIptScreening' ->> 'weightAtStartTPT' AS text) AS weight_at_start_tpt, ho.person_uuid\n" +
@@ -393,14 +411,14 @@ public class TBReportQuery {
             "bio.facility_name as facilityName, bio.datimId, bio.targetGroup, \n" +
             "bio.enrollment_setting, bio.art_start_date AS artStartDate, \n" +
             "bio.regimen_at_start AS regimen_at_start, bio.date_of_registration, \n" +
-            "tb.tbStatus AS tbStatus, tb.symptomScreen, tb.withCADScreen, tb.tbScreeningType AS tbScreeningType, \n" +
+            "tb.tbStatus AS tbStatus, tb.tbScreeningType AS tbScreeningType, \n" +
             "tb.dateOfTbScreened as dateOfTbScreened, COALESCE(iptN.eligibilityTpt,tb_treatement_start.eligible_for_tpt) as eligibleForTpt, \n" +
             "COALESCE(tbTmentNew.tbTreatmentStartDate, tb_treatement_start.tb_treatment_start_date) AS tbTreatmentStartDate, \n" +
             "(CASE WHEN COALESCE(tbTmentNew.tbTreatmentType, tb_treatement_start.tb_treatement_type) IN ('New', 'Relapse', 'Relapsed') THEN 'New/Relapse' ELSE COALESCE(tbTmentNew.tbTreatmentType, tb_treatement_start.tb_treatement_type) END) AS tbTreatmentType, \n" +
             "COALESCE(tbTmentNew.completionDate , tb_treatement_completion.tb_completion_date) AS tbTreatmentCompletionDate, \n" +
             "COALESCE(tbTmentNew.treatmentOutcome, tb_treatement_completion.tb_treatment_outcome) AS tbTreatmentOutcome, \n" +
             "COALESCE(current_tb_result.tbDiagnosticResult, tbTmentNew.tbDiagnosticResult) AS tbDiagnosticResult, \n" +
-            "(CASE WHEN (tbTmentNew.clinicallyEvaulated = 'Yes' AND tbTmentNew.tbScreeningType ILIKE '%Chest X-ray with CAD%' AND tbTmentNew.chestXrayDone = 'Yes' AND negativeTb.tbDiagnosticResult IS NOT NULL AND tbTmentNew.cadScore >= 40) THEN CAST(tbTmentNew.dateOfChestXrayResultTestDone AS DATE) ELSE NULL END)  AS dateTbScoreCad, (CASE WHEN (tbTmentNew.clinicallyEvaulated = 'Yes' AND tbTmentNew.tbScreeningType ILIKE '%Chest X-ray with CAD%' AND tbTmentNew.chestXrayDone = 'Yes' AND tbTmentNew.cadScore >= 40 AND negativeTb.tbDiagnosticResult IS NOT NULL) THEN tbTmentNew.chestXrayResultTest ELSE NULL END) AS resultTbScoreCad,\n" +
+            "(CASE WHEN (tbTmentNew.clinicallyEvaulated = 'Yes' AND tbTmentNew.tbScreeningType ILIKE '%Chest X-Ray with CAD and/or Symptom screening%' AND tbTmentNew.chestXrayDone = 'Yes' AND negativeTb.tbDiagnosticResult IS NOT NULL AND tbTmentNew.cadScore >= 40) THEN CAST(tbTmentNew.dateOfChestXrayResultTestDone AS DATE) ELSE NULL END)  AS dateTbScoreCad, (CASE WHEN (tbTmentNew.clinicallyEvaulated = 'Yes' AND tbTmentNew.tbScreeningType ILIKE '%Chest X-Ray with CAD and/or Symptom screening%' AND tbTmentNew.chestXrayDone = 'Yes' AND tbTmentNew.cadScore >= 40 AND negativeTb.tbDiagnosticResult IS NOT NULL) THEN tbTmentNew.chestXrayResultTest ELSE NULL END) AS resultTbScoreCad,\n" +
             "tbTmentNew.cadScore,\n" +
             "current_tb_result.dateofTbDiagnosticResultReceived AS dateOfTbDiagnosticResultReceived, tbSample.dateOfTbSampleCollection, \n" +
             "current_tb_result.tbDiagnosticTestType AS tbDiagnosticTestType, \n" +
