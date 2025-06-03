@@ -43,6 +43,7 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Divider from '@mui/material/Divider';
 import PrEPMSF from './PrEPMSF';
+import TbReportLongitudinal from './TbReportLongitudinal';
 
 const useStyles = makeStyles(theme => ({
   error: {
@@ -140,12 +141,14 @@ const Reports = props => {
       text: 'CLIENT VERIFICATION',
     },
     { key: 'tb-report', value: 'tb-report', text: 'TB REPORT' },
+    { key: 'tb-report-longitudinal', value: 'tb-report-longitudinal', text: 'TB LONGITUDINAL REPORT' },
     { key: 'ncd-report', value: 'ncd-report', text: 'NCD Report' },
     { key: 'eac-report', value: 'eac-report', text: 'EAC Report' },
     // { key: 'index-elicitation', value: 'index-elicitation', text: 'INDEX ELICITATION' },
     { key: 'ahd-report', value: 'ahd-report', text: 'AHD REPORT' },
     { key: 'adr-report', value: 'adr-report', text: 'ADR REPORT' },
     { key: 'custom-report', value: 'custom-report', text: 'CUSTOM REPORT' },
+
   ];
 
   const renderComponent = () => {
@@ -207,6 +210,14 @@ const Reports = props => {
             completed={completed}
           />
         );
+        case 'tb-report-longitudinal':
+          return (
+            <TbReportLongitudinal
+              handleItemClick={handleItemClick1}
+              setCompleted={setCompleted}
+              completed={completed}
+            />
+          );
       case 'ncd-report':
         return (
           <NcdReport
