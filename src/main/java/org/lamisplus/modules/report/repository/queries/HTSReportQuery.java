@@ -45,7 +45,7 @@ public class HTSReportQuery {
             "(CASE WHEN hc.hiv_test_result = 'Positive' THEN 'No'\n" +
             "WHEN hc.prep_accepted IS true THEN 'Yes' ELSE 'No' END) AS prepAccepted,  \n" +
             "(CASE WHEN hc.previously_tested IS true THEN 'Yes' ELSE 'No' END) AS previouslyTested,   \n" +
-            //"tg.display AS targetGroup,  \n" +
+            "tg.display AS targetGroup,  \n" +
             "(CASE WHEN rf.display IN ('FP') THEN NULL ELSE rf.display END) AS referredFrom,  \n" +
             "(CASE WHEN hrs.testing_setting IN ('FP') THEN NULL ELSE (select display from base_application_codeset where code = hrs.testing_setting) END) AS testingSetting,  \n" +
             "tc.display AS counselingType,  \n" +
