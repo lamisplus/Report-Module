@@ -396,7 +396,7 @@ query:
     pmtct."Date of confirmatory DNA PCR test sample collection",pmtct."Result of confirmatory DNA PCR test",pmtct."Date confirmatory DNA PCR result was received",
     pmtct."Date of Child Final Outcome test",pmtct."Result (Child Final Outcome)",pmtct."Child''s ART Start Date",pmtct."Child Unique ID"
     from (
-    SELECT DISTINCT (pii.hospital_number) p.uuid AS PersonUuid,
+    SELECT DISTINCT pii.hospital_number, p.uuid AS PersonUuid,
     facility_state.name as "State",
     facility_lga.name as "LGA",
     facility.name as "Facility",
@@ -546,7 +546,7 @@ query:
     prep.age AS "Age", prep.dateofbirth AS "Date Of Birth (yyyy-mm-dd)",
     prep.phone AS "Phone Number", prep.maritalstatus AS "Marital Status",
     prep.residentiallga AS "LGA of Residence", prep.residentialstate AS "State Of Residence",
-    prep.education AS "Education", prep.occupation AS "Occupation", prep.visitType AS  "Visit Type", prep.dateScreened AS  "Date Screened for PrEP", prep.dateScreened AS "Date Eligible for PrEP", prep.dateScreened AS "Date offered PrEP", prep.dateScreened AS "Date willing to commence PrEP",  prep.eligibleForPrep AS "Eligible for PrEP", prep.offeredPrep AS "Offered PrEP", prep.willingCommencedPrep AS "Willing to Commence PREP", prep.acceptedToCommencedPrep AS "Accepted to Commence PrEP", prep.reasonsForDecliningPrep AS "Reasons for Declining PrEP",
+    prep.education AS "Education", prep.occupation AS "Occupation", prep.populationType AS "Population Type", prep.visitType AS  "Visit Type", prep.dateScreened AS  "Date Screened for PrEP", prep.dateScreened AS "Date Eligible for PrEP", prep.dateScreened AS "Date offered PrEP", prep.dateScreened AS "Date willing to commence PrEP",  prep.eligibleForPrep AS "Eligible for PrEP", prep.offeredPrep AS "Offered PrEP", prep.willingCommencedPrep AS "Willing to Commence PREP", prep.acceptedToCommencedPrep AS "Accepted to Commence PrEP", prep.reasonsForDecliningPrep AS "Reasons for Declining PrEP",
     prep.dateofregistration AS "Date Of Registration (yyyy-mm-dd)", prep.prepCommencedDate AS "Date Of Commencement (yyyy-mm-dd)",
     prep.baselineregimen AS "Baseline Regimen", prep.prepType AS "Prep Type", prep.previousClinicPrepType AS "Previous clinic PrEP Type", prep.prepdistributionsetting AS "Prep Distribution Setting",
     prep.baselinesystolicbp AS "Baseline Systolic bp", prep.baselinediastolicbp AS "Baseline Diastolic bp", prep.baselineweight AS "Baseline Weight (kg)",
@@ -592,6 +592,7 @@ query:
     current_pc.weight AS currentWeight, current_pc.height AS currentHeight, (CASE WHEN current_pc.hiv_test_result ILIKE '%Negative%' THEN 'Negative' WHEN current_pc.hiv_test_result ILIKE '%Positive%' THEN 'Positive' ELSE NULL END) AS currentHivStatus,
     current_pc.encounter_date AS DateOfCurrentHIVStatus, (select display from base_application_codeset where code = current_pi.interruption_type) as InterruptionType, current_pi.reason_stopped AS InterruptionReason, current_pi.interruption_date AS InterruptionDate,
     current_pc.health_care_worker_signature AS healthCareWorker, CASE WHEN current_pc.visit_type = 'PREP_VISIT_TYPE_METHOD_SWITCH' THEN (select display from base_application_codeset where code = current_pc.prep_type) ELSE null END AS methodSwitch,
+    (select display from base_application_codeset where code = current_pc.population_type) AS populationType,
     (CASE
     WHEN current_pi.interruption_date <= current_pc.encounter_date
     THEN
@@ -1554,7 +1555,7 @@ query:
     longitudinal.residentiallga AS "LGA of Residence", longitudinal.residentialstate AS "State Of Residence",
     longitudinal.education AS "Education", longitudinal.occupation AS "Occupation", longitudinal.dateScreenedForPrep AS "Date Screened for PrEP", longitudinal.eligibleForPrep AS "Eligible for PrEP", longitudinal.offeredPrep AS "Offered PrEP", longitudinal.willingCommencedPrep AS "Willing to Commence PREP", longitudinal.acceptedToCommencedPrep AS "Accepted to Commence PrEP", longitudinal.reasonsForDecliningPrep AS "Reasons for Declining PrEP",longitudinal.clientWeight AS "Weight", longitudinal.clientHeight AS "Height",
     longitudinal.pulse AS "Pulse", longitudinal.temperature AS "Temperature", longitudinal.respiratory_rate AS "Respiratory Rate",
-    longitudinal.systolicBP AS "Systolic BP", longitudinal.diastolicBP AS "diastolic BP",  longitudinal.drugHistory AS "History of Drug-Drug Interactions",longitudinal.visitType AS "Visit Type", longitudinal.datePrepGiven AS "Date Prep Given",
+    longitudinal.systolicBP AS "Systolic BP", longitudinal.diastolicBP AS "diastolic BP",  longitudinal.drugHistory AS "History of Drug-Drug Interactions",longitudinal.populationType AS "Population Type", longitudinal.visitType AS "Visit Type", longitudinal.datePrepGiven AS "Date Prep Given",
     longitudinal.prepType AS "PrEP Type", longitudinal.regimenName AS "PrEP Regimen", longitudinal.regimenDuration AS "Regimen Duration / Days of Refill", longitudinal.otherDrugs AS "Other Drugs",
     longitudinal.adherenceLevel AS "Adherence Level", longitudinal.nextAppointment AS "Next Appointment", longitudinal.riskReductionService AS "Risk Reduction Services",
     longitudinal.notedSideEffects AS "Noted Side Effects", longitudinal.hepatitisTestDate AS "Date of Hepatitis Test", longitudinal.hepatitisResult AS "Hepatitis Result",
@@ -1605,12 +1606,12 @@ query:
     CAST(otherTest.other_test_name AS TEXT) AS otherTestResult, otherTest.other_test_date AS otherTestDate,
     CASE WHEN clinic.syndromic_sti_screening IS NOT NULL THEN CAST(clinic.encounter_date AS TEXT) ELSE NULL END AS dateSti,
     (SELECT display FROM base_application_codeset where id = CAST(clinic.syndromic_sti_screening AS BIGINT)) AS syndromicStiScreening,
-    clinic.hepatitis->>'testDate' AS hepatitisTestDate,
+    clinic.hepatitis->>'testDate' AS hepatitisTestDate, (select display from base_application_codeset where code = clinic.population_type) AS populationType,
     (CASE WHEN clinic.hepatitis->>'testDate' IS NOT NULL THEN clinic.hepatitis->>'result' ELSE NULL END) AS hepatitisResult,
     (SELECT display FROM base_application_codeset where code = pi.interruption_type) AS interruptionType, CAST(pi.interruption_date AS TEXT) AS interruptionDate, pi.reason_stopped AS reasonStopped, pEligiblity.visit_date AS dateScreenedForPrep,
     (SELECT display FROM base_application_codeset WHERE code = clinic.visit_type) AS visitType, (CASE WHEN pEligiblity.services_received_by_client->>'willingToCommencePrep' = 'true' THEN 'Yes' WHEN pEligiblity.services_received_by_client->>'willingToCommencePrep' = 'false' THEN 'No' ELSE null END)  AS willingCommencedPrep, (SELECT display FROM base_application_codeset where code = REPLACE(REPLACE(REPLACE(pEligiblity.services_received_by_client->>'reasonsForDecline', '[',''),']',''),'"','')) AS reasonsForDecliningPrep,
     (CASE WHEN hc.hiv_test_result = 'Positive' THEN 'No' WHEN hc.prep_offered IS true THEN 'Yes' ELSE 'No' END)  AS offeredPrep, (CASE WHEN hc.hiv_test_result = 'Positive' THEN 'No' WHEN hc.prep_accepted IS true THEN 'Yes' ELSE 'No' END) AS acceptedToCommencedPrep,
-    adr.adverse_effect->>'eventDescription' AS eventDescription, adr.report_date AS evenDate, '' AS notes, (CASE WHEN hc.hiv_test_result = 'Negative' OR pEligiblity.score = 1 THEN 'Yes' ELSE 'No' END) AS eligibleForPrep, (SELECT display FROM base_application_codeset where code = clinic.population_type) AS populationType, (SELECT display FROM base_application_codeset where code = clinic.history_of_drug_to_drug_interaction) AS drugHistory , CASE WHEN clinic.visit_type = 'PREP_VISIT_TYPE_METHOD_SWITCH' THEN (select display from base_application_codeset where code = clinic.prep_type) ELSE null END AS methodSwitch
+    adr.adverse_effect->>'eventDescription' AS eventDescription, adr.report_date AS evenDate, '' AS notes, (CASE WHEN hc.hiv_test_result = 'Negative' OR pEligiblity.score = 1 THEN 'Yes' ELSE 'No' END) AS eligibleForPrep, (SELECT display FROM base_application_codeset where code = clinic.history_of_drug_to_drug_interaction) AS drugHistory , CASE WHEN clinic.visit_type = 'PREP_VISIT_TYPE_METHOD_SWITCH' THEN (select display from base_application_codeset where code = clinic.prep_type) ELSE null END AS methodSwitch
     FROM patient_person p
     INNER JOIN (
     SELECT * FROM (SELECT p.id, REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '"', ''), ']', ''), '[', ''), 'null',''), '\\\\\\\', '') AS address,
