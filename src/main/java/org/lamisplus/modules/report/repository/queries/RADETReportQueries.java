@@ -451,15 +451,11 @@ public class RADETReportQueries {
             "join current_eac ce on ce.uuid = hes.eac_id where ce.row = 1 and hes.archived = 0 \n" +
             "  and hes.eac_session_date between ?2 and ?3 \n" +
             "  and hes.status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC')) as les where row = 1), \n" +
-            "eac_count as (\n" +
-            " select person_uuid, CASE WHEN count(*) > 6 THEN 6 ELSE count(*) END as no_eac_session from ( \n" +
-            " with current_eac as (\n" +
-            "select id, person_uuid, uuid, status, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row from hiv_eac where archived = 0) \n" +
-            " select hes.person_uuid from hiv_eac_session hes \n" +
-            "join current_eac ce on ce.person_uuid = hes.person_uuid where ce.row = 1 and hes.archived = 0 \n" +
-            "  and hes.eac_session_date between ?2 and ?3 \n" +
-            "  and hes.status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC') \n" +
-            ") as c group by person_uuid), \n" +
+            "eac_count as (SELECT person_uuid, no_eac_session FROM (\n" +
+            "SELECT person_uuid, visit_id,  no_eac_session, eac_session_date, ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY eac_session_date DESC ) AS rnkk FROM (\n" +
+            "SELECT person_uuid, visit_id, eac_session_date,COUNT(visit_id) OVER (PARTITION BY visit_id) AS no_eac_session\n" +
+            "FROM hiv_eac_session WHERE archived = 0 AND eac_session_date between ?2 and ?3 AND status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC') order by eac_session_date DESC) subQ \n" +
+            ") countEac WHERE rnkk = 1 ), \n" +
             "extended_eac as (\n" +
             " select * from (with current_eac as ( \n" +
             "select id, person_uuid, uuid, status, \n" +
