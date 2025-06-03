@@ -700,6 +700,7 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getEntryPoint())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getIndexClient())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPreviouslyTested())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getTargetGroup())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getReferredFrom())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getTestingSetting())));
 
