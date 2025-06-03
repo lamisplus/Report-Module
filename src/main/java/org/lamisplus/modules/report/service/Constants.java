@@ -248,6 +248,7 @@ public class Constants {
 					"Entry Point",
 					"Index Client",
 					"Previously Tested",
+					"Target Group",
 					"Referred From",
 					"Testing Setting",
 					"Modality",
