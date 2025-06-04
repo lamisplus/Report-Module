@@ -107,7 +107,7 @@ const TbReportLongitudinal = (props) => {
    
     axios
       .get(
-        `${baseUrl}reporting/tb-report?facilityId=${objValues.organisationUnitId}&start=${objValues.startDate}&end=${objValues.endDate}`,
+        `${baseUrl}reporting/tb-longitudinal-report?facilityId=${objValues.organisationUnitId}&start=${objValues.startDate}&end=${objValues.endDate}`,
         { headers: { Authorization: `Bearer ${token}` }, responseType: "blob" }
       )
       .then((response) => {
