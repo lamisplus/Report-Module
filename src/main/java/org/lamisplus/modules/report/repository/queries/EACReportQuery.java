@@ -137,20 +137,11 @@ public class EACReportQuery {
             "        join hiv_eac_session hes on hes.eac_id = ce.uuid " +
             "             where ce.row = 1 and hes.archived = 0 and hes.status = 'NINTH EAC' " +
             "), " +
-            "eac_count as ( " +
-            "    select person_uuid as person_uuid10, count(*) as numberOfEACSessionsCompleted from ( " +
-            "    with current_eac as ( " +
-            "      select person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
-            "      from hiv_eac where archived = 0 " +
-            "    ) " +
-            "    select hes.person_uuid from hiv_eac_session hes " +
-            "        join current_eac ce on ce.person_uuid = hes.person_uuid where ce.row = 1 and hes.archived = 0 " +
-            "            and hes.eac_session_date between ?2 and ?3 " +
-
-            "            and hes.status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC', 'FOURTH EAC', 'FIFTH EAC', 'SIXTH EAC') " +
-
-            "       ) as c group by person_uuid " +
-            "), " +
+            "eac_count as (SELECT person_uuid person_uuid10, no_eac_session numberOfEACSessionsCompleted FROM (\n" +
+            "SELECT person_uuid, eac_id,  no_eac_session, eac_session_date, ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY eac_session_date DESC ) AS rnkk FROM (\n" +
+            "SELECT person_uuid, visit_id, eac_id, eac_session_date,COUNT(eac_id) OVER (PARTITION BY eac_id) AS no_eac_session\n" +
+            "FROM hiv_eac_session WHERE archived = 0 AND eac_session_date between ?2 and ?3 AND status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC') order by eac_session_date DESC) subQ \n" +
+            ") countEac WHERE rnkk = 1), " +
             "post_eac_vl1 as ( " +
             "    WITH current_eac AS ( " +
             "        SELECT person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
