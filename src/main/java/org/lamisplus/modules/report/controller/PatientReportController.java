@@ -90,6 +90,20 @@ public class PatientReportController {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating radet report");
 	}
 
+	@GetMapping("/tb-longitudinal-report")
+	public void getTBLongitudinalReport(
+			HttpServletResponse response,
+			@RequestParam("facilityId") Long facilityId,
+			@RequestParam("start") LocalDate start,
+			@RequestParam("end") LocalDate end) throws IOException {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting TB Longitudinal report");
+		messagingTemplate.convertAndSend("/topic/tb-longitudinal-report", "start");
+		ByteArrayOutputStream baos = generateExcelService.generateTBLongitudinalReport(facilityId, start, end);
+		setStream(baos, response);
+		messagingTemplate.convertAndSend("/topic/tb-longitudinal-report", "end");
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating TB Longitudinal report");
+	}
+
 	@GetMapping("/tb-report")
 	public void getTBReport(
 			HttpServletResponse response,
