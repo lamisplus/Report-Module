@@ -104,16 +104,15 @@ public class RADETReportQueries {
             "AND he.facility_id = ?1\n" +
             "),\n" +
             "sample_collection_date AS (\n" +
-            "  SELECT CAST(sample.date_sample_collected AS DATE ) as dateOfViralLoadSampleCollection, patient_uuid as person_uuid120  FROM (\n" +
-            "SELECT lt.viral_load_indication, sm.facility_id,sm.date_sample_collected, sm.patient_uuid, sm.archived, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_sample_collected DESC) as rnkk\n" +
+            "  SELECT sample.date_sample_collected as dateOfViralLoadSampleCollection, patient_uuid as person_uuid120  FROM (\n" +
+            "SELECT lt.viral_load_indication, sm.facility_id,CAST(sm.date_sample_collected AS DATE), sm.patient_uuid, sm.archived, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_sample_collected DESC) as rnkk\n" +
             "FROM public.laboratory_sample  sm\n" +
             "  INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
             "WHERE lt.lab_test_id=16 AND sm.archived = 0 \n" +
             "AND  lt.viral_load_indication !=719\n" +
-            "AND date_sample_collected IS NOT null\n" +
-            "AND date_sample_collected <= ?3\n" +
+            "AND sm.date_sample_collected IS NOT null\n" +
             " )as sample\n" +
-            "  WHERE sample.rnkk = 1 \n" +
+            "WHERE sample.rnkk = 1 AND sample.date_sample_collected <= ?3 \n" +
             "AND (sample.archived is null OR sample.archived = 0) \n" +
             "AND sample.facility_id = ?1 ), \n" +
             "tbstatus as ( \n" +
@@ -266,10 +265,9 @@ public class RADETReportQueries {
             "  WHERE lt.lab_test_id = 16\n" +
             "AND  lt.viral_load_indication !=719\n" +
             "AND sm. date_result_reported IS NOT NULL\n" +
-            "AND sm.date_result_reported <= ?3\n" +
             "AND sm.result_reported is NOT NULL\n" +
             ")as vl_result\n" +
-            "WHERE vl_result.rank2 = 1\n" +
+            "WHERE vl_result.rank2 = 1 AND vl_result.dateOfCurrentViralLoad <= ?3\n" +
             "AND (vl_result.vlArchived = 0 OR vl_result.vlArchived is null)\n" +
             "AND  vl_result.vlFacility = ?1\n" +
             "), \n" +
@@ -452,8 +450,8 @@ public class RADETReportQueries {
             "  and hes.eac_session_date between ?2 and ?3 \n" +
             "  and hes.status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC')) as les where row = 1), \n" +
             "eac_count as (SELECT person_uuid, no_eac_session FROM (\n" +
-            "SELECT person_uuid, visit_id,  no_eac_session, eac_session_date, ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY eac_session_date DESC ) AS rnkk FROM (\n" +
-            "SELECT person_uuid, visit_id, eac_session_date,COUNT(visit_id) OVER (PARTITION BY visit_id) AS no_eac_session\n" +
+            "SELECT person_uuid, eac_id,  no_eac_session, eac_session_date, ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY eac_session_date DESC ) AS rnkk FROM (\n" +
+            "SELECT person_uuid, visit_id, eac_id, eac_session_date,COUNT(eac_id) OVER (PARTITION BY eac_id) AS no_eac_session\n" +
             "FROM hiv_eac_session WHERE archived = 0 AND eac_session_date between ?2 and ?3 AND status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC') order by eac_session_date DESC) subQ \n" +
             ") countEac WHERE rnkk = 1 ), \n" +
             "extended_eac as (\n" +
@@ -666,9 +664,9 @@ public class RADETReportQueries {
             " WHEN( stat.status_date > pharmacy.maxdate AND (stat.hiv_status ILIKE '%stop%' OR stat.hiv_status ILIKE '%out%' OR stat.hiv_status ILIKE '%Invalid %' )\n" +
             ") THEN stat.status_date ELSE pharmacy.visit_date END) AS status_date, stat.cause_of_death, stat.va_cause_of_death\n" +
             "  FROM\n" +
-            " (SELECT (CASE WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?5 THEN 'IIT' ELSE 'Active' END ) status,\n" +
+            " (SELECT (CASE WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' <= ?5 THEN 'IIT' ELSE 'Active' END ) status,\n" +
             "  (CASE\n" +
-            "WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?5  THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
+            "WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' <= ?5  THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
             "ELSE hp.visit_date\n" +
             "END\n" +
             " ) AS visit_date,\n" +
@@ -725,12 +723,12 @@ public class RADETReportQueries {
             "stat.cause_of_death, stat.va_cause_of_death\n" +
             "  FROM\n" +
             " (SELECT (CASE\n" +
-            "WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' < ?4 THEN 'IIT'\n" +
+            "WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' <= ?4 THEN 'IIT'\n" +
             "ELSE 'Active'\n" +
             "END\n" +
             " ) status,\n" +
             "  (CASE\n" +
-            "WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' <  ?4 THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
+            "WHEN hp.visit_date + hp.refill_period + INTERVAL '29 day' <=  ?4 THEN hp.visit_date + hp.refill_period + INTERVAL '29 day'\n" +
             "ELSE hp.visit_date\n" +
             "END\n" +
             " ) AS visit_date,\n" +
@@ -747,7 +745,7 @@ public class RADETReportQueries {
             "INNER JOIN public.hiv_regimen_type rt on rt.id = r.regimen_type_id \n" +
             "WHERE r.regimen_type_id in (1,2,3,4,14, 16) \n" +
             "AND hap.archived = 0  \n" +
-            "AND hap.visit_date < ?4\n" +
+            "AND hap.visit_date <= ?4\n" +
             " ) MAX ON MAX.MAXDATE = hp.visit_date AND MAX.person_uuid = hp.person_uuid \n" +
             " AND MAX.rnkkk3 = 1\n" +
             "WHERE\n" +
