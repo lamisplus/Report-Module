@@ -26,7 +26,7 @@ public class TBReportQuery {
             "AND h.facility_id = ?1 \n" +
             "AND hac.is_commencement = TRUE \n" +
             "AND hac.visit_date >= ?2 \n" +
-            "AND hac.visit_date < ?3 \n" +
+            "AND hac.visit_date <= ?3 \n" +
             "), \n" +
             "tb_status as (WITH cs AS (\n" +
             "  WITH \n" +
@@ -298,7 +298,7 @@ public class TBReportQuery {
             "   INNER JOIN  laboratory_labtest llt on llt.id = lt.lab_test_id\n" +
             "WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73)\n" +
             "  AND sm.archived = 0 AND date_sample_collected IS NOT null \n" +
-            "  AND sm.date_sample_collected <= NOW()\n" +
+            "  AND sm.date_sample_collected <= ?3\n" +
             "  AND sm.facility_id = ?1\n" +
             "  )as sample\n" +
             "WHERE sample.rnkk = 1\n" +
