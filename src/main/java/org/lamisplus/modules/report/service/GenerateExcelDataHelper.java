@@ -112,6 +112,77 @@ public class GenerateExcelDataHelper {
 		return result;
 	}
 
+
+	public static List<Map<Integer, Object>> fillTBLongitudinalReportDataMapper(@NonNull List<TbLongitudinalProjection> tbReportProjections) {
+		List<Map<Integer, Object>> result = new ArrayList<>();
+		for (TbLongitudinalProjection tbReportProjection : tbReportProjections) {
+			if (tbReportProjection != null) {
+				Map<Integer, Object> map = new HashMap<>();
+				int index = 0;
+
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getState())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getLga())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getFacilityName())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getPersonUuid())));
+
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getHospitalNumber())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getUniqueId())));
+
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getGender())));
+				map.put(index++, tbReportProjection.getDateOfBirth());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getAge())));
+
+				map.put(index++, tbReportProjection.getDateStarted());
+
+				// Date of last visit
+				map.put(index++, tbReportProjection.getDateOfObservation());
+
+
+				map.put(index++, tbReportProjection.getDateOfObservation());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbScreeningType())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbStatus())));
+				map.put(index++, tbReportProjection.getCadScore());
+
+				map.put(index++, tbReportProjection.getDateofDiagnosticTestSampleCollected());
+				map.put(index++, tbReportProjection.getDateSpecimenSent());
+				map.put(index++, tbReportProjection.getSpecimenType());
+
+				map.put(index++, (tbReportProjection.getDateofTbDiagnosticResultReceived() != null) ? "Yes" : "No");
+
+				map.put(index++, tbReportProjection.getDateDiagnosticEvaluation());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticTestType())));
+				map.put(index++, tbReportProjection.getDateofTbDiagnosticResultReceived());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbDiagnosticResult())));
+				map.put(index++, tbReportProjection.getDateTbScoreCad());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getResultTbScoreCad())));
+
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getClinicallyEvaulated())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getDateOfChestXrayResultTestDone())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getDateOfChestXrayResultTestDone())));
+
+
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbType())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentStartDate())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTreatmentOutcome())));
+				map.put(index++, tbReportProjection.getTbCompletionDate());
+
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getEligibleForTPT())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getContractionForTpt())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getContractionOptions())));
+
+				map.put(index++, tbReportProjection.getDateOfIptStart());
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getRegimenName())));
+				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getIptCompletionStatus())));
+				map.put(index++, tbReportProjection.getIptCompletionDate());
+				map.put(index, tbReportProjection.getWeightAt());
+
+				result.add(map);
+			}
+		}
+		Log.info(RESULT_OUTPUT + result.size());
+		return result;
+	}
+
 	public static List<Map<Integer, Object>> fillTBReportDataMapper(@NonNull List<TBReportProjection> tbReportProjections) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		for (TBReportProjection tbReportProjection : tbReportProjections) {
