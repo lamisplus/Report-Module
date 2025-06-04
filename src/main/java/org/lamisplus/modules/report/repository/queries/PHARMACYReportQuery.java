@@ -3,8 +3,7 @@ package org.lamisplus.modules.report.repository.queries;
 public class PHARMACYReportQuery {
 
 
-    public static final String PHARMACY_REPORT_QUERY = "SELECT DISTINCT ON (p.uuid, result.next_appointment)\n" +
-            "result.id,\n" +
+    public static final String PHARMACY_REPORT_QUERY = "SELECT result.id,\n" +
             "result.facility_id AS facilityId,\n" +
             "oi.code AS datimId,\n" +
             "org.name AS facilityName,\n" +
