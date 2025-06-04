@@ -23,7 +23,7 @@ public interface PatientLineDto {
 	
 	Integer getAge();
 	
-	String getGender();
+	String getSex();
 	
 	String getStatus();
 	

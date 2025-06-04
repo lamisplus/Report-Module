@@ -59,7 +59,7 @@ public  interface HtsReportDto {
       String getHtsLatitude();
       String getHtsLongitude();
       String getNumberOfCondomsGiven();
-      String getNumberOfLubricantsGiven();
+      //String getNumberOfLubricantsGiven();
        LocalDate getViralLoadReceivedResultDate();
        String getSource();
        String getPatientUuid();

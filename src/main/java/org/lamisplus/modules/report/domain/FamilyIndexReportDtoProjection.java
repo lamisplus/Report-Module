@@ -24,7 +24,7 @@ public interface FamilyIndexReportDtoProjection {
 
     String getEntryPoint();
     Integer getElicitedAge();
-    String getElicitedClientName();
+    //String getElicitedClientName();
     String getElicitedClientSex();
     String getElicitedClientAddress();
     String getElicitedClientPhoneNumber();
@@ -38,4 +38,6 @@ public interface FamilyIndexReportDtoProjection {
     String getElicitedClientUniqueId();
     String getDateEnrolledInOvc();
     String getOvcId();
+    String getNoOfAttempts();
+    String getContactId();
 }

@@ -13,7 +13,7 @@ public class NCDReportQuery {
                 "                                    p.surname, " +
                 "                                    p.other_name, " +
                 "                                    p.date_of_birth AS dateOfBirth, " +
-                "                                    EXTRACT(YEAR FROM  AGE(?3, date_of_birth)) AS age, " +
+                "                                    EXTRACT(YEAR FROM  AGE(NOW(), date_of_birth)) AS age, " +
                 "                                    INITCAP(p.sex) AS Sex, " +
                 "                                    p.marital_status ->> 'display' as maritalStatus, " +
                 "                                    p.education ->> 'display' as education, " +
