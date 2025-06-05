@@ -46,8 +46,8 @@ public class HTSReportQuery {
             "WHEN hc.prep_accepted IS true THEN 'Yes' ELSE 'No' END) AS prepAccepted,  \n" +
             "(CASE WHEN hc.previously_tested IS true THEN 'Yes' ELSE 'No' END) AS previouslyTested,   \n" +
             "tg.display AS targetGroup,  \n" +
-            "rf.display AS referredFrom,  \n" +
-            "(select display from base_application_codeset where code = hrs.testing_setting) AS testingSetting,  \n" +
+            "(CASE WHEN rf.display IN ('FP') THEN NULL ELSE rf.display END) AS referredFrom,  \n" +
+            "(CASE WHEN hrs.testing_setting IN ('FP') THEN NULL ELSE (select display from base_application_codeset where code = hrs.testing_setting) END) AS testingSetting,  \n" +
             "tc.display AS counselingType,  \n" +
             "(CASE \n" +
             "WHEN INITCAP(pp.sex) = 'Male' THEN NULL\n" +

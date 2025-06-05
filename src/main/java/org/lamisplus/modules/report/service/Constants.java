@@ -23,7 +23,7 @@ public class Constants {
 	public static final String HTS_SHEET = "hts";
 	public static final String PMTCT_HTS_SHEET = "pmtct-hts";
 
-	public static final String FAMILY_INDEX_SHEET = "family_index";
+	public static final String FAMILY_INDEX_SHEET = "hts_index";
 
 	public static final String REPORT_GENERATION_PROGRESS_TOPIC = "/topic/report-generation-progress";
 
@@ -45,7 +45,7 @@ public class Constants {
 			"Unique ID",
 			"Date Of Birth (yyyy-mm-dd)",
 			"Age",
-			"Gender",
+			"Sex",
 			"Marital Status",
 			"Education",
 			"Occupation",
@@ -143,11 +143,14 @@ public class Constants {
 					"ART Enrollment Setting",
 					"Date of TB Screening (yyyy-mm-dd)",
 					"TB Screening Type",
+					"CAD Score",
 					"TB status",
 					"Date of TB Sample Collection (yyyy-mm-dd)",
 					"TB Diagnostic Test Type",
 					"Date of TB Diagnostic Result Received (yyyy-mm-dd)",
 					"TB Diagnostic Result",
+					"Date of Additional TB Diagnosis Result using XRAY (for client with negative lab results with CAD score of 40 & above)",
+					"Additional TB Diagnosis Result using XRAY (for client with negative lab results with CAD score of 40 & above)",
 					"Date of Start of TB Treatment (yyyy-mm-dd)",
 					"TB Type (new, relapsed etc)",
 					"Date of Completion of TB Treatment (yyyy-mm-dd)",
@@ -182,12 +185,12 @@ public class Constants {
 					"Date Biometrics Recapture (yyyy-mm-dd)",
 					"Number of Fingers Recaptured",
 					"Case Manager"
+//					"File version"
 
 			);
 
 
 	public static final String PHARMACY_SHEET = "pharmacy-report";
-	public static final String BIOMETRIC_SHEET_SHEET = "biometric-report";
 	public static final String LAB_SHEET_NAME = "laboratory-report";
 	public static final List<String> PHARMACY_HEADER =
 			Arrays.asList(
@@ -204,25 +207,7 @@ public class Constants {
 					"Next Appointment (yyyy-mm-dd)",
 					"DSD Model"
 			);
-	public static final List<String> BIOMETRIC_HEADER =
-			Arrays.asList(
-					"S/No.",
-					"State",
-					"Facility Name",
-					"DATIM Id",
-					"Hospital Number",
-					"Name",
-					"Date of Birth",
-					"Age",
-					"Sex",
-					"Address",
-					"Phone Number",
-					"Enrollment Date (yyyy-mm-dd)",
-					"Number of Fingers Captured",
-					"Fingers Valid",
-					"Biometric Status"
-			);
-	
+
 	public static final List<String> LAB_HEADER =
 			Arrays.asList(
 					"S/No",
@@ -249,7 +234,6 @@ public class Constants {
 					"Surname",
 					"Other Names",
 					"Sex",
-					"Target Group",
 					"Age",
 					"Date Of Birth (yyyy-mm-dd)",
 					"Phone Number",
@@ -264,6 +248,7 @@ public class Constants {
 					"Entry Point",
 					"Index Client",
 					"Previously Tested",
+					"Target Group",
 					"Referred From",
 					"Testing Setting",
 					"Modality",
@@ -299,7 +284,6 @@ public class Constants {
 					"Prep Offered",
 					"Prep Accepted",
 					"Number of condoms given",
-					"Number of lubricant given",
 					"Ml Score",
 					"Ml Status",
 					"HTS Latitude",
@@ -377,6 +361,7 @@ public class Constants {
 					"Date of TB Screening",
 					"TB Screening Type",
 					"TB Status",
+					"CAD Score",
 					"Date of TB Sample Collection (yyyy-mm-dd)",
 					"Date of Specimen sent",
 					"Type of specimen",
@@ -385,6 +370,8 @@ public class Constants {
 					"TB Diagnostic Test Type",
 					"Date Result Received",
 					"TB Diagnostic Result",
+					"Date of Additional TB Diagnosis Result using XRAY (for client with negative lab results with CAD score of 40 & above)",
+					"Additional TB Diagnosis Result using XRAY (for client with negative lab results with CAD score of 40 & above)",
 					"Clinically Evaluated",
 					"Date of Clinical Evaluation",
 					"Clinical evaluation result",
@@ -413,7 +400,6 @@ public class Constants {
 					"Hospital Number",
 					"Unique Id",
 					"Sex",
-					"Target group",
 					"Date Birth (yyyy-mm-dd)",
 					"ART Start Date (yyyy-mm-dd)",
 					"Regimen at ART Start",
@@ -513,7 +499,7 @@ public class Constants {
 			"Date offered index testing",
 			"Accepted Index Testing",
 			"Date of Elicitation",
-			"Index contact's name",
+			"Index Contact ID",
 			"Index Contact's Age",
 			"Index Contact's Sex",
 			"Index Contact's Phone number",
@@ -523,6 +509,7 @@ public class Constants {
 			"History of IPV?",
 			"Mode of Notification",
 			"Counseling, Referral and Support services",
+			"Attempts",
 			"HIV Test Status",
 			"HIV Test Result",
 			"Date of HTS (dd-mm-yyyy)",
@@ -538,9 +525,7 @@ public class Constants {
 			"LGA",
 			"Facility",
 			"Patient ID",
-			"ANC Number",
 			"Mother's Hospital Num",
-			"Mother's Date  of Birth",
 			"Age",
 			"Marital Status",
 			"ANC Setting",
@@ -556,16 +541,12 @@ public class Constants {
 			"Hepatitis B Test Result",
 			"Date Tested for Hepatitis C",
 			"Hepatitis C Test Result",
-			"Date tested for Syphillis",
 			"Syphillis Test Result",
 			"If Recency Testing Opt In",
-			"Recency ID",
 			"Recency Test Type",
-			"Recency Test Date (yyyy_mm_dd)",
 			"Recency Interpretation",
 			"Viral Load Sample Collection Date",
 			"Viral Load Confirmation Result",
-			"Viral Load Confirmation Date (yyyyy-mm-dd)",
 			"Final Recency Result",
 			"Date Of Maternal Retesting",
 			"Maternal Retesting Result",

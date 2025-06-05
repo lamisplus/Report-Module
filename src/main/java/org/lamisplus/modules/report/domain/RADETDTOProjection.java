@@ -93,12 +93,19 @@ public interface RADETDTOProjection {
 	LocalDate getDateOfRepeatViralLoadResult();
 	LocalDate getDateOfRepeatViralLoadEACSampleCollection();
 	String getRepeatViralLoadResult();
+	//tb screening
+	Integer getCadScore();
 	String getTbStatus();
 	LocalDate getDateOfTbScreened();
 	LocalDate getDateOfCurrentRegimen();
 	LocalDate getDateOfIptStart();
 	LocalDate getIptCompletionDate();
 	String getIptType();
+	String getResultTbScoreCad();
+	LocalDate getDateTbScoreCad();
+	String getSymptomScreen();
+	String getWithCADScreen();
+
 	String getResultOfCervicalCancerScreening();
 	String getCervicalCancerScreeningType();
 
@@ -119,16 +126,18 @@ public interface RADETDTOProjection {
 
 	String  getTbDiagnosticTestType();
 	LocalDate getDateOfTbSampleCollection();
-
+	LocalDate getDateOfTbSampleCollected();
 	String  getTbDiagnosticResult();
 
 	String getModelDevolvedTo();
 	LocalDate getDateOfDevolvement();
 	String getCurrentDSDModel();
 	LocalDate getDateOfCurrentDSD();
-	String getCurrentDsdOutlet();
+//	String getCurrentDsdOutlet();
+	String getDsdOutlet();
 
 	LocalDate getDateReturnToSite();
+	LocalDate getDateTbSampleCollected();
 	LocalDate getDateofTbDiagnosticResultReceived();
 
 	String  getTbTreatementType();

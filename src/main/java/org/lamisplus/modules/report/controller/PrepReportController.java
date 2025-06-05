@@ -29,7 +29,7 @@ public class PrepReportController {
 	public void prepLineList(HttpServletResponse response, @RequestParam("facilityId") Long facility,
 							@RequestParam("startDate") LocalDate start,
 							@RequestParam("endDate") LocalDate end) throws IOException {
-		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting PrEP report");
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting PrEP-PBFW Report");
 
 		messagingTemplate.convertAndSend("/topic/prep", "start");
 
@@ -39,7 +39,7 @@ public class PrepReportController {
 
 		messagingTemplate.convertAndSend("/topic/prep", "end");
 
-		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done Generating PrEP report");
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done Generating PrEP-PBFW Report");
 
 	}
 

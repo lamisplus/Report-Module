@@ -111,7 +111,7 @@ const HTSIndexReport = (props) => {
         )
           .then(response => {
             setLoading(false)
-            const fileName =`${objValues.organisationUnitName} HTS FAMILY Index Report ${currentDate}`
+            const fileName =`${objValues.organisationUnitName} HTS Index Report ${currentDate}`
             const responseData = response.data
             let blob = new Blob([responseData], {type: "application/octet-stream"});
 
