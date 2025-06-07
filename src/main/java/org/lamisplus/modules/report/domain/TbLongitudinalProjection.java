@@ -12,7 +12,7 @@ public interface TbLongitudinalProjection {
     String getUniqueId();
     String getGender();
     LocalDate getDateOfBirth();
-    int getAge();
+    Integer getAge();
     LocalDate getDateStarted();
     LocalDate getDateOfObservation();
     String getTbScreeningType();
