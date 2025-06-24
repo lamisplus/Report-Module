@@ -76,5 +76,7 @@ public  interface HtsReportDto {
        String getPepfarModalities();
        String getMlScore();
        String getMlStatus();
+       LocalDate getSyphilisTestDate();
+    
 
 }

@@ -25,7 +25,9 @@ public class PMTCTReportQuery {
             "SELECT hc.person_uuid as person_uuid_hts_client,\n" +
             "(CASE WHEN (hiv_test_result2 IS NULL OR hiv_test_result2 = '') THEN hiv_test_result ELSE hiv_test_result2 END) as hivTestResult,\n" +
             "hc.risk_stratification_code as risk_stratification_code_hts_client,\n" +
+            "CASE WHEN hc.hepatitis_testing->>'hepatitisBTestResult' ILIKE 'Yes' THE hc.date_visit ELSE NULL END AS hepatitisBTestDate \n"
             "(CASE WHEN hepatitis_testing->>'hepatitisBTestResult' = 'Yes' THEN 'Positive' WHEN hepatitis_testing->>'hepatitisBTestResult' = 'No' THEN 'Negative' ELSE hepatitis_testing->>'hepatitisBTestResult' END) AS hepatitisBTestResult,\n" +
+            "CASE WHEN hc.hepatitis_testing->>'hepatitisCTestResult' ILIKE 'Yes' THE hc.date_visit ELSE NULL END AS hepatitisCTestDate \n" +
             "(CASE WHEN hepatitis_testing->>'hepatitisCTestResult' = 'Yes' THEN 'Positive' WHEN hepatitis_testing->>'hepatitisCTestResult' = 'No' THEN 'Negative' ELSE hepatitis_testing->>'hepatitisCTestResult' END) AS hepatitisCTestResult,\n" +
             "recency->>'optOutRTRI' AS optOutRTRI,\n" +
             "CASE\n" +

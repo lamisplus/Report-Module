@@ -706,9 +706,9 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getParityAnc())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getDateOfVisit())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getHivTestResult())));
-					map.put(index++, getStringValue(String.valueOf(pmtctDto.getDateOfVisit())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getHepatitisBTestDate())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getHepatitisBTestResult())));
-					map.put(index++, getStringValue(String.valueOf(pmtctDto.getDateOfVisit())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getHepatitisCTestDate())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getHepatitisCTestResult())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getTestResultSyphilisAnc())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getOptOutRTRIStatus())));
