@@ -90,12 +90,13 @@ public class HTSReportQuery {
             "modality_code.display AS modality,  \n" +
             "(CASE WHEN hc.syphilis_testing->>'syphilisTestResult' ILIKE 'Yes'   \n" +
             "THEN 'Reactive' WHEN hc.syphilis_testing->>'syphilisTestResult' ILIKE 'No' THEN 'Non-Reactive' ELSE '' END) As syphilisTestResult,  \n" +
-            "CASE WHEN hc.syphilis_testing->>'syphilisTestResult' ILIKE 'Yes' THE hc.date_visit ELSE NULL END AS syphilisTestDate, \n" +
+            "CASE WHEN hc.syphilis_testing->>'syphilisTestResult' IN ('Yes', 'No') THEN hc.date_visit ELSE NULL END AS syphilisTestDate, \n" +
             "(CASE WHEN hc.hepatitis_testing->>'hepatitisBTestResult' ILIKE 'Yes'   \n" +
             " THEN 'Positive' WHEN hc.hepatitis_testing->>'hepatitisBTestResult' ILIKE 'No' THEN 'Negative' ELSE '' END) AS hepatitisBTestResult,  \n" +
-             "(CASE WHEN hc.hepatitis_testing->>'hepatitisCTestResult' ILIKE 'Yes'   \n" +
+            "CASE WHEN hc.hepatitis_testing->>'hepatitisBTestResult' IN ('Yes', 'No') THEN hc.date_visit ELSE NULL END AS hepatitisBTestDate, \n" +
+            "(CASE WHEN hc.hepatitis_testing->>'hepatitisCTestResult' ILIKE 'Yes'   \n" +
             " THEN 'Positive' WHEN hc.hepatitis_testing->>'hepatitisCTestResult' ILIKE 'No' THEN 'Negative' ELSE '' END) AS hepatitisCTestResult,  \n" +
-            "CASE WHEN hc.hepatitis_testing->>'hepatitisCTestResult' ILIKE 'Yes' THE hc.date_visit ELSE NULL END AS hepatitisCTestDate, \n" +
+            "CASE WHEN hc.hepatitis_testing->>'hepatitisCTestResult' IN ('Yes', 'No') THEN hc.date_visit ELSE NULL END AS hepatitisCTestDate, \n" +
             "hc.cd4->>'cd4Count' AS CD4Type,  \n" +
             "hc.cd4->>'cd4SemiQuantitative' AS CD4TestResult,  \n" +
             "(CASE WHEN hc.hiv_test_result2 = 'Positive' THEN 'Positive'\n" +
