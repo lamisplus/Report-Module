@@ -316,7 +316,11 @@ public class EACReportQuery {
             "        ROW_NUMBER() OVER (PARTITION BY vl.patient_uuid ORDER BY vl.date_result_reported DESC) AS row1 " +
             "    from date_first_eac dfe " +
             "    join vl on vl.patient_uuid = dfe.person_uuid and vl.date_result_reported <= dfe.dateOfCommencementOfFirstEAC) fuvl where row1 = 1 " +
-            ") " +
+            "), " +
+            "case_manager AS (SELECT DISTINCT ON (cmp.person_uuid)person_uuid AS caseperson, cmp.case_manager_id, CONCAT(cm.first_name, ' ', cm.last_name) AS caseManager FROM (SELECT person_uuid, case_manager_id, " +
+            "ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY id DESC) " +
+            "FROM case_manager_patients) cmp  INNER JOIN case_manager cm ON cm.id=cmp.case_manager_id " + 
+            "WHERE cmp.row_number=1 AND cm.facility_id=?1) " +
             "SELECT DISTINCT * " +
             "FROM eac_clients " +
             "LEFT JOIN first_eac ON eac_clients.patientId = first_eac.person_uuid1 " +
@@ -333,5 +337,6 @@ public class EACReportQuery {
             "LEFT JOIN post_eac_vl2 ON eac_clients.patientId = post_eac_vl2.person_uuid12 " +
             "LEFT JOIN regimen_at_start ON eac_clients.patientId = regimen_at_start.person_uuid13 " +
             "LEFT JOIN last_pick ON eac_clients.patientId = last_pick.person_uuid14 " +
+            "LEFT JOIN case_manager cm ON cm.caseperson = eac_clients.patientId " +
             "LEFT JOIN vl_unsuppressed ON eac_clients.patientId = vl_unsuppressed.person_uuid15";
 }
