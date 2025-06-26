@@ -145,7 +145,7 @@ public class HTSReportQuery {
             "WHEN hrs.entry_point = 'HTS_ENTRY_POINT_COMMUNITY' AND hrs.testing_setting = 'COMMUNITY_HTS_TEST_SETTING_CT' THEN 'VCT'\n" +
             "WHEN hrs.entry_point = 'HTS_ENTRY_POINT_COMMUNITY' AND hrs.testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OUTREACH' THEN 'Mobile'\n" +
             "END)AS pepfarModalities, hc.risk_assessment->>'mlScore' AS mlScore, hc.risk_assessment->>'mlStatus' AS mlStatus,\n" +
-            "ROW_NUMBER() OVER ( PARTITION BY hc.person_uuid ORDER BY hc.date_visit DESC) AS rnkk\n" +
+            "ROW_NUMBER() OVER ( PARTITION BY hc.person_uuid ORDER BY hc.date_visit DESC, hc.date_created DESC) AS rnkk\n" +
             "FROM hts_client hc  \n" +
             "LEFT JOIN base_application_codeset tg ON tg.code = hc.target_group  \n" +
             "LEFT JOIN base_application_codeset it ON it.id = hc.relation_with_index_client\n" +
@@ -247,5 +247,5 @@ public class HTSReportQuery {
             "hc.recency, hc.risk_stratification_code, modality_code.display, hc.syphilis_testing,hc.hepatitis_testing, hc.cd4, hc.hiv_test_result2,\n" +
             "hc.test1, hc.post_test_counseling, riskscore.totalriskscore, htscounts.numberofcounts)\n" +
             "SELECT * FROM htsReport\n" +
-            "WHERE rnkk = 1";
+            "WHERE rnkk = 1 AND finalHIVTestResult IS NOT NULL AND finalHIVTestResult !=''";
 }
