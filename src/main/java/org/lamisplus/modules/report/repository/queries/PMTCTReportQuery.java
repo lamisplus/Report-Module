@@ -85,7 +85,7 @@ public class PMTCTReportQuery {
             "END) AS maternalRetestingDate,\n" +
             "(CASE WHEN AGE(hts_retest.visitDateIntial, retestingOpt.reVisitDate) <= INTERVAL '2 years' THEN retestingOpt.reHivResult ELSE NULL \n" +
             "END) AS maternalRetestingResult,\n" +
-            "ROW_NUMBER() OVER ( PARTITION BY hc.person_uuid ORDER BY date_visit DESC) AS rnk,\n" +
+            "ROW_NUMBER() OVER ( PARTITION BY hc.person_uuid ORDER BY date_visit DESC, hc.date_created DESC) AS rnk,\n" +
             "date_visit, hc.facility_id\n" +
             "FROM hts_client hc\n" +
             "LEFT JOIN hts_risk_stratification hts_risk ON hc.risk_stratification_code = hts_risk.code AND hts_risk.archived = 0\n" +
@@ -96,7 +96,7 @@ public class PMTCTReportQuery {
             "LEFT JOIN laboratory_test labTest ON labOrder.id = labTest.lab_order_id AND labTest.lab_test_id = 16\n" +
             "LEFT JOIN laboratory_result labResult ON labResult.test_id = labTest.id AND labResult.archived = 0 \n" +
             "LEFT JOIN (\n" +
-            "SELECT hct.person_uuid, hct.date_visit AS visitDateIntial, (CASE WHEN (hct.hiv_test_result2 IS NULL OR hct.hiv_test_result2 = '') THEN hct.hiv_test_result ELSE hct.hiv_test_result2 END) AS hivResultInital,risk.testing_setting, hct.risk_stratification_code, \n" +
+            "SELECT hct.person_uuid, hct.date_visit AS visitDateIntial, (CASE WHEN (hct.hiv_test_result2 IS NULL OR hct.hiv_test_result2 = '') THEN hct.hiv_test_result ELSE hct.hiv_test_result2 END) AS hivResultInital, risk.testing_setting, hct.risk_stratification_code, \n" +
             "ROW_NUMBER() OVER (PARTITION BY hct.person_uuid ORDER BY date_visit DESC) AS rowNums\n" +
             "FROM hts_client hct\n" +
             "LEFT JOIN hts_risk_stratification risk ON hct.risk_stratification_code = risk.code AND risk.archived = 0\n" +
@@ -158,7 +158,7 @@ public class PMTCTReportQuery {
             ") del where rnkk = 1 AND date_of_delivery BETWEEN ?2 AND ?3\n" +
             ")\n" +
             "select * from pmtctHts\n" +
-            "INNER JOIN hts_client hts ON hts.person_uuid_hts_client = pmtctHts.PersonUuid\n" +
+            "INNER JOIN hts_client hts ON hts.person_uuid_hts_client = pmtctHts.PersonUuid AND hc.hiv_test_result IS NOT NULL AND hc.hiv_test_result !='' \n" +
             "LEFT JOIN ancClient anc ON hts.person_uuid_hts_client = anc.person_uuid_anc\n" +
             "LEFT JOIN delivery del ON hts.person_uuid_hts_client = del.personUuidDelivery\n";
 }
