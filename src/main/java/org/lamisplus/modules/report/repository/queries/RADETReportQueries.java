@@ -314,7 +314,7 @@ public class RADETReportQueries {
             "NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'dateSpecimenSent', '') AS DATE), NULL) AS specimenSentDate,\n" +
             "data->'tbIptScreening'->>'status' as screeningStatus,\n" +
             "data->'tbIptScreening'->>'dateOfDiagnosticTest' as dateOfDiagnosticTest, \n" +
-            "data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, CAST(NULLIF(data->'tptMonitoring'->>'cadScore', '') AS INTEGER) AS cadScore,\n" +
+            "data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, CAST(NULLIF(data->'tbIptScreening'->>'cadScore', '') AS INTEGER) AS cadScore,\n" +
             "data->'tptMonitoring'->>'clinicallyEvaulated' AS clinicallyEvaulated,\n" +
             "data->'tbIptScreening'->>'chestXrayDone' AS chestXrayDone,\n" +
             "data->'tbIptScreening'->>'chestXrayResultTest' AS chestXrayResultTest,\n" +
