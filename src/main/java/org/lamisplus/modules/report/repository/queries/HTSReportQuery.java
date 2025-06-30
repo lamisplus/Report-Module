@@ -216,7 +216,7 @@ public class HTSReportQuery {
             "        hc.person_uuid, htsPrevious.hiv_test_result, \n" +
             "        hc.extra, \n" +
             "        pp.first_name, \n" +
-            "pp.marital_status,\n" +
+            "        pp.marital_status,\n" +
             "        pp.surname, \n" +
             "        pp.other_name, \n" +
             "        pp.sex, \n" +
@@ -241,7 +241,7 @@ public class HTSReportQuery {
             "        hc.source, hc.risk_assessment,\n" +
             "        hc.referred_for_sti,\n" +
             "        hc.others->>'adhocCode', hc.testing_setting, hrs.testing_setting,\n" +
-            "lgaofresidence.lgaofresidence,\n" +
+            "lgaofresidence.lgaofresidence, hc.date_created,\n" +
             "res_state.name, pp.uuid, pp.education, pp.employment_status, boui.code, hc.others, r.address, hc.date_visit, hc.first_time_visit, hc.num_children,\n" +
             "hc.num_wives, hc.index_client,hc.hiv_test_result, hc.prep_offered, hc.prep_accepted, hc.previously_tested, hrs.entry_point,\n" +
             "hc.recency, hc.risk_stratification_code, modality_code.display, hc.syphilis_testing,hc.hepatitis_testing, hc.cd4, hc.hiv_test_result2,\n" +

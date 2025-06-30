@@ -158,7 +158,7 @@ public class PMTCTReportQuery {
             ") del where rnkk = 1 AND date_of_delivery BETWEEN ?2 AND ?3\n" +
             ")\n" +
             "select * from pmtctHts\n" +
-            "INNER JOIN hts_client hts ON hts.person_uuid_hts_client = pmtctHts.PersonUuid AND hc.hiv_test_result IS NOT NULL AND hc.hiv_test_result !='' \n" +
+            "INNER JOIN hts_client hts ON hts.person_uuid_hts_client = pmtctHts.PersonUuid AND hts.hivTestResult IS NOT NULL AND hts.hivTestResult != ''\n" +
             "LEFT JOIN ancClient anc ON hts.person_uuid_hts_client = anc.person_uuid_anc\n" +
             "LEFT JOIN delivery del ON hts.person_uuid_hts_client = del.personUuidDelivery\n";
 }
