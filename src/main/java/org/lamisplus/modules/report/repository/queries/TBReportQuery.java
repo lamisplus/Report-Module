@@ -317,8 +317,8 @@ public class TBReportQuery {
             "hiv_observation\n" +
             "WHERE\n" +
             "data->'tptMonitoring'->>'endedTpt' = 'Yes' AND \n" +
-            "data->'tbIptScreening'->>'outcome IS NOT NULL AND\n" +
-            "data->'tbIptScreening'->>'outcome != ''\n" +
+            "data->'tbIptScreening'->>'outcome' IS NOT NULL AND\n" +
+            "data->'tbIptScreening'->>'outcome' != ''\n" +
             "AND archived = 0\n" +
             ") subTc WHERE rowNum = 1\n" +
             "),\n" +
