@@ -247,7 +247,7 @@ public class RADETReportQueries {
             "AND sm. date_result_reported IS NOT NULL\n" +
             "AND sm.archived = 0\n" +
             "AND sm.facility_id = ?1\n" +
-            "AND sm.date_result_reported <= ?3\n" +
+            "AND CAST(sm.date_result_reported AS DATE) <= ?3\n" +
             " )as cd4_result\n" +
             "WHERE  cd4_result.rnk = 1\n" +
             "),\n" +
