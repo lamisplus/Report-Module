@@ -140,7 +140,7 @@ const Reports = props => {
       value: 'client-verification',
       text: 'CLIENT VERIFICATION',
     },
-    { key: 'tb-report', value: 'tb-report', text: 'TB REPORT' },
+    // { key: 'tb-report', value: 'tb-report', text: 'TB REPORT' },
     { key: 'tb-report-longitudinal', value: 'tb-report-longitudinal', text: 'TB LONGITUDINAL REPORT' },
     { key: 'ncd-report', value: 'ncd-report', text: 'NCD Report' },
     { key: 'eac-report', value: 'eac-report', text: 'EAC Report' },
