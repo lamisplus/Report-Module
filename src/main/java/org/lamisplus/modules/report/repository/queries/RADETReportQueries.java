@@ -66,13 +66,13 @@ public class RADETReportQueries {
             "ELSE NULL\n" +
             "END AS dateOfTbScreened1\n" +
             "  FROM\n" +
-            " triage_vital_sign tvs\n" +
+            " triage_vital_sign tvs WHERE tvs.capture_date BETWEEN ?2 AND ?3 AND tvs.archived = 0\n" +
             "INNER JOIN (\n" +
             "SELECT\n" +
             "  person_uuid,\n" +
             "  MAX(capture_date) AS MAXDATE\n" +
             "FROM\n" +
-            "  triage_vital_sign WHERE archived = 0 \n" +
+            "  triage_vital_sign WHERE archived = 0 AND capture_date BETWEEN ?2 AND ?3\n" +
             "GROUP BY\n" +
             "  person_uuid\n" +
             "ORDER BY\n" +
@@ -86,7 +86,7 @@ public class RADETReportQueries {
             "  person_uuid,\n" +
             "  MAX(hac.visit_date) AS MAXDATE\n" +
             "FROM\n" +
-            "  hiv_art_clinical hac WHERE hac.archived = 0 \n" +
+            "  hiv_art_clinical hac WHERE hac.archived = 0 AND hac.visit_date BETWEEN ?2 AND ?3 \n" +
             "GROUP BY\n" +
             "  person_uuid\n" +
             "ORDER BY\n" +
