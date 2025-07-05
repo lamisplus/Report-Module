@@ -52,56 +52,26 @@ public class RADETReportQueries {
             " select pp.uuid AS personUuid, facility_lga.parent_organisation_unit_id AS facilityLga, (jsonb_array_elements(pp.address->'address')->>'district') as addr from patient_person pp\n" +
             "LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = CAST (pp.organization->'id' AS INTEGER) \n" +
             ") dt),\n" +
-            "current_clinical AS (SELECT DISTINCT ON (tvs.person_uuid) tvs.person_uuid AS person_uuid10,\n" +
-            "body_weight AS currentWeight,\n" +
-            "tbs.display AS tbStatus1,\n" +
-            "bac.display AS currentClinicalStage,\n" +
+            "current_clinical AS (SELECT * FROM (\n" +
+            "SELECT tvs.person_uuid AS person_uuid10, hac.visit_date, CAST(tvs.capture_date AS DATE),\n" +
+            "CASE\n" +
+            "WHEN hac.tb_screen IS NOT NULL THEN hac.visit_date\n" +
+            "ELSE NULL\n" +
+            "END AS dateOfTbScreened1,\n" +
             "(CASE \n" +
             "WHEN INITCAP(pp.sex) = 'Male' THEN NULL\n" +
             "WHEN preg.display IS NOT NULL THEN preg.display\n" +
             "ELSE hac.pregnancy_status\n" +
-            "END ) AS pregnancyStatus, \n" +
-            "CASE\n" +
-            "WHEN hac.tb_screen IS NOT NULL THEN hac.visit_date\n" +
-            "ELSE NULL\n" +
-            "END AS dateOfTbScreened1\n" +
-            "  FROM\n" +
-            " triage_vital_sign tvs WHERE tvs.capture_date BETWEEN ?2 AND ?3 AND tvs.archived = 0\n" +
-            "INNER JOIN (\n" +
-            "SELECT\n" +
-            "  person_uuid,\n" +
-            "  MAX(capture_date) AS MAXDATE\n" +
-            "FROM\n" +
-            "  triage_vital_sign WHERE archived = 0 AND capture_date BETWEEN ?2 AND ?3\n" +
-            "GROUP BY\n" +
-            "  person_uuid\n" +
-            "ORDER BY\n" +
-            "  MAXDATE ASC\n" +
-            " ) AS current_triage ON current_triage.MAXDATE = tvs.capture_date\n" +
-            "AND current_triage.person_uuid = tvs.person_uuid\n" +
-            "INNER JOIN hiv_art_clinical hac ON tvs.uuid = hac.vital_sign_uuid\n" +
-            "LEFT JOIN patient_person pp ON tvs.person_uuid = pp.uuid\n" +
-            "INNER JOIN (\n" +
-            "SELECT\n" +
-            "  person_uuid,\n" +
-            "  MAX(hac.visit_date) AS MAXDATE\n" +
-            "FROM\n" +
-            "  hiv_art_clinical hac WHERE hac.archived = 0 AND hac.visit_date BETWEEN ?2 AND ?3 \n" +
-            "GROUP BY\n" +
-            "  person_uuid\n" +
-            "ORDER BY\n" +
-            "  MAXDATE ASC\n" +
-            " ) AS current_clinical_date ON current_clinical_date.MAXDATE = hac.visit_date\n" +
-            "AND current_clinical_date.person_uuid = hac.person_uuid\n" +
+            "END ) AS pregnancyStatus, bac.display AS currentClinicalStage, body_weight AS currentWeight, tbs.display AS tbStatus1,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY hac.person_uuid ORDER BY hac.visit_date DESC) AS rnkkkk\n" +
+            "FROM hiv_art_clinical hac\n" +
+            "INNER JOIN triage_vital_sign tvs ON tvs.uuid = hac.vital_sign_uuid\n" +
+            "LEFT JOIN patient_person pp ON hac.person_uuid = pp.uuid\n" +
             "INNER JOIN hiv_enrollment he ON he.person_uuid = hac.person_uuid\n" +
             "LEFT JOIN base_application_codeset bac ON bac.id = hac.clinical_stage_id\n" +
             "LEFT JOIN base_application_codeset preg ON preg.code = hac.pregnancy_status\n" +
             "LEFT JOIN base_application_codeset tbs ON tbs.id = CASE WHEN hac.tb_status ~ '^[0-9]+$' THEN CAST(hac.tb_status AS INTEGER) ELSE 0 END  \n" +
-            "  WHERE\n" +
-            "hac.archived = 0\n" +
-            "AND he.archived = 0\n" +
-            "AND hac.visit_date <= ?3 \n" +
-            "AND he.facility_id = ?1\n" +
+            "WHERE hac.is_commencement = false AND hac.archived = 0 AND he.archived = 0 AND tvs.archived = 0 AND he.facility_id = ?1  AND hac.visit_date BETWEEN ?2 AND ?3) subQ where rnkkkk = 1\n" +
             "),\n" +
             "sample_collection_date AS (\n" +
             "  SELECT sample.date_sample_collected as dateOfViralLoadSampleCollection, patient_uuid as person_uuid120  FROM (\n" +
