@@ -479,12 +479,12 @@ public class RADETReportQueries {
             " public.hiv_art_pharmacy_regimens AS hapr\n" +
             "INNER JOIN hiv_regimen AS hr ON hapr.regimens_id = hr.id\n" +
             "  WHERE\n" +
-            "hr.regimen_type_id IN (1,2,3,4,14, 16)\n" +
+            "hr.regimen_type_id IN (1,2,3,4,14, 16) AND hap.visit_date BETWEEN ?2 AND ?3 \n" +
             "  GROUP BY\n" +
             " art_pharmacy_id, regimens_id, hr.description ) AS hapr ON hap.id = hapr.art_pharmacy_id and hap.archived=0\n" +
             "  INNER JOIN hiv_regimen AS hivreg ON hapr.regimens_id = hivreg.id\n" +
             "  INNER JOIN hiv_regimen_type AS hivregtype ON hivreg.regimen_type_id = hivregtype.id\n" +
-            "  AND hivreg.regimen_type_id IN (1,2,3,4,14,16)\n" +
+            "  AND hivreg.regimen_type_id IN (1,2,3,4,14,16) AND hap.visit_date BETWEEN ?2 AND ?3 \n" +
             " ORDER BY person_uuid, visit_date) t\n" +
             "GROUP BY person_uuid, regimen, rn1 - rn2 ORDER BY\n" +
             "  MIN(visit_date)\n" +
@@ -493,8 +493,10 @@ public class RADETReportQueries {
             "SELECT\n" +
             "  DISTINCT MAX(visit_date) AS max_visit_date,\n" +
             " person_uuid\n" +
-            "FROM hiv_art_pharmacy\n" +
-            "WHERE archived=0\n" +
+            "FROM hiv_art_pharmacy hap\n" +
+            "INNER JOIN hiv_art_pharmacy_regimens hapr ON hapr.art_pharmacy_id = hap.id\n" +
+            "INNER JOIN hiv_regimen AS hr ON hapr.regimens_id = hr.id\n" +
+            "WHERE hr.regimen_type_id IN (1,2,3,4,14, 16) AND hap.archived = 0 AND hap.visit_date BETWEEN ?2 AND ?3 \n" +
             "GROUP BY\n" +
             "  person_uuid\n" +
             " ) AS hap ON regiment_table.person_uuid = hap.person_uuid\n" +
