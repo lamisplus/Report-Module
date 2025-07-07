@@ -479,7 +479,7 @@ public class RADETReportQueries {
             " public.hiv_art_pharmacy_regimens AS hapr\n" +
             "INNER JOIN hiv_regimen AS hr ON hapr.regimens_id = hr.id\n" +
             "  WHERE\n" +
-            "hr.regimen_type_id IN (1,2,3,4,14, 16) AND hap.visit_date BETWEEN ?2 AND ?3 \n" +
+            "hr.regimen_type_id IN (1,2,3,4,14, 16)\n" +
             "  GROUP BY\n" +
             " art_pharmacy_id, regimens_id, hr.description ) AS hapr ON hap.id = hapr.art_pharmacy_id and hap.archived=0\n" +
             "  INNER JOIN hiv_regimen AS hivreg ON hapr.regimens_id = hivreg.id\n" +
