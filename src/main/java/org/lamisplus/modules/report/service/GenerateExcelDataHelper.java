@@ -1031,8 +1031,8 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(null));
 					map.put(index++, getStringValue(familyIndex.getModeOfNotification()));
 					map.put(index++, getStringValue(null));
-					map.put(index++, getStringValue(familyIndex.getElicitedClientKnownPositive()));
 					map.put(index++, getStringValue(familyIndex.getNoOfAttempts()));
+					map.put(index++, getStringValue(familyIndex.getElicitedClientKnownPositive()));
 					map.put(index++, getStringValue(familyIndex.getElicitedClientHivResult()));
 					map.put(index++, getStringValue(String.valueOf(familyIndex.getElicitedClientTestedHiv())));
 					map.put(index++, getStringValue(String.valueOf(familyIndex.getElicitedClientDateEnrolled())));
