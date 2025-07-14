@@ -86,9 +86,9 @@ public class FamilyIndexReportQuery {
             "        CAST (pns.date_of_elicitation AS DATE) AS dateOfElicitation,\n" +
             "        '' AS elicitedClientUniqueId,\n" +
             "        CAST (null AS DATE) AS dateEnrolledInOvc, pns.partner_id AS contactId,\n" +
-            "        '' AS ovcId, '' AS noOfAttempts\n" +
+            "        '' AS ovcId, pns.contact_tracing->>'numberOfAttempt' AS noOfAttempts\n" +
             "    FROM hts_pns_index_client_partner pns\n" +
-            "    JOIN hts_family_index_testing fhts ON fhts.hts_client_uuid = pns.hts_client_uuid\n" +
+            "    LEFT JOIN hts_family_index_testing fhts ON fhts.hts_client_uuid = pns.hts_client_uuid\n" +
             "    JOIN hts_client hts ON hts.uuid = pns.hts_client_uuid\n" +
             "    JOIN patient_person p ON p.uuid = hts.person_uuid\n" +
             "    LEFT JOIN hts_risk_stratification hts_rst ON hts.risk_stratification_code = hts_rst.code\n" +
