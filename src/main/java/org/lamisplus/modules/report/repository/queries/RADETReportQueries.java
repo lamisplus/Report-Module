@@ -559,10 +559,10 @@ public class RADETReportQueries {
             "AND (data->'tptMonitoring'->>'date') != 'null' \n" +
             ") AS ipt_ccs \n" +
             "WHERE ipt_c_sc_rnk = 1) \n" +
-            "select ipt_c.person_uuid as personuuid80, CASE WHEN coalesce(ipt_c_cs.iptCompletionDSC, ipt_c.iptCompletionDate) > ?3 THEN NULL ELSE coalesce(ipt_c_cs.iptCompletionDSC, ipt_c.iptCompletionDate) END as iptCompletionDate, \n" +
+            "select ipt_s.person_uuid as personuuid80, CASE WHEN coalesce(ipt_c_cs.iptCompletionDSC, ipt_c.iptCompletionDate) > ?3 THEN NULL ELSE coalesce(ipt_c_cs.iptCompletionDSC, ipt_c.iptCompletionDate) END as iptCompletionDate, \n" +
             "coalesce(ipt_c_cs.iptCompletionSCS, ipt_c.iptCompletionStatus) as iptCompletionStatus, COALESCE(ipt_s.dateOfIptStart, ipt_c_cs.iptStartDate) AS dateOfIptStart, ipt_s.iptType \n" +
-            "from ipt_c \n" +
-            "left join ipt_s on ipt_s.person_uuid = ipt_c.person_uuid \n" +
+            "from ipt_s \n" +
+            "left join ipt_c on ipt_s.person_uuid = ipt_c.person_uuid \n" +
             "left join ipt_c_cs on ipt_s.person_uuid = ipt_c_cs.person_uuid ), \n" +
             "ipt_s as ( SELECT person_uuid, visit_date as dateOfIptStart, regimen_name as iptType \n" +
             "FROM ( SELECT h.person_uuid, h.visit_date, CAST(pharmacy_object ->> 'regimenName' AS VARCHAR) AS regimen_name, \n" +
