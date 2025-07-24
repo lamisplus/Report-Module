@@ -534,7 +534,7 @@ public class RADETReportQueries {
             "COALESCE(NULLIF(CAST(ipt->>'completionStatus' AS text), ''), '') AS iptCompletionStatus, \n" +
             "row_number () over (partition by person_uuid order by cast(ipt->>'dateCompleted' as date) desc) as rnk \n" +
             "from hiv_art_pharmacy where (ipt->>'dateCompleted' is not null and ipt->>'dateCompleted' != 'null' and ipt->>'dateCompleted' != '' AND TRIM(ipt->>'dateCompleted') <> '') \n" +
-            "and archived = 0) ic where ic.rnk = 1), \n" +
+            "and archived = 0 AND ipt->>'completionStatus' != '' AND ipt->>'completionStatus' != 'null' AND ipt->>'completionStatus' <> '') ic where ic.rnk = 1), \n" +
             "ipt_s as (SELECT person_uuid, visit_date as dateOfIptStart, regimen_name as iptType \n" +
             "FROM (SELECT h.person_uuid, h.visit_date, CAST(pharmacy_object ->> 'regimenName' AS VARCHAR) AS regimen_name, \n" +
             "ROW_NUMBER() OVER (PARTITION BY h.person_uuid ORDER BY h.visit_date ASC) AS rnk \n" +
