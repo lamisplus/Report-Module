@@ -60,8 +60,7 @@ public class RADETReportQueries {
             "END AS dateOfTbScreened1,\n" +
             "(CASE \n" +
             "WHEN INITCAP(pp.sex) = 'Male' THEN NULL\n" +
-            "WHEN preg.display IS NOT NULL THEN preg.display\n" +
-            "ELSE hac.pregnancy_status\n" +
+            "WHEN hac.pregnancy_status IS NOT NULL THEN preg.display\n" +
             "END ) AS pregnancyStatus, bac.display AS currentClinicalStage, body_weight AS currentWeight, tbs.display AS tbStatus1,\n" +
             "ROW_NUMBER() OVER (PARTITION BY hac.person_uuid ORDER BY hac.visit_date DESC) AS rnkkkk\n" +
             "FROM hiv_art_clinical hac\n" +
