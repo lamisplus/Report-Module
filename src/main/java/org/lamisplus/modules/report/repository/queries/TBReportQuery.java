@@ -26,7 +26,7 @@ public class TBReportQuery {
             "AND h.facility_id = ?1 \n" +
             "AND hac.is_commencement = TRUE \n" +
             "AND hac.visit_date >= ?2 \n" +
-            "AND hac.visit_date < ?3 \n" +
+            "AND hac.visit_date <= ?3 \n" +
             "), \n" +
             "tb_status as (WITH cs AS (\n" +
             "  WITH \n" +
@@ -236,7 +236,7 @@ public class TBReportQuery {
             "NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'dateSpecimenSent', '') AS DATE), NULL) AS specimenSentDate,\n" +
             "data->'tbIptScreening'->>'status' as screeningStatus,\n" +
             "data->'tbIptScreening'->>'dateOfDiagnosticTest' as dateOfDiagnosticTest, \n" +
-            "data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, CAST(data->'tptMonitoring'->>'cadScore' AS INTEGER) AS cadScore, \n" +
+            "data->'tbIptScreening'->>'tbScreeningType' AS tbScreeningType, CAST(NULLIF(data->'tbIptScreening'->>'cadScore', '') AS INTEGER) cadScore, \n" +
             "data->'tptMonitoring'->>'clinicallyEvaulated' AS clinicallyEvaulated,\n" +
             "data->'tbIptScreening'->>'chestXrayDone' AS chestXrayDone,\n" +
             "data->'tbIptScreening'->>'chestXrayResultTest' AS chestXrayResultTest,\n" +
@@ -298,7 +298,7 @@ public class TBReportQuery {
             "   INNER JOIN  laboratory_labtest llt on llt.id = lt.lab_test_id\n" +
             "WHERE lt.lab_test_id IN (65, 51, 64, 67, 72, 71, 86, 58, 73)\n" +
             "  AND sm.archived = 0 AND date_sample_collected IS NOT null \n" +
-            "  AND sm.date_sample_collected <= NOW()\n" +
+            "  AND sm.date_sample_collected <= ?3\n" +
             "  AND sm.facility_id = ?1\n" +
             "  )as sample\n" +
             "WHERE sample.rnkk = 1\n" +
@@ -317,8 +317,8 @@ public class TBReportQuery {
             "hiv_observation\n" +
             "WHERE\n" +
             "data->'tptMonitoring'->>'endedTpt' = 'Yes' AND \n" +
-            "data->'tptMonitoring'->>'dateTptEnded' IS NOT NULL AND\n" +
-            "data->'tptMonitoring'->>'dateTptEnded' != ''\n" +
+            "data->'tbIptScreening'->>'outcome' IS NOT NULL AND\n" +
+            "data->'tbIptScreening'->>'outcome' != ''\n" +
             "AND archived = 0\n" +
             ") subTc WHERE rowNum = 1\n" +
             "),\n" +

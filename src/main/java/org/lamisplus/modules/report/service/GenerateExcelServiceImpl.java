@@ -81,7 +81,25 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	}
 
 
-
+	@Override
+	@SneakyThrows
+	public ByteArrayOutputStream generateTBLongitudinalReport(Long facilityId, LocalDate start, LocalDate end) {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
+		try {
+			List<TbLongitudinalProjection> tbReportProjections = reportRepository.generateTBLongitudinalReport(facilityId, start, end);
+			LOG.info("TB Size {}", tbReportProjections.size());
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
+			List<Map<Integer, Object>> data = GenerateExcelDataHelper.fillTBLongitudinalReportDataMapper(tbReportProjections);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
+			return excelService.generate(Constants.TB_SHEET, data, Constants.TB_REPORT_HEADER);
+		} catch (Exception e) {
+			LOG.info("An error Occurred when generating TB report...");
+			LOG.info("Error message: {}", e.getMessage());
+			e.printStackTrace();
+		}
+		LOG.info("End generate patient TB report");
+		return null;
+	}
 
 	@Override
 	@SneakyThrows

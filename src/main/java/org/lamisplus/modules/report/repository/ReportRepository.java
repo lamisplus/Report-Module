@@ -192,7 +192,10 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<PharmacyReport> getArtPharmacyReport(Long facilityId);
 
 
-        @Query(value = TBReportQuery.TB_REPORT_QUERY, nativeQuery = true)
+    @Query(value = TBLongitudinalReportQuery.TB_LONGITUDINAL_REPORT_QUERY, nativeQuery = true)
+    List<TbLongitudinalProjection> generateTBLongitudinalReport(Long facilityId, LocalDate start, LocalDate end);
+
+    @Query(value = TBReportQuery.TB_REPORT_QUERY, nativeQuery = true)
         List<TBReportProjection> generateTBReport(Long facilityId, LocalDate start, LocalDate end);
 
         @Query(value = EACReportQuery.EAC_REPORT_QUERY, nativeQuery = true)
