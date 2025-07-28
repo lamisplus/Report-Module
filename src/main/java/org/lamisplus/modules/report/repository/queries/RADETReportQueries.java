@@ -847,7 +847,7 @@ public class RADETReportQueries {
             "iptStart.dateOfIptStart AS dateOfIptStart,\n" +
             "COALESCE(CAST (iptN.tptCompletionDate AS DATE), ipt.iptCompletionDate) AS iptCompletionDate, \n" +
             "(CASE WHEN COALESCE(iptN.tptCompletionStatus, ipt.iptCompletionStatus) = 'IPT Completed' THEN 'Treatment completed' ELSE COALESCE(iptN.tptCompletionStatus, ipt.iptCompletionStatus) END) AS iptCompletionStatus,\n" +
-            "iptStart.iptType AS iptType,\n" +
+            "iptStart.iptType AS iptType, iptN.eligibilityTpt,\n" +
             "cc.*,\n" +
             "dsd1.*, dsd2.*,  \n" +
             "ov.*,\n" +
