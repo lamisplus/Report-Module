@@ -515,11 +515,11 @@ public class RADETReportQueries {
             "WHERE data->'tptMonitoring'->>'endedTpt' = 'Yes' AND data->'tbIptScreening'->>'outcome' IS NOT NULL AND data->'tbIptScreening'->>'outcome' != '' AND data->'tptMonitoring'->>'outComeOfIpt' IS NOT NULL AND data->'tptMonitoring'->>'outComeOfIpt' !=''\n" +
             " AND archived = 0 ) subTc WHERE rowNum = 1\n" +
             "),\n" +
-            "pt_screened AS (SELECT person_uuid AS person_uuid, data->'tptMonitoring'->>'tptRegimen' AS tptType, NULLIF(CAST(NULLIF(data->'tptMonitoring'->>'dateTptStarted', '') AS DATE), NULL) AS tptStartDate,\n" +
-            " data->'tptMonitoring'->>'eligibilityTpt' AS eligibilityTpt\n" +
+            "pt_screened AS (SELECT * FROM (SELECT person_uuid AS person_uuid, data->'tptMonitoring'->>'tptRegimen' AS tptType, NULLIF(CAST(NULLIF(data->'tptMonitoring'->>'dateTptStarted', '') AS DATE), NULL) AS tptStartDate,\n" +
+            " data->'tptMonitoring'->>'eligibilityTpt' AS eligibilityTpt, ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY date_of_observation  DESC) rowNum1\n" +
             "FROM hiv_observation\n" +
-            "WHERE (data->'tptMonitoring'->>'eligibilityTpt' IS NOT NULL AND  data->'tptMonitoring'->>'eligibilityTpt' != '') \n" +
-            " AND (data->'tbIptScreening'->>'outcome' IS NOT NULL AND data->'tbIptScreening'->>'outcome' != '' AND data->'tbIptScreening'->>'outcome' != 'Currently on TPT') )\n" +
+            "WHERE archived = 0 AND date_of_observation BETWEEN ?2 AND ?3 AND  (data->'tptMonitoring'->>'eligibilityTpt' IS NOT NULL AND  data->'tptMonitoring'->>'eligibilityTpt' != '') \n" +
+            " AND (data->'tbIptScreening'->>'outcome' IS NOT NULL AND data->'tbIptScreening'->>'outcome' != '' AND data->'tbIptScreening'->>'outcome' != 'Currently on TPT'))subQ WHERE rowNum1 = 1 )\n" +
             "SELECT COALESCE(tc.person_uuid, ts.person_uuid) AS person_uuid, ts.tptType, ts.tptStartDate, ts.eligibilityTpt, tc.endedTpt, tc.tptCompletionDate, tc.tptCompletionStatus\n" +
             "FROM\n" +
             "pt_screened ts\n" +
