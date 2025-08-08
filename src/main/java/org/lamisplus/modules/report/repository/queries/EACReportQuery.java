@@ -140,7 +140,7 @@ public class EACReportQuery {
             "eac_count as (SELECT person_uuid person_uuid10, no_eac_session numberOfEACSessionsCompleted FROM (\n" +
             "SELECT person_uuid, eac_id,  no_eac_session, eac_session_date, ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY eac_session_date DESC ) AS rnkk FROM (\n" +
             "SELECT person_uuid, visit_id, eac_id, eac_session_date,COUNT(eac_id) OVER (PARTITION BY eac_id) AS no_eac_session\n" +
-            "FROM hiv_eac_session WHERE archived = 0 AND eac_session_date between ?2 and ?3 AND status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC') order by eac_session_date DESC) subQ \n" +
+            "FROM hiv_eac_session WHERE archived = 0 AND eac_session_date between ?2 and ?3 AND status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC','FOURTH EAC', 'FIFTH EAC', 'SIXTH EAC') order by eac_session_date DESC) subQ \n" +
             ") countEac WHERE rnkk = 1), " +
             "post_eac_vl1 as ( " +
             "    WITH current_eac AS ( " +
