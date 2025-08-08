@@ -570,6 +570,7 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getTbTreatmentOutcome());
 
 				//TPT
+				map.put(index++, radetReportDto.getEligibilityTpt());
 				map.put(index++, radetReportDto.getDateOfIptStart());
 				map.put(index++, radetReportDto.getIptType());
 				map.put(index++, radetReportDto.getIptCompletionDate());

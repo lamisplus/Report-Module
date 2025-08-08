@@ -155,6 +155,7 @@ public class Constants {
 					"TB Type (new, relapsed etc)",
 					"Date of Completion of TB Treatment (yyyy-mm-dd)",
 					"TB Treatment Outcome",
+					"Eligible for TPT",
 					"Date of TPT Start (yyyy-mm-dd)",
 					"TPT Type",
 					"TPT Completion date (yyyy-mm-dd)",

@@ -154,4 +154,5 @@ public interface RADETDTOProjection {
 	LocalDate getDateOfEnrollment();
 
 	String getNdrPatientIdentifier();
+	String getEligibilityTpt();
 }
