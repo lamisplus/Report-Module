@@ -70,7 +70,7 @@ public class RADETReportQueries {
             "LEFT JOIN base_application_codeset bac ON bac.id = hac.clinical_stage_id\n" +
             "LEFT JOIN base_application_codeset preg ON preg.code = hac.pregnancy_status\n" +
             "LEFT JOIN base_application_codeset tbs ON tbs.id = CASE WHEN hac.tb_status ~ '^[0-9]+$' THEN CAST(hac.tb_status AS INTEGER) ELSE 0 END  \n" +
-            "WHERE hac.is_commencement = false AND hac.archived = 0 AND he.archived = 0 AND tvs.archived = 0 AND he.facility_id = ?1  AND hac.visit_date BETWEEN ?2 AND ?3) subQ where rnkkkk = 1\n" +
+            "WHERE hac.archived = 0 AND he.archived = 0 AND tvs.archived = 0 AND he.facility_id = ?1  AND hac.visit_date BETWEEN ?2 AND ?3) subQ where rnkkkk = 1\n" +
             "),\n" +
             "sample_collection_date AS (\n" +
             "  SELECT sample.date_sample_collected as dateOfViralLoadSampleCollection, patient_uuid as person_uuid120  FROM (\n" +
