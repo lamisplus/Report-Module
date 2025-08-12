@@ -70,7 +70,7 @@ public class RADETReportQueries {
             "LEFT JOIN base_application_codeset bac ON bac.id = hac.clinical_stage_id\n" +
             "LEFT JOIN base_application_codeset preg ON preg.code = hac.pregnancy_status\n" +
             "LEFT JOIN base_application_codeset tbs ON tbs.id = CASE WHEN hac.tb_status ~ '^[0-9]+$' THEN CAST(hac.tb_status AS INTEGER) ELSE 0 END  \n" +
-            "WHERE hac.is_commencement = false AND hac.archived = 0 AND he.archived = 0 AND tvs.archived = 0 AND he.facility_id = ?1  AND hac.visit_date BETWEEN ?2 AND ?3) subQ where rnkkkk = 1\n" +
+            "WHERE hac.archived = 0 AND he.archived = 0 AND tvs.archived = 0 AND he.facility_id = ?1  AND hac.visit_date BETWEEN ?2 AND ?3) subQ where rnkkkk = 1\n" +
             "),\n" +
             "sample_collection_date AS (\n" +
             "  SELECT sample.date_sample_collected as dateOfViralLoadSampleCollection, patient_uuid as person_uuid120  FROM (\n" +
@@ -378,11 +378,11 @@ public class RADETReportQueries {
             " ROW_NUMBER() OVER (PARTITION BY hes.person_uuid ORDER BY hes.eac_session_date DESC ) AS row from hiv_eac_session hes \n" +
             "join current_eac ce on ce.uuid = hes.eac_id where ce.row = 1 and hes.archived = 0 \n" +
             "  and hes.eac_session_date between ?2 and ?3 \n" +
-            "  and hes.status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC')) as les where row = 1), \n" +
+            "  and hes.status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC','FOURTH EAC', 'FIFTH EAC', 'SIXTH EAC')) as les where row = 1), \n" +
             "eac_count as (SELECT person_uuid, no_eac_session FROM (\n" +
             "SELECT person_uuid, eac_id,  no_eac_session, eac_session_date, ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY eac_session_date DESC ) AS rnkk FROM (\n" +
             "SELECT person_uuid, visit_id, eac_id, eac_session_date,COUNT(eac_id) OVER (PARTITION BY eac_id) AS no_eac_session\n" +
-            "FROM hiv_eac_session WHERE archived = 0 AND eac_session_date between ?2 and ?3 AND status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC') order by eac_session_date DESC) subQ \n" +
+            "FROM hiv_eac_session WHERE archived = 0 AND eac_session_date between ?2 and ?3 AND status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC','FOURTH EAC', 'FIFTH EAC', 'SIXTH EAC') order by eac_session_date DESC) subQ \n" +
             ") countEac WHERE rnkk = 1 ), \n" +
             "extended_eac as (\n" +
             " select * from (with current_eac as ( \n" +
@@ -392,7 +392,7 @@ public class RADETReportQueries {
             " select ce.id, ce.person_uuid, hes.eac_session_date, \n" +
             " ROW_NUMBER() OVER (PARTITION BY hes.person_uuid ORDER BY hes.eac_session_date DESC ) AS row from hiv_eac_session hes \n" +
             "join current_eac ce on ce.uuid = hes.eac_id where ce.row = 1 and hes.archived = 0 and hes.status is not null and hes.eac_session_date between ?2 and ?3 \n" +
-            "  and hes.status not in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC')) as exe where row = 1), \n" +
+            "  and hes.status not in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC','FOURTH EAC', 'FIFTH EAC', 'SIXTH EAC')) as exe where row = 1), \n" +
             "post_eac_vl as ( \n" +
             " select * from(select lt.patient_uuid, cast(ls.date_sample_collected as date), lr.result_reported, cast(lr.date_result_reported as date), \n" +
             "ROW_NUMBER() OVER (PARTITION BY lt.patient_uuid ORDER BY ls.date_sample_collected DESC) AS row \n" +
