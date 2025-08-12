@@ -25,7 +25,9 @@ public class PMTCTReportQuery {
             "SELECT hc.person_uuid as person_uuid_hts_client,\n" +
             "(CASE WHEN (hiv_test_result2 IS NULL OR hiv_test_result2 = '') THEN hiv_test_result ELSE hiv_test_result2 END) as hivTestResult,\n" +
             "hc.risk_stratification_code as risk_stratification_code_hts_client,\n" +
+            "CASE WHEN hc.hepatitis_testing->>'hepatitisBTestResult' IN ('Yes', 'No')  THEN hc.date_visit ELSE NULL END AS hepatitisBTestDate, \n" +
             "(CASE WHEN hepatitis_testing->>'hepatitisBTestResult' = 'Yes' THEN 'Positive' WHEN hepatitis_testing->>'hepatitisBTestResult' = 'No' THEN 'Negative' ELSE hepatitis_testing->>'hepatitisBTestResult' END) AS hepatitisBTestResult,\n" +
+            "CASE WHEN hc.hepatitis_testing->>'hepatitisCTestResult' IN ('Yes', 'No')  THEN hc.date_visit ELSE NULL END AS hepatitisCTestDate, \n" +
             "(CASE WHEN hepatitis_testing->>'hepatitisCTestResult' = 'Yes' THEN 'Positive' WHEN hepatitis_testing->>'hepatitisCTestResult' = 'No' THEN 'Negative' ELSE hepatitis_testing->>'hepatitisCTestResult' END) AS hepatitisCTestResult,\n" +
             "recency->>'optOutRTRI' AS optOutRTRI,\n" +
             "CASE\n" +
@@ -83,7 +85,7 @@ public class PMTCTReportQuery {
             "END) AS maternalRetestingDate,\n" +
             "(CASE WHEN AGE(hts_retest.visitDateIntial, retestingOpt.reVisitDate) <= INTERVAL '2 years' THEN retestingOpt.reHivResult ELSE NULL \n" +
             "END) AS maternalRetestingResult,\n" +
-            "ROW_NUMBER() OVER ( PARTITION BY hc.person_uuid ORDER BY date_visit DESC) AS rnk,\n" +
+            "ROW_NUMBER() OVER ( PARTITION BY hc.person_uuid ORDER BY date_visit DESC, hc.date_created DESC) AS rnk,\n" +
             "date_visit, hc.facility_id\n" +
             "FROM hts_client hc\n" +
             "LEFT JOIN hts_risk_stratification hts_risk ON hc.risk_stratification_code = hts_risk.code AND hts_risk.archived = 0\n" +
@@ -94,11 +96,11 @@ public class PMTCTReportQuery {
             "LEFT JOIN laboratory_test labTest ON labOrder.id = labTest.lab_order_id AND labTest.lab_test_id = 16\n" +
             "LEFT JOIN laboratory_result labResult ON labResult.test_id = labTest.id AND labResult.archived = 0 \n" +
             "LEFT JOIN (\n" +
-            "SELECT hct.person_uuid, hct.date_visit AS visitDateIntial, (CASE WHEN (hct.hiv_test_result2 IS NULL OR hct.hiv_test_result2 = '') THEN hct.hiv_test_result ELSE hct.hiv_test_result2 END) AS hivResultInital,risk.testing_setting, hct.risk_stratification_code, \n" +
+            "SELECT hct.person_uuid, hct.date_visit AS visitDateIntial, (CASE WHEN (hct.hiv_test_result2 IS NULL OR hct.hiv_test_result2 = '') THEN hct.hiv_test_result ELSE hct.hiv_test_result2 END) AS hivResultInital, risk.testing_setting, hct.risk_stratification_code, \n" +
             "ROW_NUMBER() OVER (PARTITION BY hct.person_uuid ORDER BY date_visit DESC) AS rowNums\n" +
             "FROM hts_client hct\n" +
             "LEFT JOIN hts_risk_stratification risk ON hct.risk_stratification_code = risk.code AND risk.archived = 0\n" +
-            "WHERE hct.pregnant IN (73,74,75) AND risk.testing_setting IN ('FACILITY_HTS_TEST_SETTING_ANC', 'COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX', 'COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW', 'COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING', 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES', 'FACILITY_HTS_TEST_SETTING_L&D', 'FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING')\n" +
+            "WHERE hct.pregnant IN (73,74,75) AND risk.testing_setting IN ('FACILITY_HTS_TEST_SETTING_ANC', 'COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX', 'COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW', 'COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING', 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES', 'FACILITY_HTS_TEST_SETTING_L&D', 'FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING', 'COMMUNITY_PMTCT_SPOKE_HEALTH_FACILITY','FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY')\n" +
             "AND hct.date_visit BETWEEN ?2 AND ?3\n" +
             ") as hts_retest ON hc.person_uuid = hts_retest.person_uuid\n" +
             "LEFT JOIN (\n" +
@@ -108,7 +110,7 @@ public class PMTCTReportQuery {
             "LEFT JOIN hts_risk_stratification risk ON hct.risk_stratification_code = risk.code AND risk.archived = 0\n" +
             "WHERE hct.pregnant IN (73,74,75) AND risk.testing_setting IN ('FACILITY_HTS_TEST_SETTING_RETESTING')\n" +
             ") AS retestingOpt ON hc.person_uuid = retestingOpt.person_uuid \n"+
-            "WHERE hc.archived = 0 AND hts_risk.testing_setting IN ('FACILITY_HTS_TEST_SETTING_ANC', 'COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX', 'COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW', 'COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING', 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES', 'FACILITY_HTS_TEST_SETTING_L&D', 'FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING','FACILITY_HTS_TEST_SETTING_RETESTING')\n" +
+            "WHERE hc.archived = 0 AND hts_risk.testing_setting IN ('FACILITY_HTS_TEST_SETTING_ANC', 'COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX', 'COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW', 'COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING', 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES', 'FACILITY_HTS_TEST_SETTING_L&D', 'FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING','FACILITY_HTS_TEST_SETTING_RETESTING','COMMUNITY_PMTCT_SPOKE_HEALTH_FACILITY','FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY')\n" +
             "GROUP BY hc.person_uuid, hc.date_visit, hc.hiv_test_result, hc.hiv_test_result2,hc.risk_stratification_code,hc.hepatitis_testing,hc.date_created,hc.recency, hts_risk.testing_setting, hts_risk.entry_point, hc.facility_id,\n" +
             "he.date_started,he.date_of_registration,he.date_confirmed_hiv, he.date_started, pmtctenroll.pmtct_enrollment_date, pmtctdov.date_of_viral_load, labResult.result_reported,labResult.date_result_reported, he.unique_id, hts_retest.visitDateIntial, hts_retest.hivResultInital, retestingOpt.reVisitDate, retestingOpt.reHivResult\n" +
             ") rr WHERE rnk = 1 AND facility_id = ?1 AND date_visit BETWEEN ?2 AND ?3\n" +
@@ -156,7 +158,7 @@ public class PMTCTReportQuery {
             ") del where rnkk = 1 AND date_of_delivery BETWEEN ?2 AND ?3\n" +
             ")\n" +
             "select * from pmtctHts\n" +
-            "INNER JOIN hts_client hts ON hts.person_uuid_hts_client = pmtctHts.PersonUuid\n" +
+            "INNER JOIN hts_client hts ON hts.person_uuid_hts_client = pmtctHts.PersonUuid AND hts.hivTestResult IS NOT NULL AND hts.hivTestResult != ''\n" +
             "LEFT JOIN ancClient anc ON hts.person_uuid_hts_client = anc.person_uuid_anc\n" +
             "LEFT JOIN delivery del ON hts.person_uuid_hts_client = del.personUuidDelivery\n";
 }

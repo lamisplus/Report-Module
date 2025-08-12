@@ -60,6 +60,8 @@ public interface PmtctDto {
     String getMaternalRetestingResult();
     String getHivUniqueId();
     String getRencencyTestType();
+    LocalDate getHepatitisBTestDate();
+    LocalDate getHepatitisCTestDate();
 
 
 }

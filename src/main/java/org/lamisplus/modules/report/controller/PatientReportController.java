@@ -90,23 +90,37 @@ public class PatientReportController {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating radet report");
 	}
 
-	@GetMapping("/tb-report")
-	public void getTBReport(
+	@GetMapping("/tb-longitudinal-report")
+	public void getTBLongitudinalReport(
 			HttpServletResponse response,
 			@RequestParam("facilityId") Long facilityId,
 			@RequestParam("start") LocalDate start,
 			@RequestParam("end") LocalDate end) throws IOException {
-		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting TB report");
-
-		messagingTemplate.convertAndSend("/topic/tb-report", "start");
-
-		ByteArrayOutputStream baos = generateExcelService.generateTBReport(facilityId, start, end);
-
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting TB Longitudinal report");
+		messagingTemplate.convertAndSend("/topic/tb-longitudinal-report", "start");
+		ByteArrayOutputStream baos = generateExcelService.generateTBLongitudinalReport(facilityId, start, end);
 		setStream(baos, response);
-
-		messagingTemplate.convertAndSend("/topic/tb-report", "end");
-		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating TB report");
+		messagingTemplate.convertAndSend("/topic/tb-longitudinal-report", "end");
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating TB Longitudinal report");
 	}
+
+	// @GetMapping("/tb-report")
+	// public void getTBReport(
+	// 		HttpServletResponse response,
+	// 		@RequestParam("facilityId") Long facilityId,
+	// 		@RequestParam("start") LocalDate start,
+	// 		@RequestParam("end") LocalDate end) throws IOException {
+	// 	messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting TB report");
+
+	// 	messagingTemplate.convertAndSend("/topic/tb-report", "start");
+
+	// 	ByteArrayOutputStream baos = generateExcelService.generateTBReport(facilityId, start, end);
+
+	// 	setStream(baos, response);
+
+	// 	messagingTemplate.convertAndSend("/topic/tb-report", "end");
+	// 	messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating TB report");
+	// }
 
 	@GetMapping("/eac-report")
 	public void getEACReport(

@@ -90,10 +90,13 @@ public class HTSReportQuery {
             "modality_code.display AS modality,  \n" +
             "(CASE WHEN hc.syphilis_testing->>'syphilisTestResult' ILIKE 'Yes'   \n" +
             "THEN 'Reactive' WHEN hc.syphilis_testing->>'syphilisTestResult' ILIKE 'No' THEN 'Non-Reactive' ELSE '' END) As syphilisTestResult,  \n" +
+            "CASE WHEN hc.syphilis_testing->>'syphilisTestResult' IN ('Yes', 'No') THEN hc.date_visit ELSE NULL END AS syphilisTestDate, \n" +
             "(CASE WHEN hc.hepatitis_testing->>'hepatitisBTestResult' ILIKE 'Yes'   \n" +
             " THEN 'Positive' WHEN hc.hepatitis_testing->>'hepatitisBTestResult' ILIKE 'No' THEN 'Negative' ELSE '' END) AS hepatitisBTestResult,  \n" +
+            "CASE WHEN hc.hepatitis_testing->>'hepatitisBTestResult' IN ('Yes', 'No') THEN hc.date_visit ELSE NULL END AS hepatitisBTestDate, \n" +
             "(CASE WHEN hc.hepatitis_testing->>'hepatitisCTestResult' ILIKE 'Yes'   \n" +
             " THEN 'Positive' WHEN hc.hepatitis_testing->>'hepatitisCTestResult' ILIKE 'No' THEN 'Negative' ELSE '' END) AS hepatitisCTestResult,  \n" +
+            "CASE WHEN hc.hepatitis_testing->>'hepatitisCTestResult' IN ('Yes', 'No') THEN hc.date_visit ELSE NULL END AS hepatitisCTestDate, \n" +
             "hc.cd4->>'cd4Count' AS CD4Type,  \n" +
             "hc.cd4->>'cd4SemiQuantitative' AS CD4TestResult,  \n" +
             "(CASE WHEN hc.hiv_test_result2 = 'Positive' THEN 'Positive'\n" +
@@ -142,7 +145,7 @@ public class HTSReportQuery {
             "WHEN hrs.entry_point = 'HTS_ENTRY_POINT_COMMUNITY' AND hrs.testing_setting = 'COMMUNITY_HTS_TEST_SETTING_CT' THEN 'VCT'\n" +
             "WHEN hrs.entry_point = 'HTS_ENTRY_POINT_COMMUNITY' AND hrs.testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OUTREACH' THEN 'Mobile'\n" +
             "END)AS pepfarModalities, hc.risk_assessment->>'mlScore' AS mlScore, hc.risk_assessment->>'mlStatus' AS mlStatus,\n" +
-            "ROW_NUMBER() OVER ( PARTITION BY hc.person_uuid ORDER BY hc.date_visit DESC) AS rnkk\n" +
+            "ROW_NUMBER() OVER ( PARTITION BY hc.person_uuid ORDER BY hc.date_visit DESC, hc.date_created DESC) AS rnkk\n" +
             "FROM hts_client hc  \n" +
             "LEFT JOIN base_application_codeset tg ON tg.code = hc.target_group  \n" +
             "LEFT JOIN base_application_codeset it ON it.id = hc.relation_with_index_client\n" +
@@ -213,7 +216,7 @@ public class HTSReportQuery {
             "        hc.person_uuid, htsPrevious.hiv_test_result, \n" +
             "        hc.extra, \n" +
             "        pp.first_name, \n" +
-            "pp.marital_status,\n" +
+            "        pp.marital_status,\n" +
             "        pp.surname, \n" +
             "        pp.other_name, \n" +
             "        pp.sex, \n" +
@@ -238,11 +241,11 @@ public class HTSReportQuery {
             "        hc.source, hc.risk_assessment,\n" +
             "        hc.referred_for_sti,\n" +
             "        hc.others->>'adhocCode', hc.testing_setting, hrs.testing_setting,\n" +
-            "lgaofresidence.lgaofresidence,\n" +
+            "lgaofresidence.lgaofresidence, hc.date_created,\n" +
             "res_state.name, pp.uuid, pp.education, pp.employment_status, boui.code, hc.others, r.address, hc.date_visit, hc.first_time_visit, hc.num_children,\n" +
             "hc.num_wives, hc.index_client,hc.hiv_test_result, hc.prep_offered, hc.prep_accepted, hc.previously_tested, hrs.entry_point,\n" +
             "hc.recency, hc.risk_stratification_code, modality_code.display, hc.syphilis_testing,hc.hepatitis_testing, hc.cd4, hc.hiv_test_result2,\n" +
             "hc.test1, hc.post_test_counseling, riskscore.totalriskscore, htscounts.numberofcounts)\n" +
             "SELECT * FROM htsReport\n" +
-            "WHERE rnkk = 1";
+            "WHERE rnkk = 1 AND finalHIVTestResult IS NOT NULL AND finalHIVTestResult !=''";
 }
