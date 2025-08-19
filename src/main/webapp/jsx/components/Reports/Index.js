@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useMemo, useState} from 'react';
 import { Card, CardBody } from 'reactstrap';
 import { makeStyles } from '@material-ui/core/styles';
 import { ToastContainer, toast } from 'react-toastify';
@@ -44,6 +44,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Divider from '@mui/material/Divider';
 import PrEPMSF from './PrEPMSF';
 import TbReportLongitudinal from './TbReportLongitudinal';
+import { useRoles } from "../../../hooks/useRoles";
+import { usePermissions } from "../../../hooks/usePermissions";
+import NoAccessCard from "../Shared/NoAccessCard";
 
 const useStyles = makeStyles(theme => ({
   error: {
@@ -61,6 +64,8 @@ const Reports = props => {
   const [activeItem, setactiveItem] = useState('basic');
   const [activeItem1, setActiveItem1] = useState('basic');
   const [expanded, setExpanded] = React.useState(false);
+  const { hasRole, loading: rolesLoading } = useRoles();
+  const { hasPermission, hasAnyPermission  }  = usePermissions();
 
   const [completed, setCompleted] = useState([]);
   const handleItemClick = activeItem => {
@@ -73,83 +78,176 @@ const Reports = props => {
 
   const handleItemClick1 = value => {
     setActiveItem1(value);
-    console.log(value); // This should print the selected option
   };
 
-  const reportMsfs = [
-    { key: 'prep-msf', value: 'prep-msf', text: 'PrEP Monthly Summary Form' },
-  ];
-
   const reportSurveillance = [
-    { key: 'hts-report', value: 'hts-report', text: 'HTS REPORT' },
-    { key: 'hts-register', value: 'hts-register', text: 'HTS REGISTER' },
-    { key: 'hivst-report', value: 'hivst-report', text: 'HIVST REPORT' },
+    {
+      key: 'hts-report',
+      value: 'hts-report',
+      text: 'HTS REPORT',
+      permissionKey: 'report_hts_report',
+    },
+    {
+      key: 'hts-register',
+      value: 'hts-register',
+      text: 'HTS REGISTER',
+      permissionKey: 'report_hts_register',
+    },
+    {
+      key: 'hivst-report',
+      value: 'hivst-report',
+      text: 'HIVST REPORT',
+      permissionKey: 'report_hivst_report',
+    },
     {
       key: 'hts-index-report',
       value: 'hts-index-report',
       text: 'HTS INDEX REPORT',
+      permissionKey: 'report_hts_index_report',
     },
   ];
 
   const reportBiometric = [
-    { key: 'biometric', value: 'biometric', text: 'BIOMETRIC DATA' },
+    { key: 'biometric', value: 'biometric', text: 'BIOMETRIC DATA' , permissionKey: 'report_biometric_data'},
   ];
   const monthSummaryReport = [
     { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary' },
   ];
+
   const reportPrevention = [
-    { key: 'prep-report', value: 'prep-report', text: 'PrEP Cross Sectional' },
-    {
-      key: 'prep-longitudinal-report',
-      value: 'prep-longitudinal-report',
-      text: 'PrEP Longitudinal REPORT',
-    },
-    // { key: 'kp-prev-report', value: 'kp-prev-report', text: 'KP PREV REPORT' },
+    { key: 'prep-report', value: 'prep-report', text: 'PrEP Cross Sectional', permissionKey: 'report_prep_cross_sectional' },
+    { key: 'prep-longitudinal-report', value: 'prep-longitudinal-report', text: 'PrEP Longitudinal REPORT', permissionKey: 'report_prep_longitudinal' },
   ];
 
   const reportPMTCT = [
-    { key: 'pmtct-hts', value: 'pmtct-hts', text: 'PMTCT HTS' },
-    {
-      key: 'pmtct-maternal-cohort',
-      value: 'pmtct-maternal-cohort',
-      text: 'PMTCT MATERNAL COHORT',
-    },
+    { key: 'pmtct-hts', value: 'pmtct-hts', text: 'PMTCT HTS', permissionKey: 'report_pmtct_hts' },
+    { key: 'pmtct-maternal-cohort', value: 'pmtct-maternal-cohort', text: 'PMTCT MATERNAL COHORT', permissionKey: 'report_pmtct_maternal_cohort' },
   ];
 
   const reportPsychosocial = [
-    { key: 'mhpss-report', value: 'mhpss-report', text: 'MHPSS Report' },
+    { key: 'mhpss-report', value: 'mhpss-report', text: 'MHPSS Report', permissionKey: 'report_mhpss_report' },
+  ];
+
+  const reportMsfs = [
+    { key: 'prep-msf', value: 'prep-msf', text: 'PrEP Monthly Summary Form', permissionKey: 'report_prep_monthly_summary_form' },
+    { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary', permissionKey: 'report_pmtct_msf' },
   ];
 
   const reportOptions = [
-    { key: 'radet', value: 'radet', text: 'RADET' },
-    { key: 'appointment', value: 'appointment', text: 'APPOINTMENT' },
-    { key: 'line-list', value: 'line-list', text: 'PATIENT LINE LIST' },
-    { key: 'pharmacy-report', value: 'pharmacy-report', text: 'PHARMACY DATA' },
-    {
-      key: 'laboratory-report',
-      value: 'laboratory-report',
-      text: 'LABORATORY DATA',
-    },
-    {
-      key: 'clinic-data-report',
-      value: 'clinic-data-report',
-      text: 'CLINIC DATA REPORT',
-    },
-    {
-      key: 'client-verification',
-      value: 'client-verification',
-      text: 'CLIENT VERIFICATION',
-    },
-    // { key: 'tb-report', value: 'tb-report', text: 'TB REPORT' },
-    { key: 'tb-report-longitudinal', value: 'tb-report-longitudinal', text: 'TB LONGITUDINAL REPORT' },
-    { key: 'ncd-report', value: 'ncd-report', text: 'NCD Report' },
-    { key: 'eac-report', value: 'eac-report', text: 'EAC Report' },
-    // { key: 'index-elicitation', value: 'index-elicitation', text: 'INDEX ELICITATION' },
-    { key: 'ahd-report', value: 'ahd-report', text: 'AHD REPORT' },
-    { key: 'adr-report', value: 'adr-report', text: 'ADR REPORT' },
-    { key: 'custom-report', value: 'custom-report', text: 'CUSTOM REPORT' },
-
+    { key: 'radet', value: 'radet', text: 'RADET', permissionKey: 'report_radet' },
+    { key: 'appointment', value: 'appointment', text: 'APPOINTMENT', permissionKey: 'report_appointment' },
+    { key: 'line-list', value: 'line-list', text: 'PATIENT LINE LIST', permissionKey: 'report_patient_line_list' },
+    { key: 'pharmacy-report', value: 'pharmacy-report', text: 'PHARMACY DATA', permissionKey: 'report_pharmacy_data' },
+    { key: 'laboratory-report', value: 'laboratory-report', text: 'LABORATORY DATA', permissionKey: 'report_laboratory_data' },
+    { key: 'clinic-data-report', value: 'clinic-data-report', text: 'CLINIC DATA REPORT', permissionKey: 'report_clinic_data_report' },
+    { key: 'client-verification', value: 'client-verification', text: 'CLIENT VERIFICATION', permissionKey: 'report_client_verification' },
+    { key: 'tb-report-longitudinal', value: 'tb-report-longitudinal', text: 'TB LONGITUDINAL REPORT', permissionKey: 'report_tb_longitudinal' },
+    { key: 'ncd-report', value: 'ncd-report', text: 'NCD Report', permissionKey: 'report_ncd_report' },
+    { key: 'eac-report', value: 'eac-report', text: 'EAC Report', permissionKey: 'report_eac_report' },
+    { key: 'ahd-report', value: 'ahd-report', text: 'AHD REPORT', permissionKey: 'report_ahd_report' },
+    { key: 'adr-report', value: 'adr-report', text: 'ADR REPORT', permissionKey: 'report_adr_report' },
+    { key: 'custom-report', value: 'custom-report', text: 'CUSTOM REPORT', permissionKey: 'report_custom_report' },
   ];
+
+  const permissions = useMemo(() => {
+    // RDE takes precedence: Full access to all reports (except maybe CUSTOM or sensitive ones)
+    if (hasRole("RDE")) {
+      return {
+        canViewHTSReport: true,
+        canViewHTSRegister: true,
+        canViewHIVSTReport: true,
+        canViewHTSIndexReport: true,
+        canViewRadet: true,
+        canViewAppointment: true,
+        canViewPatientLineList: true,
+        canViewPharmacyData: true,
+        canViewLaboratoryData: true,
+        canViewClinicData: true,
+        canViewClientVerification: true,
+        canViewTbLongitudinal: true,
+        canViewNcdReport: true,
+        canViewEACReport: true,
+        canViewAHDReport: true,
+        canViewADRReport: true,
+        canViewCustomReport: true,
+        canViewPMTCTHTS: true,
+        canViewPMTCTMaternalCohort: true,
+        canViewPrepCrossSectional: true,
+        canViewPrepLongitudinal: true,
+        canViewPrepMSF: true,
+        canViewPMTCTMSF: true,
+        canViewBiometricData: true,
+        canViewMHPSSReport: true,
+      };
+    }
+
+    // For non-RDE users: Permission-based access
+    return {
+      canViewHTSReport: hasPermission("report_hts_report"),
+      canViewHTSRegister: hasPermission("report_hts_register"),
+      canViewHIVSTReport: hasPermission("report_hivst_report"),
+      canViewHTSIndexReport: hasPermission("report_hts_index_report"),
+
+      canViewRadet: hasPermission("report_radet"),
+      canViewAppointment: hasPermission("report_appointment"),
+      canViewPatientLineList: hasPermission("report_patient_line_list"),
+      canViewPharmacyData: hasPermission("report_pharmacy_data"),
+      canViewLaboratoryData: hasPermission("report_laboratory_data"),
+      canViewClinicData: hasPermission("report_clinic_data_report"),
+      canViewClientVerification: hasPermission("report_client_verification"),
+      canViewTbLongitudinal: hasPermission("report_tb_longitudinal"),
+      canViewNcdReport: hasPermission("report_ncd_report"),
+      canViewEACReport: hasPermission("report_eac_report"),
+      canViewAHDReport: hasPermission("report_ahd_report"),
+      canViewADRReport: hasPermission("report_adr_report"),
+      canViewCustomReport: hasPermission("report_custom_report"),
+
+      canViewPMTCTHTS: hasPermission("report_pmtct_hts"),
+      canViewPMTCTMaternalCohort: hasPermission("report_pmtct_maternal_cohort"),
+
+      canViewPrepCrossSectional: hasPermission("report_prep_cross_sectional"),
+      canViewPrepLongitudinal: hasPermission("report_prep_longitudinal"),
+      canViewPrepMSF: hasPermission("report_prep_monthly_summary_form"),
+      canViewPMTCTMSF: hasPermission("report_pmtct_msf"),
+      canViewBiometricData: hasPermission("report_biometric_data"),
+      canViewMHPSSReport: hasPermission("report_mhpss_report"),
+    };
+  }, [hasRole, hasPermission, hasAnyPermission]);
+
+  const hasAnyReportAccess = () => {
+    const allReports = [
+      ...reportSurveillance,
+      ...reportOptions,
+      ...reportBiometric,
+      ...reportPrevention,
+      ...reportPMTCT,
+      ...reportPsychosocial,
+      ...reportMsfs,
+      ...monthSummaryReport,
+    ];
+    return allReports.some(option =>
+        hasRole("RDE") || hasPermission(option.permissionKey)
+    );
+  };
+
+  const hasAnyAccess = (reportList) => {
+    return reportList.some(option =>
+        hasRole("RDE") || hasPermission(option.permissionKey)
+    );
+  };
+
+  const hasBasicAccess = () => {
+    const basicReports = [
+      { value: 'radet', perm: 'report_radet' },
+      { value: 'biometric', perm: 'report_biometric_data' },
+      { value: 'hts-report', perm: 'report_hts_report' },
+      { value: 'prep-report', perm: 'report_prep_cross_sectional' },
+    ];
+
+    return basicReports.some(r =>
+        hasRole("RDE") || hasPermission(r.perm)
+    );
+  };
 
   const renderComponent = () => {
     switch (activeItem1) {
@@ -418,24 +516,30 @@ const Reports = props => {
               <br />
               <br />
               <div className="col-md-3 float-start">
+                {!hasAnyReportAccess() ? (
+                    <NoAccessCard
+                        title="No Report Access"
+                        message="You do not have permission to view any reports. Contact your administrator if you believe this is an error."
+                    />
+                ) : (
                 <Menu
                   size="large"
                   vertical
                   style={{ backgroundColor: '#014D88' }}
                 >
                   <Menu.Item
-                    name="inbox"
-                    style={{
-                      backgroundColor: '#000',
-                    }}
+                      name="inbox"
+                      style={{
+                        backgroundColor: '#000',
+                      }}
                   >
-                    <span style={{ color: '#fff' }}>
+                    <span style={{color: '#fff'}}>
                       {' '}
                       Search all Report below{' '}
                     </span>
                   </Menu.Item>
 
-                  <Accordion
+                  {hasAnyAccess(reportSurveillance) && (<Accordion
                     expanded={expanded === 'panel2'}
                     onChange={handleChange('panel2')}
                     style={{ backgroundColor: '#014D88' }}
@@ -450,58 +554,59 @@ const Reports = props => {
                       </Typography>
                     </AccordionSummary>
                     <AccordionDetails
-                      style={{
-                        paddingTop: 0,
-                        marginTop: 0,
-                        backgroundColor: '#014D88',
-                      }}
+                        style={{
+                          paddingTop: 0,
+                          marginTop: 0,
+                          backgroundColor: '#014D88',
+                        }}
                     >
-                      {Object.values(reportSurveillance).map(option => (
-                        <div
-                          style={{
-                            marginTop: '10px',
-                            marginLeft: '10px',
-                            display: 'flex',
-                            justifyContent: 'flex-start',
-                            alignItems: 'center',
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: '10px',
-                              height: '10px',
-                              backgroundColor: 'white',
-                              borderRadius: '50%',
-                            }}
-                          />
-                          <Typography>
+                      {Object.values(reportSurveillance).map(option => {
+                        const canView =
+                            hasRole("RDE") ||
+                            hasPermission(option.permissionKey);
+                        // Only render if user has access
+                        if (!canView) return null;
+
+                        return (
                             <div
-                              style={{
-                                cursor: 'pointer',
-                                marginBottom: '0px',
-                                marginLeft: '10px',
-                                color:
-                                  activeItem1 === option.value
-                                    ? 'grey'
-                                    : '#fff',
-                              }}
-                              onClick={() => handleItemClick1(option.value)}
-                              key={option.key}
+                                key={option.key}
+                                style={{
+                                  marginTop: '10px',
+                                  marginLeft: '10px',
+                                  display: 'flex',
+                                  justifyContent: 'flex-start',
+                                  alignItems: 'center',
+                                }}
                             >
-                              {option.text}
+                              <div
+                                  style={{
+                                    width: '10px',
+                                    height: '10px',
+                                    backgroundColor: 'white',
+                                    borderRadius: '50%',
+                                  }}
+                              />
+                              <Typography>
+                                <div
+                                    style={{
+                                      cursor: 'pointer',
+                                      marginBottom: '0px',
+                                      marginLeft: '10px',
+                                      color: activeItem1 === option.value ? 'grey' : '#fff',
+                                    }}
+                                    onClick={() => handleItemClick1(option.value)}
+                                >
+                                  {option.text}
+                                </div>
+                              </Typography>
+                              <Divider orientation="horizontal" variant="fullWidth" component="li" />
                             </div>
-                          </Typography>
-                          <Divider
-                            orientation={'horizontal'}
-                            variant="fullWidth"
-                            component="li"
-                          />
-                        </div>
-                      ))}
+                        );
+                      })}
                     </AccordionDetails>
                   </Accordion>
-
-                  <Accordion
+                  )}
+                  { hasAnyAccess(reportOptions) && <Accordion
                     expanded={expanded === 'panel1'}
                     onChange={handleChange('panel1')}
                     style={{ backgroundColor: '#014D88' }}
@@ -523,8 +628,13 @@ const Reports = props => {
                         backgroundColor: '#014D88',
                       }}
                     >
-                      {Object.values(reportOptions).map(option => (
-                        <div
+                      {Object.values(reportOptions).map(option =>  {
+                        const canView =
+                        hasRole("RDE") ||
+                        hasPermission(option.permissionKey);
+                        if (!canView) return null;
+
+                       return ( <div
                           style={{
                             marginTop: '10px',
                             marginLeft: '10px',
@@ -564,11 +674,12 @@ const Reports = props => {
                             component="li"
                           />
                         </div>
-                      ))}
+                       );
+              })}
                     </AccordionDetails>
                   </Accordion>
-
-                  <Accordion
+                  }
+                  { hasAnyAccess(reportBiometric) && <Accordion
                     expanded={expanded === 'panel3'}
                     onChange={handleChange('panel3')}
                     style={{ backgroundColor: '#014D88' }}
@@ -589,52 +700,59 @@ const Reports = props => {
                         backgroundColor: '#014D88',
                       }}
                     >
-                      {Object.values(reportBiometric).map(option => (
-                        <div
-                          style={{
-                            marginTop: '10px',
-                            marginLeft: '10px',
-                            display: 'flex',
-                            justifyContent: 'flex-start',
-                            alignItems: 'center',
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: '10px',
-                              height: '10px',
-                              backgroundColor: 'white',
-                              borderRadius: '50%',
-                            }}
-                          />
-                          <Typography>
+                      {Object.values(reportBiometric).map(option => {
+                        const canView =
+                            hasRole("RDE") ||
+                            hasPermission(option.permissionKey);
+                        // Only render if user has access
+                        if (!canView) return null;
+                        return (
                             <div
-                              style={{
-                                cursor: 'pointer',
-                                marginBottom: '0px',
-                                marginLeft: '10px',
-                                color:
-                                  activeItem1 === option.value
-                                    ? 'grey'
-                                    : '#fff',
-                              }}
-                              onClick={() => handleItemClick1(option.value)}
-                              key={option.key}
+                                style={{
+                                  marginTop: '10px',
+                                  marginLeft: '10px',
+                                  display: 'flex',
+                                  justifyContent: 'flex-start',
+                                  alignItems: 'center',
+                                }}
                             >
-                              {option.text}
+                              <div
+                                  style={{
+                                    width: '10px',
+                                    height: '10px',
+                                    backgroundColor: 'white',
+                                    borderRadius: '50%',
+                                  }}
+                              />
+                              <Typography>
+                                <div
+                                    style={{
+                                      cursor: 'pointer',
+                                      marginBottom: '0px',
+                                      marginLeft: '10px',
+                                      color:
+                                          activeItem1 === option.value
+                                              ? 'grey'
+                                              : '#fff',
+                                    }}
+                                    onClick={() => handleItemClick1(option.value)}
+                                    key={option.key}
+                                >
+                                  {option.text}
+                                </div>
+                              </Typography>
+                              <Divider
+                                  orientation={'horizontal'}
+                                  variant="fullWidth"
+                                  component="li"
+                              />
                             </div>
-                          </Typography>
-                          <Divider
-                            orientation={'horizontal'}
-                            variant="fullWidth"
-                            component="li"
-                          />
-                        </div>
-                      ))}
+                        );
+                      })}
                     </AccordionDetails>
                   </Accordion>
-
-                  <Accordion
+                  }
+                  { hasAnyAccess(reportPrevention) && <Accordion
                     expanded={expanded === 'panel4'}
                     onChange={handleChange('panel4')}
                     style={{ backgroundColor: '#014D88' }}
@@ -655,7 +773,13 @@ const Reports = props => {
                         backgroundColor: '#014D88',
                       }}
                     >
-                      {Object.values(reportPrevention).map(option => (
+                      {Object.values(reportPrevention).map(option => {
+                        const canView =
+                            hasRole("RDE") ||
+                            hasPermission(option.permissionKey);
+                        // Only render if user has access
+                        if (!canView) return null;
+                        return (
                         <div
                           style={{
                             marginTop: '10px',
@@ -696,10 +820,12 @@ const Reports = props => {
                             component="li"
                           />
                         </div>
-                      ))}
+                      );
+                      })}
                     </AccordionDetails>
                   </Accordion>
-                  <Accordion
+                  }
+                  { hasAnyAccess(reportPMTCT) && <Accordion
                     expanded={expanded === 'panel5'}
                     onChange={handleChange('panel5')}
                     style={{ backgroundColor: '#014D88' }}
@@ -720,7 +846,13 @@ const Reports = props => {
                         backgroundColor: '#014D88',
                       }}
                     >
-                      {Object.values(reportPMTCT).map(option => (
+                      {Object.values(reportPMTCT).map(option =>  {
+                        const canView =
+                            hasRole("RDE") ||
+                            hasPermission(option.permissionKey);
+                        // Only render if user has access
+                        if (!canView) return null;
+                        return (
                         <div
                           style={{
                             marginTop: '10px',
@@ -761,10 +893,12 @@ const Reports = props => {
                             component="li"
                           />
                         </div>
-                      ))}
+                      );
+                      })}
                     </AccordionDetails>
                   </Accordion>
-                  <Accordion
+                  }
+                  {hasAnyAccess(reportPsychosocial) && <Accordion
                     expanded={expanded === 'panel6'}
                     onChange={handleChange('panel6')}
                     style={{ backgroundColor: '#014D88' }}
@@ -785,7 +919,13 @@ const Reports = props => {
                         backgroundColor: '#014D88',
                       }}
                     >
-                      {Object.values(reportPsychosocial).map(option => (
+                      {Object.values(reportPsychosocial).map(option => {
+                        const canView =
+                            hasRole("RDE") ||
+                            hasPermission(option.permissionKey);
+                        // Only render if user has access
+                        if (!canView) return null;
+                        return (
                         <div
                           style={{
                             marginTop: '10px',
@@ -826,11 +966,12 @@ const Reports = props => {
                             component="li"
                           />
                         </div>
-                      ))}
+                        );
+                      })}
                     </AccordionDetails>
                   </Accordion>
-
-                  <Accordion
+                  }
+                  { hasAnyAccess(reportMsfs) && <Accordion
                     expanded={expanded === 'panel7'}
                     onChange={handleChange('panel7')}
                     style={{ backgroundColor: '#014D88' }}
@@ -851,7 +992,12 @@ const Reports = props => {
                         backgroundColor: '#014D88',
                       }}
                     >
-                      {Object.values(reportMsfs).map(option => (
+                      {Object.values(reportMsfs).map(option => {
+                        const canView =
+                            hasRole("RDE") ||
+                            hasPermission(option.permissionKey);
+                        if (!canView) return null;
+                        return (
                         <div
                           style={{
                             marginTop: '10px',
@@ -892,10 +1038,11 @@ const Reports = props => {
                             component="li"
                           />
                         </div>
-                      ))}
+                      )
+                      })}
                     </AccordionDetails>
                   </Accordion>
-
+                  }
                   {/* monthly Summary Form Accordion */}
                   {/* <Accordion expanded={expanded === 'panel7'} onChange={handleChange('panel7')} style={{ backgroundColor: "#014D88" }}>
         <AccordionSummary
@@ -920,7 +1067,7 @@ const Reports = props => {
 
                   <br />
 
-                  <Menu.Item
+                  { hasBasicAccess() &&  <Menu.Item
                     name="inbox"
                     style={{
                       backgroundColor: '#000',
@@ -928,8 +1075,8 @@ const Reports = props => {
                   >
                     <span style={{ color: '#fff' }}> Basic Report below </span>
                   </Menu.Item>
-
-                  <Menu.Item
+                  }
+                  {(hasRole("RDE") || hasPermission("report_radet")) && <Menu.Item
                     name="inbox"
                     active={activeItem === 'radet'}
                     onClick={() => handleItemClick1('radet')}
@@ -939,8 +1086,8 @@ const Reports = props => {
                   >
                     <span style={{ color: '#fff' }}> RADET </span>
                   </Menu.Item>
-
-                  <Menu.Item
+                  }
+                  {(hasRole("RDE") || hasPermission("report_biometric_data")) && <Menu.Item
                     name="inbox"
                     active={activeItem === 'biometric'}
                     onClick={() => handleItemClick1('biometric')}
@@ -950,8 +1097,8 @@ const Reports = props => {
                   >
                     <span style={{ color: '#fff' }}>BIOMETRIC DATA</span>
                   </Menu.Item>
-
-                  <Menu.Item
+                  }
+                  { (hasRole("RDE") || hasPermission("report_hts_report")) && <Menu.Item
                     name="inbox"
                     active={activeItem === 'hts-report'}
                     onClick={() => handleItemClick1('hts-report')}
@@ -962,8 +1109,8 @@ const Reports = props => {
                   >
                     <span style={{ color: '#fff' }}>HTS REPORT</span>
                   </Menu.Item>
-
-                  <Menu.Item
+                  }
+                  {( hasRole("RDE") || hasPermission("report_prep_cross_sectional")) && <Menu.Item
                     name="inbox"
                     active={activeItem === 'prep-report'}
                     onClick={() => handleItemClick1('prep-report')}
@@ -974,7 +1121,9 @@ const Reports = props => {
                   >
                     <span style={{ color: '#fff' }}>PrEP Cross Sectional Report</span>
                   </Menu.Item>
+                    }
                 </Menu>
+                )}
               </div>
 
               <div
