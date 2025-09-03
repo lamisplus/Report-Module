@@ -186,14 +186,14 @@ public class RADETReportQueries {
             "),\n" +
             "current_vl_result AS (SELECT * FROM (\n" +
             "  SELECT CAST(ls.date_sample_collected AS DATE ) AS dateOfCurrentViralLoadSample, sm.patient_uuid as person_uuid130 , sm.facility_id as vlFacility, sm.archived as vlArchived, acode.display as viralLoadIndication, sm.result_reported as currentViralLoad,CAST(sm.date_result_reported AS DATE) as dateOfCurrentViralLoad,\n" +
-            "ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rank2\n" +
+            "ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY ls.date_sample_collected DESC) as rank2\n" +
             "  FROM public.laboratory_result  sm\n" +
             " INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
             "  INNER JOIN public.laboratory_sample ls on ls.test_id = lt.id\n" +
             " INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication\n" +
-            "  WHERE lt.lab_test_id = 16 AND CAST(date_result_reported AS DATE) BETWEEN ?2 AND ?3\n" +
+            "  WHERE lt.lab_test_id = 16 AND CAST(ls.date_sample_collected AS DATE) BETWEEN ?2 AND ?3\n" +
             "AND  lt.viral_load_indication !=719\n" +
-            "AND sm. date_result_reported IS NOT NULL\n" +
+            "AND sm. date_result_reported IS NOT NULL AND CAST(sm. date_result_reported AS DATE) <= ?3\n" +
             "AND sm.result_reported is NOT NULL\n" +
             ")as vl_result\n" +
             "WHERE vl_result.rank2 = 1 AND vl_result.dateOfCurrentViralLoad <= ?3\n" +
