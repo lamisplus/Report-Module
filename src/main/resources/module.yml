@@ -15,3 +15,88 @@ webModules:
     name: ReportModule
     path: report
     position: 99
+permissions:
+  - name: generate_report
+    description: Generate Report
+    moduleName: ReportModule
+
+  # HTS Reports
+  - name: report_hts_report
+    description: View and generate HTS Report
+    moduleName: ReportModule
+  - name: report_hts_register
+    description: View and generate HTS Register
+    moduleName: ReportModule
+  - name: report_hivst_report
+    description: View and generate HIVST Report
+    moduleName: ReportModule
+  - name: report_hts_index_report
+    description: View and generate HTS Index Report
+    moduleName: ReportModule
+
+  # PMTCT Reports
+  - name: report_pmtct_hts
+    description: View and generate PMTCT HTS Report
+    moduleName: ReportModule
+  - name: report_pmtct_maternal_cohort
+    description: View and generate PMTCT Maternal Cohort Report
+    moduleName: ReportModule
+
+  # Prevention Reports
+  - name: report_prep_cross_sectional
+    description: View and generate PrEP Cross Sectional Report
+    moduleName: ReportModule
+  - name: report_prep_longitudinal
+    description: View and generate PrEP Longitudinal Report
+    moduleName: ReportModule
+
+  # Psychosocial
+  - name: report_mhpss_report
+    description: View and generate MHPSS Report
+    moduleName: ReportModule
+
+  # Treatment Reports
+  - name: report_radet
+    description: View and generate RADET Report
+    moduleName: ReportModule
+  - name: report_appointment
+    description: View and generate Appointment Report
+    moduleName: ReportModule
+  - name: report_patient_line_list
+    description: View and generate Patient Line List Report
+    moduleName: ReportModule
+  - name: report_pharmacy_data
+    description: View and generate Pharmacy Data Report
+    moduleName: ReportModule
+  - name: report_laboratory_data
+    description: View and generate Laboratory Data Report
+    moduleName: ReportModule
+  - name: report_clinic_data_report
+    description: View and generate Clinic Data Report
+    moduleName: ReportModule
+  - name: report_client_verification
+    description: View and generate Client Verification Report
+    moduleName: ReportModule
+  - name: report_tb_longitudinal
+    description: View and generate TB Longitudinal Report
+    moduleName: ReportModule
+  - name: report_ncd_report
+    description: View and generate NCD Report
+    moduleName: ReportModule
+  - name: report_eac_report
+    description: View and generate EAC Report
+    moduleName: ReportModule
+  - name: report_ahd_report
+    description: View and generate AHD Report
+    moduleName: ReportModule
+  - name: report_adr_report
+    description: View and generate ADR Report
+    moduleName: ReportModule
+  - name: report_custom_report
+    description: View and generate Custom Report
+    moduleName: ReportModule
+
+    # Report visualization generator
+  - name: report_visualisation_generator
+    description: View and generate report visualisation
+    moduleName: ReportModule
