@@ -151,7 +151,7 @@ const Reports = props => {
 
   const permissions = useMemo(() => {
     // RDE takes precedence: Full access to all reports (except maybe CUSTOM or sensitive ones)
-    if (hasRole("RDE")) {
+    if (hasRole("RDE") || hasRole("Super Admin")) {
       return {
         canViewHTSReport: true,
         canViewHTSRegister: true,
@@ -226,13 +226,13 @@ const Reports = props => {
       ...monthSummaryReport,
     ];
     return allReports.some(option =>
-        hasRole("RDE") || hasPermission(option.permissionKey)
+        hasRole("Super Admin") || hasRole("RDE") || hasPermission(option.permissionKey)
     );
   };
 
   const hasAnyAccess = (reportList) => {
     return reportList.some(option =>
-        hasRole("RDE") || hasPermission(option.permissionKey)
+        hasRole("Super Admin") || hasRole("RDE") || hasPermission(option.permissionKey)
     );
   };
 
@@ -245,7 +245,7 @@ const Reports = props => {
     ];
 
     return basicReports.some(r =>
-        hasRole("RDE") || hasPermission(r.perm)
+        hasRole("Super Admin") ||  hasRole("RDE") || hasPermission(r.perm)
     );
   };
 
@@ -563,6 +563,7 @@ const Reports = props => {
                       {Object.values(reportSurveillance).map(option => {
                         const canView =
                             hasRole("RDE") ||
+                            hasRole("Super Admin") ||
                             hasPermission(option.permissionKey);
                         // Only render if user has access
                         if (!canView) return null;
@@ -630,7 +631,7 @@ const Reports = props => {
                     >
                       {Object.values(reportOptions).map(option =>  {
                         const canView =
-                        hasRole("RDE") ||
+                        hasRole("RDE") || hasRole("Super Admin") ||
                         hasPermission(option.permissionKey);
                         if (!canView) return null;
 
@@ -702,7 +703,7 @@ const Reports = props => {
                     >
                       {Object.values(reportBiometric).map(option => {
                         const canView =
-                            hasRole("RDE") ||
+                            hasRole("RDE") ||   hasRole("Super Admin") ||
                             hasPermission(option.permissionKey);
                         // Only render if user has access
                         if (!canView) return null;
@@ -775,7 +776,7 @@ const Reports = props => {
                     >
                       {Object.values(reportPrevention).map(option => {
                         const canView =
-                            hasRole("RDE") ||
+                            hasRole("RDE") ||   hasRole("Super Admin") ||
                             hasPermission(option.permissionKey);
                         // Only render if user has access
                         if (!canView) return null;
@@ -848,7 +849,7 @@ const Reports = props => {
                     >
                       {Object.values(reportPMTCT).map(option =>  {
                         const canView =
-                            hasRole("RDE") ||
+                            hasRole("RDE") ||   hasRole("Super Admin") ||
                             hasPermission(option.permissionKey);
                         // Only render if user has access
                         if (!canView) return null;
@@ -921,7 +922,7 @@ const Reports = props => {
                     >
                       {Object.values(reportPsychosocial).map(option => {
                         const canView =
-                            hasRole("RDE") ||
+                            hasRole("RDE") ||   hasRole("Super Admin") ||
                             hasPermission(option.permissionKey);
                         // Only render if user has access
                         if (!canView) return null;
@@ -994,7 +995,7 @@ const Reports = props => {
                     >
                       {Object.values(reportMsfs).map(option => {
                         const canView =
-                            hasRole("RDE") ||
+                            hasRole("RDE") ||   hasRole("Super Admin") ||
                             hasPermission(option.permissionKey);
                         if (!canView) return null;
                         return (
@@ -1076,7 +1077,7 @@ const Reports = props => {
                     <span style={{ color: '#fff' }}> Basic Report below </span>
                   </Menu.Item>
                   }
-                  {(hasRole("RDE") || hasPermission("report_radet")) && <Menu.Item
+                  {(hasRole("RDE") ||  hasRole("Super Admin") || hasPermission("report_radet")) && <Menu.Item
                     name="inbox"
                     active={activeItem === 'radet'}
                     onClick={() => handleItemClick1('radet')}
@@ -1087,7 +1088,7 @@ const Reports = props => {
                     <span style={{ color: '#fff' }}> RADET </span>
                   </Menu.Item>
                   }
-                  {(hasRole("RDE") || hasPermission("report_biometric_data")) && <Menu.Item
+                  { hasRole("Super Admin") || (hasRole("RDE")  || hasPermission("report_biometric_data")) && <Menu.Item
                     name="inbox"
                     active={activeItem === 'biometric'}
                     onClick={() => handleItemClick1('biometric')}
@@ -1098,7 +1099,7 @@ const Reports = props => {
                     <span style={{ color: '#fff' }}>BIOMETRIC DATA</span>
                   </Menu.Item>
                   }
-                  { (hasRole("RDE") || hasPermission("report_hts_report")) && <Menu.Item
+                  { hasRole("Super Admin") || (hasRole("RDE") || hasPermission("report_hts_report")) && <Menu.Item
                     name="inbox"
                     active={activeItem === 'hts-report'}
                     onClick={() => handleItemClick1('hts-report')}
@@ -1110,7 +1111,7 @@ const Reports = props => {
                     <span style={{ color: '#fff' }}>HTS REPORT</span>
                   </Menu.Item>
                   }
-                  {( hasRole("RDE") || hasPermission("report_prep_cross_sectional")) && <Menu.Item
+                  {( hasRole("Super Admin") || hasRole("RDE") || hasPermission("report_prep_cross_sectional")) && <Menu.Item
                     name="inbox"
                     active={activeItem === 'prep-report'}
                     onClick={() => handleItemClick1('prep-report')}
