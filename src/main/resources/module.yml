@@ -95,6 +95,10 @@ permissions:
   - name: report_custom_report
     description: View and generate Custom Report
     moduleName: ReportModule
+    # Biometric Report
+  - name: report_biometric_data
+    description: View and generate Biometric Report
+    moduleName: ReportModule
 
     # Report visualization generator
   - name: report_visualisation_generator
