@@ -63,7 +63,8 @@ const HTSReport = (props) => {
         organisationUnitName:"",
         startDate:"",
         endDate: "",
-        reportType: ""
+        reportType: "",
+        scrambler: true,
     })
     useEffect(() => {
         Facilities()
@@ -107,12 +108,19 @@ const HTSReport = (props) => {
           setObjValues ({...objValues,  startDate: "", endDate: currentDate});
         }
     }
+
+    const handleScramblerToggle = () => {
+  setObjValues(prev => ({
+    ...prev,
+    scrambler: !prev.scrambler
+  }));
+};
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true)
-        console.log(token);
+        console.log(objValues);
 
-        axios.post(`${baseUrl}hts-reporting?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}&reportType=${objValues.reportType}`,objValues.organisationUnitId,
+        axios.post(`${baseUrl}hts-reporting?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}&reportType=${objValues.reportType}&scramber=${objValues.scrambler}`,objValues.organisationUnitId,
             { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
         )
           .then(response => {
@@ -179,7 +187,7 @@ const HTSReport = (props) => {
                                     />
                                 </FormGroup>
                             </div>
-                            <div className="form-group  col-md-2">
+                            <div className="form-group  col-md-1">
                                  <FormGroup check>
                                   <Label check>
                                     <Input type="checkbox" onChange={handleValueChange}/>
@@ -187,6 +195,19 @@ const HTSReport = (props) => {
                                   </Label>
                                 </FormGroup>
                             </div>
+
+                            <div className="form-group  col-md-1">
+                                 <FormGroup>
+                                  <Label check>
+                                    <Input type="checkbox" 
+                                    checked={objValues.scrambler ? false : true}
+                                    onChange={handleScramblerToggle} 
+                                    />
+                                     {' '} &nbsp;&nbsp;<span> Unscramble </span>
+                                  </Label>
+                                </FormGroup>
+                            </div>
+
                             <div className="form-group col-md-4">
                             <FormGroup check>
   <Label check>
