@@ -129,7 +129,7 @@ public class HTSReportQuery {
             "WHEN hrs.entry_point = 'HTS_ENTRY_POINT_FACILITY' AND hrs.testing_setting = 'FACILITY_HTS_TEST_SETTING_WARD_INPATIENT' THEN 'Inpatient'\n" +
             "WHEN hrs.entry_point = 'HTS_ENTRY_POINT_FACILITY' AND hrs.testing_setting = 'FACILITY_HTS_TEST_SETTING_CT' THEN 'VCT'\n" +
             "WHEN hrs.entry_point = 'HTS_ENTRY_POINT_FACILITY' AND hrs.testing_setting = 'FACILITY_HTS_TEST_SETTING_TB' THEN 'TB_STAT/OtherPITC'\n" +
-            "WHEN hrs.entry_point = 'HTS_ENTRY_POINT_FACILITY' AND hrs.testing_setting IN ('FACILITY_HTS_TEST_SETTING_FP', 'FACILITY_HTS_TEST_SETTING_BLOOD_BANK', 'FACILITY_HTS_TEST_SETTING_STANDALONE_HTS','FACILITY_HTS_TEST_SETTING_OTHERS_(SPECIFY)') THEN 'Other PITC'\n" +
+            "WHEN hrs.entry_point = 'HTS_ENTRY_POINT_FACILITY' AND hrs.testing_setting IN ('FACILITY_HTS_TEST_SETTING_FP', 'FACILITY_HTS_TEST_SETTING_BLOOD_BANK', 'FACILITY_HTS_TEST_SETTING_STANDALONE_HTS','FACILITY_HTS_TEST_SETTING_OTHERS_(SPECIFY)', 'FACILITY_HTS_TEST_SETTING_OTHERS') THEN 'Other PITC'\n" +
             "WHEN hrs.entry_point = 'HTS_ENTRY_POINT_FACILITY' AND hrs.testing_setting ='FACILITY_HTS_TEST_SETTING_STI' THEN 'STI'\n" +
             "WHEN hrs.entry_point = 'HTS_ENTRY_POINT_FACILITY' AND hrs.testing_setting ='FACILITY_HTS_TEST_SETTING_SNS' THEN 'SNS'\n" +
             "WHEN hrs.entry_point = 'HTS_ENTRY_POINT_FACILITY' AND hrs.testing_setting ='FACILITY_HTS_TEST_SETTING_INDEX' THEN 'Index'\n" +
