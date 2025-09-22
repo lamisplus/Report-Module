@@ -203,7 +203,7 @@ const HTSReport = (props) => {
                                     checked={objValues.scrambler ? false : true}
                                     onChange={handleScramblerToggle} 
                                     />
-                                     {' '} &nbsp;&nbsp;<span> Unscramble </span>
+                                     {' '} &nbsp;<span> <em><strong>Unscramble </strong></em> </span>
                                   </Label>
                                 </FormGroup>
                             </div>

@@ -92,7 +92,7 @@ public class ARTPATIENTReportQuery {
             "FROM\n" +
             "    laboratory_order lo\n" +
             "        INNER JOIN hiv_enrollment h ON h.person_uuid = lo.patient_uuid\n" +
-            "        LEFT JOIN laboratory_test lt ON lt.lab_order_id = lo.id\n" +
+            "        LEFT JOIN laboratory_test lt ON lt.lab_order_id = lo.id AND lt.lab_test_id = 16\n" +
             "        LEFT JOIN laboratory_labtest ll ON ll.id = lt.lab_test_id AND ll.lab_test_name = 'Viral Load'\n" +
             "\n" +
             "        LEFT JOIN laboratory_sample ls ON ls.test_id = lt.id AND ls.patient_uuid = lo.patient_uuid\n" +
