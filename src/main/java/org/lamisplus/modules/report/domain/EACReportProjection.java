@@ -42,12 +42,12 @@ public interface EACReportProjection {
 
     Integer getNumberOfEACSessionsCompleted();
     LocalDate getDateOfRepeatViralLoadPostEACSampleCollected();
-    Double getRepeatViralLoadResultPostEAC();
+    String getRepeatViralLoadResultPostEAC();
     LocalDate getDateOfRepeatViralLoadResultPostEACVL();
     String getReferredToSwitchCommittee();
     String getEligibleForSwitch();
     LocalDate getDateOfRepeatViralLoadPostSwitchEACSampleCollected();
-    Double getRepeatViralLoadResultPostSwitchEAC();
+    String getRepeatViralLoadResultPostSwitchEAC();
     LocalDate getDateOfRepeatViralLoadResultPostSwitchEACVL();
     String getMethodOfPostSwitchEACSession();
     String getReferredToSwitchCommitteePostSwitchEAC();
