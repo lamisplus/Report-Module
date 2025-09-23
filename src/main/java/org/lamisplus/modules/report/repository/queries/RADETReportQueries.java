@@ -394,13 +394,17 @@ public class RADETReportQueries {
             "join current_eac ce on ce.uuid = hes.eac_id where ce.row = 1 and hes.archived = 0 and hes.status is not null and hes.eac_session_date between ?2 and ?3 \n" +
             "  and hes.status not in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC','FOURTH EAC', 'FIFTH EAC', 'SIXTH EAC')) as exe where row = 1), \n" +
             "post_eac_vl as ( \n" +
-            " select * from(select lt.patient_uuid, cast(ls.date_sample_collected as date), lr.result_reported, cast(lr.date_result_reported as date), \n" +
-            "ROW_NUMBER() OVER (PARTITION BY lt.patient_uuid ORDER BY ls.date_sample_collected DESC) AS row \n" +
-            " from laboratory_test lt \n" +
-            " left join laboratory_sample ls on ls.test_id = lt.id \n" +
-            " left join laboratory_result lr on lr.test_id = lt.id \n" +
-            "where lt.viral_load_indication = 302 and lt.archived = 0 and ls.archived = 0 \n" +
-            " and ls.date_sample_collected between ?2 and ?3) pe where row = 1 ) \n" +
+            "select * from(\n" +
+            "  SELECT CAST(ls.date_sample_collected AS DATE ) AS date_sample_collected, sm.patient_uuid as patient_uuid , sm.facility_id as vlFacility, sm.archived as vlArchived, acode.display as viralLoadIndication, sm.result_reported as result_reported, CAST(sm.date_result_reported AS DATE) as date_result_reported,\n" +
+            "ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY ls.date_sample_collected DESC) as row\n" +
+            "  FROM public.laboratory_result  sm\n" +
+            " INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
+            "  INNER JOIN public.laboratory_sample ls on ls.test_id = lt.id\n" +
+            " INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication\n" +
+            "  WHERE lt.lab_test_id = 16 AND CAST(ls.date_sample_collected AS DATE) BETWEEN ?2 AND ?3\n" +
+            "AND  lt.viral_load_indication IN (302, 305, 304)\n" +
+            "AND CAST(sm. date_result_reported AS DATE) <= ?3\n" +
+            ") pe where row = 1) \n" +
             "select fe.person_uuid as person_uuid50, fe.eac_session_date as dateOfCommencementOfEAC, le.eac_session_date as dateOfLastEACSessionCompleted, \n" +
             "ec.no_eac_session as numberOfEACSessionCompleted, exe.eac_session_date as dateOfExtendEACCompletion, \n" +
             "pvl.result_reported as repeatViralLoadResult, pvl.date_result_reported as DateOfRepeatViralLoadResult, \n" +
