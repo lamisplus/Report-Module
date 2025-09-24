@@ -1027,7 +1027,7 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(familyIndex.getElicitedClientPhoneNumber()));
 					map.put(index++, getStringValue(familyIndex.getElicitedClientAddress()));
 					map.put(index++, getStringValue(familyIndex.getRelationshipWithIndex()));
-					map.put(index++, getStringValue(null));
+					map.put(index++, getStringValue(familyIndex.getRelationshipWithIndex()));
 					map.put(index++, getStringValue(null));
 					map.put(index++, getStringValue(familyIndex.getModeOfNotification()));
 					map.put(index++, getStringValue(null));
