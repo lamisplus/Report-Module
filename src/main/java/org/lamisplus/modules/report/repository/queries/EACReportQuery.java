@@ -142,53 +142,17 @@ public class EACReportQuery {
             "SELECT person_uuid, visit_id, eac_id, eac_session_date,COUNT(eac_id) OVER (PARTITION BY eac_id) AS no_eac_session\n" +
             "FROM hiv_eac_session WHERE archived = 0 AND eac_session_date between ?2 and ?3 AND status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC','FOURTH EAC', 'FIFTH EAC', 'SIXTH EAC') order by eac_session_date DESC) subQ \n" +
             ") countEac WHERE rnkk = 1), " +
-            "post_eac_vl1 as ( " +
-            "    WITH current_eac AS ( " +
-            "        SELECT person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
-            "        FROM hiv_eac " +
-            "        WHERE archived = 0 " +
-            "    ), " +
-            "    eac_session_date AS ( " +
-            "        SELECT hes.person_uuid, MAX(hes.eac_session_date) AS eac_session_date " +
-            "        FROM hiv_eac_session hes " +
-            "        JOIN current_eac ce ON ce.uuid = hes.eac_id " +
-            "        WHERE " +
-            "            ce.row = 1 " +
-            "            AND hes.archived = 0 and hes.eac_session_date isnull " +
-            "            AND hes.eac_session_date BETWEEN ?2 AND ?3 " +
-            "            AND hes.status IN ('FIRST EAC', 'SECOND EAC', 'THIRD EAC', 'FOURTH EAC', 'FIFTH EAC', 'SIXTH EAC') " +
-            "        GROUP BY " +
-            "            hes.person_uuid " +
-            "    ), " +
-            "    vl AS ( " +
-            "        SELECT " +
-            "            lt.patient_uuid, " +
-            "            CAST(ls.date_sample_collected AS DATE) AS date_sample_collected, " +
-            "            lr.result_reported, " +
-            "            CAST(lr.date_result_reported AS DATE) AS date_result_reported, " +
-            "            ROW_NUMBER() OVER (PARTITION BY lt.patient_uuid ORDER BY lr.date_result_reported DESC) AS row "
-            +
-            "        FROM laboratory_test lt " +
-            "        LEFT JOIN laboratory_sample ls ON ls.test_id = lt.id AND ls.archived = 0 " +
-            "        LEFT JOIN laboratory_result lr ON lr.test_id = lt.id AND lr.date_result_reported BETWEEN ?2 AND ?3 " +
-            "        WHERE lt.viral_load_indication = 302 AND lt.archived = 0 " +
-            "    ) " +
-            "    SELECT " +
-            "        pev.person_uuid as person_uuid11, " +
-            "        pev.dateOfRepeatViralLoadResultPostEACVL, " +
-            "        pev.dateOfRepeatViralLoadPostEACSampleCollected, " +
-            "        pev.repeatViralLoadResultPostEAC " +
-            "    FROM ( " +
-            "        SELECT " +
-            "            ed.person_uuid, " +
-            "            vl.date_result_reported AS dateOfRepeatViralLoadResultPostEACVL, " +
-            "            vl.date_sample_collected AS dateOfRepeatViralLoadPostEACSampleCollected, " +
-            "            vl.result_reported AS repeatViralLoadResultPostEAC, " +
-            "            ROW_NUMBER() OVER (PARTITION BY vl.patient_uuid ORDER BY vl.date_result_reported DESC) AS row " +
-            "        FROM eac_session_date ed " +
-            "        JOIN vl ON vl.patient_uuid = ed.person_uuid AND vl.date_result_reported <= ed.eac_session_date " +
-            "    ) pev WHERE pev.row = 1 " +
-            "), " +
+            "post_eac_vl1 as (select * from(\n" +
+            "    SELECT CAST(ls.date_sample_collected AS DATE ) AS dateOfRepeatViralLoadPostEACSampleCollected, sm.patient_uuid as person_uuid11 , sm.facility_id as vlFacility, sm.archived as vlArchived, acode.display as viralLoadIndication, sm.result_reported as repeatViralLoadResultPostEAC, CAST(sm.date_result_reported AS DATE) as dateOfRepeatViralLoadResultPostEACVL,\n" +
+            "  ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY ls.date_sample_collected DESC) as row\n" +
+            "  FROM public.laboratory_result  sm\n" +
+            "  INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
+            "  INNER JOIN public.laboratory_sample ls on ls.test_id = lt.id\n" +
+            "   INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication\n" +
+            "  WHERE lt.lab_test_id = 16 AND CAST(ls.date_sample_collected AS DATE) BETWEEN ?2 AND ?3\n" +
+            "AND  lt.viral_load_indication IN (302, 305, 304) \n" +
+            "AND CAST(sm. date_result_reported AS DATE) <= ?3 \n" +
+            ") pe where row = 1 ), " +
             "post_eac_vl2 as ( " +
             "    WITH current_eac AS ( " +
             "        SELECT person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row " +
@@ -201,24 +165,24 @@ public class EACReportQuery {
             "        JOIN current_eac ce ON ce.uuid = hes.eac_id " +
             "        WHERE " +
             "            ce.row = 1 " +
-            "            AND hes.archived = 0 and hes.eac_session_date isnull " +
+            "            AND hes.archived = 0 and hes.eac_session_date is not null " +
             "            AND hes.eac_session_date BETWEEN ?2 AND ?3 " +
             "            AND hes.status IN ('SEVENTH EAC', 'EIGHTH EAC', 'NINTH EAC') " +
             "        GROUP BY " +
             "            hes.person_uuid " +
             "    ), " +
             "    vl AS ( " +
-            "        SELECT " +
-            "            lt.patient_uuid, " +
-            "            CAST(ls.date_sample_collected AS DATE) AS date_sample_collected, " +
-            "            lr.result_reported, " +
-            "            CAST(lr.date_result_reported AS DATE) AS date_result_reported, " +
-            "            ROW_NUMBER() OVER (PARTITION BY lt.patient_uuid ORDER BY lr.date_result_reported DESC) AS row " +
-            "        FROM laboratory_test lt " +
-            "        LEFT JOIN laboratory_sample ls ON ls.test_id = lt.id AND ls.archived = 0 " +
-            "        LEFT JOIN laboratory_result lr ON lr.test_id = lt.id AND lr.date_result_reported BETWEEN ?2 AND ?3 " +
-            "        WHERE lt.viral_load_indication = 302 AND lt.archived = 0 " +
-            "    ) " +
+            "        select * from(\n" +
+            "  SELECT CAST(ls.date_sample_collected AS DATE ) AS date_sample_collected, sm.patient_uuid as patient_uuid , sm.facility_id as vlFacility, sm.archived as vlArchived, acode.display as viralLoadIndication, sm.result_reported as result_reported, CAST(sm.date_result_reported AS DATE) as date_result_reported,\n" +
+            "  ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY ls.date_sample_collected DESC) as row\n" +
+            "  FROM public.laboratory_result  sm\n" +
+            "  INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
+            "  INNER JOIN public.laboratory_sample ls on ls.test_id = lt.id\n" +
+            "   INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication\n" +
+            "  WHERE lt.lab_test_id = 16 AND CAST(ls.date_sample_collected AS DATE) BETWEEN ?2 AND ?3\n" +
+            "AND  lt.viral_load_indication IN (302, 305, 304) \n" +
+            "AND CAST(sm. date_result_reported AS DATE) <= ?3 \n" +
+            ") pe where row = 1    ) " +
             "    SELECT " +
             "        pev.person_uuid as person_uuid12, " +
             "        pev.dateOfRepeatViralLoadResultPostSwitchEACVL, " +
