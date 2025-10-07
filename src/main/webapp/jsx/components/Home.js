@@ -1,7 +1,9 @@
-import React, {useState, Fragment } from "react";
+import React, {useState, Fragment, useMemo} from "react";
 import { Row, Col, Card,  Tab, Tabs, } from "react-bootstrap";
 import Reports from './Reports/Index'
 import Visualisation from './Visualisation/Index'
+import {useRoles} from "../../hooks/useRoles";
+import {usePermissions} from "../../hooks/usePermissions";
 
 const divStyle = {
   borderRadius: "2px",
@@ -10,7 +12,8 @@ const divStyle = {
 
 const Home = () => {
     const [key, setKey] = useState('home');
-
+    const { hasRole, loading: rolesLoading } = useRoles();
+    const { hasPermission, hasAnyPermission  }  = usePermissions();
 
   return (
     <Fragment>  
@@ -36,9 +39,10 @@ const Home = () => {
                   <Tab eventKey="home" title="GENERAL REPORT">                   
                     <Reports />
                   </Tab>
-                  <Tab eventKey="checked-in" title="REPORT VISUALISATION GENERATOR">                   
+                  { (hasRole("RDE") || hasPermission("report_visualisation_generator")) && <Tab eventKey="checked-in" title="REPORT VISUALISATION GENERATOR">
                     <Visualisation />
-                  </Tab>                   
+                  </Tab>
+                  }
                 </Tabs>
               </div>
             </Card.Body>

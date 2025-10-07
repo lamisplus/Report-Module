@@ -739,7 +739,7 @@ public class GenerateExcelDataHelper {
 	}
 
 
-	public  List<Map<Integer, Object>> fillHtsDataMapper(@NonNull List<HtsReportDto> htsReportDtos, String reportType) {
+	public  List<Map<Integer, Object>> fillHtsDataMapper(@NonNull List<HtsReportDto> htsReportDtos, String reportType, Boolean scramble) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		int sn = 1;
 		Log.info("converting HTS db records to excel ....");
@@ -753,15 +753,15 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFacility())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getClientCode())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPatientId())));
-					map.put(index++, getStringValue(String.valueOf(scrambler.scrambleCharacters(htsReportDto.getFirstName()))));
-					map.put(index++, getStringValue(String.valueOf(htsReportDto.getSurname() != null ? scrambler.scrambleCharacters(htsReportDto.getSurname()) :"")));
-					map.put(index++, getStringValue(String.valueOf(htsReportDto.getOtherName() != null ? scrambler.scrambleCharacters(htsReportDto.getOtherName()): "")));
+					map.put(index++, getStringValue(String.valueOf(scramble ? scrambler.scrambleCharacters(htsReportDto.getFirstName()) : htsReportDto.getFirstName())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getSurname() != null ? (scramble ? scrambler.scrambleCharacters(htsReportDto.getSurname()) : htsReportDto.getSurname()) : "" )));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getOtherName() != null ? (scramble ? scrambler.scrambleCharacters(htsReportDto.getOtherName()) : htsReportDto.getOtherName()) : "")));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getSex())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getAge())));
 					map.put(index++, htsReportDto.getDateOfBirth());
-					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPhoneNumber() != null ? scrambler.scrambleNumbers(htsReportDto.getPhoneNumber()) : "")));
+                    map.put(index++, getStringValue(String.valueOf(htsReportDto.getPhoneNumber() != null ? (scramble ? scrambler.scrambleCharacters(htsReportDto.getPhoneNumber()) : htsReportDto.getPhoneNumber()) : "")));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getMaritalStatus())));
-					map.put(index++, htsReportDto.getClientAddress() != null ? getStringValue(String.valueOf(scrambler.scrambleCharacters(htsReportDto.getClientAddress()))).replace("\"", ""):"");
+                    map.put(index++, getStringValue(String.valueOf(htsReportDto.getClientAddress() != null ? (scramble ? scrambler.scrambleCharacters(htsReportDto.getClientAddress()).replace("\"", "") : htsReportDto.getClientAddress()) : "" )));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getLgaOfResidence())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getStateOfResidence())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getEducation())));
@@ -1027,7 +1027,7 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(familyIndex.getElicitedClientPhoneNumber()));
 					map.put(index++, getStringValue(familyIndex.getElicitedClientAddress()));
 					map.put(index++, getStringValue(familyIndex.getRelationshipWithIndex()));
-					map.put(index++, getStringValue(null));
+					map.put(index++, getStringValue(familyIndex.getRelationshipWithIndex()));
 					map.put(index++, getStringValue(null));
 					map.put(index++, getStringValue(familyIndex.getModeOfNotification()));
 					map.put(index++, getStringValue(null));

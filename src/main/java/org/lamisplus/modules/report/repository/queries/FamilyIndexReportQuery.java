@@ -75,7 +75,7 @@ public class FamilyIndexReportQuery {
             "        CASE WHEN pns.hts_client_information->>'partnerAge' ~ '^[0-9]+$' THEN CAST(pns.hts_client_information->>'partnerAge' AS INTEGER) ELSE 0 END AS elicitedAge,\n" +
             "        pns.hts_client_information->>'partnerName' AS elicitedClientName, \n" +
             "        (select display from base_application_codeset where id = CASE WHEN pns.hts_client_information->>'partnerSex' ~ '^[0-9]+$' THEN CAST(pns.hts_client_information->>'partnerSex' AS INTEGER) ELSE 0 END) AS elicitedClientSex, \n" +
-            "        pns.hts_client_information->>'partnerAddress' AS elicitedClientAddress, \n" +
+            "        COALESCE(pns.hts_client_information->>'descriptiveResidentialAddress', pns.hts_client_information->>'partnerAddress') AS elicitedClientAddress, \n" +
             "        pns.contact_tracing->>'partnerPhoneNumber' AS elicitedClientPhoneNumber,\n" +
             "        pns.date_partner_tested AS elicitedClientTestedHiv, \n" +
             "        pns.hiv_test_result AS elicitedClientHivResult, \n" +
