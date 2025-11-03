@@ -146,7 +146,7 @@ public class PMTCTReportQuery {
             "MAX(created_date) AS max_created_date_anc\n" +
             "FROM pmtct_anc\n" +
             "GROUP BY person_uuid, anc_setting, first_anc_date, gaweeks, gravida, parity, tested_syphilis, test_result_syphilis, partner_information, anc_no, static_hiv_status, \n" +
-            "pmtct_hts_info,syphilisTreatmentStatus,previously_known_hiv_status, treated_hepatitisb, community_setting ) anc WHERE rnk1 = 1 AND firstAncDate BETWEEN ?2 AND ?3\n" +
+            "pmtct_hts_info,syphilisTreatmentStatus,previously_known_hiv_status, treated_hepatitisb, community_setting, facility_enrolled_in) anc WHERE rnk1 = 1 AND firstAncDate BETWEEN ?2 AND ?3\n" +
             "),\n" +
             "delivery AS (\n" +
             "SELECT * FROM (\n" +
