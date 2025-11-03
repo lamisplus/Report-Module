@@ -551,7 +551,7 @@ public class Constants {
 			"Date Of Maternal Retesting",
 			"Maternal Retesting Result",
 			"Mother''s ART Start Date",
-			"Previously Known HIV Status",
+			"Previously Known HIV +Ve Status",
 			"Mother''s Unique ID",
 			"Linked to Syphilis Treatment"
 	);
