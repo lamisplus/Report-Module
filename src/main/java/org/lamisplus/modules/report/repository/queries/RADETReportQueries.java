@@ -374,7 +374,7 @@ public class RADETReportQueries {
             "WHEN eacSession.status = 'THIRD EAC' THEN COALESCE (secondEac.sessionDate, firstEac.sessionDate)\n" +
             "WHEN eacSession.status = 'FOURTH EAC' THEN COALESCE (thirdEac.sessionDate, secondEac.sessionDate, firstEac.sessionDate)\n" +
             "WHEN eacSession.status = 'FIFTH EAC' THEN COALESCE (fourthEac.sessionDate, thirdEac.sessionDate, secondEac.sessionDate, firstEac.sessionDate)\n" +
-            "WHEN eacSession.status = 'SIXTH EAC' THEN COALESCE (fifthEac.sessionDate, fourthEac.sessionDate, thirdEac.sessionDate, secondEac.sessionDate, firstEac.sessionDate) END) AS dateOfLastEACSessionCompletede, \n" +
+            "WHEN eacSession.status = 'SIXTH EAC' THEN COALESCE (fifthEac.sessionDate, fourthEac.sessionDate, thirdEac.sessionDate, secondEac.sessionDate, firstEac.sessionDate) END) AS dateOfLastEACSessionCompleted, \n" +
             "COALESCE (fifthEac.sessionDate,sixthEac.sessionDate) dateOfExtendEACCompletion, \n" +
             "(CASE WHEN postEacVl.date_sample_collected >= fourthEac.sessionDate  THEN postEacVl.date_sample_collected END) dateOfRepeatViralLoadEACSampleCollection, (CASE WHEN postEacVl.date_sample_collected >= fourthEac.sessionDate THEN postEacVl.result_reported END) repeatViralLoadResult, \n" +
             "(CASE WHEN postEacVl.date_sample_collected >= fourthEac.sessionDate THEN postEacVl.date_result_reported END) dateOfRepeatViralLoadResult, eacSession.status, eacSession.eac_session_date FROM \n" +
