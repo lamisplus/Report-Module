@@ -123,7 +123,7 @@ public class PMTCTReportQuery {
             "first_anc_date AS firstAncDate,\n" +
             "gaweeks AS gaweeksAnc,\n" +
             "gravida AS gravidaAnc,\n" +
-            "parity As parityAnc,\n" +
+            "parity As parityAnc, facility_enrolled_in facilityEnrolledIn,\n" +
             "tested_syphilis AS testedSyphilisAnc,\n" +
             "test_result_syphilis AS testResultSyphilisAnc,\n" +
             "CASE\n" +
@@ -146,7 +146,7 @@ public class PMTCTReportQuery {
             "MAX(created_date) AS max_created_date_anc\n" +
             "FROM pmtct_anc\n" +
             "GROUP BY person_uuid, anc_setting, first_anc_date, gaweeks, gravida, parity, tested_syphilis, test_result_syphilis, partner_information, anc_no, static_hiv_status, \n" +
-            "pmtct_hts_info,syphilisTreatmentStatus,previously_known_hiv_status, treated_hepatitisb, community_setting ) anc WHERE rnk1 = 1 AND firstAncDate BETWEEN ?2 AND ?3\n" +
+            "pmtct_hts_info,syphilisTreatmentStatus,previously_known_hiv_status, treated_hepatitisb, community_setting, facility_enrolled_in) anc WHERE rnk1 = 1 AND firstAncDate BETWEEN ?2 AND ?3\n" +
             "),\n" +
             "delivery AS (\n" +
             "SELECT * FROM (\n" +
@@ -178,7 +178,7 @@ public class PMTCTReportQuery {
             "SELECT\n" +
             "    pmtctHts.personUuid,  pmtctHts.maritalStatus, pmtctHts.hospitalNumber, pmtctHts.motherDob, pmtctHts.motherAge, pmtctHts.state, pmtctHts.lgaName,pmtctHts.facilityName,\n" +
             "    hts.hivTestResult, hts.dateOfVisit, hts.hivEnrollmentDate, hts.hivUniqueId, hts.pepfarModalities, hts.gonModalities,  hts.maternalRetestingDate, hts.maternalRetestingResult,\n" +
-            "    anc.gaweeksAnc, anc.previouslyKnownHIVPositive, anc.receivedHivRetestedResult, anc.dateTestedHivPositive, anc.acceptedHIVTesting, anc.hivRestested, anc.referredTo, anc.acceptHivTest, anc.syphillisStatus, anc.syphilisTreatmentStatus, anc.testResultSyphilisAnc, anc.TestedSyphilisAnc, anc.previouslyKnownHivStatus, anc.ancSettingAnc, anc.firstAncDate, anc.gravidaAnc, anc.parityAnc, del.date_of_delivery, del.hbstatusDelivery, knw.art_start_date,\n" +
+            "    anc.gaweeksAnc, anc.facilityEnrolledIn, anc.previouslyKnownHIVPositive, anc.receivedHivRetestedResult, anc.dateTestedHivPositive, anc.acceptedHIVTesting, anc.hivRestested, anc.referredTo, anc.acceptHivTest, anc.syphillisStatus, anc.syphilisTreatmentStatus, anc.testResultSyphilisAnc, anc.TestedSyphilisAnc, anc.previouslyKnownHivStatus, anc.ancSettingAnc, anc.firstAncDate, anc.gravidaAnc, anc.parityAnc, del.date_of_delivery, del.hbstatusDelivery, knw.art_start_date,\n" +
             "hts.DateStarted,hts.DateConfirmHiv, hts.DateOfRegistrationOnHiv, hts.EntryPoint, hts.TestingSetting, hts.PmtctEnrollmentDate, hts.DateOfViralLoad, hts.ResultReported, hts.DateResultReported,\n" +
             "hts.RencencyTestType,hts.HepatitisCTestDate, hts.HepatitisBTestDate, hts.FinalRecencyResult, hts.RencencyInterpretation, hts.RencencyTestDate, hts.SampleType, hts.RencencyId, hts.OptOutRTRIStatus, hts.OptOutRTRI, hts.hepatitisCTestResult, hts.hepatitisBTestResult\n" +
             "FROM pmtctHts\n" +
@@ -192,7 +192,7 @@ public class PMTCTReportQuery {
             "SELECT\n" +
             "    pmtctHts.personUuid, pmtctHts.maritalStatus, pmtctHts.hospitalNumber, pmtctHts.motherDob, pmtctHts.motherAge, pmtctHts.state, pmtctHts.lgaName, pmtctHts.facilityName,\n" +
             "    NULL AS hivTestResult, NULL AS dateOfVisit, knw.dateEnrolled AS hivEnrollmentDate, knw.uniqueId AS hivUniqueId, NULL AS pepfarModalities, NULL AS gonModalities, NULL AS maternalRetestingDate,\n" +
-            "    NULL AS maternalRetestingResult, anc.gaweeksAnc, anc.previouslyKnownHIVPositive, anc.receivedHivRetestedResult, anc.dateTestedHivPositive, anc.acceptedHIVTesting, anc.hivRestested, anc.referredTo, anc.acceptHivTest, anc.syphillisStatus,  anc.syphilisTreatmentStatus, anc.testResultSyphilisAnc, anc.TestedSyphilisAnc, anc.previouslyKnownHivStatus, anc.ancSettingAnc,  anc.firstAncDate, anc.gravidaAnc, anc.parityAnc, del.date_of_delivery, del.hbstatusDelivery, knw.art_start_date,\n" +
+            "    NULL AS maternalRetestingResult, anc.gaweeksAnc, anc.facilityEnrolledIn, anc.previouslyKnownHIVPositive, anc.receivedHivRetestedResult, anc.dateTestedHivPositive, anc.acceptedHIVTesting, anc.hivRestested, anc.referredTo, anc.acceptHivTest, anc.syphillisStatus,  anc.syphilisTreatmentStatus, anc.testResultSyphilisAnc, anc.TestedSyphilisAnc, anc.previouslyKnownHivStatus, anc.ancSettingAnc,  anc.firstAncDate, anc.gravidaAnc, anc.parityAnc, del.date_of_delivery, del.hbstatusDelivery, knw.art_start_date,\n" +
             "    NULL AS DateStarted, NULL AS DateConfirmHiv, NULL AS DateOfRegistrationOnHiv, NULL AS EntryPoint, NULL AS TestingSetting, NULL AS PmtctEnrollmentDate, knw.DateOfViralLoad, knw.ResultReported, knw.DateResultReported,\n" +
             "NULL AS RencencyTestType, NULL AS HepatitisCTestDate, NULL ASHepatitisBTestDate, NULL AS FinalRecencyResult, NULL AS RencencyInterpretation, NULL AS RencencyTestDate, NULL AS SampleType, NULL AS RencencyId, NULL AS OptOutRTRIStatus, NULL AS OptOutRTRI, NULL AS hepatitisCTestResult, NULL AS hepatitisBTestResult\n" +
             "FROM pmtctHts\n" +

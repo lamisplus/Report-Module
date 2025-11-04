@@ -62,6 +62,7 @@ public interface PmtctDto {
     String getRencencyTestType();
     LocalDate getHepatitisBTestDate();
     LocalDate getHepatitisCTestDate();
+    String getFacilityEnrolledIn();
 
 
 }
