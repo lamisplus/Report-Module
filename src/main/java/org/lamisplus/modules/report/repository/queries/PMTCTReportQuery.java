@@ -123,7 +123,7 @@ public class PMTCTReportQuery {
             "first_anc_date AS firstAncDate,\n" +
             "gaweeks AS gaweeksAnc,\n" +
             "gravida AS gravidaAnc,\n" +
-            "parity As parityAnc, facility_enrolled_in facilityEnrolledIn,\n" +
+            "parity As parityAnc, facility_enrolled_in AS facilityEnrolledIn,\n" +
             "tested_syphilis AS testedSyphilisAnc,\n" +
             "test_result_syphilis AS testResultSyphilisAnc,\n" +
             "CASE\n" +
