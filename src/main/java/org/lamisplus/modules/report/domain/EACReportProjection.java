@@ -37,6 +37,7 @@ public interface EACReportProjection {
     LocalDate getDateOfThirdEACSessionCompleted();
     String getMethodOfThirdEACSession();
     LocalDate getDateOfCommencementOfFourthEAC();
+    LocalDate getDateOfCommencementOfFifthEAC();
     LocalDate getDateOfFourthEACSessionCompleted();
     String getMethodOfFourthEACSession();
 
