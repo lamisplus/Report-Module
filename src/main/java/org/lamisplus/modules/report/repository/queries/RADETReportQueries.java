@@ -358,43 +358,52 @@ public class RADETReportQueries {
             " LEFT JOIN laboratory_result lr ON lt.id = lr.test_id\n" +
             " WHERE lt.lab_test_id IN (86, 65, 67, 64, 58, 51, 73, 72, 71) and sm.archived = 0 AND sm.date_sample_collected IS NOT NULL AND (lr.result_reported ILIKE '%negative%' OR lr.result_reported ILIKE '%MTB not detected%')\n" +
             "),\n" +
-            "eac as ( \n" +
-            "with first_eac as ( \n" +
-            " select * from (with current_eac as (\n" +
-            "select id, person_uuid, uuid, status, \n" +
-            " ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row \n" +
-            "from hiv_eac where archived = 0) \n" +
-            " select ce.id, ce.person_uuid, hes.eac_session_date, \n" +
-            " ROW_NUMBER() OVER (PARTITION BY hes.person_uuid ORDER BY hes.eac_session_date ASC ) AS row from hiv_eac_session hes \n" +
-            "join current_eac ce on ce.uuid = hes.eac_id where ce.row = 1 and hes.archived = 0 \n" +
-            "  and hes.eac_session_date between ?2 and ?3 \n" +
-            "  and hes.status in ('FIRST EAC')) as fes where row = 1), \n" +
-            "last_eac as ( \n" +
-            " select * from (with current_eac as ( \n" +
-            "select id, person_uuid, uuid, status, \n" +
-            " ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row \n" +
-            "from hiv_eac where archived = 0) \n" +
-            " select ce.id, ce.person_uuid, hes.eac_session_date, \n" +
-            " ROW_NUMBER() OVER (PARTITION BY hes.person_uuid ORDER BY hes.eac_session_date DESC ) AS row from hiv_eac_session hes \n" +
-            "join current_eac ce on ce.uuid = hes.eac_id where ce.row = 1 and hes.archived = 0 \n" +
-            "  and hes.eac_session_date between ?2 and ?3 \n" +
-            "  and hes.status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC','FOURTH EAC', 'FIFTH EAC', 'SIXTH EAC')) as les where row = 1), \n" +
-            "eac_count as (SELECT person_uuid, no_eac_session FROM (\n" +
-            "SELECT person_uuid, eac_id,  no_eac_session, eac_session_date, ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY eac_session_date DESC ) AS rnkk FROM (\n" +
-            "SELECT person_uuid, visit_id, eac_id, eac_session_date,COUNT(eac_id) OVER (PARTITION BY eac_id) AS no_eac_session\n" +
-            "FROM hiv_eac_session WHERE archived = 0 AND eac_session_date between ?2 and ?3 AND status in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC','FOURTH EAC', 'FIFTH EAC', 'SIXTH EAC') order by eac_session_date DESC) subQ \n" +
-            ") countEac WHERE rnkk = 1 ), \n" +
-            "extended_eac as (\n" +
-            " select * from (with current_eac as ( \n" +
-            "select id, person_uuid, uuid, status, \n" +
-            " ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row \n" +
-            "from hiv_eac where archived = 0) \n" +
-            " select ce.id, ce.person_uuid, hes.eac_session_date, \n" +
-            " ROW_NUMBER() OVER (PARTITION BY hes.person_uuid ORDER BY hes.eac_session_date DESC ) AS row from hiv_eac_session hes \n" +
-            "join current_eac ce on ce.uuid = hes.eac_id where ce.row = 1 and hes.archived = 0 and hes.status is not null and hes.eac_session_date between ?2 and ?3 \n" +
-            "  and hes.status not in ('FIRST EAC', 'SECOND EAC', 'THIRD EAC','FOURTH EAC', 'FIFTH EAC', 'SIXTH EAC')) as exe where row = 1), \n" +
-            "post_eac_vl as ( \n" +
-            "select * from(\n" +
+            "eac as (SELECT enrolledEac.facility_id, enrolledEac.person_uuid person_uuid50, enrolledEac.uuid,\n" +
+            "firstEac.sessionDate dateOfCommencementOfEAC,\n" +
+            "(\n" +
+            "CASE WHEN eacSession.status = 'FIRST EAC' THEN  0\n" +
+            "WHEN eacSession.status = 'SECOND EAC' THEN 1\n" +
+            "WHEN eacSession.status = 'THIRD EAC' THEN 2\n" +
+            "WHEN eacSession.status = 'FOURTH EAC' THEN 3\n" +
+            "WHEN eacSession.status = 'FIFTH EAC' THEN 4\n" +
+            "WHEN eacSession.status = 'SIXTH EAC' THEN 5\n" +
+            "END\n" +
+            ") numberOfEACSessionCompleted, \n" +
+            "(CASE WHEN eacSession.status = 'FIRST EAC' THEN  NULL\n" +
+            "WHEN eacSession.status = 'SECOND EAC' THEN firstEac.sessionDate\n" +
+            "WHEN eacSession.status = 'THIRD EAC' THEN COALESCE (secondEac.sessionDate, firstEac.sessionDate)\n" +
+            "WHEN eacSession.status = 'FOURTH EAC' THEN COALESCE (thirdEac.sessionDate, secondEac.sessionDate, firstEac.sessionDate)\n" +
+            "WHEN eacSession.status = 'FIFTH EAC' THEN COALESCE (fourthEac.sessionDate, thirdEac.sessionDate, secondEac.sessionDate, firstEac.sessionDate)\n" +
+            "WHEN eacSession.status = 'SIXTH EAC' THEN COALESCE (fifthEac.sessionDate, fourthEac.sessionDate, thirdEac.sessionDate, secondEac.sessionDate, firstEac.sessionDate) END) AS dateOfLastEACSessionCompleted, \n" +
+            "COALESCE (fifthEac.sessionDate,sixthEac.sessionDate) dateOfExtendEACCompletion, \n" +
+            "(CASE WHEN postEacVl.date_sample_collected >= fourthEac.sessionDate  THEN postEacVl.date_sample_collected END) dateOfRepeatViralLoadEACSampleCollection, (CASE WHEN postEacVl.date_sample_collected >= fourthEac.sessionDate THEN postEacVl.result_reported END) repeatViralLoadResult, \n" +
+            "(CASE WHEN postEacVl.date_sample_collected >= fourthEac.sessionDate THEN postEacVl.date_result_reported END) dateOfRepeatViralLoadResult, eacSession.status, eacSession.eac_session_date FROM \n" +
+            "hiv_eac enrolledEac\n" +
+            "INNER JOIN (\n" +
+            "SELECT person_uuid, eac_id, eac_session_date, status, ROW_NUMBER() OVER (PARTITION BY eac_id, person_uuid ORDER BY eac_session_date DESC) eacRank,\n" +
+            "COUNT(*) OVER (PARTITION BY eac_id, person_uuid) AS eacCount\n" +
+            "FROM hiv_eac_session\n" +
+            "WHERE archived = 0 AND eac_session_date BETWEEN ?2 AND ?3\n" +
+            ") eacSession ON eacSession.eac_id = enrolledEac.uuid AND eacSession.eacRank = 1\n" +
+            "LEFT JOIN (\n" +
+            "SELECT person_uuid, eac_id, eac_session_date sessionDate, status FROM hiv_eac_session WHERE archived = 0 AND status = 'FIRST EAC'\n" +
+            ") firstEac ON firstEac.eac_id = eacSession.eac_id\n" +
+            "LEFT JOIN (\n" +
+            "SELECT person_uuid, eac_id, eac_session_date sessionDate, status FROM hiv_eac_session WHERE archived = 0 AND status = 'SECOND EAC'\n" +
+            ") secondEac ON secondEac.eac_id = eacSession.eac_id\n" +
+            "LEFT JOIN (\n" +
+            "SELECT person_uuid, eac_id, eac_session_date sessionDate, status FROM hiv_eac_session WHERE archived = 0 AND status = 'THIRD EAC'\n" +
+            ") thirdEac ON thirdEac.eac_id = eacSession.eac_id\n" +
+            "LEFT JOIN (\n" +
+            "SELECT person_uuid, eac_id, eac_session_date sessionDate, status FROM hiv_eac_session WHERE archived = 0 AND status = 'FOURTH EAC'\n" +
+            ") fourthEac ON fourthEac.eac_id = eacSession.eac_id\n" +
+            "LEFT JOIN (\n" +
+            "SELECT person_uuid, eac_id, eac_session_date sessionDate, status FROM hiv_eac_session WHERE archived = 0 AND status = 'FIFTH EAC'\n" +
+            ") fifthEac ON fifthEac.eac_id = eacSession.eac_id\n" +
+            "LEFT JOIN (\n" +
+            "SELECT person_uuid, eac_id, eac_session_date sessionDate, status FROM hiv_eac_session WHERE archived = 0 AND status = 'SIXTH EAC'\n" +
+            ") sixthEac ON sixthEac.eac_id = eacSession.eac_id\n" +
+            "LEFT JOIN (select * from(\n" +
             "  SELECT CAST(ls.date_sample_collected AS DATE ) AS date_sample_collected, sm.patient_uuid as patient_uuid , sm.facility_id as vlFacility, sm.archived as vlArchived, acode.display as viralLoadIndication, sm.result_reported as result_reported, CAST(sm.date_result_reported AS DATE) as date_result_reported,\n" +
             "ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY ls.date_sample_collected DESC) as row\n" +
             "  FROM public.laboratory_result  sm\n" +
@@ -404,16 +413,9 @@ public class RADETReportQueries {
             "  WHERE lt.lab_test_id = 16 AND CAST(ls.date_sample_collected AS DATE) BETWEEN ?2 AND ?3\n" +
             "AND  lt.viral_load_indication IN (302, 305, 304)\n" +
             "AND CAST(sm. date_result_reported AS DATE) <= ?3\n" +
-            ") pe where row = 1) \n" +
-            "select fe.person_uuid as person_uuid50, fe.eac_session_date as dateOfCommencementOfEAC, le.eac_session_date as dateOfLastEACSessionCompleted, \n" +
-            "ec.no_eac_session as numberOfEACSessionCompleted, exe.eac_session_date as dateOfExtendEACCompletion, \n" +
-            "pvl.result_reported as repeatViralLoadResult, pvl.date_result_reported as DateOfRepeatViralLoadResult, \n" +
-            "pvl.date_sample_collected as dateOfRepeatViralLoadEACSampleCollection \n" +
-            "from first_eac fe \n" +
-            "left join last_eac le on le.person_uuid = fe.person_uuid \n" +
-            "left join eac_count ec on ec.person_uuid = fe.person_uuid \n" +
-            "left join extended_eac exe on exe.person_uuid = fe.person_uuid \n" +
-            "left join post_eac_vl pvl on pvl.patient_uuid = fe.person_uuid), \n" +
+            ") pe where row = 1\n" +
+            ") postEacVl ON postEacVl.patient_uuid = enrolledEac.person_uuid\n" +
+            "WHERE archived = 0 AND facility_id = ?1), \n" +
             "dsd1 as ( \n" +
             "select person_uuid as person_uuid_dsd_1, dateOfDevolvement, modelDevolvedTo \n" +
             "from (select d.person_uuid, d.date_devolved as dateOfDevolvement, bmt.display as modelDevolvedTo, \n" +

@@ -284,19 +284,19 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getUnsuppressedVLRIndication())));
 
 				map.put(index++, eacReportProjection.getDateOfCommencementOfFirstEAC());
-				map.put(index++, eacReportProjection.getDateOfFirstEACSessionCompleted());
+				map.put(index++, eacReportProjection.getDateOfCommencementOfSecondEAC());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfFirstEACSession())));
 
 				map.put(index++, eacReportProjection.getDateOfCommencementOfSecondEAC());
-				map.put(index++, eacReportProjection.getDateOfSecondEACSessionCompleted());
+				map.put(index++, eacReportProjection.getDateOfCommencementOfThirdEAC());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfSecondEACSession())));
 
 				map.put(index++, eacReportProjection.getDateOfCommencementOfThirdEAC());
-				map.put(index++, eacReportProjection.getDateOfThirdEACSessionCompleted());
+				map.put(index++, eacReportProjection.getDateOfCommencementOfFourthEAC());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfThirdEACSession())));
 
 				map.put(index++, eacReportProjection.getDateOfCommencementOfFourthEAC());
-				map.put(index++, eacReportProjection.getDateOfFourthEACSessionCompleted());
+				map.put(index++, eacReportProjection.getDateOfCommencementOfFifthEAC());
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfFourthEACSession())));
 
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getNumberOfEACSessionsCompleted())));
