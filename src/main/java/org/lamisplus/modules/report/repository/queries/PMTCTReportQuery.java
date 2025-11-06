@@ -167,9 +167,9 @@ public class PMTCTReportQuery {
             "hts.RencencyTestType,COALESCE(htsPmtct.date_of_hiv_test, hts.HepatitisCTestDate) HepatitisCTestDate, COALESCE(htsPmtct.date_of_hiv_test, hts.HepatitisBTestDate) HepatitisBTestDate, hts.FinalRecencyResult, hts.RencencyInterpretation, hts.RencencyTestDate, hts.SampleType, hts.RencencyId, hts.OptOutRTRIStatus, hts.OptOutRTRI, COALESCE(htsPmtct.hepatitis_c, hts.hepatitisCTestResult) hepatitisCTestResult, COALESCE(htsPmtct.hepatitis_b, hts.hepatitisBTestResult) hepatitisBTestResult\n" +
             "FROM pmtctHts\n" +
             "LEFT JOIN pmtct_enrollment pe ON pmtctHts.PersonUuid = pe.person_uuid\n" +
-            "INNER JOIN ancClient anc ON pmtctHts.PersonUuid = anc.person_uuid_anc\n" +
-            "LEFT JOIN htsClient hts ON hts.person_uuid_hts_client = pmtctHts.PersonUuid AND hts.hivTestResult IS NOT NULL AND hts.hivTestResult != ''\n" +
-            "LEFT JOIN delivery del ON hts.person_uuid_hts_client = del.personUuidDelivery\n" +
+            "INNER JOIN ancClient anc ON pmtctHts.PersonUuid = anc.person_uuid_anc AND rnk1 = 1\n" +
+            "LEFT JOIN htsClient hts ON hts.person_uuid_hts_client = pmtctHts.PersonUuid AND hts.hivTestResult IS NOT NULL AND hts.hivTestResult != '' and rnk = 1 \n" +
+            "LEFT JOIN delivery del ON hts.person_uuid_hts_client = del.personUuidDelivery AND rnkk = 1\n" +
             "LEFT JOIN hiv_enrollment he ON he.person_uuid = pmtctHts.PersonUuid\n" +
-            "LEFT JOIN htsPmtct htsPmtct ON htsPmtct.personUuid100 = pmtctHts.PersonUuid";
+            "LEFT JOIN htsPmtct htsPmtct ON htsPmtct.personUuid100 = pmtctHts.PersonUuid AND rnkk1 = 1";
 }
