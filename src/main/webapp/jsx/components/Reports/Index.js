@@ -110,9 +110,9 @@ const Reports = props => {
   const reportBiometric = [
     { key: 'biometric', value: 'biometric', text: 'BIOMETRIC DATA' , permissionKey: 'report_biometric_data'},
   ];
-  const monthSummaryReport = [
-    { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary' },
-  ];
+  // const monthSummaryReport = [
+  //   { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary' },
+  // ];
 
   const reportPrevention = [
     { key: 'prep-report', value: 'prep-report', text: 'PrEP Cross Sectional', permissionKey: 'report_prep_cross_sectional' },
@@ -223,7 +223,7 @@ const Reports = props => {
       ...reportPMTCT,
       ...reportPsychosocial,
       ...reportMsfs,
-      ...monthSummaryReport,
+      // ...monthSummaryReport,
     ];
     return allReports.some(option =>
         hasRole("RDE")  || hasRole("Super Admin")|| hasPermission(option.permissionKey)

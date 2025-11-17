@@ -691,7 +691,7 @@ public class GenerateExcelDataHelper {
 					int index = 0;
 					map.put(index++, String.valueOf(sn));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getState())));
-					map.put(index++, getStringValue(String.valueOf(pmtctDto.getLga())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getLgaName())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getFacilityName())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getPersonUuid())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getHospitalNumber())));
