@@ -155,20 +155,29 @@ public class PMTCTReportQuery {
             ") del where rnkk = 1 AND date_of_delivery BETWEEN ?2 AND ?3\n" +
             "),\n" +
             "htsPmtct AS (\n" +
-            "SELECT person_uuid personUuid100, (select display from base_application_codeset where code = test_entry_point) testEntryPoint, initial_hiv_test, date_of_hiv_test, (select display from base_application_codeset where code = test_setting) testSetting, final_result, hepatitis_b, hepatitis_c, syphilis, testing_type,\n" +
+            "SELECT person_uuid personUuid100, \n" +
+            "(CASE WHEN test_entry_point = 'HTS_ENTRY_POINT_COMMUNITY' AND test_setting IN ('COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING', 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES','COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX', 'COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW') THEN 'PMTCT (ANC1 Only)' \n" +
+            "WHEN test_entry_point = 'HTS_ENTRY_POINT_FACILITY' AND test_setting IN ('FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY', 'FACILITY_HTS_TEST_SETTING_ANC') THEN 'PMTCT (ANC1 Only)'\n" +
+            "WHEN test_entry_point = 'HTS_ENTRY_POINT_FACILITY' AND test_setting = 'FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING' THEN 'PMTCT (Post ANC1: Breastfeeding)'\n" +
+            "WHEN test_entry_point = 'HTS_ENTRY_POINT_FACILITY' AND test_setting IN ('FACILITY_HTS_TEST_SETTING_RETESTING', 'FACILITY_HTS_TEST_SETTING_L&D' ) THEN 'PMTCT (Post ANC1: Pregnancy/L&D)'\n" +
+            "END) pepfarModalities, \n"+
+            "(CASE WHEN test_entry_point  = 'HTS_ENTRY_POINT_FACILITY' AND test_setting IN ('FACILITY_HTS_TEST_SETTING_ANC', 'FACILITY_HTS_TEST_SETTING_RETESTING', 'FACILITY_HTS_TEST_SETTING_L&D', 'FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING') THEN ''\n" +
+            "WHEN test_entry_point  = 'HTS_ENTRY_POINT_COMMUNITY' AND test_setting IN ('COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING', 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES','COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX', 'COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW') THEN 'Pregnant Women (Community)'\n" +
+            "END) AS gonModalities,  \n" +
+            "(select display from base_application_codeset where code = test_entry_point) testEntryPoint, initial_hiv_test, date_of_hiv_test, (select display from base_application_codeset where code = test_setting) testSetting, final_result, hepatitis_b, hepatitis_c, syphilis, testing_type,\n" +
             "ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY date_of_hiv_test DESC) AS rnkk1\n" +
             "FROM pmtct_hts\n" +
             "where archived = 0 AND date_of_hiv_test BETWEEN ?2 AND ?3\n" +
             ")\n" +
             "SELECT pmtctHts.personUuid,  pmtctHts.maritalStatus, pmtctHts.hospitalNumber, pmtctHts.motherDob, pmtctHts.motherAge, pmtctHts.state, pmtctHts.lgaName,pmtctHts.facilityName,\n" +
-            "    COALESCE(htsPmtct.final_result, hts.hivTestResult) hivTestResult, COALESCE(htsPmtct.date_of_hiv_test,hts.dateOfVisit) dateOfVisit, hts.hivEnrollmentDate, hts.hivUniqueId, hts.pepfarModalities, hts.gonModalities,  COALESCE(htsPmtct.date_of_hiv_test, hts.maternalRetestingDate) maternalRetestingDate, COALESCE(CASE WHEN htsPmtct.testing_type = 'RETESTING' THEN htsPmtct.final_result ELSE NULL END, hts.maternalRetestingResult) maternalRetestingResult,\n" +
+            "    COALESCE(htsPmtct.final_result, hts.hivTestResult) hivTestResult, COALESCE(htsPmtct.date_of_hiv_test,hts.dateOfVisit) dateOfVisit, hts.hivEnrollmentDate, hts.hivUniqueId, COALESCE(htsPmtct.pepfarModalities, hts.pepfarModalities) pepfarModalities, COALESCE(htsPmtct.gonModalities, hts.gonModalities) gonModalities,  COALESCE(htsPmtct.date_of_hiv_test, hts.maternalRetestingDate) maternalRetestingDate, COALESCE(CASE WHEN htsPmtct.testing_type = 'RETESTING' THEN htsPmtct.final_result ELSE NULL END, hts.maternalRetestingResult) maternalRetestingResult,\n" +
             "    anc.gaweeksAnc, anc.facilityEnrolledIn, anc.previouslyKnownHIVPositive, anc.receivedHivRetestedResult, anc.dateTestedHivPositive, anc.acceptedHIVTesting, anc.hivRestested, anc.referredTo, anc.acceptHivTest, anc.syphillisStatus, anc.syphilisTreatmentStatus, anc.testResultSyphilisAnc, anc.TestedSyphilisAnc, anc.previouslyKnownHivStatus, anc.ancSettingAnc, anc.firstAncDate, anc.gravidaAnc, anc.parityAnc, del.date_of_delivery, del.hbstatusDelivery, pe.art_start_date,\n" +
             "hts.DateStarted,hts.DateConfirmHiv, hts.DateOfRegistrationOnHiv, COALESCE(htsPmtct.testEntryPoint ,hts.EntryPoint) EntryPoint, COALESCE(htsPmtct.testSetting, hts.TestingSetting) TestingSetting, hts.PmtctEnrollmentDate, hts.DateOfViralLoad, hts.ResultReported, hts.DateResultReported,\n" +
             "hts.RencencyTestType,COALESCE(htsPmtct.date_of_hiv_test, hts.HepatitisCTestDate) HepatitisCTestDate, COALESCE(htsPmtct.date_of_hiv_test, hts.HepatitisBTestDate) HepatitisBTestDate, hts.FinalRecencyResult, hts.RencencyInterpretation, hts.RencencyTestDate, hts.SampleType, hts.RencencyId, hts.OptOutRTRIStatus, hts.OptOutRTRI, COALESCE(htsPmtct.hepatitis_c, hts.hepatitisCTestResult) hepatitisCTestResult, COALESCE(htsPmtct.hepatitis_b, hts.hepatitisBTestResult) hepatitisBTestResult\n" +
             "FROM pmtctHts\n" +
             "LEFT JOIN pmtct_enrollment pe ON pmtctHts.PersonUuid = pe.person_uuid\n" +
-            "INNER JOIN ancClient anc ON pmtctHts.PersonUuid = anc.person_uuid_anc AND rnk1 = 1\n" +
-            "LEFT JOIN htsClient hts ON hts.person_uuid_hts_client = pmtctHts.PersonUuid AND hts.hivTestResult IS NOT NULL AND hts.hivTestResult != '' and rnk = 1 \n" +
+            "LEFT JOIN ancClient anc ON pmtctHts.PersonUuid = anc.person_uuid_anc AND rnk1 = 1\n" +
+            "LEFT JOIN htsClient hts ON hts.person_uuid_hts_client = pmtctHts.PersonUuid AND hts.hivTestResult IS NOT NULL AND hts.hivTestResult != '' AND rnk = 1\n" +
             "LEFT JOIN delivery del ON hts.person_uuid_hts_client = del.personUuidDelivery AND rnkk = 1\n" +
             "LEFT JOIN hiv_enrollment he ON he.person_uuid = pmtctHts.PersonUuid\n" +
             "LEFT JOIN htsPmtct htsPmtct ON htsPmtct.personUuid100 = pmtctHts.PersonUuid AND rnkk1 = 1";

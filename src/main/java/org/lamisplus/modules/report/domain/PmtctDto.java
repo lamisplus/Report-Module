@@ -6,7 +6,7 @@ public interface PmtctDto {
 
     String getFacilityName();
     String getState();
-    String getLga();
+    String getLgaName();
     String getPersonUuid();
     String getAncNumber();
     String getHospitalNumber();
