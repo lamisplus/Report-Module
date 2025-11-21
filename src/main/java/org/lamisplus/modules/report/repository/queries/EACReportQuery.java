@@ -43,7 +43,7 @@ public class EACReportQuery {
             "    ) \n" +
             "    SELECT bd.*, \n" +
             "\teac.dateOfCommencementOfFirstEAC, eac.dateOfCommencementOfSecondEAC, eac.dateOfCommencementOfThirdEAC, eac.dateOfCommencementOfFourthEAC, eac.dateOfCommencementOfFifthEAC, eac.dateOfCommencementOfSixthEAC,\n" +
-            "\teac.numberOfEACSessionCompleted, eac.dateOfRepeatViralLoadPostEACSampleCollected, eac.repeatViralLoadResultPostEAC, eac.dateOfRepeatViralLoadResultPostEACVL\n" +
+            "\teac.numberOfEACSessionsCompleted, eac.dateOfRepeatViralLoadPostEACSampleCollected, eac.repeatViralLoadResultPostEAC, eac.dateOfRepeatViralLoadResultPostEACVL\n" +
             "\tFROM bio_data bd \n" +
             "\tJOIN (\n" +
             "SELECT enrolledEac.facility_id, enrolledEac.person_uuid personUuid50, enrolledEac.uuid,\n" +
@@ -56,7 +56,7 @@ public class EACReportQuery {
             "WHEN eacSession.status = 'FIFTH EAC' THEN 4\n" +
             "WHEN eacSession.status = 'SIXTH EAC' THEN 5\n" +
             "END\n" +
-            ") numberOfEACSessionCompleted, COALESCE (fifthEac.sessionDate,sixthEac.sessionDate) dateOfExtendEACCompletion, postEacVl.date_sample_collected,\n" +
+            ") numberOfEACSessionsCompleted, COALESCE (fifthEac.sessionDate,sixthEac.sessionDate) dateOfExtendEACCompletion, postEacVl.date_sample_collected,\n" +
             "(CASE WHEN postEacVl.date_sample_collected >= fourthEac.sessionDate THEN postEacVl.date_sample_collected END) dateOfRepeatViralLoadPostEACSampleCollected, (CASE WHEN postEacVl.date_sample_collected >= fourthEac.sessionDate THEN postEacVl.result_reported END) repeatViralLoadResultPostEAC, \n" +
             "(CASE WHEN postEacVl.date_sample_collected >= fourthEac.sessionDate THEN postEacVl.date_result_reported END) dateOfRepeatViralLoadResultPostEACVL, eacSession.status, eacSession.eac_session_date\n" +
             "FROM \n" +
