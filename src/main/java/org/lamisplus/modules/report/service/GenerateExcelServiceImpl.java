@@ -44,13 +44,13 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 
 
 	@Override
-	public ByteArrayOutputStream generatePatientLine(HttpServletResponse response, Long facilityId) {
+	public ByteArrayOutputStream generatePatientLine(HttpServletResponse response, Long facilityId, Boolean scrambler) {
 		LOG.info("Start generating patient line list for facility: " + getFacilityName(facilityId));
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			List<PatientLineDto> data = reportRepository.getPatientLineByFacilityId(facilityId);
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
-			List<Map<Integer, Object>> fullData = GenerateExcelDataHelper.fillPatientLineListDataMapper(data);
+			List<Map<Integer, Object>> fullData = excelDataHelper.fillPatientLineListDataMapper(data, scrambler);
 			LOG.info("fullData 2: " + data.size());
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.PATIENT_LINE_LIST, fullData, Constants.PATIENT_LINE_LIST_HEADER);

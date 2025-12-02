@@ -1,12 +1,12 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {FormGroup, Label , CardBody} from "reactstrap";
-import {makeStyles} from "@material-ui/core/styles";
-import {Card} from "@material-ui/core";
-import {token, url as baseUrl } from "../../../api";
+import { FormGroup, Label, CardBody, Input } from "reactstrap";
+import { makeStyles } from "@material-ui/core/styles";
+import { Card } from "@material-ui/core";
+import { token, url as baseUrl } from "../../../api";
 import 'react-phone-input-2/lib/style.css'
-import { Button} from 'semantic-ui-react'
-import { toast} from "react-toastify";
+import { Button } from 'semantic-ui-react'
+import { toast } from "react-toastify";
 import FileSaver from "file-saver";
 import { Message } from 'semantic-ui-react'
 import ProgressComponent from "./ProgressComponent"
@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
     inline: {
         display: "inline",
     },
-    error:{
+    error: {
         color: '#f85032',
         fontSize: '12.8px'
     }
@@ -58,75 +58,84 @@ const PatientLineList = (props) => {
     const classes = useStyles();
     const [loading, setLoading] = useState(false)
     const [facilitiesUpdate, setFacilities] = useState([]);
-    const [objValues, setObjValues]=useState({       
-        organisationUnitId:"",
-        organisationUnitName:"",
+    const [objValues, setObjValues] = useState({
+        organisationUnitId: "",
+        organisationUnitName: "",
+        scrambler: true
     })
-    const handleSubmit = (e) => {        
+    const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true)
-        axios.post(`${baseUrl}reporting/patient-line-list?facilityId=${objValues.organisationUnitId}`,objValues.organisationUnitId,
-           { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
-          )
-              .then(response => {
+        axios.post(`${baseUrl}reporting/patient-line-list?facilityId=${objValues.organisationUnitId}&scrambler=${objValues.scrambler}`, objValues.organisationUnitId,
+            { headers: { "Authorization": `Bearer ${token}` }, responseType: 'blob' },
+        )
+            .then(response => {
                 setLoading(false)
                 const fileName = `${objValues.organisationUnitName} Patient Line List ${currentDate}`
                 const responseData = response.data
-                let blob = new Blob([responseData], {type: "application/octet-stream"});
+                let blob = new Blob([responseData], { type: "application/octet-stream" });
                 FileSaver.saveAs(blob, `${fileName}.xlsx`);
                 toast.success(" Report generated successful");
 
-              })
-              .catch(error => {
+            })
+            .catch(error => {
                 setLoading(false)
-                if(error.response && error.response.data){
-                    let errorMessage = error.response.data.apierror && error.response.data.apierror.message!=="" ? error.response.data.apierror.message :  "Something went wrong, please try again";
+                if (error.response && error.response.data) {
+                    let errorMessage = error.response.data.apierror && error.response.data.apierror.message !== "" ? error.response.data.apierror.message : "Something went wrong, please try again";
                     toast.error(errorMessage);
-                  }
-                  else{
+                }
+                else {
                     toast.error("Something went wrong. Please try again...");
-                  }
-              });
-            
+                }
+            });
+
 
     }
+
+    const handleScramblerToggle = () => {
+        setObjValues(prev => ({
+            ...prev,
+            scrambler: !prev.scrambler
+        }));
+    };
+
     const handleInputChange = (e) => {
         const selectedOption = e.target.options ? e.target.options[e.target.selectedIndex] : null;
         const selectedValue = e.target.value;
         const name = e.target.name;
-      
+
         setObjValues(prevValues => ({
             ...prevValues,
             [name]: selectedValue,
             organisationUnitName: name === "organisationUnitId" && selectedOption ? selectedOption.innerText : prevValues.organisationUnitName,
         }));
-      };
-      
+    };
+
     useEffect(() => {
         Facilities()
-      }, []);
-    const Facilities =()=>{
-    axios
-        .get(`${baseUrl}account`,
-            { headers: {"Authorization" : `Bearer ${token}`} }
-        )
-        .then((response) => {
-            console.log(response.data);
-            setFacilities(response.data.applicationUserOrganisationUnits);
-        })
-        .catch((error) => {
-        });
-    
+    }, []);
+    const Facilities = () => {
+        axios
+            .get(`${baseUrl}account`,
+                { headers: { "Authorization": `Bearer ${token}` } }
+            )
+            .then((response) => {
+                console.log(response.data);
+                setFacilities(response.data.applicationUserOrganisationUnits);
+            })
+            .catch((error) => {
+            });
+
     }
-console.log(facilitiesUpdate)
+    console.log(facilitiesUpdate)
     return (
         <>
-            
+
             <Card >
                 <CardBody>
-    
-                <h2 style={{color:'#000'}}>PATIENT LINE LIST</h2>
-                <br/>
+
+                    <h2 style={{ color: '#000' }}>PATIENT LINE LIST</h2>
+                    <br />
                     < >
                         <div className="row">
 
@@ -138,7 +147,7 @@ console.log(facilitiesUpdate)
                                         name="organisationUnitId"
                                         id="organisationUnitId"
                                         onChange={handleInputChange}
-                                        style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
+                                        style={{ border: "1px solid #014D88", borderRadius: "0.2rem" }}
                                     >
                                         <option value={""}></option>
                                         {facilitiesUpdate.map((value) => (
@@ -147,29 +156,43 @@ console.log(facilitiesUpdate)
                                             </option>
                                         ))}
                                     </select>
-                                    
+
                                 </FormGroup>
                             </div>
 
+                            <div className="form-group col-md-2 d-flex align-items-center">
+                                <FormGroup check>
+                                    <Label check>
+                                        <Input
+                                            type="checkbox"
+                                            checked={objValues.scrambler ? false : true}
+                                            onChange={handleScramblerToggle}
+                                        />
+                                        <span className="ml-2"><strong>Unscramble</strong></span>
+                                    </Label>
+                                </FormGroup>
+                            </div>
+
+
                             <br />
                             <div className="row">
-                            <div className="form-group mb-3 col-md-6">
-                            <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={handleSubmit} disabled={objValues.organisationUnitId === "" || loading} />
-                            </div>
+                                <div className="form-group mb-3 col-md-6">
+                                    <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#014d88", color: '#fff' }} onClick={handleSubmit} disabled={objValues.organisationUnitId === "" || loading} />
+                                </div>
                             </div>
 
                             {loading && (
                                 <Message icon>
-                                                  <Message.Content>
-                                                        <ProgressComponent/>
-                                                  </Message.Content>
-                                                </Message>
+                                    <Message.Content>
+                                        <ProgressComponent />
+                                    </Message.Content>
+                                </Message>
                             )}
                         </div>
                     </>
 
                 </CardBody>
-            </Card>                                 
+            </Card>
         </>
     );
 };

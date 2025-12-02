@@ -35,12 +35,11 @@ public class GenerateExcelDataHelper {
 	private final Scrambler scrambler;
 	private final SimpMessageSendingOperations messagingTemplate;
 	private final ExcelService excelService;
-//	private final JsonEncryptor jsonEncryptor;
 	public static final String RESULT_OUTPUT = "Results:";
 	public static final String ERROR_OUTPUT = "The error message is: ";
 	public static final String RECORD_OUTPUT = "Done converting db records total size {}";
 
-	public static List<Map<Integer, Object>> fillPatientLineListDataMapper(@NonNull List<PatientLineDto> listFinalResult) {
+	public List<Map<Integer, Object>> fillPatientLineListDataMapper(@NonNull List<PatientLineDto> listFinalResult, Boolean scramble) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		for (PatientLineDto patient : listFinalResult) {
 			if (patient != null) {
@@ -55,6 +54,10 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(patient.getPersonUuid())));
 				map.put(index++, getStringValue(String.valueOf(patient.getHospitalNumber())));
 				map.put(index++, getStringValue(String.valueOf(patient.getUniqueId())));
+
+                map.put(index++, getStringValue(String.valueOf(scramble ? scrambler.scrambleCharacters(patient.getFirstName()) : patient.getFirstName())));
+                map.put(index++, getStringValue(String.valueOf(patient.getSurname() != null ? (scramble ? scrambler.scrambleCharacters(patient.getSurname()) : patient.getSurname()) : "" )));
+                map.put(index++, getStringValue(String.valueOf(patient.getOtherName() != null ? (scramble ? scrambler.scrambleCharacters(patient.getOtherName()) : patient.getOtherName()) : "")));
 				map.put(index++, patient.getDateOfBirth());
 				map.put(index++, getStringValue(String.valueOf(patient.getAge())));
 				map.put(index++, getStringValue(String.valueOf(patient.getSex())));
@@ -740,7 +743,7 @@ public class GenerateExcelDataHelper {
 	}
 
 
-	public  List<Map<Integer, Object>> fillHtsDataMapper(@NonNull List<HtsReportDto> htsReportDtos, String reportType, Boolean scramble) {
+	public List<Map<Integer, Object>> fillHtsDataMapper(@NonNull List<HtsReportDto> htsReportDtos, String reportType, Boolean scramble) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		int sn = 1;
 		Log.info("converting HTS db records to excel ....");

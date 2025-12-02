@@ -18,6 +18,9 @@ public interface PatientLineDto {
 	String getPersonUuid();
 	
 	String getHospitalNumber();
+    String getSurname();
+    String getFirstName();
+    String getOtherName();
 
 	LocalDate getDateOfBirth();
 	

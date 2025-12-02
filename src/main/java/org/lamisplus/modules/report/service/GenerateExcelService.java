@@ -10,7 +10,7 @@ import java.time.LocalDate;
 
 public interface GenerateExcelService {
  
- ByteArrayOutputStream generatePatientLine(HttpServletResponse response, Long facilityId);
+ ByteArrayOutputStream generatePatientLine(HttpServletResponse response, Long facilityId, Boolean scrambler);
  ByteArrayOutputStream generateRadet(Long facilityId, LocalDate start, LocalDate end);
  ByteArrayOutputStream generatePharmacyReport(Long facilityId) throws IOException;
  ByteArrayOutputStream generateBiometricReport(Long facilityId,  LocalDate start, LocalDate end) throws IOException;
