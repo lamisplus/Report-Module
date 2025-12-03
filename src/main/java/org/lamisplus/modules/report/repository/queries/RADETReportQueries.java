@@ -403,15 +403,15 @@ public class RADETReportQueries {
             "SELECT person_uuid, eac_id, eac_session_date sessionDate, status FROM hiv_eac_session WHERE archived = 0 AND status = 'SIXTH EAC'\n" +
             ") sixthEac ON sixthEac.eac_id = eacSession.eac_id\n" +
             "LEFT JOIN (select * from(\n" +
-            "  SELECT CAST(ls.date_sample_collected AS DATE ) AS date_sample_collected, sm.patient_uuid as patient_uuid , sm.facility_id as vlFacility, sm.archived as vlArchived, acode.display as viralLoadIndication, sm.result_reported as result_reported, CAST(sm.date_result_reported AS DATE) as date_result_reported,\n" +
-            "ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY ls.date_sample_collected DESC) as row\n" +
-            "  FROM public.laboratory_result  sm\n" +
-            " INNER JOIN public.laboratory_test  lt on sm.test_id = lt.id\n" +
-            "  INNER JOIN public.laboratory_sample ls on ls.test_id = lt.id\n" +
-            " INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication\n" +
-            "  WHERE lt.lab_test_id = 16 AND CAST(ls.date_sample_collected AS DATE) BETWEEN ?2 AND ?3\n" +
-            "AND  lt.viral_load_indication IN (302, 305, 304)\n" +
-            "AND CAST(sm. date_result_reported AS DATE) <= ?3\n" +
+            "SELECT CAST(ls.date_sample_collected AS DATE ) AS date_sample_collected, ls.patient_uuid as patient_uuid , ls.facility_id as vlFacility, ls.archived as vlArchived, acode.display as viralLoadIndication, \n" +
+            "sm.result_reported as result_reported, CAST(sm.date_result_reported AS DATE) as date_result_reported,\n" +
+            "ROW_NUMBER () OVER (PARTITION BY ls.patient_uuid ORDER BY ls.date_sample_collected DESC) as row\n" +
+            "FROM public.laboratory_sample  ls\n" +
+            "INNER JOIN public.laboratory_test  lt on ls.test_id = lt.id AND lt.archived = 0\n" +
+            "INNER JOIN public.base_application_codeset  acode on acode.id =  lt.viral_load_indication\n" +
+            "LEFT JOIN public.laboratory_result sm ON sm.test_id = ls.test_id AND sm.archived = 0\n" +
+            "WHERE  lt.lab_test_id = 16 AND ls.archived = 0 AND CAST(ls.date_sample_collected AS DATE) BETWEEN ?2 AND ?3\n" +
+            "AND  lt.viral_load_indication IN (302, 305, 304) AND (sm.date_result_reported IS NULL OR CAST(sm.date_result_reported AS DATE) <= ?3)\n" +
             ") pe where row = 1\n" +
             ") postEacVl ON postEacVl.patient_uuid = enrolledEac.person_uuid\n" +
             "WHERE archived = 0 AND facility_id = ?1), \n" +
