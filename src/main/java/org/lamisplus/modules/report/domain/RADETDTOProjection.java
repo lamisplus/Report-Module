@@ -98,6 +98,7 @@ public interface RADETDTOProjection {
 	String getTbStatus();
 	LocalDate getDateOfTbScreened();
 	LocalDate getDateOfCurrentRegimen();
+    String getEligibilityTpt();
 	LocalDate getDateOfIptStart();
 	LocalDate getIptCompletionDate();
 	String getIptType();
