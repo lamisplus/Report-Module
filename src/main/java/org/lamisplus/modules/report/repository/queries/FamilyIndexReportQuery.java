@@ -35,7 +35,7 @@ public class FamilyIndexReportQuery {
             "\t\t'' AS modeOfNotification,\n" +
             "\t\thft.known_hiv_positive AS elicitedClientKnownPositive, \n" +
             "        hft.date_visit AS dateOfElicitation, \n" +
-            "        '' AS elicitedClientUniqueId, \n" +
+            "        hfi.uan AS elicitedClientUniqueId, \n" +
             "        hft.date_enrolled_in_ovc AS dateEnrolledInOvc, hfi.contact_id AS contactId,\n" +
             "        hft.ovc_id AS ovcId, (select display from base_application_codeset where code = hft.attempt) AS noOfAttempts\n" +
             "    FROM hts_family_index hfi\n" +
