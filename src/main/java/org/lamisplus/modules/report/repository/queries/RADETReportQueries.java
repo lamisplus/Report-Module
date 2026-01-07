@@ -77,13 +77,11 @@ public class RADETReportQueries {
             "SELECT lt.viral_load_indication, sm.facility_id,CAST(sm.date_sample_collected AS DATE), sm.patient_uuid, sm.archived, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_sample_collected DESC) as rnkk\n" +
             "FROM public.laboratory_sample  sm\n" +
             "  INNER JOIN public.laboratory_test lt ON lt.id = sm.test_id\n" +
-            "WHERE lt.lab_test_id=16 AND sm.archived = 0 \n" +
+            "WHERE lt.lab_test_id=16 AND CAST(sm.date_sample_collected AS DATE) <= ?3 AND (sm.archived is null OR sm.archived = 0) \n" +
             "AND  lt.viral_load_indication !=719\n" +
             "AND sm.date_sample_collected IS NOT null\n" +
             " )as sample\n" +
-            "WHERE sample.rnkk = 1 AND sample.date_sample_collected <= ?3 \n" +
-            "AND (sample.archived is null OR sample.archived = 0) \n" +
-            "AND sample.facility_id = ?1 ), \n" +
+            "WHERE sample.rnkk = 1 AND sample.facility_id = ?1 ), \n" +
             "tbstatus as ( \n" +
             "WITH cs AS (\n" +
             "WITH FilteredObservations AS (\n" +
