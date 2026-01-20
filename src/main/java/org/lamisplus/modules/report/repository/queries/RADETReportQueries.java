@@ -373,8 +373,8 @@ public class RADETReportQueries {
             "    WHEN eacSession.status = 'SECOND EAC' THEN  COALESCE(secondEac.sessionDate,firstEac.sessionDate)\n" +
             "    WHEN eacSession.status = 'FIRST EAC' THEN NULL END) AS dateOfLastEACSessionCompleted, \n" +
             "COALESCE (fifthEac.sessionDate,sixthEac.sessionDate) dateOfExtendEACCompletion, \n" +
-            "(CASE WHEN postEacVl.date_sample_collected >= fourthEac.sessionDate  THEN postEacVl.date_sample_collected END) dateOfRepeatViralLoadEACSampleCollection, (CASE WHEN postEacVl.date_sample_collected >= fourthEac.sessionDate THEN postEacVl.result_reported END) repeatViralLoadResult, \n" +
-            "(CASE WHEN postEacVl.date_sample_collected >= fourthEac.sessionDate THEN postEacVl.date_result_reported END) dateOfRepeatViralLoadResult, eacSession.status, eacSession.eac_session_date FROM \n" +
+            "(CASE WHEN postEacVl.date_sample_collected >= thirdEac.sessionDate  THEN postEacVl.date_sample_collected END) dateOfRepeatViralLoadEACSampleCollection, (CASE WHEN postEacVl.date_sample_collected >= thirdEac.sessionDate THEN postEacVl.result_reported END) repeatViralLoadResult, \n" +
+            "(CASE WHEN postEacVl.date_sample_collected >= thirdEac.sessionDate THEN postEacVl.date_result_reported END) dateOfRepeatViralLoadResult, eacSession.status, eacSession.eac_session_date FROM \n" +
             "hiv_eac enrolledEac\n" +
             "INNER JOIN (\n" +
             "SELECT person_uuid, eac_id, eac_session_date, status, ROW_NUMBER() OVER (PARTITION BY eac_id, person_uuid ORDER BY eac_session_date DESC) eacRank,\n" +

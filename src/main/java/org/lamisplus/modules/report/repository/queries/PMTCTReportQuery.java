@@ -7,9 +7,9 @@ public class PMTCTReportQuery {
             "facility_state.name AS state, facility_lga.name AS lgaName, facility.name AS facilityName\n" +
             "FROM patient_person p\n" +
             "INNER JOIN (\n" +
-            "SELECT * FROM (SELECT p.id, CONCAT(CAST(address_object->>'city' AS VARCHAR), ' ', REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '\\\\\\\\', ''), ']', ''), '[', ''), 'null',''), '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\', '')) AS address,\n" +
-            " CASE WHEN address_object->>'stateId'  ~ '^\\\\\\\\d+(\\\\\\\\.\\\\\\\\d+)?$' THEN address_object->>'stateId' ELSE null END  AS stateId,\n" +
-            "CASE WHEN address_object->>'district'  ~ '^\\\\\\\\d+(\\\\\\\\.\\\\\\\\d+)?$' THEN address_object->>'district' ELSE null END  AS lgaId\n" +
+            "SELECT * FROM (SELECT p.id, CONCAT(CAST(address_object->>'city' AS VARCHAR), ' ', REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(CAST(address_object->>'line' AS text), '\\\\\\\\\\\\\\\\', ''), ']', ''), '[', ''), 'null',''), '\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\', '')) AS address,\n" +
+            " CASE WHEN address_object->>'stateId'  ~ '^\\\\\\\\\\\\\\\\d+(\\\\\\\\\\\\\\\\.\\\\\\\\\\\\\\\\d+)?$' THEN address_object->>'stateId' ELSE null END  AS stateId,\n" +
+            "CASE WHEN address_object->>'district'  ~ '^\\\\\\\\\\\\\\\\d+(\\\\\\\\\\\\\\\\.\\\\\\\\\\\\\\\\d+)?$' THEN address_object->>'district' ELSE null END  AS lgaId\n" +
             "FROM patient_person p,\n" +
             "jsonb_array_elements(p.address-> 'address') with ordinality l(address_object)) as result\n" +
             ") r ON r.id=p.id\n" +
@@ -19,7 +19,9 @@ public class PMTCTReportQuery {
             "LEFT JOIN base_organisation_unit res_state ON res_state.id=CAST(r.stateid AS BIGINT)\n" +
             "LEFT JOIN base_organisation_unit res_lga ON res_lga.id=CAST(r.lgaid AS BIGINT)\n" +
             "LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=p.facility_id AND boui.name='DATIM_ID'\n" +
-            "WHERE p.archived = 0 AND sex Ilike '%Female%'),\n" +
+            "WHERE p.archived = 0 AND sex Ilike '%Female%' AND p.uuid IN (SELECT person_uuid FROM pmtct_anc WHERE archived = 0\n" +
+            "UNION\n" +
+            "SELECT person_uuid FROM pmtct_enrollment WHERE archived = 0)),\n" +
             "ancClient AS (\n" +
             "SELECT person_uuid AS person_uuid_anc,\n" +
             "(CASE WHEN community_setting = 'PMTCT (ANC1 Only)' THEN 'PMTCT (ANC1 Only)' ELSE (select display from base_application_codeset where code = community_setting) END) AS ancSettingAnc,\n" +

@@ -57,8 +57,8 @@ public class EACReportQuery {
             "WHEN eacSession.status = 'SIXTH EAC' THEN 5\n" +
             "END\n" +
             ") numberOfEACSessionsCompleted, COALESCE (fifthEac.sessionDate,sixthEac.sessionDate) dateOfExtendEACCompletion, postEacVl.date_sample_collected,\n" +
-            "(CASE WHEN postEacVl.date_sample_collected >= fourthEac.sessionDate THEN postEacVl.date_sample_collected END) dateOfRepeatViralLoadPostEACSampleCollected, (CASE WHEN postEacVl.date_sample_collected >= fourthEac.sessionDate THEN postEacVl.result_reported END) repeatViralLoadResultPostEAC, \n" +
-            "(CASE WHEN postEacVl.date_sample_collected >= fourthEac.sessionDate THEN postEacVl.date_result_reported END) dateOfRepeatViralLoadResultPostEACVL, eacSession.status, eacSession.eac_session_date\n" +
+            "(CASE WHEN postEacVl.date_sample_collected >= thirdEac.sessionDate THEN postEacVl.date_sample_collected END) dateOfRepeatViralLoadPostEACSampleCollected, (CASE WHEN postEacVl.date_sample_collected >= thirdEac.sessionDate THEN postEacVl.result_reported END) repeatViralLoadResultPostEAC, \n" +
+            "(CASE WHEN postEacVl.date_sample_collected >= thirdEac.sessionDate THEN postEacVl.date_result_reported END) dateOfRepeatViralLoadResultPostEACVL, eacSession.status, eacSession.eac_session_date\n" +
             "FROM \n" +
             "hiv_eac enrolledEac\n" +
             "INNER JOIN (\n" +
