@@ -6,7 +6,7 @@ public class EACReportQuery {
             "     WITH bio_data AS ( \n" +
             "    SELECT \n" +
             "        facility_lga.name AS lga, facility_state.name AS state, p.uuid as patientId, p.hospital_number as hospitalNumber, h.unique_id as uniqueId, \n" +
-            "        EXTRACT(YEAR FROM AGE(?3, p.date_of_birth)) AS age, INITCAP(p.sex) AS sex, p.date_of_birth as dateOfBirth, boo.name as lgaOfResidence, \n" +
+            "        EXTRACT(YEAR FROM AGE(?3, p.date_of_birth)) AS age, INITCAP(p.sex) AS sex, p.date_of_birth as dateOfBirth, boo.lgaOfResidence as lgaOfResidence, \n" +
             "        facility.name AS facilityName, boui.code AS datimId, hac.visit_date AS artStartDate, hr.description AS regimenAtArtStart, p.date_of_registration\n" +
             "    FROM \n" +
             "        patient_person p \n" +
@@ -32,11 +32,16 @@ public class EACReportQuery {
             "           AND hac.visit_date < ?3\n" +
             "    LEFT JOIN \n" +
             "        hiv_regimen hr ON hr.id = hac.regimen_id \n" +
-            "    LEFT JOIN base_organisation_unit boo on boo.id = \n" +
-            "        CASE \n" +
-            "            WHEN (string_to_array(p.address->'address'->0->>'district', ','))[1] ~ '^\\\\d+$'THEN cast(p.address->'address'->0->>'district' as bigint) \n" +
-            "            ELSE NULL \n" +
-            "        END \n" +
+            "LEFT JOIN (\n" +
+            "select DISTINCT ON (personUuid) personUuid as personUuid11, \n" +
+            "            case when (addr ~ '^[0-9\\\\\\.]+$') =TRUE \n" +
+            "             then (select name from base_organisation_unit where id = cast(addr as int)) ELSE\n" +
+            "            (select name from base_organisation_unit where id = cast(facilityLga as int)) end as lgaOfResidence \n" +
+            "            from (\n" +
+            "             select pp.uuid AS personUuid, facility_lga.parent_organisation_unit_id AS facilityLga, (jsonb_array_elements(pp.address->'address')->>'district') as addr from patient_person pp\n" +
+            "            LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = CAST (pp.organization->'id' AS INTEGER) \n" +
+            "            ) dt \n" +
+            "   ) boo ON boo.personUuid11 = p.uuid\n"+
             "    WHERE \n" +
             "        p.archived = 0 \n" +
             "        AND p.facility_id = ?1 \n" +
