@@ -53,11 +53,11 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(patient.getDatimId())));
 				map.put(index++, getStringValue(String.valueOf(patient.getPersonUuid())));
 				map.put(index++, getStringValue(String.valueOf(patient.getHospitalNumber())));
-				map.put(index++, getStringValue(String.valueOf(patient.getUniqueId())));
 
-                map.put(index++, getStringValue(String.valueOf(scramble ? scrambler.scrambleCharacters(patient.getFirstName()) : patient.getFirstName())));
-                map.put(index++, getStringValue(String.valueOf(patient.getSurname() != null ? (scramble ? scrambler.scrambleCharacters(patient.getSurname()) : patient.getSurname()) : "" )));
-                map.put(index++, getStringValue(String.valueOf(patient.getOtherName() != null ? (scramble ? scrambler.scrambleCharacters(patient.getOtherName()) : patient.getOtherName()) : "")));
+				map.put(index++, getStringValue(String.valueOf(patient.getUniqueId())));
+				map.put(index++, getStringValue(patient.getFirstName() == null ? "" : (scramble ? scrambler.scrambleCharacters(patient.getFirstName()) : patient.getFirstName())));
+				map.put(index++, getStringValue(patient.getSurname() == null ? "" : (scramble ? scrambler.scrambleCharacters(patient.getSurname()) : patient.getSurname())));
+				map.put(index++, getStringValue(patient.getOtherName() == null ? "" : (scramble ? scrambler.scrambleCharacters(patient.getOtherName()) : patient.getOtherName())));
 				map.put(index++, patient.getDateOfBirth());
 				map.put(index++, getStringValue(String.valueOf(patient.getAge())));
 				map.put(index++, getStringValue(String.valueOf(patient.getSex())));
