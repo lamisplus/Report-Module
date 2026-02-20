@@ -3,7 +3,7 @@ package org.lamisplus.modules.report.repository.queries;
 public class TBLongitudinalReportQuery {
 
     public static final String TB_LONGITUDINAL_REPORT_QUERY = "SELECT facility.name as facilityName, facility_lga.name as lga, facility_state.name as state, p.uuid AS personUuid, p.hospital_number AS hospitalNumber,\n" +
-            "he.unique_id AS uniqueId, INITCAP(p.sex) AS gender, p.date_of_birth AS dateOfBirth, EXTRACT(YEAR FROM  AGE(?3, date_of_birth)) AS age, he.date_started dateStarted,\n" +
+            "he.unique_id AS uniqueId, INITCAP(p.sex) AS gender, p.date_of_birth AS dateOfBirth, EXTRACT(YEAR FROM  AGE(?3, date_of_birth)) AS age, COALESCE(he.date_started, he.date_of_registration) dateStarted,\n" +
             "clientObservation.dateOfObservation, clientObservation.tbScreeningType, clientObservation.cadScore, clientObservation.tbStatus,\n" +
             "clientObservation.specimenType, clientObservation.dateSpecimenSent, clientObservation.diagnosticTestDone, clientObservation.clinicallyEvaulated, clientObservation.dateOfObservation dateOfEvaluation,\n" +
             "clientObservation.resultOfClinicalEvaluation, clientObservation.tbType, clientObservation.dateOfChestXrayResultTestDone,clientObservation.chestXrayResult, clientObservation.tbTreatmentStartDate,\n" +
