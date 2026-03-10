@@ -10,7 +10,11 @@ import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.report.config.Application;
 import org.lamisplus.modules.report.domain.HtsReportDto;
 import org.lamisplus.modules.report.domain.RADETDTOProjection;
+import org.lamisplus.modules.report.domain.dto.ApprCollectionProjection;
+import org.lamisplus.modules.report.domain.dto.ApprProjection;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
+import org.lamisplus.modules.report.domain.entity.Period;
+import org.lamisplus.modules.report.repository.PeriodRepository;
 import org.lamisplus.modules.report.repository.ReportRepository;
 import org.lamisplus.modules.report.utility.DateUtil;
 import org.lamisplus.modules.report.utility.ResultSetExtract;
@@ -23,8 +27,11 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -41,6 +48,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	private final DateUtil dateUtil;
 	private final SimpMessageSendingOperations messagingTemplate;
 	private final QuarterService quarterService;
+    private final PeriodRepository  periodRepository;
 
 
 	@Override
@@ -600,8 +608,46 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		return null;
 	}
 
+    @Override
+    public List<ApprProjection> pullRadetRecords(Long facilityId, String weekPeriod, List<String> dataElement) {
+        Period period = periodRepository.findById(weekPeriod)
+                .orElseThrow(() -> new RuntimeException("Period not found"));
 
-	public ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException {
+        LocalDate startDate = period.getStartDate();
+        LocalDate endDate   = period.getEndDate();
+
+
+        LocalDate previousQuarterEnd = quarterService.getPreviousQuarter(endDate).getEnd();
+        LocalDate previousPreviousQuarterEnd = quarterService.getPreviousQuarter(previousQuarterEnd).getEnd();
+        LOG.info("facilityId: " + facilityId +" "  +startDate + "  to " + endDate);
+        LOG.info("previous : "+previousQuarterEnd);
+        LOG.info("previousPreviousQuarterEnd : "+previousPreviousQuarterEnd);
+
+
+        System.out.println("Here are the extracted dates: " + startDate + " " + endDate.toString() );
+        reportRepository.truncateRadet();
+        System.out.println("Start truncate radet report");
+        reportRepository.pullRadet(facilityId, startDate, endDate,
+                previousQuarterEnd, previousPreviousQuarterEnd, weekPeriod);
+        System.out.println("End truncate radet report");
+        System.out.println("updating radet clean radet report");
+        reportRepository.updateCleanColumn();
+        System.out.println("End updating radet clean radet report");
+        System.out.println("Start pulling appr report");
+        return reportRepository.getApprReport(startDate, endDate, dataElement);
+    }
+
+    @Override
+    public List<String> getAllWeekForAppr(Long year) {
+        return Optional.ofNullable(periodRepository.findAllPeriodCode(year))
+                .orElseGet(Collections::emptyList)
+                .stream()
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+
+    public ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
 		String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);

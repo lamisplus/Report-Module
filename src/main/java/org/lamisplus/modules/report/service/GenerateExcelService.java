@@ -1,11 +1,13 @@
 package org.lamisplus.modules.report.service;
 
+import org.lamisplus.modules.report.domain.dto.ApprProjection;
+
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
-
+import java.util.List;
 
 
 public interface GenerateExcelService {
@@ -49,4 +51,8 @@ public interface GenerateExcelService {
  ByteArrayOutputStream generateFamilyIndex(Long facilityId);
 
 
+    List<ApprProjection> pullRadetRecords(Long facilityId, String weekPeriod, List<String> dataElement);
+
+
+    List<String> getAllWeekForAppr(Long year);
 }

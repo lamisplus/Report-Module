@@ -2,8 +2,12 @@ package org.lamisplus.modules.report.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.lamisplus.modules.report.domain.dto.ApprCollectionProjection;
+import org.lamisplus.modules.report.domain.dto.ApprDataValue;
+import org.lamisplus.modules.report.domain.dto.ApprProjection;
 import org.lamisplus.modules.report.service.Constants;
 import org.lamisplus.modules.report.service.GenerateExcelService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,6 +18,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -72,6 +78,46 @@ public class PrepReportController {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done Generating Kp Prev report");
 
 	}
+
+//    @PostMapping(REPORT_URL_VERSION_ONE + "/fill-radet")
+//    public ResponseEntity<ApprCollectionProjection> pullRadetRecords(
+//            @RequestParam("facilityId") Long facilityId,
+//            @RequestParam("weekPeriod") String weekPeriod
+//    ){
+//        return ResponseEntity.ok(generateExcelService.pullRadetRecords(facilityId, weekPeriod));
+//    }
+
+    @PostMapping(REPORT_URL_VERSION_ONE + "/fill-radet")
+    public ResponseEntity<ApprCollectionProjection> pullRadetRecords(
+            @RequestParam("facilityId") Long facilityId,
+            @RequestParam("weekPeriod") String weekPeriod,
+            @RequestParam("dataElement") List<String> dataElement
+    ){
+        // fetch rows
+        List<ApprProjection> rows = generateExcelService.pullRadetRecords(facilityId, weekPeriod, dataElement);
+
+        // map to final DTO
+        ApprCollectionProjection payload = toCollection(rows);
+
+        return ResponseEntity.ok(payload);
+    }
+
+    // You can place this mapper in the controller or (better) the service
+    private ApprCollectionProjection toCollection(List<ApprProjection> rows) {
+        List<ApprDataValue> values = rows.stream()
+                .map(r -> new ApprDataValue(
+                        r.getDataElement(),
+                        r.getPeriod(),
+                        r.getOrgUnit(),
+                        r.getCategoryOptionCombo(),
+                        r.getValue(),
+                        r.getAttributeOptionCombo()
+                ))
+                .collect(Collectors.toList());
+//                .toList();
+
+        return new ApprCollectionProjection(values);
+    }
 
 
 	private void setStream(ByteArrayOutputStream baos, HttpServletResponse response) throws IOException {
