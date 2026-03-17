@@ -50,8 +50,9 @@ public interface GenerateExcelService {
 
  ByteArrayOutputStream generateFamilyIndex(Long facilityId);
 
+    ByteArrayOutputStream pullRadetRecord(Long facilityId, String weekPeriod);
 
-    List<ApprProjection> pullRadetRecords(Long facilityId, String weekPeriod, List<String> dataElement);
+    List<ApprProjection> pullRadetRecords(Long facilityId, String weekPeriod);
 
 
     List<String> getAllWeekForAppr(Long year);

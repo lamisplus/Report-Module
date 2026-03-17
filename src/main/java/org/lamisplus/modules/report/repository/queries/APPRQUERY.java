@@ -4,8 +4,7 @@ public class APPRQUERY {
 
 
 
-    public static final String APPR_REPORT_QUERY ="WITH\n" +
-            "params AS (\n" +
+    public static final String APPR_REPORT_QUERY ="WITH params AS (\n" +
             "    SELECT\n" +
             "        CAST(?2   AS DATE)                                             AS eop,\n" +
             "        CAST(?1 AS DATE)                                             AS sop,\n" +
@@ -14,7 +13,6 @@ public class APPRQUERY {
             "        CAST(?2   AS DATE) - INTERVAL '12 months' + INTERVAL '1 day'   AS eop_12m,\n" +
             "        CAST(?2   AS DATE) - INTERVAL '7 days'                         AS eop_7d\n" +
             "),\n" +
-            "\n" +
             "radet_flags AS (\n" +
             "    SELECT\n" +
             "        r.apprcode                                                    AS org_unit,\n" +
@@ -23,7 +21,6 @@ public class APPRQUERY {
             "        r.age,\n" +
             "        UPPER(r.gender)                                               AS gender,\n" +
             "\n" +
-            "        -- status booleans (evaluated once per row)\n" +
             "        (r.currentstatus ILIKE '%ACTIVE%'\n" +
             "         AND r.currentstatus NOT ILIKE '%RESTART%')                   AS is_active,\n" +
             "        r.currentstatus ILIKE '%ACTIVE RESTART%'                      AS is_restart,\n" +
@@ -78,7 +75,6 @@ public class APPRQUERY {
             "        r.iptcompletionstatus,\n" +
             "        r.cleaned_causeofdeath,\n" +
             "       CAST(NULLIF(r.treatmentmethoddate, '') AS DATE) AS treatmentmethoddate\n" +
-            "\n" +
             "    FROM public.radet_table r\n" +
             "    CROSS JOIN params p      -- params is 1 row; makes p.* available here\n" +
             "),\n" +
@@ -89,14 +85,12 @@ public class APPRQUERY {
             "    WHERE  is_active AND verified\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_NEW with CD4 (Q2-1) ───────────────────────────────────────────────────\n" +
             "agg_tx_new_cd4 AS (\n" +
             "    SELECT r.org_unit, r.attrib, r.period, r.gender, r.age,\n" +
             "           co_arg.cd4_min, co_arg.cd4_max, COUNT(*) AS cnt\n" +
             "    FROM   radet_flags r\n" +
             "    CROSS  JOIN params p\n" +
-            "    -- bring cd4 bounds in via a lateral so we aggregate per band\n" +
             "    JOIN   public.category_option co_arg\n" +
             "           ON co_arg.cd4_min IS NOT NULL\n" +
             "          AND r.cleaned_lastcd4count > co_arg.cd4_min\n" +
@@ -108,7 +102,6 @@ public class APPRQUERY {
             "    GROUP  BY r.org_unit, r.attrib, r.period, r.gender, r.age,\n" +
             "              co_arg.cd4_min, co_arg.cd4_max\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_NEW no CD4 (Q2-2) ─────────────────────────────────────────────────────\n" +
             "agg_tx_new_nocd4 AS (\n" +
             "    SELECT org_unit, attrib, period, gender, age, COUNT(*) AS cnt\n" +
@@ -120,7 +113,6 @@ public class APPRQUERY {
             "      AND  (r.age BETWEEN 0 AND 4 OR (r.age > 4 AND r.cleaned_lastcd4count IS NULL))\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_PVLS Denominator (Q3) ──────────────────────────────────────────────────\n" +
             "agg_pvls_d AS (\n" +
             "    SELECT org_unit, attrib, period, gender, age, COUNT(*) AS cnt\n" +
@@ -132,7 +124,6 @@ public class APPRQUERY {
             "      AND  (p.eop - r.artstartdate) >= 180\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_PVLS Numerator (Q4) ────────────────────────────────────────────────────\n" +
             "agg_pvls_n AS (\n" +
             "    SELECT org_unit, attrib, period, gender, age, COUNT(*) AS cnt\n" +
@@ -146,8 +137,7 @@ public class APPRQUERY {
             "      AND  r.cleaned_currentviralload IS NOT NULL\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age\n" +
             "),\n" +
-            "\n" +
-            "-- ── TX_RTT with CD4 (Q5-1) ───────────────────────────────────────────────────\n" +
+            " -- ── TX_RTT with CD4 (Q5-1) ───────────────────────────────────────────────────\n" +
             "agg_rtt_cd4 AS (\n" +
             "    SELECT r.org_unit, r.attrib, r.period, r.gender, r.age,\n" +
             "           co_arg.cd4_min, co_arg.cd4_max, COUNT(*) AS cnt\n" +
@@ -163,7 +153,6 @@ public class APPRQUERY {
             "    GROUP  BY r.org_unit, r.attrib, r.period, r.gender, r.age,\n" +
             "              co_arg.cd4_min, co_arg.cd4_max\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_RTT no CD4 (Q5-2) ─────────────────────────────────────────────────────\n" +
             "agg_rtt_nocd4 AS (\n" +
             "    SELECT org_unit, attrib, period, gender, age, COUNT(*) AS cnt\n" +
@@ -174,7 +163,6 @@ public class APPRQUERY {
             "      AND  (r.age BETWEEN 0 AND 4 OR (r.age > 4 AND r.cleaned_lastcd4count IS NULL))\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_ML Died cause-of-death (Q6) ───────────────────────────────────────────\n" +
             "agg_ml_died AS (\n" +
             "    SELECT org_unit, attrib, period, gender, age,\n" +
@@ -189,7 +177,6 @@ public class APPRQUERY {
             "      AND  r.previousstatusdate < p.sop\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age, r.cleaned_causeofdeath\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_ML IIT (Q7-1) ─────────────────────────────────────────────────────────\n" +
             "agg_ml_iit AS (\n" +
             "    SELECT org_unit, attrib, period, gender, age,\n" +
@@ -200,7 +187,6 @@ public class APPRQUERY {
             "      AND  r.currentstatusdate BETWEEN p.sop AND p.eop\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age, (p.eop - r.artstartdate)\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_ML Died previous active (Q7-2) ────────────────────────────────────────\n" +
             "agg_ml_died_prev AS (\n" +
             "    SELECT org_unit, attrib, period, gender, age, COUNT(*) AS cnt\n" +
@@ -220,7 +206,6 @@ public class APPRQUERY {
             "      AND  r.currentstatusdate BETWEEN p.sop AND p.eop\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_ML Custom Status (Q7-4) ───────────────────────────────────────────────\n" +
             "agg_ml_custom AS (\n" +
             "    SELECT r.apprcode org_unit, r.attributecombo attrib, r.period, r.gender, r.age,\n" +
@@ -233,7 +218,6 @@ public class APPRQUERY {
             "      AND  r.currentstatusdate BETWEEN p.sop AND p.eop\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age, r.currentstatus\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_RTT IIT Duration (Q8) ─────────────────────────────────────────────────\n" +
             "agg_rtt_iit_dur AS (\n" +
             "    SELECT org_unit, attrib, period,\n" +
@@ -245,7 +229,6 @@ public class APPRQUERY {
             "    GROUP  BY org_unit, attrib, period,\n" +
             "              (r.currentstatusdate - r.artstartdate)\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_CURR MMD (Q9) ─────────────────────────────────────────────────────────\n" +
             "agg_tx_curr_mmd AS (\n" +
             "    SELECT org_unit, attrib, period, gender, age,\n" +
@@ -255,7 +238,6 @@ public class APPRQUERY {
             "      AND  r.monthsofarvrefill IS NOT NULL\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age, r.monthsofarvrefill\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_TB_D Old Positive (Q10-1) ─────────────────────────────────────────────\n" +
             "agg_tb_d_old_pos AS (\n" +
             "    SELECT org_unit, attrib, period, gender, age, COUNT(*) AS cnt\n" +
@@ -272,7 +254,6 @@ public class APPRQUERY {
             "                                           '%Confirmed TB%']))\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_TB_D New Positive (Q10-2) ─────────────────────────────────────────────\n" +
             "agg_tb_d_new_pos AS (\n" +
             "    SELECT org_unit, attrib, period, gender, age, COUNT(*) AS cnt\n" +
@@ -289,7 +270,6 @@ public class APPRQUERY {
             "                                           '%Confirmed TB%']))\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_TB_D Old Negative (Q10-3) ─────────────────────────────────────────────\n" +
             "agg_tb_d_old_neg AS (\n" +
             "    SELECT org_unit, attrib, period, gender, age, COUNT(*) AS cnt\n" +
@@ -302,7 +282,6 @@ public class APPRQUERY {
             "      AND  (r.tbscreeningtype IS NOT NULL AND r.tbscreeningtype != '')\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_TB_D New Negative (Q10-4) ─────────────────────────────────────────────\n" +
             "agg_tb_d_new_neg AS (\n" +
             "    SELECT org_unit, attrib, period, gender, age, COUNT(*) AS cnt\n" +
@@ -315,7 +294,6 @@ public class APPRQUERY {
             "      AND  (r.tbscreeningtype IS NOT NULL AND r.tbscreeningtype != '')\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_TB Specimen Returned (Q11) ────────────────────────────────────────────\n" +
             "agg_tb_spec_ret AS (\n" +
             "    SELECT org_unit, attrib, period, COUNT(*) AS cnt\n" +
@@ -331,7 +309,6 @@ public class APPRQUERY {
             "      AND  r.cleaned_tbdiagnosticresult_interpretation ILIKE ANY (ARRAY['%Positive%'])\n" +
             "    GROUP  BY org_unit, attrib, period\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_TB Specimen Sent (Q12) ────────────────────────────────────────────────\n" +
             "agg_tb_spec_sent AS (\n" +
             "    SELECT org_unit, attrib, period, COUNT(*) AS cnt\n" +
@@ -344,7 +321,6 @@ public class APPRQUERY {
             "      AND  r.tbstatus ILIKE ANY (ARRAY['%presumptive%','%Confirmed TB%','%Currently on TB treatment%'])\n" +
             "    GROUP  BY org_unit, attrib, period\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_TB Test Type specific (Q13-1) ─────────────────────────────────────────\n" +
             "agg_tb_test_type AS (\n" +
             "    SELECT org_unit, attrib, period, r.tbdiagnostictesttype, COUNT(*) AS cnt\n" +
@@ -360,7 +336,6 @@ public class APPRQUERY {
             "      AND  r.tbdiagnostictesttype IS NOT NULL\n" +
             "    GROUP  BY org_unit, attrib, period, r.tbdiagnostictesttype\n" +
             "),\n" +
-            "\n" +
             "-- ── CXCA_SCRN (Q14) ──────────────────────────────────────────────────────────\n" +
             "agg_cxca_scrn AS (\n" +
             "    SELECT org_unit, attrib, period, age,\n" +
@@ -376,7 +351,6 @@ public class APPRQUERY {
             "    GROUP  BY org_unit, attrib, period, age,\n" +
             "              r.cervicalcancerscreeningtype, r.resultofcervicalcancerscreening\n" +
             "),\n" +
-            "\n" +
             "-- ── CXCA_TX (Q15) ────────────────────────────────────────────────────────────\n" +
             "agg_cxca_tx AS (\n" +
             "    SELECT org_unit, attrib, period, age,\n" +
@@ -394,7 +368,6 @@ public class APPRQUERY {
             "    GROUP  BY org_unit, attrib, period, age,\n" +
             "              r.cervicalcancerscreeningtype, r.cervicalcancertreatmentscreened\n" +
             "),\n" +
-            "\n" +
             "-- ── TB_PREV Denominator New ART (Q16-1) ──────────────────────────────────────\n" +
             "agg_tb_prev_d_new AS (\n" +
             "    SELECT org_unit, attrib, period, gender, age, COUNT(*) AS cnt\n" +
@@ -405,7 +378,6 @@ public class APPRQUERY {
             "      AND  r.artstartdate   BETWEEN p.eop_12m AND p.eop_6m\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age\n" +
             "),\n" +
-            "\n" +
             "-- ── TB_PREV Denominator Existing ART (Q16-2) ─────────────────────────────────\n" +
             "agg_tb_prev_d_ex AS (\n" +
             "    SELECT org_unit, attrib, period, gender, age, COUNT(*) AS cnt\n" +
@@ -416,7 +388,6 @@ public class APPRQUERY {
             "      AND  r.artstartdate  <= p.eop_12m\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age\n" +
             "),\n" +
-            "\n" +
             "-- ── TB_PREV Numerator New ART (Q17-1) ────────────────────────────────────────\n" +
             "agg_tb_prev_n_new AS (\n" +
             "    SELECT org_unit, attrib, period, gender, age, COUNT(*) AS cnt\n" +
@@ -430,7 +401,6 @@ public class APPRQUERY {
             "      AND  r.iptcompletionstatus ILIKE '%completed%'\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age\n" +
             "),\n" +
-            "\n" +
             "-- ── TB_PREV Numerator Existing ART (Q17-2) ───────────────────────────────────\n" +
             "agg_tb_prev_n_ex AS (\n" +
             "    SELECT org_unit, attrib, period, gender, age, COUNT(*) AS cnt\n" +
@@ -444,7 +414,6 @@ public class APPRQUERY {
             "      AND  r.iptcompletionstatus ILIKE '%completed%'\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_NEW Pregnant/BF (Q21) ─────────────────────────────────────────────────\n" +
             "agg_tx_new_preg AS (\n" +
             "    SELECT org_unit, attrib, period, COUNT(*) AS cnt\n" +
@@ -457,7 +426,6 @@ public class APPRQUERY {
             "      AND  (r.careentry NOT ILIKE '%Transfer-in%' OR r.careentry IS NULL)\n" +
             "    GROUP  BY org_unit, attrib, period\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_PVLS_D Pregnant/BF (Q22) ──────────────────────────────────────────────\n" +
             "agg_pvls_d_preg AS (\n" +
             "    SELECT org_unit, attrib, period, r.pregnancystatus, COUNT(*) AS cnt\n" +
@@ -471,7 +439,6 @@ public class APPRQUERY {
             "      AND  r.pregnancystatus NOT ILIKE '%NOT%'\n" +
             "    GROUP  BY org_unit, attrib, period, r.pregnancystatus\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_PVLS_N Pregnant/BF (Q24) ──────────────────────────────────────────────\n" +
             "agg_pvls_n_preg AS (\n" +
             "    SELECT org_unit, attrib, period, r.pregnancystatus, COUNT(*) AS cnt\n" +
@@ -487,7 +454,6 @@ public class APPRQUERY {
             "      AND  r.pregnancystatus NOT ILIKE '%NOT%'\n" +
             "    GROUP  BY org_unit, attrib, period, r.pregnancystatus\n" +
             "),\n" +
-            "\n" +
             "-- ── TX_TB_D Screening Type (Q33) ─────────────────────────────────────────────\n" +
             "agg_tb_d_scrn_type AS (\n" +
             "    SELECT org_unit, attrib, period, r.tbscreeningtype, COUNT(*) AS cnt\n" +
@@ -631,16 +597,14 @@ public class APPRQUERY {
             "),\n" +
             "\n" +
             "ou_period AS (\n" +
-            "    SELECT DISTINCT apprcode AS org_unit, attributecombo AS attrib, period\n" +
+            "    SELECT DISTINCT apprcode AS org_unit, attributecombo AS attrib, period, ipname, facilityname, state, lga\n" +
             "    FROM   public.radet_table\n" +
             "),\n" +
-            "\n" +
             "final AS (\n" +
-            "\n" +
             "    -- ── TX_CURR ──────────────────────────────────────────────────\n" +
             "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0) AS value\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'lO30dVqdhrL'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -649,14 +613,12 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
             "    -- ── TX_NEW_WITH_CD4 ──────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'HJtyGifV4OI'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -666,14 +628,12 @@ public class APPRQUERY {
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "          AND  a.cd4_min = co.cd4_min AND a.cd4_max = co.cd4_max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
             "    -- ── TX_NEW_NO_CD4 ────────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'HJtyGifV4OI'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -682,14 +642,12 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
             "    -- ── TX_PVLS_D ────────────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'r9nGYnFbT51'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -698,14 +656,12 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_PVLS_N ────────────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_PVLS_N ────────────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'jxaQYJGzpfI'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -714,14 +670,12 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_RTT_WITH_CD4 ──────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_RTT_WITH_CD4 ──────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'toiOIKgtle8'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -731,14 +685,12 @@ public class APPRQUERY {
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "          AND  a.cd4_min = co.cd4_min AND a.cd4_max = co.cd4_max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_RTT_NO_CD4 ────────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_RTT_NO_CD4 ────────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'toiOIKgtle8'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -747,14 +699,12 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_ML_DIED (cause of death) ──────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_ML_DIED (cause of death) ──────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'BLLyjf1RlJA'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -764,14 +714,12 @@ public class APPRQUERY {
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "          AND  a.cleaned_causeofdeath ILIKE co.cause_of_death\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_ML_IIT ────────────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_ML_IIT ────────────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'm80DW9SjvsC'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -781,14 +729,12 @@ public class APPRQUERY {
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "          AND  a.iit_gap BETWEEN co.iit_days_min AND co.iit_days_max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_RTT_IIT_DURATION ──────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_RTT_IIT_DURATION ──────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'Ot4j5cD437l'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -796,14 +742,12 @@ public class APPRQUERY {
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
             "          AND  a.gap BETWEEN co.iit_days_min AND co.iit_days_max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_CURR_MMD ──────────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_CURR_MMD ──────────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'NEqrzFHDI1U'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -813,14 +757,12 @@ public class APPRQUERY {
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "          AND  a.monthsofarvrefill BETWEEN co.months_min AND co.months_max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_TB_D_OLD_POS ──────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_TB_D_OLD_POS ──────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'Wve38eJ8kgk'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -829,14 +771,12 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_TB_D_NEW_POS ──────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_TB_D_NEW_POS ──────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'Wve38eJ8kgk'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -845,14 +785,12 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_TB_D_OLD_NEG ──────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_TB_D_OLD_NEG ──────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'Wve38eJ8kgk'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -861,14 +799,12 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_TB_D_NEW_NEG ──────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_TB_D_NEW_NEG ──────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'Wve38eJ8kgk'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -877,42 +813,38 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_TB_SPECIMEN_RET ───────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_TB_SPECIMEN_RET ───────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'FQwNvHS0V66'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
             "    LEFT   JOIN agg_tb_spec_ret a\n" +
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "\n" +
             "    UNION ALL\n" +
             "\n" +
-            "    -- ── TX_TB_SPECIMEN_SENT ──────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_TB_SPECIMEN_SENT ──────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'z0VVeKuUIPs'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
             "    LEFT   JOIN agg_tb_spec_sent a\n" +
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_TB_TEST_TYPE (specific) ───────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_TB_TEST_TYPE (specific) ───────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'MbabSqlSAcX'\n" +
             "    JOIN   public.category_option co\n" +
@@ -922,14 +854,12 @@ public class APPRQUERY {
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
             "          AND  a.tbdiagnostictesttype ILIKE co.tb_test_type\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_TB_TEST_OTHER ─────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_TB_TEST_OTHER ─────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'MbabSqlSAcX'\n" +
             "    JOIN   public.category_option co\n" +
@@ -942,14 +872,12 @@ public class APPRQUERY {
             "          AND  a.tbdiagnostictesttype NOT ILIKE '%Tru%'\n" +
             "          AND  a.tbdiagnostictesttype NOT ILIKE '%ray%'\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── CXCA_SCRN ────────────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── CXCA_SCRN ────────────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'cW5jgBzL3pX'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -959,14 +887,12 @@ public class APPRQUERY {
             "          AND  a.cervicalcancerscreeningtype ILIKE co.screening_type\n" +
             "          AND  a.resultofcervicalcancerscreening ILIKE co.screening_result\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── CXCA_TX ──────────────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── CXCA_TX ──────────────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'ixfUm3GsTQP'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -976,14 +902,12 @@ public class APPRQUERY {
             "          AND  a.cervicalcancerscreeningtype ILIKE co.screening_type\n" +
             "          AND  a.cervicalcancertreatmentscreened ILIKE co.treatment_type\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TB_PREV_D_NEW ────────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TB_PREV_D_NEW ────────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'k2evNoBFHBL'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -992,14 +916,12 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TB_PREV_D_EX ─────────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TB_PREV_D_EX ─────────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'k2evNoBFHBL'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -1008,14 +930,12 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TB_PREV_N_NEW ────────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TB_PREV_N_NEW ────────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'oIVpdKLVIMq'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -1024,14 +944,12 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TB_PREV_N_EX ─────────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TB_PREV_N_EX ─────────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'oIVpdKLVIMq'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -1040,28 +958,26 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "\n" +
             "    UNION ALL\n" +
             "\n" +
-            "    -- ── TX_NEW_PREG_BF ───────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_NEW_PREG_BF ───────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'cPbjkxXC9yC'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
             "    LEFT   JOIN agg_tx_new_preg a\n" +
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_PVLS_D_PREG ───────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_PVLS_D_PREG ───────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'tR0IfJwY6MI'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -1069,14 +985,12 @@ public class APPRQUERY {
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
             "          AND  a.pregnancystatus ILIKE co.screening_result\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_PVLS_N_PREG ───────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_PVLS_N_PREG ───────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'aJZGdGpHOyp'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -1084,14 +998,12 @@ public class APPRQUERY {
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
             "          AND  a.pregnancystatus ILIKE co.screening_result\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_TB_D_SCRN_TYPE ────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_TB_D_SCRN_TYPE ────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'CKCzNdE83RT'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -1099,14 +1011,12 @@ public class APPRQUERY {
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
             "          AND  a.tbscreeningtype ILIKE co.screening_type\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_CURR_DSD ──────────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_CURR_DSD ──────────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'Rt2xSEinPkL'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -1114,14 +1024,12 @@ public class APPRQUERY {
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
             "          AND  a.modeldevolveto ILIKE co.dsd_model\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_PVLS_D_DSD ────────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_PVLS_D_DSD ────────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'vnirlTOs11i'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -1129,14 +1037,12 @@ public class APPRQUERY {
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
             "          AND  a.modeldevolveto ILIKE co.dsd_model\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_PVLS_N_DSD ────────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_PVLS_N_DSD ────────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'hHQll2DSXM1'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -1144,14 +1050,12 @@ public class APPRQUERY {
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
             "          AND  a.modeldevolveto ILIKE co.dsd_model\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_EVER_ENROLLED ─────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_EVER_ENROLLED ─────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'ibtXLuhXoXc'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -1160,14 +1064,12 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_PVLS_ELIGIBLE ─────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_PVLS_ELIGIBLE ─────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'jKZLTQPumKx'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -1176,14 +1078,12 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_PVLS_SAMPLE_COLL ──────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_PVLS_SAMPLE_COLL ──────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'prLqOcJY87r'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -1192,14 +1092,12 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── VL_SAMPLE_WEEKLY ─────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── VL_SAMPLE_WEEKLY ─────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'eJmIb96Ee4W'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -1208,14 +1106,12 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── VL_ELIGIBLE_WEEKLY ───────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── VL_ELIGIBLE_WEEKLY ───────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'iZIUDkhuxp4'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -1224,14 +1120,12 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_TB_N_OLD ──────────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_TB_N_OLD ──────────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'vyQrzD6QrWv'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -1240,14 +1134,12 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
-            "\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
-            "\n" +
-            "    -- ── TX_TB_N_NEW ──────────────────────────────────────────────\n" +
-            "    SELECT de.data_element_uid, de.data_element,\n" +
+//            "    -- ── TX_TB_N_NEW ──────────────────────────────────────────────\n" +
+            "    SELECT de.data_element_uid, de.data_element AS data_element_name,\n" +
             "           op.period, op.org_unit, op.attrib, co.category_option_uid,\n" +
-            "           COALESCE(SUM(a.cnt), 0)\n" +
+            "           COALESCE(SUM(a.cnt), 0) AS value, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    FROM   ou_period op\n" +
             "    JOIN   public.data_element de   ON de.data_element_uid = 'vyQrzD6QrWv'\n" +
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
@@ -1256,18 +1148,19 @@ public class APPRQUERY {
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
-            "              op.org_unit, op.attrib, co.category_option_uid\n" +
+            "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             ")\n" +
-            "\n" +
             "SELECT\n" +
             "    data_element_uid    AS dataElement,\n" +
             "    period,\n" +
             "    org_unit            AS orgUnit,\n" +
             "    category_option_uid AS categoryOptionCombo,\n" +
             "    SUM(value)          AS value,\n" +
-            "    attrib              AS attributeOptionCombo\n" +
-            "FROM  final WHERE data_element_uid IN ?3 \n" +
+            "    attrib              AS attributeOptionCombo,\n" +
+            "data_element_name AS dataElementName, category_option AS categoryOptionName,\n" +
+            "facilityname, state, lga, ipname\n" +
+            "FROM  final \n" +
             "GROUP BY data_element_uid, period,\n" +
-            "         org_unit, category_option_uid, attrib\n" +
-            "ORDER BY org_unit, data_element_uid, category_option_uid\n";
+            "org_unit, category_option_uid, attrib, facilityname, state, lga, ipname, data_element_name, category_option\n" +
+            "ORDER BY org_unit, data_element_uid, category_option_uid";
 }

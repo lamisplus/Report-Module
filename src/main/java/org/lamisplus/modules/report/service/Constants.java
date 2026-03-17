@@ -17,6 +17,7 @@ public class Constants {
 	public static final String CLIENT_SERVICE_LIST = "client_service_list";
 
 	public static final String RADET_SHEET = "radet";
+	public static final String APPR_SHEET = "appr";
 	public static final String TB_SHEET = "tb";
 	public static final String NCD_SHEET = "ncd";
 	public static final String EAC_SHEET = "eac";
@@ -192,6 +193,22 @@ public class Constants {
 //					"File version"
 
 			);
+
+    public static final List<String> APPR_HEADER =
+            Arrays.asList(
+                    "OrgUID",
+                    "Period",
+                    "DataElementUID",
+                    "DataElementName",
+                    "CategoryOptionComboUID",
+                    "CategoryOptionComboName",
+                    "AttributeOptionComboUID",
+                    "Value",
+                    "FacilityName",
+                    "FacilityState",
+                    "FacilityLGA",
+                    "IP"
+            );
 
 
 	public static final String PHARMACY_SHEET = "pharmacy-report";

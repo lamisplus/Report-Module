@@ -9,6 +9,7 @@ import org.lamisplus.modules.report.service.Constants;
 import org.lamisplus.modules.report.service.GenerateExcelService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -90,11 +91,10 @@ public class PrepReportController {
     @PostMapping(REPORT_URL_VERSION_ONE + "/fill-radet")
     public ResponseEntity<ApprCollectionProjection> pullRadetRecords(
             @RequestParam("facilityId") Long facilityId,
-            @RequestParam("weekPeriod") String weekPeriod,
-            @RequestParam("dataElement") List<String> dataElement
+            @RequestParam("weekPeriod") String weekPeriod
     ){
         // fetch rows
-        List<ApprProjection> rows = generateExcelService.pullRadetRecords(facilityId, weekPeriod, dataElement);
+        List<ApprProjection> rows = generateExcelService.pullRadetRecords(facilityId, weekPeriod);
 
         // map to final DTO
         ApprCollectionProjection payload = toCollection(rows);
@@ -117,6 +117,24 @@ public class PrepReportController {
 //                .toList();
 
         return new ApprCollectionProjection(values);
+    }
+
+
+    @PostMapping(REPORT_URL_VERSION_ONE + "/preview-appr")
+    public void getRadet(
+            HttpServletResponse response,
+            @RequestParam("facilityId") Long facilityId,
+            @RequestParam("weekPeriod") String weekPeriod) throws IOException {
+        messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting pull appr Report");
+
+        messagingTemplate.convertAndSend("/topic/preview-appr", "start");
+
+        ByteArrayOutputStream baos = generateExcelService.pullRadetRecord(facilityId, weekPeriod);
+
+        setStream(baos, response);
+        messagingTemplate.convertAndSend("/topic/preview-appr", "end");
+
+        messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating radet report");
     }
 
 

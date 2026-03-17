@@ -11,6 +11,7 @@ import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.report.domain.LabReport;
 import org.lamisplus.modules.report.domain.PatientLineDto;
 import org.lamisplus.modules.report.domain.PharmacyReport;
+import org.lamisplus.modules.report.domain.dto.ApprProjection;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 //import org.lamisplus.modules.report.utility.JsonEncryptor;
 import org.lamisplus.modules.report.utility.Scrambler;
@@ -1055,4 +1056,38 @@ public class GenerateExcelDataHelper {
 		Log.info(RESULT_OUTPUT + result.size());
 		return result;
 	}
+
+    public List<Map<Integer, Object>> fillApprDataMapper(List<ApprProjection> apprDto) {
+
+        List<Map<Integer, Object>> result = new ArrayList<>();
+        for (ApprProjection appr : apprDto) {
+            if (appr != null) {
+                Map<Integer, Object> map = new HashMap<>();
+                int index = 0;
+                try {
+                    map.put(index++, getStringValue(appr.getOrgUnit()));
+                    map.put(index++, getStringValue(appr.getPeriod()));
+                    map.put(index++, getStringValue(appr.getDataElement()));
+                    map.put(index++, getStringValue(appr.getDataElementName()));
+                    map.put(index++, getStringValue(appr.getCategoryOptionCombo()));
+
+                    map.put(index++, getStringValue(appr.getCategoryOptionComboName()));
+                    map.put(index++, null);
+                    map.put(index++, getStringValue(String.valueOf(appr.getValue())));
+                    map.put(index++, getStringValue(appr.getFacilityname()));
+                    map.put(index++, getStringValue(appr.getState()));
+                    map.put(index++, getStringValue(appr.getLga()));
+                    map.put(index, getStringValue(appr.getIpname()));
+
+                } catch (Exception e) {
+                    LOG.error("An error occurred when converting db records to excel");
+                    LOG.error(ERROR_OUTPUT + e.getMessage());
+                }
+                result.add(map);
+
+            }
+        }
+        Log.info(RESULT_OUTPUT + result.size());
+        return result;
+    }
 }

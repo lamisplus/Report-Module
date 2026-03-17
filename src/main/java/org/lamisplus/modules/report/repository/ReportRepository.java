@@ -215,7 +215,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
-    @Query(value = "INSERT INTO radet_table (period, personuuid, hospitalnumber, uniqueid, age, gender, dateofbirth, datimid, targetgroup, enrollmentsetting, artstartdate,\n" +
+    @Query(value = "INSERT INTO radet_table (period, ipname, facilityname, state, lga, personuuid, hospitalnumber, uniqueid, age, gender, dateofbirth, datimid, targetgroup, enrollmentsetting, artstartdate,\n" +
                 "regimenatstart, dateofregistration, dateofenrollment, ovcuniqueid, householduniqueno, careentry, regimenlineatstart,\n" +
                 "apprcode, attributecombo, dateofviralloadsamplecollection, dateofcurrentviralloadsample, viralloadindication, currentviralload, \n" +
                 "dateofcurrentviralload,dsdmodel, lastpickupdate, currentartregimen, currentregimenline, nextpickupdate, monthsofarvrefill,\n" +
@@ -229,9 +229,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
                 "datetbscorecad, dateoftbsamplecollection, dateoftbdiagnosticresultreceived, dateoftbsamplecollected, tbdiagnosticresult, tbdiagnostictesttype,\n" +
                 "tbstatus, dateodtbscreened, tbscreeningtype, causeofdeath, vacauseofdeath, previousstatus, previousstatusdate, currentstatus, currentstatusdate, clientverificationstatus,\n" +
                 "clientverificationoutcome, vleligibilitystatus, test, dateofvleligibilitystatus, lastcd4count, dateoflastcd4count, casemanager)\n" +
-                "\n" +
-                "SELECT \n" +
-                "?6 AS period, personuuid, hospitalnumber, uniqueid, age, gender, dateofbirth, datimid, targetgroup, enrollmentsetting, artstartdate,\n" +
+                "SELECT ?6 AS period, ipName, facilityName, state, lga, personuuid, hospitalnumber, uniqueid, age, gender, dateofbirth, datimid, targetgroup, enrollmentsetting, artstartdate,\n" +
                 "regimenatstart, dateofregistration, dateofenrollment, ovcuniqueid, householduniqueno, careentry, regimenlineatstart,\n" +
                 "apprcode, attributecombo, dateofviralloadsamplecollection, dateofcurrentviralloadsample, viralloadindication, currentviralload, \n" +
                 "dateofcurrentviralload,dsdmodel, lastpickupdate, currentartregimen, currentregimenline, nextpickupdate, monthsofarvrefill,\n" +
@@ -245,7 +243,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
                 "datetbscorecad, dateoftbsamplecollection, dateoftbdiagnosticresultreceived, dateoftbsamplecollected, tbdiagnosticresult, tbdiagnostictesttype,\n" +
                 "tbstatus, dateoftbscreened, tbscreeningtype, causeofdeath, vacauseofdeath, previousstatus, previousstatusdate, currentstatus, currentstatusdate, clientverificationstatus,\n" +
                 "clientverificationoutcome, vleligibilitystatus, test, dateofvleligibilitystatus, lastcd4count, dateoflastcd4count, casemanager\n" +
-                "FROM (WITH bio_data AS (SELECT DISTINCT (p.uuid) AS personUuid,p.hospital_number AS hospitalNumber, h.unique_id as uniqueId,\n" +
+                "FROM (" +
+                "WITH bio_data AS (SELECT DISTINCT (p.uuid) AS personUuid,p.hospital_number AS hospitalNumber, h.unique_id as uniqueId,\n" +
                 "EXTRACT(YEAR FROM  AGE(?3, date_of_birth)) AS age,\n" +
                 "INITCAP(p.sex) AS gender,\n" +
                 "p.date_of_birth AS dateOfBirth,\n" +
@@ -1278,7 +1277,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
 
     @Query(value = APPRQUERY.APPR_REPORT_QUERY, nativeQuery = true)
-    List<ApprProjection> getApprReport(LocalDate start, LocalDate end, List<String> dataElement);
+    List<ApprProjection> getApprReport(LocalDate start, LocalDate end);
 
 
 

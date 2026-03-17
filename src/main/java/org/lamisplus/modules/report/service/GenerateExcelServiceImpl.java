@@ -10,6 +10,7 @@ import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.report.config.Application;
 import org.lamisplus.modules.report.domain.HtsReportDto;
 import org.lamisplus.modules.report.domain.RADETDTOProjection;
+import org.lamisplus.modules.report.domain.dto.AppPreviewProjection;
 import org.lamisplus.modules.report.domain.dto.ApprCollectionProjection;
 import org.lamisplus.modules.report.domain.dto.ApprProjection;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
@@ -608,8 +609,13 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		return null;
 	}
 
+//    @Override
+//    public ByteArrayOutputStream pullRadetRecord(Long facilityId, String weekPeriod) {
+//        return null;
+//    }
+
     @Override
-    public List<ApprProjection> pullRadetRecords(Long facilityId, String weekPeriod, List<String> dataElement) {
+    public List<ApprProjection> pullRadetRecords(Long facilityId, String weekPeriod) {
         Period period = periodRepository.findById(weekPeriod)
                 .orElseThrow(() -> new RuntimeException("Period not found"));
 
@@ -634,7 +640,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
         reportRepository.updateCleanColumn();
         System.out.println("End updating radet clean radet report");
         System.out.println("Start pulling appr report");
-        return reportRepository.getApprReport(startDate, endDate, dataElement);
+        return reportRepository.getApprReport(startDate, endDate);
     }
 
     @Override
@@ -685,5 +691,37 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("query size is : {}" + fullData.size());
 		return excelService.generate(reportName, fullData, headers);
 	}
+
+
+
+    @Override
+    @SneakyThrows
+    public ByteArrayOutputStream pullRadetRecord(Long facilityId, String weekPeriod) {
+        LOG.info("Start generating APPR for facility:{}", getFacilityName(facilityId));
+        messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
+
+        Period period = periodRepository.findById(weekPeriod)
+                .orElseThrow(() -> new RuntimeException("Period not found"));
+
+        LocalDate startDate = period.getStartDate();
+        LocalDate endDate   = period.getEndDate();
+
+        try {
+            List<ApprProjection> apprDto = reportRepository.getApprReport(startDate, endDate);
+            LOG.info("RADET Size {}", apprDto.size());
+            messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
+            List<Map<Integer, Object>> data = excelDataHelper.fillApprDataMapper(apprDto);
+
+            messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
+            return excelService.generate(Constants.APPR_SHEET, data, Constants.APPR_HEADER);
+
+        } catch (Exception e) {
+            LOG.error("Error generating RADET: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to generate RADET report", e);
+        } finally {
+            LOG.info("End generate patient Radet");
+        }
+    }
+
 }
 
