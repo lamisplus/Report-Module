@@ -50,7 +50,7 @@ public class EACReportQuery {
             "\teac.dateOfCommencementOfFirstEAC, eac.dateOfCommencementOfSecondEAC, eac.dateOfCommencementOfThirdEAC, eac.dateOfCommencementOfFourthEAC, eac.dateOfCommencementOfFifthEAC, eac.dateOfCommencementOfSixthEAC,\n" +
             "\teac.numberOfEACSessionsCompleted, eac.dateOfRepeatViralLoadPostEACSampleCollected, eac.repeatViralLoadResultPostEAC, eac.dateOfRepeatViralLoadResultPostEACVL\n" +
             "\tFROM bio_data bd \n" +
-            "\tJOIN (\n" +
+            "\tJOIN (SELECT * FROM (\n" +
             "SELECT enrolledEac.facility_id, enrolledEac.person_uuid personUuid50, enrolledEac.uuid,\n" +
             "firstEac.sessionDate dateOfCommencementOfFirstEAC, secondEac.sessionDate dateOfCommencementOfSecondEAC, thirdEac.sessionDate dateOfCommencementOfThirdEAC, fourthEac.sessionDate dateOfCommencementOfFourthEAC, fifthEac.sessionDate dateOfCommencementOfFifthEAC, sixthEac.sessionDate dateOfCommencementOfSixthEAC,\n" +
             "(\n" +
@@ -63,7 +63,7 @@ public class EACReportQuery {
             "END\n" +
             ") numberOfEACSessionsCompleted, COALESCE (fifthEac.sessionDate,sixthEac.sessionDate) dateOfExtendEACCompletion, postEacVl.date_sample_collected,\n" +
             "(CASE WHEN postEacVl.date_sample_collected >= thirdEac.sessionDate THEN postEacVl.date_sample_collected END) dateOfRepeatViralLoadPostEACSampleCollected, (CASE WHEN postEacVl.date_sample_collected >= thirdEac.sessionDate THEN postEacVl.result_reported END) repeatViralLoadResultPostEAC, \n" +
-            "(CASE WHEN postEacVl.date_sample_collected >= thirdEac.sessionDate THEN postEacVl.date_result_reported END) dateOfRepeatViralLoadResultPostEACVL, eacSession.status, eacSession.eac_session_date\n" +
+            "(CASE WHEN postEacVl.date_sample_collected >= thirdEac.sessionDate THEN postEacVl.date_result_reported END) dateOfRepeatViralLoadResultPostEACVL, eacSession.status, eacSession.eac_session_date, ROW_NUMBER () OVER (PARTITION BY enrolledEac.person_uuid ORDER BY firstEac.sessionDate DESC) as rowkk\n" +
             "FROM \n" +
             "hiv_eac enrolledEac\n" +
             "INNER JOIN (\n" +
@@ -101,7 +101,7 @@ public class EACReportQuery {
             "AND  lt.viral_load_indication IN (302, 305, 304) AND (sm.date_result_reported IS NULL OR CAST(sm.date_result_reported AS DATE) <= ?3)\n" +
             ") pe where row = 1\n" +
             ") postEacVl ON postEacVl.patient_uuid = enrolledEac.person_uuid\n" +
-            "WHERE archived = 0) eac ON eac.personUuid50 = bd.patientId),\n" +
+            "WHERE archived = 0)finalQuery WHERE rowkk = 1) eac ON eac.personUuid50 = bd.patientId),\n" +
             "post_eac_vl2 as ( \n" +
             "    WITH current_eac AS ( \n" +
             "        SELECT person_uuid, uuid, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY id DESC) AS row \n" +

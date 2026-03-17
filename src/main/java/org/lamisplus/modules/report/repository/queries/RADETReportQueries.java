@@ -356,7 +356,7 @@ public class RADETReportQueries {
             " LEFT JOIN laboratory_result lr ON lt.id = lr.test_id\n" +
             " WHERE lt.lab_test_id IN (86, 65, 67, 64, 58, 51, 73, 72, 71) and sm.archived = 0 AND sm.date_sample_collected IS NOT NULL AND (lr.result_reported ILIKE '%negative%' OR lr.result_reported ILIKE '%MTB not detected%')\n" +
             "),\n" +
-            "eac as (SELECT enrolledEac.facility_id, enrolledEac.person_uuid person_uuid50, enrolledEac.uuid,\n" +
+            "eac as (SELECT * FROM (SELECT enrolledEac.facility_id, enrolledEac.person_uuid person_uuid50, enrolledEac.uuid,\n" +
             "firstEac.sessionDate dateOfCommencementOfEAC,\n" +
             "(\n" +
             "CASE WHEN eacSession.status = 'SIXTH EAC' THEN 5\n" +
@@ -374,7 +374,9 @@ public class RADETReportQueries {
             "    WHEN eacSession.status = 'FIRST EAC' THEN NULL END) AS dateOfLastEACSessionCompleted,\n" +
             "COALESCE (fifthEac.sessionDate,sixthEac.sessionDate) dateOfExtendEACCompletion,\n" +
             "(CASE WHEN postEacVl.date_sample_collected >= thirdEac.sessionDate  THEN postEacVl.date_sample_collected END) dateOfRepeatViralLoadEACSampleCollection, (CASE WHEN postEacVl.date_sample_collected >= thirdEac.sessionDate THEN postEacVl.result_reported END) repeatViralLoadResult,\n" +
-            "(CASE WHEN postEacVl.date_sample_collected >= thirdEac.sessionDate THEN postEacVl.date_result_reported END) dateOfRepeatViralLoadResult, eacSession.status, eacSession.eac_session_date FROM\n" +
+            "(CASE WHEN postEacVl.date_sample_collected >= thirdEac.sessionDate THEN postEacVl.date_result_reported END) dateOfRepeatViralLoadResult, eacSession.status, eacSession.eac_session_date, \n" +
+            "ROW_NUMBER () OVER (PARTITION BY enrolledEac.person_uuid ORDER BY firstEac.sessionDate DESC) as rowkk\n" +
+            "FROM\n" +
             "hiv_eac enrolledEac\n" +
             "INNER JOIN (\n" +
             "SELECT person_uuid, eac_id, eac_session_date, status, ROW_NUMBER() OVER (PARTITION BY eac_id, person_uuid ORDER BY eac_session_date DESC) eacRank,\n" +
@@ -412,7 +414,7 @@ public class RADETReportQueries {
             "AND  lt.viral_load_indication IN (302, 305, 304) AND (sm.date_result_reported IS NULL OR CAST(sm.date_result_reported AS DATE) <= ?3)\n" +
             ") pe where row = 1\n" +
             ") postEacVl ON postEacVl.patient_uuid = enrolledEac.person_uuid\n" +
-            "WHERE archived = 0 AND facility_id = ?1),\n" +
+            "WHERE archived = 0 AND facility_id = ?1)finalEAC WHERE rowkk = 1),\n" +
             "dsd1 as (\n" +
             "select person_uuid as person_uuid_dsd_1, dateOfDevolvement, modelDevolvedTo\n" +
             "from (select d.person_uuid, d.date_devolved as dateOfDevolvement, bmt.display as modelDevolvedTo,\n" +
