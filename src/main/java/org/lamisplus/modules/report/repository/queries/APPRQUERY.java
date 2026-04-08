@@ -1157,7 +1157,7 @@ public class APPRQUERY {
             "    category_option_uid AS categoryOptionCombo,\n" +
             "    SUM(value)          AS value,\n" +
             "    attrib              AS attributeOptionCombo,\n" +
-            "data_element_name AS dataElementName, category_option AS categoryOptionName,\n" +
+            "data_element_name AS data_element_name, category_option AS categoryOptionName,\n" +
             "facilityname, state, lga, ipname\n" +
             "FROM  final \n" +
             "GROUP BY data_element_uid, period,\n" +

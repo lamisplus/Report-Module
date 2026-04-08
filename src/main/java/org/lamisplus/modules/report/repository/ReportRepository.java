@@ -1541,4 +1541,21 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "    END)", nativeQuery = true)
     int updateCleanColumn();
 
+
+    @Query(value = "SELECT period, ipname, facilityname, state, lga, personuuid, hospitalnumber, uniqueid, age, gender, dateofbirth, datimid, targetgroup, enrollmentsetting, artstartdate,\n" +
+            "regimenatstart, dateofregistration, dateofenrollment, ovcuniqueid, householduniqueno, careentry, regimenlineatstart,\n" +
+            "apprcode, attributecombo, dateofviralloadsamplecollection, dateofcurrentviralloadsample, viralloadindication, currentviralload, \n" +
+            "dateofcurrentviralload,dsdmodel, lastpickupdate, currentartregimen, currentregimenline, nextpickupdate, monthsofarvrefill,\n" +
+            "datebiometricenrolled, numberoffingerscaptured, datebiometricsrecaptured, numberoffingersrecaptured, biometricstatus, status_date,\n" +
+            "visit_date, capture_date, dateoftbscreened1, pregnancystatus, currentclinicalstage, currentweight, tbstatus1, dateofcommencementofeac,\n" +
+            "numberofeacsessioncompleted, dateoflasteacsessioncompleted, dateofextendeaccompletion, dateofrepeatviralloadeacsamplecollection,\n" +
+            "repeatviralloadresult, dateofrepeatviralloadresult, eacstatus, eac_session_date, dateofcurrentregimen, dateofiptstart, iptcompletiondate,\n" +
+            "iptcompletionstatus, ipttype, dateofcervicalcancerscreening, treatmentmethoddate, cervicalcancerscreeningtype, cervicalcancerscreeningmethod,\n" +
+            "cervicalcancertreatmentscreened, resultofcervicalcancerscreening, dateofdevolvement, modeldevolveto, dateofcurrentdsd, currentdsdmodel,\n" +
+            "datereturntosite, currentdsdoutlet, dsdoutlet, tbtreatmenttype, cadscore, tbtreatmentstartdate, tbtreatmentoutcome, tbcompletiondate,\n" +
+            "datetbscorecad, dateoftbsamplecollection, dateoftbdiagnosticresultreceived, dateoftbsamplecollected, tbdiagnosticresult, tbdiagnostictesttype,\n" +
+            "tbstatus, dateodtbscreened, tbscreeningtype, causeofdeath, vacauseofdeath, previousstatus, previousstatusdate, currentstatus, currentstatusdate, clientverificationstatus,\n" +
+            "clientverificationoutcome, vleligibilitystatus, test, dateofvleligibilitystatus, lastcd4count, dateoflastcd4count, casemanager FROM radet_table", nativeQuery = true)
+    List<ApprRADETProjection> apprRadet();
+
 }

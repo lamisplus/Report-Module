@@ -25,7 +25,7 @@ public class TBLongitudinalReportQuery {
             "INITCAP(data->'tbIptScreening'->>'diagnosticTestDone') diagnosticTestDone, INITCAP(data->'tptMonitoring'->>'clinicallyEvaulated') clinicallyEvaulated, data->'tbIptScreening'->>'resultOfClinicalEvaluation' resultOfClinicalEvaluation,\n" +
             "data->'tbIptScreening'->>'tbType' tbType, NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'dateOfChestXrayResultTestDone', '') AS DATE), NULL) dateOfChestXrayResultTestDone, data->'tbIptScreening'->>'chestXrayResult' chestXrayResult, NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'tbTreatmentStartDate', '') AS DATE), NULL) tbTreatmentStartDate,\n" +
             "data->'tbIptScreening'->>'completedTbTreatment' completedTbTreatment,  data->'tbIptScreening'->>'treatmentOutcome' treatmentOutcome, NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'completionDate', '') AS DATE), NULL) tbCompletionDate,\n" +
-            "COALESCE(data->'tbIptScreening'->>'eligibleForTPT', data->'tptMonitoring'->>'eligibilityTpt', NULL) eligibleForTPT, data->'tptMonitoring'->>'contractionForTpt' contractionForTpt, data->'tbIptScreening'->>'chestXrayDone' chestXrayDone,\n" +
+            "COALESCE(NULLIF(data->'tbIptScreening'->>'eligibleForTPT', ''), data->'tptMonitoring'->>'eligibilityTpt', NULL) eligibleForTPT, data->'tptMonitoring'->>'contractionForTpt' contractionForTpt, data->'tbIptScreening'->>'chestXrayDone' chestXrayDone,\n" +
             "TRIM(BOTH ',' FROM\n" +
             "COALESCE(\n" +
             "CASE WHEN (data->'tptMonitoring'->>'liverSymptoms' IS NOT NULL AND data->'tptMonitoring'->>'liverSymptoms' != '' AND data->'tptMonitoring'->>'liverSymptoms' != 'No') THEN ',Liver Symptoms' ELSE '' END ||\n" +
@@ -45,8 +45,8 @@ public class TBLongitudinalReportQuery {
             "FROM hiv_art_pharmacy h \n" +
             "INNER JOIN jsonb_array_elements(h.extra -> 'regimens') WITH ORDINALITY p(pharmacy_object) ON TRUE \n" +
             "INNER JOIN hiv_regimen hr ON hr.description = CAST(p.pharmacy_object ->> 'regimenName' AS VARCHAR) \n" +
-            "INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id  AND hrt.id = 15 AND hrt.id NOT IN (1,2,3,4,14, 16) \n" +
-            "WHERE hrt.id = 15 AND h.archived = 0 AND h.visit_date BETWEEN ?2 AND ?3\n" +
+            "INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id  AND hrt.id IN (15, 9, 10) AND hrt.id NOT IN (1,2,3,4,14, 16) \n" +
+            "WHERE hrt.id = 15 AND h.archived = 0 AND hr.description ILIKE '%Isoniazid%' AND h.visit_date BETWEEN ?2 AND ?3\n" +
             ") AS ic \n" +
             "WHERE ic.rnk = 1\n" +
             ") tptClients ON tptClients.person_uuid = he.person_uuid\n" +
@@ -59,7 +59,7 @@ public class TBLongitudinalReportQuery {
             "and archived = 0) ic where ic.rnk = 1\n" +
             ") iptCompletionFromPharmacy ON iptCompletionFromPharmacy.person_uuid = he.person_uuid\n" +
             "LEFT JOIN (\n" +
-            "SELECT (CASE WHEN llt.lab_test_name ILIKE '%TB LAMP%' THEN 'TB-LAM' ELSE llt.lab_test_name END) AS tbDiagnosticTestType, llt.id, CAST(sm.date_sample_collected AS DATE) dateofDiagnosticTestSampleCollected, \n" +
+            "SELECT llt.lab_test_name AS tbDiagnosticTestType, llt.id, CAST(sm.date_sample_collected AS DATE) dateofDiagnosticTestSampleCollected, \n" +
             "(CASE WHEN lr.result_reported ILIKE '%Negative%' THEN 'Negative' ELSE result_reported END) as tbDiagnosticResult, CAST(lr.date_result_reported AS DATE) as dateofTbDiagnosticResultReceived, sm.patient_uuid,\n" +
             "CAST(lr.date_assayed AS DATE) dateDiagnosticEvaluation, ROW_NUMBER() OVER (PARTITION BY sm.patient_uuid ORDER BY sm.date_sample_collected DESC) rnkkkk\n" +
             "FROM public.laboratory_sample  sm\n" +
@@ -70,7 +70,7 @@ public class TBLongitudinalReportQuery {
             "AND sm.archived = 0 \n" +
             "AND lr.archived = 0\n" +
             "AND date_sample_collected IS NOT null \n" +
-            "AND sm.date_sample_collected <= ?3\n" +
+            "AND CAST(sm.date_sample_collected AS DATE) <= ?3\n" +
             ") tbLabSample ON tbLabSample.patient_uuid = clientObservation.personUuid AND tbLabSample.dateofDiagnosticTestSampleCollected = clientObservation.dateOfObservation\n" +
             "LEFT JOIN (\n" +
             "SELECT sm.patient_uuid as personTbResult, CASE WHEN (CAST(lr.date_result_reported AS DATE) > NOW() AND lr.result_reported IS NOT NULL) THEN NULL ELSE lr.result_reported END  as tbDiagnosticResult,\n" +

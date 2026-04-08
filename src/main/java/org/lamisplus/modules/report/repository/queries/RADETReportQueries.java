@@ -240,7 +240,7 @@ public class RADETReportQueries {
             "MAX(CASE WHEN lab_test_id = 72 THEN 'TrueNAT' END) ,\n" +
             "MAX(CASE WHEN lab_test_id = 71 THEN 'TB-LAM' END) ,\n" +
             "MAX(CASE WHEN lab_test_id = 86 THEN 'Cobas' END) ,\n" +
-            "MAX(CASE WHEN lab_test_id = 73 THEN 'TB-LAM' END) ,\n" +
+            "MAX(CASE WHEN lab_test_id = 73 THEN 'TB-LAMP' END) ,\n" +
             "MAX(CASE WHEN lab_test_id = 58 THEN 'TB-LAM' END)\n" +
             ") as tbDiagnosticTestType\n" +
             " FROM (\n" +
@@ -524,7 +524,7 @@ public class RADETReportQueries {
             " data->'tptMonitoring'->>'eligibilityTpt' AS eligibilityTpt\n" +
             "FROM hiv_observation\n" +
             "WHERE (data->'tptMonitoring'->>'eligibilityTpt' IS NOT NULL AND  data->'tptMonitoring'->>'eligibilityTpt' != '')\n" +
-            " AND (data->'tbIptScreening'->>'outcome' IS NOT NULL AND data->'tbIptScreening'->>'outcome' != '' AND data->'tbIptScreening'->>'outcome' != 'Currently on TPT') )\n" +
+            " AND (data->'tbIptScreening'->>'outcome' != 'Currently on TPT') )\n" +
             "SELECT COALESCE(tc.person_uuid, ts.person_uuid) AS person_uuid, ts.tptType, ts.tptStartDate, ts.eligibilityTpt, tc.endedTpt, tc.tptCompletionDate, tc.tptCompletionStatus\n" +
             "FROM\n" +
             "pt_screened ts\n" +
@@ -545,8 +545,8 @@ public class RADETReportQueries {
             "FROM hiv_art_pharmacy h\n" +
             "INNER JOIN jsonb_array_elements(h.extra -> 'regimens') WITH ORDINALITY p(pharmacy_object) ON TRUE\n" +
             "INNER JOIN hiv_regimen hr ON hr.description = CAST(p.pharmacy_object ->> 'regimenName' AS VARCHAR)\n" +
-            "INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id  AND hrt.id = 15 AND hrt.id NOT IN (1,2,3,4,14, 16)\n" +
-            "WHERE hrt.id = 15 AND h.archived = 0\n" +
+            "INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id  AND hrt.id IN (15, 9) AND hrt.id NOT IN (1,2,3,4,14, 16)\n" +
+            "WHERE hrt.id IN (15, 9) AND h.archived = 0 AND hr.description ILIKE '%Isoniazid%'\n" +
             ") AS ic WHERE ic.rnk = 1 ),\n" +
             "ipt_c_cs as (\n" +
             "SELECT person_uuid, iptStartDate, iptCompletionSCS, iptCompletionDSC\n" +
@@ -574,8 +574,8 @@ public class RADETReportQueries {
             "FROM hiv_art_pharmacy h\n" +
             "INNER JOIN jsonb_array_elements(h.extra -> 'regimens') WITH ORDINALITY p(pharmacy_object) ON TRUE\n" +
             "INNER JOIN hiv_regimen hr ON hr.description = CAST(p.pharmacy_object ->> 'regimenName' AS VARCHAR)\n" +
-            "INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id  AND hrt.id = 15 AND hrt.id NOT IN (1,2,3,4,14, 16)\n" +
-            "WHERE hrt.id = 15 AND h.archived = 0\n" +
+            "INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id  AND hrt.id IN (15, 9, 10) AND hrt.id NOT IN (1,2,3,4,14, 16)\n" +
+            "WHERE hrt.id IN (15, 9, 10) AND h.archived = 0 AND hr.description ILIKE '%Isoniazid%'\n" +
             ") AS ic WHERE ic.rnk = 1 ),\n" +
             " cervical_cancer AS (select * from (select  ho.person_uuid AS person_uuid90, ho.date_of_observation AS dateOfCervicalCancerScreening,\n" +
             "ho.data ->> 'screenTreatmentMethodDate' AS treatmentMethodDate,cc_type.display AS cervicalCancerScreeningType,\n" +
@@ -593,7 +593,7 @@ public class RADETReportQueries {
             "previous_previous AS (SELECT person_uuid AS prePrePersonUuid,\n" +
             " (CASE\n" +
             "WHEN hiv_status ILIKE '%DEATH%' OR hiv_status ILIKE '%Died%' THEN 'Died'\n" +
-            "WHEN( status_date > visit_date AND (hiv_status ILIKE '%stop%' OR hiv_status ILIKE '%out%' OR hiv_status ILIKE '%Invalid %' OR hiv_status ILIKE '%ART Transfer In%'))\n" +
+            "WHEN( status_date > maxdate AND (hiv_status ILIKE '%stop%' OR hiv_status ILIKE '%out%' OR hiv_status ILIKE '%Invalid %' OR hiv_status ILIKE '%ART Transfer In%'))\n" +
             " THEN hiv_status \n" +
             "ELSE status\n" +
             "END) AS status,\n" +
@@ -649,7 +649,7 @@ public class RADETReportQueries {
             "previous AS (SELECT person_uuid AS prePersonUuid,\n" +
             " (CASE\n" +
             "WHEN hiv_status ILIKE '%DEATH%' OR hiv_status ILIKE '%Died%' THEN 'Died'\n" +
-            "WHEN( status_date > visit_date AND (hiv_status ILIKE '%stop%' OR hiv_status ILIKE '%out%' OR hiv_status ILIKE '%Invalid %' OR hiv_status ILIKE '%ART Transfer In%'))\n" +
+            "WHEN( status_date > maxdate AND (hiv_status ILIKE '%stop%' OR hiv_status ILIKE '%out%' OR hiv_status ILIKE '%Invalid %' OR hiv_status ILIKE '%ART Transfer In%'))\n" +
             " THEN hiv_status \n" +
             "ELSE status\n" +
             "END) AS status,\n" +
@@ -705,7 +705,7 @@ public class RADETReportQueries {
             "current_status AS (SELECT person_uuid AS cuPersonUuid,\n" +
             " (CASE\n" +
             "WHEN hiv_status ILIKE '%DEATH%' OR hiv_status ILIKE '%Died%' THEN 'Died'\n" +
-            "WHEN( status_date > visit_date AND (hiv_status ILIKE '%stop%' OR hiv_status ILIKE '%out%' OR hiv_status ILIKE '%Invalid %' OR hiv_status ILIKE '%ART Transfer In%'))\n" +
+            "WHEN( status_date > maxdate AND (hiv_status ILIKE '%stop%' OR hiv_status ILIKE '%out%' OR hiv_status ILIKE '%Invalid %' OR hiv_status ILIKE '%ART Transfer In%'))\n" +
             " THEN hiv_status \n" +
             "ELSE status\n" +
             "END) AS status,\n" +
@@ -847,7 +847,7 @@ public class RADETReportQueries {
             "iptStart.dateOfIptStart AS dateOfIptStart,\n" +
             "COALESCE(CAST (iptN.tptCompletionDate AS DATE), ipt.iptCompletionDate) AS iptCompletionDate,\n" +
             "(CASE WHEN COALESCE(iptN.tptCompletionStatus, ipt.iptCompletionStatus) = 'IPT Completed' THEN 'Treatment completed' ELSE COALESCE(iptN.tptCompletionStatus, ipt.iptCompletionStatus) END) AS iptCompletionStatus,\n" +
-            "iptStart.iptType AS iptType,\n" +
+            "iptStart.iptType AS iptType, iptN.eligibilityTpt,\n" +
             "cc.*,\n" +
             "dsd1.*, dsd2.*,  \n" +
             "ov.*,\n" +

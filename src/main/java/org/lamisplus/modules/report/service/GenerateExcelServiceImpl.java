@@ -192,8 +192,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("End generate patient Radet");
 		return null;
 	}
-	
-	@Override
+
+
+    @Override
 	public ByteArrayOutputStream generatePharmacyReport(Long facilityId) {
 		LOG.info("generating Pharmacy");
 		try {
@@ -652,7 +653,6 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
                 .collect(Collectors.toList());
     }
 
-
     public ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
@@ -721,6 +721,27 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
         } finally {
             LOG.info("End generate patient Radet");
         }
+    }
+
+    @Override
+    @SneakyThrows
+    public ByteArrayOutputStream generateApprRadet() {
+        messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
+        try {
+            List<ApprRADETProjection> radetDtos = reportRepository.apprRadet();
+
+            LOG.info("RADET Size {}", radetDtos.size());
+            messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
+            List<Map<Integer, Object>> data = excelDataHelper.fillApprRadetDataMapper(radetDtos);
+            messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
+            return excelService.generate(Constants.RADET_SHEET, data, Constants.APPR_RADET_HEADER);
+
+        } catch (Exception e) {
+            LOG.info("An error Occurred when generating RADET...");
+            LOG.error("Error message: {}", e.getMessage());
+        }
+        LOG.info("End generate patient Radet");
+        return null;
     }
 
 }

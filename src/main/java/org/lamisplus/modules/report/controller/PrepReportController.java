@@ -138,6 +138,22 @@ public class PrepReportController {
     }
 
 
+    @GetMapping(REPORT_URL_VERSION_ONE + "/appr-radet")
+    public void getApprRadet(
+            HttpServletResponse response) throws IOException {
+        messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting Appr radet report");
+
+        messagingTemplate.convertAndSend("/topic/radet", "start");
+
+        ByteArrayOutputStream baos = generateExcelService.generateApprRadet();
+
+        setStream(baos, response);
+        messagingTemplate.convertAndSend("/topic/radet", "end");
+
+        messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating radet report");
+    }
+
+
 	private void setStream(ByteArrayOutputStream baos, HttpServletResponse response) throws IOException {
 		response.setHeader("Content-Type", "application/octet-stream");
 		response.setHeader("Content-Length", Integer.toString(baos.size()));

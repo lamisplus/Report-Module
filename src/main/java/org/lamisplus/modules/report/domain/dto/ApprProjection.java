@@ -14,5 +14,7 @@ public interface ApprProjection {
     String getLga();
     String getIpname();
     String getDataElementName();
+    String getData_element_name();
+
 
 }

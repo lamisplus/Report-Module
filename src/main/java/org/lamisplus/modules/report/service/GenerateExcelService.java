@@ -20,15 +20,9 @@ public interface GenerateExcelService {
  ByteArrayOutputStream generateClinicReport(Long facilityId) throws IOException;
  String getFacilityName(Long facilityId);
  ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, LocalDate end, String reportType, Boolean scrambler);
-
  ByteArrayOutputStream generatePmtctHts(Long facilityId, LocalDate start, LocalDate end, String reportType);
-
-
  ByteArrayOutputStream generatePrep(Long facilityId, LocalDate start, LocalDate end);
-
  ByteArrayOutputStream generateKpPrevReport (Long facilityId, LocalDate start, LocalDate end);
-
-
  ByteArrayOutputStream generateLongitudinalPrepReport(Long facilityId, LocalDate start, LocalDate end);
  ByteArrayOutputStream generateHivstReport(Long facilityId, LocalDate start, LocalDate end);
  ByteArrayOutputStream generateHtsRegisterReport(Long facilityId, LocalDate start, LocalDate end);
@@ -46,14 +40,14 @@ public interface GenerateExcelService {
  ByteArrayOutputStream generateAdrReport(Long facilityId, LocalDate start, LocalDate end);
 
  ByteArrayOutputStream generateNCDReport(Long facilityId, LocalDate start, LocalDate end);
-  ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException;
+ ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException;
 
  ByteArrayOutputStream generateFamilyIndex(Long facilityId);
 
-    ByteArrayOutputStream pullRadetRecord(Long facilityId, String weekPeriod);
+ ByteArrayOutputStream pullRadetRecord(Long facilityId, String weekPeriod);
 
-    List<ApprProjection> pullRadetRecords(Long facilityId, String weekPeriod);
+ List<ApprProjection> pullRadetRecords(Long facilityId, String weekPeriod);
+ List<String> getAllWeekForAppr(Long year);
+ ByteArrayOutputStream generateApprRadet();
 
-
-    List<String> getAllWeekForAppr(Long year);
 }
