@@ -13,39 +13,37 @@ public class RADETReportQueries {
             "facility_lga.name AS lga,\n" +
             "facility_state.name AS state,\n" +
             "boui.code AS datimId,\n" +
-            "tgroup.display AS targetGroup,\n" +
-            "eSetting.display AS enrollmentSetting,\n" +
-            "hac.visit_date AS artStartDate,\n" +
-            "hr.description AS regimenAtStart,\n" +
+            "h.enrollment_setting AS enrollmentSetting,\n" +
+            "h.visit_date AS artStartDate,\n" +
+            "h.regimen_id AS regimenAtStart,\n" +
             "p.date_of_registration as dateOfRegistration,\n" +
-            "h.date_of_registration as dateOfEnrollment,\n" +
-            "h.ovc_number AS ovcUniqueId,\n" +
-            "h.house_hold_number AS householdUniqueNo,\n" +
-            "ecareEntry.display AS careEntry,\n" +
-            "hrt.description AS regimenLineAtStart\n" +
+            "h.visit_date as dateOfEnrollment,\n" +
+            "h.ovc_unique_id AS ovcNumber,\n" +
+            "h.household_unique_number AS householdNumber,\n" +
+            "h.care_entry_point_id AS careEntry,\n" +
+            "h.regimen_line_id AS regimenLineAtStart\n" +
             "FROM patient_person p\n" +
             "INNER JOIN base_organisation_unit facility ON facility.id = facility_id\n" +
             "INNER JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id\n" +
             "INNER JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id\n" +
             "INNER JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id = facility_id AND boui.name='DATIM_ID'\n" +
-            "INNER JOIN hiv_enrollment h ON h.person_uuid = p.uuid\n" +
-            "LEFT JOIN base_application_codeset tgroup ON tgroup.id = h.target_group_id\n" +
-            "LEFT JOIN base_application_codeset eSetting ON eSetting.id = h.enrollment_setting_id\n" +
-            "LEFT JOIN base_application_codeset ecareEntry ON ecareEntry.id = h.entry_point_id\n" +
-            "INNER JOIN hiv_art_clinical hac ON hac.hiv_enrollment_uuid = h.uuid\n" +
-            "AND hac.archived = 0\n" +
-            "INNER JOIN hiv_regimen hr ON hr.id = hac.regimen_id\n" +
-            "INNER JOIN hiv_regimen_type hrt ON hrt.id = hac.regimen_type_id AND hac.regimen_type_id IN (1,2,3,4,14, 16)\n" +
-            "WHERE\n" +
-            "h.archived = 0\n" +
-            "AND p.archived = 0\n" +
-            "AND h.facility_id = ?1\n" +
-            "AND hac.is_commencement = TRUE\n" +
-            "AND hac.visit_date >= ?2\n" +
-            "AND hac.visit_date <= ?3\n" +
+            "INNER JOIN (\n" +
+            "SELECT person_uuid, unique_id, visit_date, hrt.description regimen_line_id, hr.description regimen_id, ecareEntry.display care_entry_point_id, eSetting.display enrollment_setting, ovc_unique_id, household_unique_number FROM (\n" +
+            "SELECT person_uuid, unique_id, visit_date, regimen_line_id, regimen_id, care_entry_point_id, enrollment_setting, ovc_data->>'ovc_unique_id' ovc_unique_id, ovc_data->>'household_unique_number' household_unique_number,\n" +
+            "ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER by visit_date DESC) rnkk\n" +
+            "FROM hiv_enrollment_commencement\n" +
+            "WHERE archived = 0 AND visit_date BETWEEN ?2 AND ?3 AND facility_id = ?1 AND CAST(regimen_line_id AS INTEGER) IN (1,2,3,4,14, 16)\n" +
+            ") sub \n" +
+            "LEFT JOIN base_application_codeset eSetting ON eSetting.code = sub.enrollment_setting\n" +
+            "LEFT JOIN base_application_codeset ecareEntry ON ecareEntry.code = sub.care_entry_point_id\n" +
+            "INNER JOIN hiv_regimen hr ON hr.id = sub.regimen_id\n" +
+            "INNER JOIN hiv_regimen_type hrt ON hrt.id = sub.regimen_line_id AND sub.regimen_line_id IN (1,2,3,4,14, 16)\n" +
+            "WHERE rnkk = 1\n" +
+            ") h ON h.person_uuid = p.uuid\n" +
+            "WHERE p.archived = 0\n" +
             "),\n" +
             "patient_lga as (select DISTINCT ON (personUuid) personUuid as personUuid11,\n" +
-            "case when (addr ~ '^[0-9\\\\\\\\\\\\.]+$') =TRUE\n" +
+            "case when (addr ~ '^[0-9\\\\\\\\\\.]+$') =TRUE\n" +
             " then (select name from base_organisation_unit where id = cast(addr as int)) ELSE\n" +
             "(select name from base_organisation_unit where id = cast(facilityLga as int)) end as lgaOfResidence\n" +
             "from (\n" +
@@ -61,12 +59,13 @@ public class RADETReportQueries {
             "(CASE\n" +
             "WHEN INITCAP(pp.sex) = 'Male' THEN NULL\n" +
             "WHEN hac.pregnancy_status IS NOT NULL THEN preg.display\n" +
-            "END ) AS pregnancyStatus, bac.display AS currentClinicalStage, body_weight AS currentWeight, tbs.display AS tbStatus1,\n" +
+            "END ) AS pregnancyStatus, bac.display AS currentClinicalStage, \n" +
+            "body_weight AS currentWeight, tbs.display AS tbStatus1,\n" +
             "ROW_NUMBER() OVER (PARTITION BY hac.person_uuid ORDER BY hac.visit_date DESC) AS rnkkkk\n" +
             "FROM hiv_art_clinical hac\n" +
             "INNER JOIN triage_vital_sign tvs ON tvs.uuid = hac.vital_sign_uuid\n" +
             "LEFT JOIN patient_person pp ON hac.person_uuid = pp.uuid\n" +
-            "INNER JOIN hiv_enrollment he ON he.person_uuid = hac.person_uuid\n" +
+            "INNER JOIN hiv_enrollment_commencement he ON he.person_uuid = hac.person_uuid\n" +
             "LEFT JOIN base_application_codeset bac ON bac.id = hac.clinical_stage_id\n" +
             "LEFT JOIN base_application_codeset preg ON preg.code = hac.pregnancy_status\n" +
             "LEFT JOIN base_application_codeset tbs ON tbs.id = CASE WHEN hac.tb_status ~ '^[0-9]+$' THEN CAST(hac.tb_status AS INTEGER) ELSE 0 END  \n" +
@@ -258,12 +257,12 @@ public class RADETReportQueries {
             "tbTreatment AS (\n" +
             "SELECT * FROM (SELECT\n" +
             " COALESCE(NULLIF(CAST(data->'tbIptScreening'->>'treatementType' AS text), ''), '') as tbTreatementType,\n" +
-            " NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'tbTreatmentStartDate', '') AS DATE), NULL)as tbTreatmentStartDate,\n" +
+            " NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'tbTreatmentStartDate', '') AS DATE), NULL) as tbTreatmentStartDate,\n" +
             " CAST(data->'tbIptScreening'->>'treatmentOutcome' AS text) as tbTreatmentOutcome,\n" +
             " NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'completionDate', '') AS DATE), NULL) as tbCompletionDate,\n" +
             " person_uuid as tbTreatmentPersonUuid,\n" +
             " ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY date_of_observation DESC)\n" +
-            "FROM public.hiv_observation WHERE type = 'Chronic Care'\n" +
+            "FROM public.hiv_observation WHERE type = 'Chronic Care' AND date_of_observation BETWEEN ?2 AND ?3\n" +
             "AND facility_id = ?1 and archived = 0\n" +
             ") tbTreatment WHERE row_number = 1\n" +
             "AND tbTreatmentStartDate IS NOT NULL),\n" +
@@ -588,8 +587,6 @@ public class RADETReportQueries {
             " LEFT JOIN base_application_codeset cc_result ON cc_result.code = CAST(ho.data ->> 'screeningResult' AS VARCHAR)\n" +
             " LEFT JOIN base_application_codeset cc_trtm ON cc_trtm.code = CAST(ho.data ->> 'screenTreatment' AS VARCHAR)\n" +
             "where ho.archived = 0 and type = 'Cervical cancer') as cc where row = 1),\n" +
-            " ovc AS ( SELECT DISTINCT ON (person_uuid) person_uuid AS personUuid100, ovc_number AS ovcNumber, house_hold_number AS householdNumber\n" +
-            "  FROM hiv_enrollment),\n" +
             "previous_previous AS (SELECT person_uuid AS prePrePersonUuid,\n" +
             " (CASE\n" +
             "WHEN hiv_status ILIKE '%DEATH%' OR hiv_status ILIKE '%Died%' THEN 'Died'\n" +
@@ -624,7 +621,7 @@ public class RADETReportQueries {
             "FROM (\n" +
             "  SELECT ph.person_uuid, ph.visit_date, ph.refill_period,ROW_NUMBER() OVER (PARTITION BY ph.person_uuid ORDER BY ph.visit_date DESC ) AS rn\n" +
             "  FROM hiv_art_pharmacy ph\n" +
-            "  INNER JOIN hiv_enrollment h ON h.person_uuid = ph.person_uuid AND h.archived = 0\n" +
+            "  INNER JOIN hiv_enrollment_commencement h ON h.person_uuid = ph.person_uuid AND h.archived = 0\n" +
             "  INNER JOIN public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = ph.id\n" +
             "  INNER JOIN public.hiv_regimen r ON r.id = pr.regimens_id\n" +
             "  INNER JOIN public.hiv_regimen_type rt ON rt.id = r.regimen_type_id\n" +
@@ -680,7 +677,7 @@ public class RADETReportQueries {
             "FROM (\n" +
             "  SELECT ph.person_uuid, ph.visit_date, ph.refill_period,ROW_NUMBER() OVER (PARTITION BY ph.person_uuid ORDER BY ph.visit_date DESC ) AS rn\n" +
             "  FROM hiv_art_pharmacy ph\n" +
-            "  INNER JOIN hiv_enrollment h ON h.person_uuid = ph.person_uuid AND h.archived = 0\n" +
+            "  INNER JOIN hiv_enrollment_commencement h ON h.person_uuid = ph.person_uuid AND h.archived = 0\n" +
             "  INNER JOIN public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = ph.id\n" +
             "  INNER JOIN public.hiv_regimen r ON r.id = pr.regimens_id\n" +
             "  INNER JOIN public.hiv_regimen_type rt ON rt.id = r.regimen_type_id\n" +
@@ -736,7 +733,7 @@ public class RADETReportQueries {
             "FROM (\n" +
             "  SELECT ph.person_uuid, ph.visit_date, ph.refill_period,ROW_NUMBER() OVER (PARTITION BY ph.person_uuid ORDER BY ph.visit_date DESC ) AS rn\n" +
             "  FROM hiv_art_pharmacy ph\n" +
-            "  INNER JOIN hiv_enrollment h ON h.person_uuid = ph.person_uuid AND h.archived = 0\n" +
+            "  INNER JOIN hiv_enrollment_commencement h ON h.person_uuid = ph.person_uuid AND h.archived = 0\n" +
             "  INNER JOIN public.hiv_art_pharmacy_regimens pr ON pr.art_pharmacy_id = ph.id\n" +
             "  INNER JOIN public.hiv_regimen r ON r.id = pr.regimens_id\n" +
             "  INNER JOIN public.hiv_regimen_type rt ON rt.id = r.regimen_type_id\n" +
@@ -759,7 +756,7 @@ public class RADETReportQueries {
             "  ON stat.person_id = pharmacy.person_uuid\n" +
             "WHERE pharmacy.rn = 1) statuss\n" +
             "),\n" +
-            "naive_vl_data AS (SELECT pp.uuid AS nvl_person_uuid, EXTRACT(YEAR FROM AGE(NOW(), pp.date_of_birth) ) as age, ph.visit_date, ph.regimen\n" +
+            "naive_vl_data AS (SELECT pp.uuid AS nvl_person_uuid, EXTRACT(YEAR FROM AGE(?3, pp.date_of_birth) ) as age, ph.visit_date, ph.regimen\n" +
             "  FROM patient_person pp\n" +
             " INNER JOIN (SELECT DISTINCT * FROM (SELECT pharm.*,\n" +
             " ROW_NUMBER() OVER (PARTITION BY pharm.person_uuid ORDER BY pharm.visit_date DESC)\n" +
@@ -816,7 +813,7 @@ public class RADETReportQueries {
             "hiv_status, ROW_NUMBER() OVER (PARTITION BY person_id ORDER BY status_date DESC)\n" +
             " FROM hiv_status_tracker WHERE hiv_status ilike '%Died%' AND archived=0 AND status_date <= ?3 )s\n" +
             "WHERE s.row_number=1) hst\n" +
-            "INNER JOIN hiv_enrollment he ON he.person_uuid = hst.person_id\n" +
+            "INNER JOIN hiv_enrollment_commencement he ON he.person_uuid = hst.person_id\n" +
             "  WHERE hst.status_date <= ?3\n" +
             "),\n" +
             "case_manager AS (\n" +
@@ -850,7 +847,6 @@ public class RADETReportQueries {
             "iptStart.iptType AS iptType, iptN.eligibilityTpt,\n" +
             "cc.*,\n" +
             "dsd1.*, dsd2.*,  \n" +
-            "ov.*,\n" +
             "(CASE WHEN COALESCE(tbTmentNew.tbTreatmentType, tbTment.tbTreatementType) IN ('New', 'Relapse', 'Relapsed') THEN 'New/Relapse' ELSE COALESCE(tbTmentNew.tbTreatmentType, tbTment.tbTreatementType) END)  AS tbTreatementType, tbTmentNew.cadScore,\n" +
             "COALESCE(tbTmentNew.tbTreatmentStartDate, tbTment.tbTreatmentStartDate) AS tbTreatmentStartDate,\n" +
             "COALESCE(tbTmentNew.treatmentOutcome, tbTment.tbTreatmentOutcome) AS tbTreatmentOutcome,\n" +
@@ -1009,7 +1005,6 @@ public class RADETReportQueries {
             " LEFT JOIN ipt ipt ON ipt.personUuid80 = bd.personUuid\n" +
             " LEFT JOIN iptNew iptN ON iptN.person_uuid = bd.personUuid\n" +
             " LEFT JOIN cervical_cancer cc ON cc.person_uuid90 = bd.personUuid\n" +
-            " LEFT JOIN ovc ov ON ov.personUuid100 = bd.personUuid\n" +
             " LEFT JOIN current_status ct ON ct.cuPersonUuid = bd.personUuid\n" +
             " LEFT JOIN previous pre ON pre.prePersonUuid = ct.cuPersonUuid\n" +
             " LEFT JOIN previous_previous prepre ON prepre.prePrePersonUuid = ct.cuPersonUuid\n" +

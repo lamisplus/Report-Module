@@ -26,7 +26,7 @@ public interface RADETDTOProjection {
 
 	String getGender();
 
-	String getTargetGroup();
+//	String getTargetGroup();
 
 	String getEnrollmentSetting();
 
