@@ -2,108 +2,51 @@ package org.lamisplus.modules.report.repository.queries;
 
 public class FamilyIndexReportQuery {
 
-    public static final String FAMILY_INDEX_REPORT_QUERY = "WITH familyIndex AS (\n" +
-            "    SELECT \n" +
-            "        facility.name AS facilityName, \n" +
-            "        facility_state.name AS state, \n" +
-            "        facility_lga.name AS lga,  \n" +
-            "        p.uuid AS PersonUuid, \n" +
-            "\t\tp.facility_id AS facilityId,\n" +
-            "        p.hospital_number AS hospitalNumber,\n" +
-            "        EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS age,  \n" +
-            "        boui.code AS datimId, \n" +
-            "        p.date_of_birth AS dateOfBirth,\n" +
-            "        INITCAP(p.sex) AS sex, \n" +
-            "        CONCAT(p.first_name, ' ', p.surname) AS patientName, \n" +
-            "        p.other_name AS otherName,\n" +
-            "        (select display from base_application_codeset where id = CAST (fhts.marital_status AS INTEGER)) AS maritalStatus,\n" +
-            "        fhts.date_index_client_confirmed_hiv_positive_test_result AS dateConfirmedHiv,\n" +
-            "\t    fhts.visit_date AS dateOfferIndex, \n" +
-            "\t    fhts.date_client_enrolled_on_treatment AS dateEnrolled,\n" +
-            "        fhts.recency_testing AS recencyTesting, \n" +
-            "        fhts.willing_to_have_children_tested_else_where AS acceptedTesting, \n" +
-            "\t\t(select display from base_application_codeset where code = hts_rst.entry_point) AS entryPoint,\n" +
-            "        hfi.age AS elicitedAge,\n" +
-            "\t\t'' AS elicitedClientName,\n" +
-            "        (select display from base_application_codeset where code = hft.tracker_sex) AS elicitedClientSex, \n" +
-            "\t\t'' AS elicitedClientAddress,\n" +
-            "\t\t'' AS elicitedClientPhoneNumber,\n" +
-            "        hft.date_tested AS elicitedClientTestedHiv, \n" +
-            "\t\thft.hiv_test_result AS elicitedClientHivResult,\n" +
-            "        hft.date_enrolledonart AS elicitedClientDateEnrolled,\n" +
-            "        (select display from base_application_codeset where code = hfi.family_relationship) AS relationshipWithIndex,\n" +
-            "\t\t'' AS modeOfNotification,\n" +
-            "\t\thft.known_hiv_positive AS elicitedClientKnownPositive, \n" +
-            "        hft.date_visit AS dateOfElicitation, \n" +
-            "        hfi.uan AS elicitedClientUniqueId, \n" +
-            "        hft.date_enrolled_in_ovc AS dateEnrolledInOvc, hfi.contact_id AS contactId,\n" +
-            "        hft.ovc_id AS ovcId, (select display from base_application_codeset where code = hft.attempt) AS noOfAttempts\n" +
-            "    FROM hts_family_index hfi\n" +
-            "    JOIN hts_family_index_testing fhts ON fhts.uuid = hfi.family_index_testing_uuid\n" +
-            "    JOIN hts_client hts ON hts.uuid = fhts.hts_client_uuid\n" +
-            "\tLEFT JOIN hts_risk_stratification hts_rst ON hts.risk_stratification_code = hts_rst.code\n" +
-            "    JOIN hts_family_index_testing_tracker hft ON hft.family_index_uuid = hfi.uuid\n" +
-            "    JOIN patient_person p ON p.uuid = hts.person_uuid\n" +
-            "    --JOIN hiv_enrollment h ON h.person_uuid = p.uuid\n" +
-            "    LEFT JOIN base_organisation_unit facility ON facility.id = p.facility_id\n" +
-            "    LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id\n" +
-            "    LEFT JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id\n" +
-            "    LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id = p.facility_id AND boui.name = 'DATIM_ID'\n" +
-            "\tWHERE hfi.archived = 0\n" +
+    public static final String FAMILY_INDEX_REPORT_QUERY = "WITH htsEncounter AS (\n" +
+            "SELECT CAST(he.patient_uuid AS TEXT) AS patientUuid, hec.client_code clientCode, he.date_of_service dateOfService, basEntry.display AS entryPoint, basCategory.display AS clientCategory,\n" +
+            "basOfferedPns.display AS offeredPns, basAcceptedPns.display AS acceptedPns, hc.contact_code,\n" +
+            "CONCAT(hc.first_name, ' ', hc.middle_name, ' ', hc.surname) AS nameOfIndexClient, basRelationship.display AS relationshipToIndex, basSex.display AS sex,\n" +
+            "hc.age, hc.phone, hc.address, basNotification.display AS notificationMethod, hc.attempts, basKnownHiv.display AS knownHivPositive, hc.date_tested_hiv dateTestedHiv,\n" +
+            "basHivResult.display AS hivTestResult, hc.date_enrolled_art dateEnrolledArt, hc.on_art onArt, '' AS uan, hc.date_enrolled_ovc dateEnrolledOvc, hc.ovc_id ovcId\n" +
+            "FROM hts_ict_encounter he\n" +
+            "LEFT JOIN hts_ict_contact hc ON hc.ict_encounter_id = he.id\n" +
+            "LEFT JOIN hts_encounter hec ON hec.uuid = he.hts_encounter_uuid\n" +
+            "LEFT JOIN base_application_codeset basEntry ON basEntry.code = he.setting\n" +
+            "LEFT JOIN base_application_codeset basCategory ON basCategory.code = he.client_category\n" +
+            "LEFT JOIN base_application_codeset basOfferedPns ON basOfferedPns.code = he.offered_pns\n" +
+            "LEFT JOIN base_application_codeset basAcceptedPns ON basAcceptedPns.code = he.accepted_pns\n" +
+            "LEFT JOIN base_application_codeset basRelationship ON basRelationship.code = hc.relationship_to_index\n" +
+            "LEFT JOIN base_application_codeset basSex ON basSex.code = hc.sex\n" +
+            "LEFT JOIN base_application_codeset basNotification ON basNotification.code = hc.notification_method\n" +
+            "LEFT JOIN base_application_codeset basKnownHiv ON basKnownHiv.code = hc.known_hiv_positive\n" +
+            "LEFT JOIN base_application_codeset basHivResult ON basHivResult.code = hc.hiv_test_result\n" +
+            "WHERE he.archived IS FALSE AND hc.archived IS FALSE AND he.facility_id = ?1\n" +
             "),\n" +
-            "partnerIndex AS (\n" +
-            "    SELECT \n" +
-            "        facility.name AS facilityName, \n" +
-            "        facility_state.name AS state, \n" +
-            "        facility_lga.name AS lga,  \n" +
-            "        p.uuid AS PersonUuid, \n" +
-            "\t\tp.facility_id AS facilityId,\n" +
-            "        p.hospital_number AS hospitalNumber,\n" +
-            "        EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS age,  \n" +
-            "        boui.code AS datimId, \n" +
-            "        p.date_of_birth AS dateOfBirth,\n" +
-            "        INITCAP(p.sex) AS sex, \n" +
-            "        CONCAT(p.first_name, ' ', p.surname) AS patientName, \n" +
-            "        p.other_name AS otherName,\n" +
-            "        (select display from base_application_codeset where id = CAST (fhts.marital_status AS INTEGER))  AS maritalStatus,\n" +
-            "        fhts.date_index_client_confirmed_hiv_positive_test_result AS dateConfirmedHiv,\n" +
-            "        fhts.visit_date AS dateOfferIndex,\n" +
-            "        fhts.date_client_enrolled_on_treatment AS dateEnrolled,\n" +
-            "        fhts.recency_testing AS recencyTesting, \n" +
-            "        pns.accepted_pns AS acceptedTesting, \n" +
-            "        (select display from base_application_codeset where code = hts_rst.entry_point) AS entryPoint,\n" +
-            "        CASE WHEN pns.hts_client_information->>'partnerAge' ~ '^[0-9]+$' THEN CAST(pns.hts_client_information->>'partnerAge' AS INTEGER) ELSE 0 END AS elicitedAge,\n" +
-            "        pns.hts_client_information->>'partnerName' AS elicitedClientName, \n" +
-            "        (select display from base_application_codeset where id = CASE WHEN pns.hts_client_information->>'partnerSex' ~ '^[0-9]+$' THEN CAST(pns.hts_client_information->>'partnerSex' AS INTEGER) ELSE 0 END) AS elicitedClientSex, \n" +
-            "        COALESCE(pns.hts_client_information->>'descriptiveResidentialAddress', pns.hts_client_information->>'partnerAddress') AS elicitedClientAddress, \n" +
-            "        pns.contact_tracing->>'partnerPhoneNumber' AS elicitedClientPhoneNumber,\n" +
-            "        pns.date_partner_tested AS elicitedClientTestedHiv, \n" +
-            "        pns.hiv_test_result AS elicitedClientHivResult, \n" +
-            "        pns.date_enrollment_on_art AS elicitedClientDateEnrolled,\n" +
-            "        (select display from base_application_codeset where id = CASE WHEN pns.hts_client_information->>'relativeToIndexClient' ~ '^[0-9]+$' THEN CAST(pns.hts_client_information->>'relativeToIndexClient' AS INTEGER) ELSE 0 END) AS relationshipWithIndex,\n" +
-            "        (select display from base_application_codeset where id = CASE WHEN pns.notification_method ~ '^[0-9]+$' THEN CAST(pns.notification_method AS INTEGER) ELSE 0 END ) AS modeOfNotification, \n" +
-            "        pns.known_hiv_positive AS elicitedClientKnownPositive, \n" +
-            "        CAST (pns.date_of_elicitation AS DATE) AS dateOfElicitation,\n" +
-            "        '' AS elicitedClientUniqueId,\n" +
-            "        CAST (null AS DATE) AS dateEnrolledInOvc, pns.partner_id AS contactId,\n" +
-            "        '' AS ovcId, pns.contact_tracing->>'numberOfAttempt' AS noOfAttempts\n" +
-            "    FROM hts_pns_index_client_partner pns\n" +
-            "    LEFT JOIN hts_family_index_testing fhts ON fhts.hts_client_uuid = pns.hts_client_uuid\n" +
-            "    JOIN hts_client hts ON hts.uuid = pns.hts_client_uuid\n" +
-            "    JOIN patient_person p ON p.uuid = hts.person_uuid\n" +
-            "    LEFT JOIN hts_risk_stratification hts_rst ON hts.risk_stratification_code = hts_rst.code\n" +
-            "   -- JOIN hiv_enrollment h ON h.person_uuid = p.uuid\n" +
-            "    LEFT JOIN base_organisation_unit facility ON facility.id = pns.facility_id\n" +
-            "    LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id\n" +
-            "    LEFT JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id\n" +
-            "    LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id = pns.facility_id AND boui.name = 'DATIM_ID'\n" +
-            "    WHERE pns.archived = 0 AND pns.hts_client_information->>'partnerAge' != '' AND pns.hts_client_information->>'partnerSex' !=''\n" +
-            ")\n" +
-            "SELECT * FROM (\n" +
-            "SELECT * FROM familyIndex\n" +
-            "UNION ALL\n" +
-            "SELECT * FROM partnerIndex\n" +
-            ") allReport\n" +
-            "WHERE facilityId = ?1\n" +
-            "ORDER BY hospitalNumber;\n";
+            "bio_data AS (\n" +
+            "SELECT DISTINCT ON (p.uuid) p.uuid AS personUuid, p.hospital_number AS hospitalNumber,\n" +
+            "CAST(EXTRACT(YEAR FROM AGE(CAST(?3 AS DATE), p.date_of_birth)) AS INTEGER) AS age, INITCAP(p.sex) AS gender,\n" +
+            "p.date_of_birth AS dateOfBirth, facility.name AS facilityName, facility_lga.name AS lga, facility_state.name AS state,\n" +
+            "boui.code AS datimId, p.first_name AS firstName, p.surname AS surname, p.other_name AS otherName, p.contact_point->'contactPoint'->0->>'value' AS phoneNumber,\n" +
+            "p.marital_status->>'display' AS maritalStatus, p.address->'address'->0->>'city' AS address,\n" +
+            "p.employment_status->>'display' AS occupation, p.education->>'display' AS educationStatus\n" +
+            "FROM patient_person p\n" +
+            "INNER JOIN base_organisation_unit facility ON facility.id = p.facility_id\n" +
+            "INNER JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id\n" +
+            "INNER JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id\n" +
+            "INNER JOIN base_organisation_unit_identifier boui\n" +
+            "ON boui.organisation_unit_id = p.facility_id AND boui.name = 'DATIM_ID'\n" +
+            "WHERE p.archived = 0 AND p.facility_id = ?1),\n" +
+            "patientResidencial as (select DISTINCT ON (personUuid) personUuid as personUuid11,\n" +
+            "case when (addr ~ '^[0-9\\\\.]+$') =TRUE\n" +
+            " then (select name from base_organisation_unit where id = cast(addr as int)) ELSE\n" +
+            "(select name from base_organisation_unit where id = cast(facilityLga as int)) end as lgaOfResidence,\n" +
+            "(select name from base_organisation_unit where id = (CASE WHEN stateResidence ~ '^[0-9]+$' THEN CAST(stateResidence AS INTEGER) ELSE null END)) AS stateOfResidence\n" +
+            "from (\n" +
+            " select CAST(pp.uuid AS UUID) AS personUuid, facility_lga.parent_organisation_unit_id AS facilityLga, (jsonb_array_elements(pp.address->'address')->>'stateId') stateResidence, (jsonb_array_elements(pp.address->'address')->>'district') as addr from patient_person pp\n" +
+            "LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = CAST (pp.organization->'id' AS INTEGER)\n" +
+            ") dt)\n" +
+            "SELECT bio.state, bio.lga, bio.facilityName, bio.datimId, bio.surname, bio.firstName,  bio.hospitalNumber,\n" +
+            "het.*\n" +
+            "FROM bio_data bio\n" +
+            "INNER JOIN htsEncounter het ON het.patientUuid = bio.personUuid";
 }
