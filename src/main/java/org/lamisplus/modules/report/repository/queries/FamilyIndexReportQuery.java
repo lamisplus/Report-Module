@@ -24,7 +24,7 @@ public class FamilyIndexReportQuery {
             "),\n" +
             "bio_data AS (\n" +
             "SELECT DISTINCT ON (p.uuid) p.uuid AS personUuid, p.hospital_number AS hospitalNumber,\n" +
-            "CAST(EXTRACT(YEAR FROM AGE(CAST(?3 AS DATE), p.date_of_birth)) AS INTEGER) AS age, INITCAP(p.sex) AS gender,\n" +
+            "CAST(EXTRACT(YEAR FROM AGE(CAST(NOW() AS DATE), p.date_of_birth)) AS INTEGER) AS age, INITCAP(p.sex) AS gender,\n" +
             "p.date_of_birth AS dateOfBirth, facility.name AS facilityName, facility_lga.name AS lga, facility_state.name AS state,\n" +
             "boui.code AS datimId, p.first_name AS firstName, p.surname AS surname, p.other_name AS otherName, p.contact_point->'contactPoint'->0->>'value' AS phoneNumber,\n" +
             "p.marital_status->>'display' AS maritalStatus, p.address->'address'->0->>'city' AS address,\n" +

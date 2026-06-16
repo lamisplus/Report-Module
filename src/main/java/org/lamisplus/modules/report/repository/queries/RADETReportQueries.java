@@ -5,7 +5,7 @@ public class RADETReportQueries {
     private RADETReportQueries() {}
 
 
-    public static final String RADET_REPORT_QUERY = "WITH bio_data AS (SELECT DISTINCT (p.uuid) AS personUuid,p.hospital_number AS hospitalNumber, h.unique_id as uniqueId,\n" +
+    public static final String RADET_REPORT_QUERY = "WITH bio_data AS (SELECT DISTINCT (p.uuid) AS personUuid,p.hospital_number AS hospitalNumber,\n" +
             "EXTRACT(YEAR FROM  AGE(?3, date_of_birth)) AS age,\n" +
             "INITCAP(p.sex) AS gender,\n" +
             "p.date_of_birth AS dateOfBirth,\n" +
@@ -13,22 +13,17 @@ public class RADETReportQueries {
             "facility_lga.name AS lga,\n" +
             "facility_state.name AS state,\n" +
             "boui.code AS datimId,\n" +
-            "h.enrollment_setting AS enrollmentSetting,\n" +
-            "h.visit_date AS artStartDate,\n" +
-            "h.regimen_id AS regimenAtStart,\n" +
-            "p.date_of_registration as dateOfRegistration,\n" +
-            "h.visit_date as dateOfEnrollment,\n" +
-            "h.ovc_unique_id AS ovcNumber,\n" +
-            "h.household_unique_number AS householdNumber,\n" +
-            "h.care_entry_point_id AS careEntry,\n" +
-            "h.regimen_line_id AS regimenLineAtStart\n" +
+            "p.date_of_registration as dateOfRegistration\n" +
             "FROM patient_person p\n" +
             "INNER JOIN base_organisation_unit facility ON facility.id = facility_id\n" +
             "INNER JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id\n" +
             "INNER JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id\n" +
             "INNER JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id = facility_id AND boui.name='DATIM_ID'\n" +
-            "INNER JOIN (\n" +
-            "SELECT person_uuid, unique_id, visit_date, hrt.description regimen_line_id, hr.description regimen_id, ecareEntry.display care_entry_point_id, eSetting.display enrollment_setting, ovc_unique_id, household_unique_number FROM (\n" +
+            "INNER JOIN hiv_enrollment_commencement h ON h.person_uuid = p.uuid\n" +
+            "WHERE p.facility_id = ?1 AND p.archived = 0\n" +
+            "),\n" +
+            "hivEnrollment AS (\n" +
+            "SELECT person_uuid personUuid101, unique_id uniqueId, visit_date artStartDate, hrt.description regimenLineAtStart, hr.description regimenAtStart, ecareEntry.display careEntry, eSetting.display enrollmentSetting, ovc_unique_id ovcNumber, household_unique_number householdNumber FROM (\n" +
             "SELECT person_uuid, unique_id, visit_date, regimen_line_id, regimen_id, care_entry_point_id, enrollment_setting, ovc_data->>'ovc_unique_id' ovc_unique_id, ovc_data->>'household_unique_number' household_unique_number,\n" +
             "ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER by visit_date DESC) rnkk\n" +
             "FROM hiv_enrollment_commencement\n" +
@@ -39,11 +34,9 @@ public class RADETReportQueries {
             "INNER JOIN hiv_regimen hr ON hr.id = sub.regimen_id\n" +
             "INNER JOIN hiv_regimen_type hrt ON hrt.id = sub.regimen_line_id AND sub.regimen_line_id IN (1,2,3,4,14, 16)\n" +
             "WHERE rnkk = 1\n" +
-            ") h ON h.person_uuid = p.uuid\n" +
-            "WHERE p.archived = 0\n" +
             "),\n" +
             "patient_lga as (select DISTINCT ON (personUuid) personUuid as personUuid11,\n" +
-            "case when (addr ~ '^[0-9\\\\\\\\\\.]+$') =TRUE\n" +
+            "case when (addr ~ '^[0-9\\\\\\\\\\\\\\\\\\\\.]+$') =TRUE\n" +
             " then (select name from base_organisation_unit where id = cast(addr as int)) ELSE\n" +
             "(select name from base_organisation_unit where id = cast(facilityLga as int)) end as lgaOfResidence\n" +
             "from (\n" +
@@ -437,7 +430,7 @@ public class RADETReportQueries {
             "bst.biometric_status AS biometricStatus,\n" +
             "bst.status_date\n" +
             "FROM\n" +
-            "hiv_enrollment he\n" +
+            "hiv_enrollment_commencement he\n" +
             "LEFT JOIN (SELECT  b.person_uuid, CASE WHEN COUNT(b.person_uuid) > 10 THEN 10 ELSE COUNT(b.person_uuid) END,\n" +
             "MAX(enrollment_date) enrollment_date\n" +
             "  FROM\n" +
@@ -833,6 +826,7 @@ public class RADETReportQueries {
             "bd.*,\n" +
             "CONCAT(bd.datimId, '_', bd.personUuid) AS ndrPatientIdentifier,\n" +
             "p_lga.*,\n" +
+            "enroll.*,\n" +
             "scd.*,\n" +
             "cvlr.*,\n" +
             "pdr.*,\n" +
@@ -912,18 +906,18 @@ public class RADETReportQueries {
             "WHEN ct.status ILIKE '%DEATH%' THEN FALSE\n" +
             "WHEN ct.status ILIKE '%stop%' THEN FALSE\n" +
             "WHEN (nvd.age >= 15 AND nvd.regimen ILIKE '%DTG%'\n" +
-            "AND bd.artstartdate + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%') THEN TRUE\n" +
+            "AND enroll.artstartdate + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%') THEN TRUE\n" +
             "WHEN (nvd.age >= 15 AND nvd.regimen NOT ILIKE '%DTG%'\n" +
-            "AND bd.artstartdate + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%') THEN TRUE\n" +
-            "WHEN (nvd.age <= 15 AND bd.artstartdate + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%') THEN TRUE\n" +
+            "AND enroll.artstartdate + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%') THEN TRUE\n" +
+            "WHEN (nvd.age <= 15 AND enroll.artstartdate + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%') THEN TRUE\n" +
             "WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL\n" +
             "AND scd.dateofviralloadsamplecollection IS NULL AND\n" +
             "cvlr.dateofcurrentviralload IS NULL\n" +
-            "AND CAST(bd.artstartdate AS DATE) + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN TRUE\n" +
+            "AND CAST(enroll.artstartdate AS DATE) + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN TRUE\n" +
             "WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL\n" +
             "AND scd.dateofviralloadsamplecollection IS NOT NULL AND\n" +
             "cvlr.dateofcurrentviralload IS NULL\n" +
-            "AND CAST(bd.artstartdate AS DATE) + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN TRUE\n" +
+            "AND CAST(enroll.artstartdate AS DATE) + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN TRUE\n" +
             "WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000\n" +
             "AND( scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload\n" +
             "OR  scd.dateofviralloadsamplecollection IS NULL )\n" +
@@ -949,24 +943,24 @@ public class RADETReportQueries {
             "WHEN ct.status ILIKE '%stop%' THEN NULL\n" +
             "WHEN (nvd.age >= 15\n" +
             "AND nvd.regimen ILIKE '%DTG%'\n" +
-            "AND bd.artstartdate + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%')\n" +
-            "THEN CAST(bd.artstartdate + 91 AS DATE)\n" +
+            "AND enroll.artstartdate + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%')\n" +
+            "THEN CAST(enroll.artstartdate + 91 AS DATE)\n" +
             "WHEN (nvd.age >= 15\n" +
             "AND nvd.regimen NOT ILIKE '%DTG%'\n" +
-            "AND bd.artstartdate + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%')\n" +
-            "THEN CAST(bd.artstartdate + 181 AS DATE)\n" +
-            "WHEN (nvd.age <= 15 AND bd.artstartdate + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%')\n" +
-            "THEN CAST(bd.artstartdate + 181 AS DATE)\n" +
+            "AND enroll.artstartdate + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%')\n" +
+            "THEN CAST(enroll.artstartdate + 181 AS DATE)\n" +
+            "WHEN (nvd.age <= 15 AND enroll.artstartdate + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%')\n" +
+            "THEN CAST(enroll.artstartdate + 181 AS DATE)\n" +
             "WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL\n" +
             "AND scd.dateofviralloadsamplecollection IS NULL AND\n" +
             "cvlr.dateofcurrentviralload IS NULL\n" +
-            "AND CAST(bd.artstartdate AS DATE) + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN\n" +
-            "CAST(bd.artstartdate AS DATE) + 181\n" +
+            "AND CAST(enroll.artstartdate AS DATE) + 181 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN\n" +
+            "CAST(enroll.artstartdate AS DATE) + 181\n" +
             "WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) IS NULL\n" +
             "AND scd.dateofviralloadsamplecollection IS NOT NULL AND\n" +
             "cvlr.dateofcurrentviralload IS NULL\n" +
-            "AND CAST(bd.artstartdate AS DATE) + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN\n" +
-            "CAST(bd.artstartdate AS DATE) + 91\n" +
+            "AND CAST(enroll.artstartdate AS DATE) + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN\n" +
+            "CAST(enroll.artstartdate AS DATE) + 91\n" +
             "WHEN CAST(NULLIF(REGEXP_REPLACE(cvlr.currentviralload, '[^0-9]', '', 'g'), '') AS INTEGER) < 1000\n" +
             "AND( scd.dateofviralloadsamplecollection < cvlr.dateofcurrentviralload\n" +
             "OR  scd.dateofviralloadsamplecollection IS NULL )\n" +
@@ -992,6 +986,7 @@ public class RADETReportQueries {
             "ELSE NULL END) as dateOfLastCd4Count,\n" +
             "INITCAP(cm.caseManager) AS caseManager\n" +
             "FROM bio_data bd\n" +
+            "INNER JOIN hivEnrollment enroll ON enroll.personUuid101 = bd.personUuid\n" +
             " LEFT JOIN patient_lga p_lga on p_lga.personUuid11 = bd.personUuid\n" +
             " LEFT JOIN pharmacy_details_regimen pdr ON pdr.person_uuid40 = bd.personUuid\n" +
             " LEFT JOIN current_clinical c ON c.person_uuid10 = bd.personUuid\n" +
