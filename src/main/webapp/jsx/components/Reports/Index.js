@@ -107,45 +107,45 @@ const Reports = props => {
     },
   ];
 
-  // const reportBiometric = [
-  //   { key: 'biometric', value: 'biometric', text: 'BIOMETRIC DATA' , permissionKey: 'report_biometric_data'},
-  // ];
-  // const monthSummaryReport = [
-  //   { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary' },
-  // ];
+  const reportBiometric = [
+    { key: 'biometric', value: 'biometric', text: 'BIOMETRIC DATA' , permissionKey: 'report_biometric_data'},
+  ];
+  const monthSummaryReport = [
+    { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary' },
+  ];
 
   const reportPrevention = [
     { key: 'prep-report', value: 'prep-report', text: 'PrEP Cross Sectional', permissionKey: 'report_prep_cross_sectional' },
     // { key: 'prep-longitudinal-report', value: 'prep-longitudinal-report', text: 'PrEP Longitudinal REPORT', permissionKey: 'report_prep_longitudinal' },
   ];
 
-  // const reportPMTCT = [
-  //   { key: 'pmtct-hts', value: 'pmtct-hts', text: 'PMTCT HTS', permissionKey: 'report_pmtct_hts' },
-  //   { key: 'pmtct-maternal-cohort', value: 'pmtct-maternal-cohort', text: 'PMTCT MATERNAL COHORT', permissionKey: 'report_pmtct_maternal_cohort' },
-  // ];
+  const reportPMTCT = [
+    { key: 'pmtct-hts', value: 'pmtct-hts', text: 'PMTCT HTS', permissionKey: 'report_pmtct_hts' },
+    { key: 'pmtct-maternal-cohort', value: 'pmtct-maternal-cohort', text: 'PMTCT MATERNAL COHORT', permissionKey: 'report_pmtct_maternal_cohort' },
+  ];
 
   const reportPsychosocial = [
     { key: 'mhpss-report', value: 'mhpss-report', text: 'MHPSS Report', permissionKey: 'report_mhpss_report' },
   ];
 
-  // const reportMsfs = [
-  //   { key: 'prep-msf', value: 'prep-msf', text: 'PrEP Monthly Summary Form', permissionKey: 'report_prep_monthly_summary_form' },
-  //   { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary', permissionKey: 'report_pmtct_msf' },
-  // ];
+  const reportMsfs = [
+    { key: 'prep-msf', value: 'prep-msf', text: 'PrEP Monthly Summary Form', permissionKey: 'report_prep_monthly_summary_form' },
+    { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary', permissionKey: 'report_pmtct_msf' },
+  ];
 
   const reportOptions = [
     { key: 'radet', value: 'radet', text: 'RADET', permissionKey: 'report_radet' },
     { key: 'appointment', value: 'appointment', text: 'APPOINTMENT', permissionKey: 'report_appointment' },
-    // { key: 'line-list', value: 'line-list', text: 'PATIENT LINE LIST', permissionKey: 'report_patient_line_list' },
+    { key: 'line-list', value: 'line-list', text: 'PATIENT LINE LIST', permissionKey: 'report_patient_line_list' },
     { key: 'pharmacy-report', value: 'pharmacy-report', text: 'PHARMACY DATA', permissionKey: 'report_pharmacy_data' },
     { key: 'laboratory-report', value: 'laboratory-report', text: 'LABORATORY DATA', permissionKey: 'report_laboratory_data' },
     { key: 'clinic-data-report', value: 'clinic-data-report', text: 'CLINIC DATA REPORT', permissionKey: 'report_clinic_data_report' },
     { key: 'client-verification', value: 'client-verification', text: 'CLIENT VERIFICATION', permissionKey: 'report_client_verification' },
-    // { key: 'tb-report-longitudinal', value: 'tb-report-longitudinal', text: 'TB LONGITUDINAL REPORT', permissionKey: 'report_tb_longitudinal' },
-    // { key: 'ncd-report', value: 'ncd-report', text: 'NCD Report', permissionKey: 'report_ncd_report' },
-    // { key: 'eac-report', value: 'eac-report', text: 'EAC Report', permissionKey: 'report_eac_report' },
-    // { key: 'ahd-report', value: 'ahd-report', text: 'AHD REPORT', permissionKey: 'report_ahd_report' },
-    // { key: 'adr-report', value: 'adr-report', text: 'ADR REPORT', permissionKey: 'report_adr_report' },
+    { key: 'tb-report-longitudinal', value: 'tb-report-longitudinal', text: 'TB LONGITUDINAL REPORT', permissionKey: 'report_tb_longitudinal' },
+    { key: 'ncd-report', value: 'ncd-report', text: 'NCD Report', permissionKey: 'report_ncd_report' },
+    { key: 'eac-report', value: 'eac-report', text: 'EAC Report', permissionKey: 'report_eac_report' },
+    { key: 'ahd-report', value: 'ahd-report', text: 'AHD REPORT', permissionKey: 'report_ahd_report' },
+    { key: 'adr-report', value: 'adr-report', text: 'ADR REPORT', permissionKey: 'report_adr_report' },
     { key: 'custom-report', value: 'custom-report', text: 'CUSTOM REPORT', permissionKey: 'report_custom_report' },
   ];
 
@@ -1057,7 +1057,7 @@ const Reports = props => {
           aria-controls="panel3bh-content"
           id="panel3bh-header"
         >
-         
+
           <Typography sx={{  flexShrink: 0, color: "#fff" }}>
           Select Monthly Summary Report
           </Typography>
