@@ -4,12 +4,12 @@ public class FamilyIndexReportQuery {
 
     public static final String FAMILY_INDEX_REPORT_QUERY = "WITH htsEncounter AS (\n" +
             "SELECT CAST(he.patient_uuid AS TEXT) AS patientUuid, hec.client_code clientCode, he.date_of_service dateOfService, basEntry.display AS entryPoint, basCategory.display AS clientCategory,\n" +
-            "basOfferedPns.display AS offeredPns, basAcceptedPns.display AS acceptedPns, hc.contact_code,\n" +
+            "basOfferedPns.display AS offeredPns, basAcceptedPns.display AS acceptedPns, hc.contact_code contactCode,\n" +
             "CONCAT(hc.first_name, ' ', hc.middle_name, ' ', hc.surname) AS nameOfIndexClient, basRelationship.display AS relationshipToIndex, basSex.display AS sex,\n" +
             "hc.age, hc.phone, hc.address, basNotification.display AS notificationMethod, hc.attempts, basKnownHiv.display AS knownHivPositive, hc.date_tested_hiv dateTestedHiv,\n" +
             "basHivResult.display AS hivTestResult, hc.date_enrolled_art dateEnrolledArt, hc.on_art onArt, '' AS uan, hc.date_enrolled_ovc dateEnrolledOvc, hc.ovc_id ovcId\n" +
             "FROM hts_ict_encounter he\n" +
-            "LEFT JOIN hts_ict_contact hc ON hc.ict_encounter_id = he.id\n" +
+            "LEFT JOIN hts_ict_contact hc ON hc.hts_ict_encounter_uuid = he.uuid\n" +
             "LEFT JOIN hts_encounter hec ON hec.uuid = he.hts_encounter_uuid\n" +
             "LEFT JOIN base_application_codeset basEntry ON basEntry.code = he.setting\n" +
             "LEFT JOIN base_application_codeset basCategory ON basCategory.code = he.client_category\n" +
