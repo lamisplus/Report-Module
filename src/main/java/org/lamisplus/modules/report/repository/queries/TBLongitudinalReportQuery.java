@@ -14,7 +14,7 @@ public class TBLongitudinalReportQuery {
             "(CASE WHEN (clientObservation.clinicallyEvaulated = 'Yes' AND clientObservation.tbScreeningType ILIKE '%Chest X-Ray with CAD and/or Symptom screening%' AND clientObservation.chestXrayResult = 'Yes' AND clientObservation.cadScore >= 40 AND negativeResult.tbDiagnosticResult IS NOT NULL) THEN clientObservation.chestXrayResult ELSE NULL END) AS resultTbScoreCad,\n" +
             "clientObservation.rank1\n" +
             "FROM patient_person p\n" +
-            "INNER JOIN hiv_enrollment he ON he.person_uuid = p.uuid\n" +
+            "INNER JOIN hiv_enrollment_commencement he ON he.person_uuid = p.uuid\n" +
             " LEFT JOIN base_organisation_unit facility ON facility.id=p.facility_id\n" +
             "LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id=facility.parent_organisation_unit_id\n" +
             "LEFT JOIN base_organisation_unit facility_state ON facility_state.id=facility_lga.parent_organisation_unit_id\n" +

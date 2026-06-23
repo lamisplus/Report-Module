@@ -12,7 +12,7 @@ public class TBReportQuery {
             "INNER JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id \n" +
             "INNER JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id \n" +
             "INNER JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id = facility_id AND boui.name='DATIM_ID' \n" +
-            "INNER JOIN hiv_enrollment h ON h.person_uuid = p.uuid \n" +
+            "INNER JOIN hiv_enrollment_commencement h ON h.person_uuid = p.uuid \n" +
             "LEFT JOIN base_application_codeset tgroup ON tgroup.id = h.target_group_id \n" +
             "LEFT JOIN base_application_codeset eSetting ON eSetting.id = h.enrollment_setting_id \n" +
             "LEFT JOIN base_application_codeset ecareEntry ON ecareEntry.id = h.entry_point_id \n" +
