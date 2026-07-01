@@ -1118,10 +1118,10 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(clientService.getOutcome()));
 					map.put(index++, getStringValue(clientService.getDsdModel()));
 					map.put(index++, getStringValue(clientService.getComment()));
-					map.put(index++, getStringValue(clientService.getReturnedToCare()));
+					map.put(index++, clientService.getReturnedToCare());
 					map.put(index++, getStringValue(clientService.getReferredTo()));
 					map.put(index++, getStringValue(clientService.getDiscontinuation()));
-					map.put(index++, getStringValue(clientService.getDateOfDiscontinuation()));
+					map.put(index++, clientService.getDateOfDiscontinuation());
 					map.put(index++, getStringValue(clientService.getReasonForDiscontinuation()));
 					//Client Verification triggers
 					map.put(index++, getStringValue(clientService.getNoInitBiometric()));
