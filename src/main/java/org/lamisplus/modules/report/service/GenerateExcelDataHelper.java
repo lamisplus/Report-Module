@@ -865,7 +865,7 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getSetting())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getFacilitySetting())));
 					map.put(index++, reportType.equals("GoN")  ? getStringValue(String.valueOf(pmtctDto.getGonModalities())) : getStringValue(String.valueOf(pmtctDto.getPepfarModalities())));
-					map.put(index++, getStringValue(String.valueOf(pmtctDto.getDate())));
+					map.put(index++, pmtctDto.getDate());
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getGravida())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getParity())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getPreviouslyKnownHivPositive())));
@@ -873,7 +873,7 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getHivEarlyDetect())));
 					map.put(index++, null);// Suspected Acute Infection
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getHivEarlyDetectViralLoad())));
-					map.put(index++, getStringValue(String.valueOf(pmtctDto.getDateOfVisit())));
+					map.put(index++, pmtctDto.getDateOfVisit());
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getFinalHivTestResult())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getKnownPositive())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getHbTestResult())));
@@ -949,7 +949,7 @@ public class GenerateExcelDataHelper {
 					map.put(index++, htsReportDto.getDateOfPreviousHts());
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPreviousHtsResult())));
 					map.put(index++, htsReportDto.getNumberOfCounts());
-					map.put(index++, getStringValue(String.valueOf(htsReportDto.getDateOfVisit())));
+					map.put(index++, htsReportDto.getDateOfVisit());
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getTypeOfHivTestDone())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFinalHivTestResult())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getSuspected())));
@@ -1170,10 +1170,10 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(familyIndex.getClientCode()));
                     map.put(index++, getStringValue(familyIndex.getEntryPoint()));
 					map.put(index++, getStringValue(familyIndex.getClientCategory()));
-					map.put(index++, getStringValue(String.valueOf(familyIndex.getDateOfService())));
+					map.put(index++, familyIndex.getDateOfService());
 					map.put(index++, getStringValue(String.valueOf(familyIndex.getOfferedPns())));
 					map.put(index++, getStringValue(String.valueOf(familyIndex.getAcceptedPns())));
-					map.put(index++, getStringValue(String.valueOf(familyIndex.getDateOfService())));
+					map.put(index++, familyIndex.getDateOfService());
 					map.put(index++, getStringValue(String.valueOf(familyIndex.getContactCode())));
 					map.put(index++, getStringValue(familyIndex.getNameOfIndexClient()));
 					map.put(index++, getStringValue(familyIndex.getRelationshipToIndex()));
@@ -1184,11 +1184,11 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(familyIndex.getNotificationMethod())));
 					map.put(index++, getStringValue(String.valueOf(familyIndex.getAttempts())));
                     map.put(index++, getStringValue(String.valueOf(familyIndex.getKnownHivPositive())));
-                    map.put(index++, getStringValue(String.valueOf(familyIndex.getDateTestedHiv())));
+                    map.put(index++, familyIndex.getDateTestedHiv());
                     map.put(index++, getStringValue(String.valueOf(familyIndex.getHivTestResult())));
-                    map.put(index++, getStringValue(String.valueOf(familyIndex.getDateEnrolledArt())));
+                    map.put(index++, familyIndex.getDateEnrolledArt());
                     map.put(index++, getStringValue(String.valueOf(familyIndex.getUan())));
-                    map.put(index++, getStringValue(String.valueOf(familyIndex.getDateEnrolledOvc())));
+                    map.put(index++, familyIndex.getDateEnrolledOvc());
 					map.put(index, getStringValue(String.valueOf(familyIndex.getOvcId())));
 
 				} catch (Exception e) {
