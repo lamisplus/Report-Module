@@ -5,17 +5,16 @@ public class TBReportQuery {
     public static final String TB_REPORT_QUERY = "with bio_data as (\n" +
             "SELECT facility_lga.name AS lga, p.other_name, p.surname, p.first_name, \n" +
             "facility_state.name AS state, p.uuid, p.hospital_number, h.unique_id as uniqueId,EXTRACT(YEAR FROM AGE(?3, date_of_birth)) AS age, \n" +
-            "INITCAP(p.sex) AS gender,p.date_of_birth, facility.name AS facility_name, boui.code AS datimId,tgroup.display AS targetGroup, eSetting.display AS enrollment_setting, \n" +
-            "hac.visit_date AS art_start_date, hr.description AS regimen_at_start, p.date_of_registration \n" +
+            "INITCAP(p.sex) AS gender,p.date_of_birth, facility.name AS facility_name, boui.code AS datimId, eSetting.display AS enrollment_setting, \n" +
+            "h.visit_date AS art_start_date, hr.description AS regimen_at_start, p.date_of_registration \n" +
             "FROM patient_person p \n" +
             "INNER JOIN base_organisation_unit facility ON facility.id = facility_id \n" +
             "INNER JOIN base_organisation_unit facility_lga ON facility_lga.id = facility.parent_organisation_unit_id \n" +
             "INNER JOIN base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id \n" +
             "INNER JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id = facility_id AND boui.name='DATIM_ID' \n" +
             "INNER JOIN hiv_enrollment_commencement h ON h.person_uuid = p.uuid \n" +
-            "LEFT JOIN base_application_codeset tgroup ON tgroup.id = h.target_group_id \n" +
-            "LEFT JOIN base_application_codeset eSetting ON eSetting.id = h.enrollment_setting_id \n" +
-            "LEFT JOIN base_application_codeset ecareEntry ON ecareEntry.id = h.entry_point_id \n" +
+            "LEFT JOIN base_application_codeset eSetting ON eSetting.code = h.enrollment_setting\n" +
+            "LEFT JOIN base_application_codeset ecareEntry ON ecareEntry.code = h.care_entry_point_id \n" +
             "INNER JOIN hiv_art_clinical hac ON hac.hiv_enrollment_uuid = h.uuid \n" +
             "AND hac.archived = 0 \n" +
             "INNER JOIN hiv_regimen hr ON hr.id = hac.regimen_id \n" +
@@ -24,7 +23,6 @@ public class TBReportQuery {
             "h.archived = 0 \n" +
             "AND p.archived = 0 \n" +
             "AND h.facility_id = ?1 \n" +
-            "AND hac.is_commencement = TRUE \n" +
             "AND hac.visit_date >= ?2 \n" +
             "AND hac.visit_date <= ?3 \n" +
             "), \n" +
@@ -408,7 +406,7 @@ public class TBReportQuery {
             "SELECT DISTINCT ON (bio.uuid)\n" +
             "bio.uuid AS personUuid, bio.lga, bio.state, bio.hospital_number as hospitalNumber, bio.other_name as otherName, \n" +
             "bio.uniqueId, bio.age, bio.gender, bio.date_of_birth as dateOfBirth, bio.surname, bio.first_name as firstName, \n" +
-            "bio.facility_name as facilityName, bio.datimId, bio.targetGroup, \n" +
+            "bio.facility_name as facilityName, bio.datimId,\n" +
             "bio.enrollment_setting, bio.art_start_date AS artStartDate, \n" +
             "bio.regimen_at_start AS regimen_at_start, bio.date_of_registration, \n" +
             "tb.tbStatus AS tbStatus, tb.tbScreeningType AS tbScreeningType, \n" +
@@ -439,5 +437,5 @@ public class TBReportQuery {
             "LEFT JOIN iptNew iptN ON bio.uuid= iptN.person_uuid\n" +
             "LEFT JOIN tbTreatmentNew tbTmentNew ON tbTmentNew.person_uuid_tb = bio.uuid\n" +
             "LEFT JOIN negativeTbDiagnosticResults negativeTb ON negativeTb.personTbResult = bio.uuid AND negativeTb.dateOfTbSampleCollected = tbTmentNew.specimenSentDate\n" +
-            "LEFT JOIN tb_sample_collection tbSample ON tbSample.personTbSample = bio.uuid\n";
+            "LEFT JOIN tb_sample_collection tbSample ON tbSample.personTbSample = bio.uuid";
 }
