@@ -160,12 +160,12 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getResultTbScoreCad())));
 
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getClinicallyEvaulated())));
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getDateOfChestXrayResultTestDone())));
+				map.put(index++, tbReportProjection.getDateOfChestXrayResultTestDone());
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getChestXrayResult())));
 
 
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbType())));
-				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTbTreatmentStartDate())));
+				map.put(index++, tbReportProjection.getTbTreatmentStartDate());
 				map.put(index++, getStringValue(String.valueOf(tbReportProjection.getTreatmentOutcome())));
 				map.put(index++, tbReportProjection.getTbCompletionDate());
 
