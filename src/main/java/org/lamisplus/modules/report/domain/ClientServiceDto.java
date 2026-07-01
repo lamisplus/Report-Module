@@ -1,6 +1,8 @@
 package org.lamisplus.modules.report.domain;
 
 
+import java.time.LocalDate;
+
 public interface ClientServiceDto {
     String getFacilityState();
     String getFacilityName();
@@ -13,10 +15,10 @@ public interface ClientServiceDto {
     String getOutcome();
     String getDsdModel();
     String getComment();
-    String getReturnedToCare();
+    LocalDate getReturnedToCare();
     String getReferredTo();
     String getDiscontinuation();
-    String getDateOfDiscontinuation();
+    LocalDate getDateOfDiscontinuation();
     String getReasonForDiscontinuation();
     String getNoAttempts();
     String getHospitalNumber();
