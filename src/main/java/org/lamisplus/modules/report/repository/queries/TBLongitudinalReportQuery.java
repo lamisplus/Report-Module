@@ -35,7 +35,7 @@ public class TBLongitudinalReportQuery {
             "'')) AS contractionOptions, COALESCE(NULLIF(CAST(NULLIF(data->'tptMonitoring'->>'dateTptEnded', '') AS DATE), NULL), NULLIF(CAST(NULLIF(data->'tptMonitoring'->>'dateOfTptCompleted', '') AS DATE), NULL)) iptCompletionDate, \n" +
             "CAST(data->'tptMonitoring'->>'outComeOfIpt' AS VARCHAR) iptCompletionStatus, data->'tptMonitoring'->>'weight' weightAt,\n" +
             "ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) as rank1\n" +
-            "FROM hiv_observation where type= 'Chronic Care' AND date_of_observation BETWEEN ?2 AND ?3\n" +
+            "FROM hiv_observation where archived = 0 AND type= 'Chronic Care' AND date_of_observation BETWEEN ?2 AND ?3\n" +
             ") clientObservation ON clientObservation.personUuid = he.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT person_uuid, visit_date as dateOfIptStart, regimen_name regimenName\n" +

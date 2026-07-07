@@ -73,7 +73,7 @@ public class PMTCTReportQuery {
             "WHERE p.archived = 0 AND p.facility_id = ?1\n" +
             "),\n" +
             "patientResidencial as (select DISTINCT ON (personUuid) personUuid as personUuid11,\n" +
-            "case when (addr ~ '^[0-9\\\\\\\\.]+$') =TRUE\n" +
+            "case when (addr ~ '^[0-9\\\\.]+$') =TRUE\n" +
             " then (select name from base_organisation_unit where id = cast(addr as int)) ELSE\n" +
             "(select name from base_organisation_unit where id = cast(facilityLga as int)) end as lgaOfResidence,\n" +
             "(select name from base_organisation_unit where id = (CASE WHEN stateResidence ~ '^[0-9]+$' THEN CAST(stateResidence AS INTEGER) ELSE null END)) AS stateOfResidence\n" +
@@ -120,6 +120,6 @@ public class PMTCTReportQuery {
             "WHEN hts.entryPoint = 'HTS_ENTRY_POINT_COMMUNITY' AND hts.facilitySettingRaw = 'COMMUNITY_HTS_TEST_SETTING_OUTREACH' THEN 'Mobile'\n" +
             "END) AS TEXT) AS pepfarModalities\n" +
             "FROM pmtctRegister pr\n" +
-            "LEFT JOIN htsTest hts ON hts.patient_uuid = CAST(pr.patient_uuid AS UUID)\n" +
+            "LEFT JOIN htsTest hts ON hts.patient_uuid = pr.patient_uuid\n" +
             "INNER JOIN bio_data bio ON bio.personUuid = pr.patient_uuid";
 }
