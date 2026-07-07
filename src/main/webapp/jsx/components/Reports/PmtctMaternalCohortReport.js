@@ -113,12 +113,12 @@ const PmtctMaternalCohortReport = (props) => {
         )
           .then(response => {
             setLoading(false)
-            const fileName = `${objValues.organisationUnitName} PMTCT Maternal Cohort ${currentDate}`
+            const fileName = `${objValues.organisationUnitName} CHILD Follow-up report ${currentDate}`
             const responseData = response.data
             let blob = new Blob([responseData], {type: "application/octet-stream"});
 
             FileSaver.saveAs(blob, `${fileName}.xlsx`);
-            toast.success("PMTCT Report generated successfully");
+            toast.success("Child Follow-up report generated successfully");
           })
           .catch(error => {
             setLoading(false)
@@ -138,7 +138,7 @@ const PmtctMaternalCohortReport = (props) => {
             <Card >
                 <CardBody>
 
-                <h2 style={{color:'#000'}}>PMTCT - Maternal Cohort REPORT</h2>
+                <h2 style={{color:'#000'}}>CHILD Follow-up REPORT</h2>
                 <br/>
                     < >
                         <div className="row">

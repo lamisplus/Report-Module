@@ -16,10 +16,10 @@ public class CLIENTVERIFICATIONReportQuery {
             "obj.value->>'outcome' AS outcome, \n" +
             "CASE WHEN pt.dsd_model IS NULL THEN '' ELSE pt.dsd_model END  AS dsdModel, \n" +
             "obj.value->>'comment' AS comment, \n" +
-            "CAST(h.data->>'returnedToCare' AS DATE) AS returnedToCare, \n" +
+            "CASE WHEN h.data->>'returnedToCare' ~ '^\\d{4}-\\d{2}-\\d{2}$' THEN CAST(h.data->>'returnedToCare' AS DATE) ELSE NULL END AS returnedToCare, \n" +
             "h.data->>'referredTo' AS referredTo, \n" +
             "h.data->>'discontinuation' AS discontinuation, \n" +
-            "CAST(h.data->>'dateOfDiscontinuation' AS DATE) AS dateOfDiscontinuation, \n" +
+            "CASE WHEN h.data->>'dateOfDiscontinuation' ~ '^\\d{4}-\\d{2}-\\d{2}$' THEN CAST(h.data->>'dateOfDiscontinuation' AS DATE) ELSE NULL END AS dateOfDiscontinuation, \n" +
             "CASE WHEN pt.reason_for_discountinuation IS NULL THEN '' ELSE pt.reason_for_discountinuation END  AS reasonForDiscontinuation, \n" +
             "COALESCE(string_agg(CAST(any_element.value AS text), ', '), '') AS anyOfTheFollowingList, \n" +
             "ROW_NUMBER() OVER ( PARTITION BY h.person_uuid ORDER BY CAST(data->'attempt'->0->>'dateOfAttempt' AS DATE) DESC) AS rnk,\n" +

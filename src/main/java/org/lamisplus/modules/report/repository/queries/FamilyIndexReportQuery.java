@@ -42,7 +42,7 @@ public class FamilyIndexReportQuery {
             "(select name from base_organisation_unit where id = cast(facilityLga as int)) end as lgaOfResidence,\n" +
             "(select name from base_organisation_unit where id = (CASE WHEN stateResidence ~ '^[0-9]+$' THEN CAST(stateResidence AS INTEGER) ELSE null END)) AS stateOfResidence\n" +
             "from (\n" +
-            " select CAST(pp.uuid AS UUID) AS personUuid, facility_lga.parent_organisation_unit_id AS facilityLga, (jsonb_array_elements(pp.address->'address')->>'stateId') stateResidence, (jsonb_array_elements(pp.address->'address')->>'district') as addr from patient_person pp\n" +
+            " select pp.uuid AS personUuid, facility_lga.parent_organisation_unit_id AS facilityLga, (jsonb_array_elements(pp.address->'address')->>'stateId') stateResidence, (jsonb_array_elements(pp.address->'address')->>'district') as addr from patient_person pp\n" +
             "LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = CAST (pp.organization->'id' AS INTEGER)\n" +
             ") dt)\n" +
             "SELECT bio.state, bio.lga, bio.facilityName, bio.datimId, bio.surname, bio.firstName,  bio.hospitalNumber,\n" +

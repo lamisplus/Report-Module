@@ -48,7 +48,12 @@ public class HTSReportQuery {
             "SELECT CAST(patient_uuid AS TEXT) patientUuid, client_code clientCode, CAST(date_of_visit AS DATE) dateOfVisit, setting entryPoint, \n" +
             "observation->>'previouslyTestedNegative' previouslyTestedNegative,\n" +
             "COALESCE(observation->>'facilitySetting', observation->>'communityEntryPoint') facilitySetting,\n" +
-            "observation->>'typeOfSession' typeOfSession,\n" +
+            "observation->>'typeOfSession' typeOfSession, \n" +
+            "CASE WHEN observation->>'pregnancyStatus' = 'PREGANACY_STATUS_PREGNANT BREASTFEEDING_NO' THEN 'PREGANACY_STATUS_PREGNANT'\n" +
+            "WHEN observation->>'pregnancyStatus' = 'PREGANACY_STATUS_NOT_PREGNANT BREASTFEEDING_NO' THEN 'PREGANACY_STATUS_NOT_PREGNANT'\n" +
+            "WHEN observation->>'pregnancyStatus' = 'PREGANACY_STATUS_BREASTFEEDING BREASTFEEDING_NO' THEN 'PREGANACY_STATUS_BREASTFEEDING'\n" +
+            "WHEN observation->>'pregnancyStatus' = 'PREGANACY_STATUS_POST_PARTUM BREASTFEEDING_NO' THEN 'PREGANACY_STATUS_POST_PARTUM'\n" +
+            "WHEN observation->>'pregnancyStatus' = 'BREASTFEEDING_NO' THEN NULL END AS fixPstatus,\n" +
             "observation->>'pregnancyStatus' pregnancyStatus,\n" +
             "observation->>'indexTesting' indexTesting,\n" +
             "observation->>'indexClientCode' indexClientCode,\n" +
@@ -65,13 +70,13 @@ public class HTSReportQuery {
             "source, longitude, latitude, facility_id facilityId,\n" +
             "ROW_NUMBER() OVER (PARTITION BY patient_uuid ORDER BY date_of_visit DESC) rnk\n" +
             "FROM hts_encounter\n" +
-            "WHERE archived IS FALSE AND date_of_visit BETWEEN ?2 AND ?3 AND facility_id = ?1\n" +
+            "WHERE archived IS FALSE AND observation->>'finalHivTestResult' IS NOT NULL AND observation->>'finalHivTestResult' <> '' AND date_of_visit BETWEEN ?2 AND ?3 AND facility_id = ?1\n" +
             ") latestHts \n" +
             "LEFT JOIN base_application_codeset basEntry ON basEntry.code = latestHts.entryPoint\n" +
             "LEFT JOIN base_application_codeset baspreviouslyTestedNegative ON baspreviouslyTestedNegative.code = latestHts.previouslyTestedNegative\n" +
             "LEFT JOIN base_application_codeset basFacility ON basFacility.code = latestHts.facilitySetting\n" +
             "LEFT JOIN base_application_codeset basSession ON basSession.code = latestHts.typeOfSession\n" +
-            "LEFT JOIN base_application_codeset basPreg ON basPreg.code = latestHts.pregnancyStatus\n" +
+            "LEFT JOIN base_application_codeset basPreg ON basPreg.code = latestHts.fixPstatus\n" +
             "LEFT JOIN base_application_codeset basIndexTest ON basIndexTest.code = latestHts.indexTesting\n" +
             "LEFT JOIN base_application_codeset basIndexRel ON basIndexRel.code = latestHts.indexRelationship\n" +
             "LEFT JOIN base_application_codeset basHivTest ON basHivTest.code = latestHts.typeOfHivTestDone\n" +
@@ -87,7 +92,7 @@ public class HTSReportQuery {
             "select patient_uuid, CAST(date_of_visit AS DATE) dateOfPreviousHts, observation->>'finalHivTestResult' previousHtsResult,   \n" +
             "ROW_NUMBER() OVER ( PARTITION BY patient_uuid ORDER BY date_of_visit DESC) AS rnk\n" +
             "FROM hts_encounter\n" +
-            "WHERE archived IS FALSE AND date_of_visit BETWEEN ?2 AND ?3\n" +
+            "WHERE archived IS FALSE AND observation->>'finalHivTestResult' IS NOT NULL AND observation->>'finalHivTestResult' <> '' AND date_of_visit BETWEEN ?2 AND ?3\n" +
             ") pre where rnk = 2\n" +
             "),\n" +
             "htsCounts AS (\n" +
