@@ -365,7 +365,7 @@ public class Constants {
             "Occupation",
             "Date of Visit (yyyy-mm-dd)",
             "First Time Visit",
-            "Entry Point",
+            "Setting",
             "Previously Tested",
             "Testing Setting",
             "Modality",

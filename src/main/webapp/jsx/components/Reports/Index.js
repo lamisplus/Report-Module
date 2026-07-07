@@ -121,7 +121,7 @@ const Reports = props => {
 
   const reportPMTCT = [
     { key: 'pmtct-hts', value: 'pmtct-hts', text: 'PMTCT HTS', permissionKey: 'report_pmtct_hts' },
-    { key: 'pmtct-maternal-cohort', value: 'pmtct-maternal-cohort', text: 'PMTCT MATERNAL COHORT', permissionKey: 'report_pmtct_maternal_cohort' },
+    { key: 'pmtct-maternal-cohort', value: 'pmtct-maternal-cohort', text: 'CHILD Follow-up report', permissionKey: 'report_child_followup_' },
   ];
 
   const reportPsychosocial = [
