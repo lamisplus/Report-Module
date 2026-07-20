@@ -47,13 +47,13 @@ public class HTSReportQuery {
             "FROM (\n" +
             "SELECT CAST(patient_uuid AS TEXT) patientUuid, client_code clientCode, CAST(date_of_visit AS DATE) dateOfVisit, setting entryPoint, \n" +
             "observation->>'previouslyTestedNegative' previouslyTestedNegative,\n" +
-            "COALESCE(observation->>'facilitySetting', observation->>'communityEntryPoint') facilitySetting,\n" +
+            "COALESCE(NULLIF(observation->>'facilitySetting', ''),observation->>'communityEntryPoint') facilitySetting,\n" +
             "observation->>'typeOfSession' typeOfSession, \n" +
             "CASE WHEN observation->>'pregnancyStatus' = 'PREGANACY_STATUS_PREGNANT BREASTFEEDING_NO' THEN 'PREGANACY_STATUS_PREGNANT'\n" +
             "WHEN observation->>'pregnancyStatus' = 'PREGANACY_STATUS_NOT_PREGNANT BREASTFEEDING_NO' THEN 'PREGANACY_STATUS_NOT_PREGNANT'\n" +
             "WHEN observation->>'pregnancyStatus' = 'PREGANACY_STATUS_BREASTFEEDING BREASTFEEDING_NO' THEN 'PREGANACY_STATUS_BREASTFEEDING'\n" +
             "WHEN observation->>'pregnancyStatus' = 'PREGANACY_STATUS_POST_PARTUM BREASTFEEDING_NO' THEN 'PREGANACY_STATUS_POST_PARTUM'\n" +
-            "WHEN observation->>'pregnancyStatus' = 'BREASTFEEDING_NO' THEN NULL END AS fixPstatus,\n" +
+            "WHEN observation->>'pregnancyStatus' = 'BREASTFEEDING_NO' THEN NULL ELSE NULL END AS fixPstatus,\n" +
             "observation->>'pregnancyStatus' pregnancyStatus,\n" +
             "observation->>'indexTesting' indexTesting,\n" +
             "observation->>'indexClientCode' indexClientCode,\n" +

@@ -658,7 +658,7 @@ public class APPRQUERY {
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
-            "          AND  a.cleaned_causeofdeath ILIKE co.cause_of_death\n" +
+            "          AND  a.cleaned_causeofdeath ILIKE co.status\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
             "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
@@ -673,7 +673,7 @@ public class APPRQUERY {
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
-            "          AND  a.iit_gap BETWEEN co.iit_days_min AND co.iit_days_max\n" +
+            "          AND  a.iit_gap BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
             "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
@@ -686,7 +686,7 @@ public class APPRQUERY {
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
             "    LEFT   JOIN agg_rtt_iit_dur a\n" +
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
-            "          AND  a.gap BETWEEN co.iit_days_min AND co.iit_days_max\n" +
+            "          AND  a.gap BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
             "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
@@ -701,7 +701,7 @@ public class APPRQUERY {
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
             "          AND  UPPER(a.gender) = UPPER(co.sex)\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
-            "          AND  a.monthsofarvrefill BETWEEN co.months_min AND co.months_max\n" +
+            "          AND  a.monthsofarvrefill BETWEEN co.min AND co.max\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
             "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
@@ -794,10 +794,10 @@ public class APPRQUERY {
             "    JOIN   public.data_element de   ON de.data_element_uid = 'MbabSqlSAcX'\n" +
             "    JOIN   public.category_option co\n" +
             "           ON  co.data_element_id = de.id\n" +
-            "          AND  co.tb_test_type NOT ILIKE '%Other%'\n" +
+            "          AND  co.status NOT ILIKE '%Other%'\n" +
             "    LEFT   JOIN agg_tb_test_type a\n" +
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
-            "          AND  a.tbdiagnostictesttype ILIKE co.tb_test_type\n" +
+            "          AND  a.tbdiagnostictesttype ILIKE co.status\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
             "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
@@ -809,7 +809,7 @@ public class APPRQUERY {
             "    JOIN   public.data_element de   ON de.data_element_uid = 'MbabSqlSAcX'\n" +
             "    JOIN   public.category_option co\n" +
             "           ON  co.data_element_id = de.id\n" +
-            "          AND  co.tb_test_type ILIKE '%Other%'\n" +
+            "          AND  co.status ILIKE '%Other%'\n" +
             "    LEFT   JOIN agg_tb_test_type a\n" +
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
             "          AND  a.tbdiagnostictesttype NOT ILIKE '%Smear%'\n" +
@@ -829,8 +829,8 @@ public class APPRQUERY {
             "    LEFT   JOIN agg_cxca_scrn a\n" +
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
-            "          AND  a.cervicalcancerscreeningtype ILIKE co.screening_type\n" +
-            "          AND  a.resultofcervicalcancerscreening ILIKE co.screening_result\n" +
+            "          AND  a.cervicalcancerscreeningtype ILIKE co.status\n" +
+            "          AND  a.resultofcervicalcancerscreening ILIKE co.status\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
             "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
@@ -844,8 +844,8 @@ public class APPRQUERY {
             "    LEFT   JOIN agg_cxca_tx a\n" +
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
             "          AND  a.age BETWEEN co.min AND co.max\n" +
-            "          AND  a.cervicalcancerscreeningtype ILIKE co.screening_type\n" +
-            "          AND  a.cervicalcancertreatmentscreened ILIKE co.treatment_type\n" +
+            "          AND  a.cervicalcancerscreeningtype ILIKE co.status\n" +
+            "          AND  a.cervicalcancertreatmentscreened ILIKE co.status\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
             "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
@@ -927,7 +927,7 @@ public class APPRQUERY {
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
             "    LEFT   JOIN agg_pvls_d_preg a\n" +
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
-            "          AND  a.pregnancystatus ILIKE co.screening_result\n" +
+            "          AND  a.pregnancystatus ILIKE co.sex\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
             "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
@@ -940,7 +940,7 @@ public class APPRQUERY {
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
             "    LEFT   JOIN agg_pvls_n_preg a\n" +
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
-            "          AND  a.pregnancystatus ILIKE co.screening_result\n" +
+            "          AND  a.pregnancystatus ILIKE co.sex\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
             "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
@@ -953,7 +953,7 @@ public class APPRQUERY {
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
             "    LEFT   JOIN agg_tb_d_scrn_type a\n" +
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
-            "          AND  a.tbscreeningtype ILIKE co.screening_type\n" +
+            "          AND  a.tbscreeningtype ILIKE co.status\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
             "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
@@ -966,7 +966,7 @@ public class APPRQUERY {
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
             "    LEFT   JOIN agg_tx_curr_dsd a\n" +
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
-            "          AND  a.modeldevolveto ILIKE co.dsd_model\n" +
+            "          AND  a.modeldevolveto ILIKE co.status\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
             "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
@@ -979,7 +979,7 @@ public class APPRQUERY {
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
             "    LEFT   JOIN agg_pvls_d_dsd a\n" +
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
-            "          AND  a.modeldevolveto ILIKE co.dsd_model\n" +
+            "          AND  a.modeldevolveto ILIKE co.status\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
             "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
@@ -992,7 +992,7 @@ public class APPRQUERY {
             "    JOIN   public.category_option co ON co.data_element_id = de.id\n" +
             "    LEFT   JOIN agg_pvls_n_dsd a\n" +
             "           ON  a.org_unit = op.org_unit AND a.attrib = op.attrib AND a.period = op.period\n" +
-            "          AND  a.modeldevolveto ILIKE co.dsd_model\n" +
+            "          AND  a.modeldevolveto ILIKE co.status\n" +
             "    GROUP  BY de.data_element_uid, de.data_element, op.period,\n" +
             "              op.org_unit, op.attrib, co.category_option_uid, op.facilityname, op.state, op.lga, ipname, co.category_option\n" +
             "    UNION ALL\n" +
