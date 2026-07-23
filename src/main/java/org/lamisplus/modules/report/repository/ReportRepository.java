@@ -16,6 +16,9 @@ import java.util.Optional;
 
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
+        @Query(value = HtsMsfREPORT.HTS_MONTHLY_MSF_QUERY, nativeQuery = true)
+        List<HtsMsfProjection> findTestingResults(Long facilityId, LocalDate start, LocalDate end);
+
         @Query(value = HTSReportQuery.HTS_REPORT_QUERY, nativeQuery = true)
         List<HtsReportDto> getHtsReport(Long facilityId, LocalDate start, LocalDate end);
 

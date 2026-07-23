@@ -15,6 +15,7 @@ import org.lamisplus.modules.report.domain.dto.ApprCollectionProjection;
 import org.lamisplus.modules.report.domain.dto.ApprProjection;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
 import org.lamisplus.modules.report.domain.entity.Period;
+import org.lamisplus.modules.report.repository.MonthRepository;
 import org.lamisplus.modules.report.repository.PeriodRepository;
 import org.lamisplus.modules.report.repository.ReportRepository;
 import org.lamisplus.modules.report.utility.DateUtil;
@@ -28,10 +29,9 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -50,6 +50,7 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	private final SimpMessageSendingOperations messagingTemplate;
 	private final QuarterService quarterService;
     private final PeriodRepository  periodRepository;
+    private final MonthRepository monthRepository;
 
 
 	@Override
@@ -663,6 +664,12 @@ public ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, Local
         System.out.println("Start pulling appr report");
         return reportRepository.getApprReport(startDate, endDate);
     }
+
+    @Override
+    public List<String> getMonths() {
+        return monthRepository.findAllMonth();
+    }
+
 
     @Override
     public List<String> getAllWeekForAppr(Long year) {

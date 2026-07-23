@@ -44,10 +44,14 @@ public interface GenerateExcelService {
 
  ByteArrayOutputStream generateFamilyIndex(Long facilityId);
 
+ List<String> getMonths();
+
  ByteArrayOutputStream pullRadetRecord(Long facilityId, String weekPeriod);
 
  List<ApprProjection> pullRadetRecords(Long facilityId, String weekPeriod);
  List<String> getAllWeekForAppr(Long year);
  ByteArrayOutputStream generateApprRadet();
+
+
 
 }

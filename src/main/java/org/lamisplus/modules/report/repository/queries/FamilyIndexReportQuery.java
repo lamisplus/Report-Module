@@ -9,8 +9,8 @@ public class FamilyIndexReportQuery {
             "hc.age, hc.phone, hc.address, basNotification.display AS notificationMethod, hc.attempts, basKnownHiv.display AS knownHivPositive, hc.date_tested_hiv dateTestedHiv,\n" +
             "basHivResult.display AS hivTestResult, hc.date_enrolled_art dateEnrolledArt, hc.on_art onArt, '' AS uan, hc.date_enrolled_ovc dateEnrolledOvc, hc.ovc_id ovcId\n" +
             "FROM hts_ict_encounter he\n" +
-            "LEFT JOIN hts_ict_contact hc ON hc.hts_ict_encounter_uuid = he.uuid\n" +
-            "LEFT JOIN hts_encounter hec ON hec.uuid = he.hts_encounter_uuid\n" +
+            "LEFT JOIN hts_ict_contact hc ON hc.hts_ict_encounter_uuid = he.uuid AND hc.archived IS FALSE\n" +
+            "LEFT JOIN hts_encounter hec ON hec.uuid = he.hts_encounter_uuid AND hec.archived IS FALSE\n" +
             "LEFT JOIN base_application_codeset basEntry ON basEntry.code = he.setting\n" +
             "LEFT JOIN base_application_codeset basCategory ON basCategory.code = he.client_category\n" +
             "LEFT JOIN base_application_codeset basOfferedPns ON basOfferedPns.code = he.offered_pns\n" +
@@ -20,7 +20,7 @@ public class FamilyIndexReportQuery {
             "LEFT JOIN base_application_codeset basNotification ON basNotification.code = hc.notification_method\n" +
             "LEFT JOIN base_application_codeset basKnownHiv ON basKnownHiv.code = hc.known_hiv_positive\n" +
             "LEFT JOIN base_application_codeset basHivResult ON basHivResult.code = hc.hiv_test_result\n" +
-            "WHERE he.archived IS FALSE AND hc.archived IS FALSE AND he.facility_id = ?1\n" +
+            "WHERE he.archived IS FALSE AND he.facility_id = ?1\n" +
             "),\n" +
             "bio_data AS (\n" +
             "SELECT DISTINCT ON (p.uuid) p.uuid AS personUuid, p.hospital_number AS hospitalNumber,\n" +

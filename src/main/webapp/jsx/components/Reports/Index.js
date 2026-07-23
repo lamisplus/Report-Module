@@ -43,6 +43,7 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Divider from '@mui/material/Divider';
 import PrEPMSF from './PrEPMSF';
+import HTS_MSF from './HTS_MSF';
 import TbReportLongitudinal from './TbReportLongitudinal';
 import { useRoles } from "../../../hooks/useRoles";
 import { usePermissions } from "../../../hooks/usePermissions";
@@ -111,7 +112,11 @@ const Reports = props => {
     { key: 'biometric', value: 'biometric', text: 'BIOMETRIC DATA' , permissionKey: 'report_biometric_data'},
   ];
   const monthSummaryReport = [
-    { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary' },
+    { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary',
+      permissionKey: 'report_pmtct_msf'
+    },
+    // { key: 'HTS-MSF', value: 'HTS-MSF', text: 'HTS Monthly Summary', 
+    //   permissionKey: 'report_pmtct_msf' }
   ];
 
   const reportPrevention = [
@@ -131,6 +136,7 @@ const Reports = props => {
   const reportMsfs = [
     { key: 'prep-msf', value: 'prep-msf', text: 'PrEP Monthly Summary Form', permissionKey: 'report_prep_monthly_summary_form' },
     { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary', permissionKey: 'report_pmtct_msf' },
+    { key: 'hts-msf', value: 'hts-msf', text: 'HTS Monthly Summary', permissionKey: 'report_pmtct_msf' },
   ];
 
   const reportOptions = [
@@ -175,6 +181,7 @@ const Reports = props => {
         canViewPrepCrossSectional: true,
         canViewPrepLongitudinal: true,
         canViewPrepMSF: true,
+        canViewHTS_MSF: true,
         canViewPMTCTMSF: true,
         canViewBiometricData: true,
         canViewMHPSSReport: true,
@@ -209,6 +216,7 @@ const Reports = props => {
       canViewPrepLongitudinal: hasPermission("report_prep_longitudinal"),
       canViewPrepMSF: hasPermission("report_prep_monthly_summary_form"),
       canViewPMTCTMSF: hasPermission("report_pmtct_msf"),
+      canViewHTS_MSF: hasPermission("report_pmtct_msf"), //TODO: Consider creating a separate permission for HTS_MSF if needed.
       canViewBiometricData: hasPermission("report_biometric_data"),
       canViewMHPSSReport: hasPermission("report_mhpss_report"),
     };
@@ -496,6 +504,14 @@ const Reports = props => {
       case 'prep-msf':
         return (
           <PrEPMSF
+            handleItemClick={handleItemClick1}
+            setCompleted={setCompleted}
+            completed={completed}
+          />
+        );
+        case 'hts-msf':
+        return (
+          <HTS_MSF
             handleItemClick={handleItemClick1}
             setCompleted={setCompleted}
             completed={completed}
