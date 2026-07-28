@@ -36,4 +36,34 @@
                 )
         </sql>
     </changeSet>
+
+    <changeSet id="20260727-001" author="Joshua Gabriel">
+    <preConditions onFail="MARK_RAN">
+        <not>
+            <tableExists tableName="monthly_period"/>
+        </not>
+    </preConditions>
+        <sql>
+        CREATE TABLE IF NOT EXISTS public.monthly_period (
+        id BIGSERIAL PRIMARY KEY,
+        month_name VARCHAR(20) NOT NULL,
+        start_date DATE NOT NULL,
+        end_date DATE NOT NULL
+        );
+        </sql>
+    </changeSet>
+
+    <changeSet id="20260726-02-load-monthly-period-data" author="Joshua Gabriel">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM monthly_period
+            </sqlCheck>
+        </preConditions>
+        <sqlFile
+                path="installers/report/MonthlyCalendar.sql"
+                relativeToChangelogFile="false"
+                splitStatements="true"
+                stripComments="true"/>
+    </changeSet>
+
 </databaseChangeLog>
