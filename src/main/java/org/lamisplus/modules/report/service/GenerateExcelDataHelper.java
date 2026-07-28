@@ -514,8 +514,8 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getAge());
 				map.put(index++, getStringValue(String.valueOf(radetReportDto.getCareEntry())));
 				map.put(index++, radetReportDto.getDateOfRegistration());
-				map.put(index++, radetReportDto.getArtStartDate()); // enrollmentDate and artstartdate are using hivEnrollmentVisitDate
 				map.put(index++, radetReportDto.getArtStartDate());
+				map.put(index++, radetReportDto.getDateEnrolled());
 				map.put(index++, radetReportDto.getLastPickupDate());
 				map.put(index++, radetReportDto.getMonthsOfARVRefill());
 

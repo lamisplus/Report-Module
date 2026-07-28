@@ -32,6 +32,8 @@ public interface RADETDTOProjection {
 
 	Date getArtStartDate();
 
+    LocalDate getDateEnrolled();
+
 	String getRegimenAtStart();
 
 	String getRegimenLineAtStart();

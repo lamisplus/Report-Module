@@ -23,8 +23,8 @@ public class RADETReportQueries {
             "WHERE p.facility_id = ?1 AND p.archived = 0\n" +
             "),\n" +
             "hivEnrollment AS (\n" +
-            "SELECT person_uuid personUuid101, unique_id uniqueId, visit_date artStartDate, hrt.description regimenLineAtStart, hr.description regimenAtStart, ecareEntry.display careEntry, eSetting.display enrollmentSetting, ovc_unique_id ovcNumber, household_unique_number householdNumber FROM (\n" +
-            "SELECT person_uuid, unique_id, visit_date, regimen_line_id, regimen_id, care_entry_point_id, enrollment_setting, ovc_data->>'ovc_unique_id' ovc_unique_id, ovc_data->>'household_unique_number' household_unique_number,\n" +
+            "SELECT person_uuid personUuid101, unique_id uniqueId, date_art_started artStartDate, dateEnrolled, hrt.description regimenLineAtStart, hr.description regimenAtStart, ecareEntry.display careEntry, eSetting.display enrollmentSetting, ovc_unique_id ovcNumber, household_unique_number householdNumber FROM (\n" +
+            "SELECT person_uuid, unique_id, date_art_started, date_enrolled_in_hiv_care dateEnrolled, visit_date, regimen_line_id, regimen_id, care_entry_point_id, enrollment_setting, ovc_data->>'ovc_unique_id' ovc_unique_id, ovc_data->>'household_unique_number' household_unique_number,\n" +
             "ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER by visit_date DESC) rnkk\n" +
             "FROM hiv_enrollment_commencement\n" +
             "WHERE archived = 0 AND visit_date BETWEEN ?2 AND ?3 AND facility_id = ?1 AND CAST(regimen_line_id AS INTEGER) IN (1,2,3,4,14, 16)\n" +
