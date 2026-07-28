@@ -1297,7 +1297,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "      WHEN r.currentviralload ILIKE ANY (ARRAY['%Nr%', '%invalid%']) THEN NULL\n" +
             "\n" +
             "      -- direct numeric (integer or decimal)\n" +
-            "      WHEN r.currentviralload ~ '^[0-9]+(\\\\.[0-9]+)?$'\n" +
+            "      WHEN r.currentviralload ~ '^\\d+(\\.\\d+)?$'\n" +
             "        THEN CAST(r.currentviralload AS DOUBLE PRECISION)\n" +
             "\n" +
             "      -- contains digits → try to clean\n" +

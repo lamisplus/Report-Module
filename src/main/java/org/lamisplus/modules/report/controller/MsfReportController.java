@@ -2,13 +2,13 @@ package org.lamisplus.modules.report.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.lamisplus.modules.report.domain.dto.ReportProjectionDTO;
+import org.lamisplus.modules.report.service.GenericExcelReportService;
+import org.lamisplus.modules.report.service.GenericPdfReportService;
 import org.lamisplus.modules.report.service.HtsReportBuilderService;
-import org.lamisplus.modules.report.service.MsfService;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -28,9 +26,11 @@ public class MsfReportController {
 
     private static final String EXCEL_MEDIA_TYPE =
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    private static final String PDF_MEDIA_TYPE = "application/pdf";
 
     private final HtsReportBuilderService builderService;
-    private final MsfService excelService;
+    private final GenericExcelReportService excelService;
+    private final GenericPdfReportService pdfService;
 
     @ApiOperation(
             value = "Download HTS Monthly Summary Form",
@@ -42,25 +42,38 @@ public class MsfReportController {
             @ApiResponse(code = 400, message = "Invalid date supplied"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
-    @GetMapping(
-            value = "/hts_msf",
-            produces = EXCEL_MEDIA_TYPE
-    )
+    @GetMapping("/hts_msf")
     public ResponseEntity<ByteArrayResource> export(
             @RequestParam("facilityId") Long facilityId,
-            @RequestParam("month") String month) {
-
+            @RequestParam("month") String month,
+            @RequestParam(defaultValue = "excel") String format) {
 
         ReportProjectionDTO dto = builderService.build(facilityId, month);
 
-        byte[] excelBytes = excelService.generate(dto);
+        byte[] fileBytes;
+        String fileName;
+        String mediaType;
 
-        String fileName = String.format(
-                "HTS_MSF_%s.xlsx",
-                month
-        );
+        switch (format.toLowerCase()) {
+            case "pdf":
+                fileBytes = pdfService.generate(dto);
+                fileName = String.format("HTS_MSF_%s.pdf", month);
+                mediaType = PDF_MEDIA_TYPE;
+                break;
 
-        ByteArrayResource resource = new ByteArrayResource(excelBytes);
+            case "excel":
+            case "xlsx":
+                fileBytes = excelService.generate(dto);
+                fileName = String.format("HTS_MSF_%s.xlsx", month);
+                mediaType = EXCEL_MEDIA_TYPE;
+                break;
+
+            default:
+                throw new IllegalArgumentException(
+                        "Unsupported format. Use 'excel' or 'pdf'");
+        }
+
+        ByteArrayResource resource = new ByteArrayResource(fileBytes);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -69,8 +82,8 @@ public class MsfReportController {
                         "no-cache, no-store, must-revalidate")
                 .header("Pragma", "no-cache")
                 .header("Expires", "0")
-                .contentLength(excelBytes.length)
-                .contentType(MediaType.parseMediaType(EXCEL_MEDIA_TYPE))
+                .contentLength(fileBytes.length)
+                .contentType(MediaType.parseMediaType(mediaType))
                 .body(resource);
     }
 }
