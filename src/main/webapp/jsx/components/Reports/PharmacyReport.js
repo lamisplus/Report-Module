@@ -1,177 +1,248 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {FormGroup, Label , CardBody} from "reactstrap";
-import {makeStyles} from "@material-ui/core/styles";
-import {Card} from "@material-ui/core";
-import {token, url as baseUrl } from "../../../api";
-import 'react-phone-input-2/lib/style.css'
-import { Button} from 'semantic-ui-react'
-import { toast} from "react-toastify";
 import FileSaver from "file-saver";
-import { Message } from 'semantic-ui-react'
-import ProgressComponent from "./ProgressComponent"
+import { toast } from "react-toastify";
 
+import { CardBody } from "reactstrap";
 
-const useStyles = makeStyles((theme) => ({
-    card: {
-        margin: theme.spacing(20),
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center"
-    },
-    form: {
-        width: "100%", // Fix IE 11 issue.
-        marginTop: theme.spacing(3),
-    },
-    submit: {
-        margin: theme.spacing(3, 0, 2),
-    },
-    cardBottom: {
-        marginBottom: 20,
-    },
-    Select: {
-        height: 45,
-        width: 300,
-    },
-    button: {
-        margin: theme.spacing(1),
-    },
-    root: {
-        flexGrow: 1,
-        maxWidth: 752,
-    },
-    demo: {
-        backgroundColor: theme.palette.background.default,
-    },
-    inline: {
-        display: "inline",
-    },
-    error:{
-        color: '#f85032',
-        fontSize: '12.8px'
-    }
-}));
+import {
+    Card,
+    Paper,
+    Box,
+    Typography,
+    TextField
+} from "@material-ui/core";
 
+import Autocomplete from "@material-ui/lab/Autocomplete";
 
-const PharmacyReport = (props) => {
-    let currentDate = new Date().toISOString().split('T')[0]
-    const classes = useStyles();
-    const [loading, setLoading] = useState(false)
+import LocalPharmacyIcon from "@material-ui/icons/LocalPharmacy";
+import BusinessIcon from "@material-ui/icons/Business";
+
+import { Button, Message } from "semantic-ui-react";
+
+import { token, url as baseUrl } from "../../../api";
+import ProgressComponent from "./ProgressComponent";
+
+const PharmacyReport = () => {
+    const currentDate = new Date().toISOString().split("T")[0];
+
+    const [loading, setLoading] = useState(false);
     const [facilities, setFacilities] = useState([]);
-    const [objValues, setObjValues]=useState({       
-        organisationUnitId:"",
-        organisationUnitName:""
-    })
+
+    const [objValues, setObjValues] = useState({
+        organisationUnitId: "",
+        organisationUnitName: ""
+    });
+
     useEffect(() => {
-        Facilities()
-      }, []);
-    const Facilities =()=>{
-    axios
-        .get(`${baseUrl}account`,
-            { headers: {"Authorization" : `Bearer ${token}`} }
-        )
-        .then((response) => {
-            setFacilities(response.data.applicationUserOrganisationUnits);
-        })
-        .catch((error) => {
-        });
-    
-    }
-    const handleInputChange = (e) => {
-        const selectedOption = e.target.options ? e.target.options[e.target.selectedIndex] : null;
-        const selectedValue = e.target.value;
-        const name = e.target.name;
-      
-        setObjValues(prevValues => ({
-            ...prevValues,
-            [name]: selectedValue,
-            organisationUnitName: name === "organisationUnitId" && selectedOption ? selectedOption.innerText : prevValues.organisationUnitName,
-        }));
-      };
-      
-    const handleSubmit = (e) => {        
+        loadFacilities();
+    }, []);
+
+    const loadFacilities = () => {
+        axios
+            .get(`${baseUrl}account`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            .then((response) => {
+                setFacilities(
+                    response.data.applicationUserOrganisationUnits || []
+                );
+            })
+            .catch(() => {
+                toast.error("Unable to load facilities");
+            });
+    };
+
+    const handleSubmit = (e) => {
         e.preventDefault();
-        setLoading(true)
-        axios.get(`${baseUrl}reporting/pharmacy/${objValues.organisationUnitId}`,
-           { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
-          
-          )
-              .then(response => {
-                setLoading(false)
-                const fileName = `${objValues.organisationUnitName} Pharmacy ${currentDate}`
-                const responseData = response.data
-                let blob = new Blob([responseData], {type: "application/octet-stream"});
-                FileSaver.saveAs(blob, `${fileName}.xlsx`);
-                  //toast.success(" Save successful");
-                  //props.setActiveContent('recent-history')
 
-              })
-              .catch(error => {
-                setLoading(false)
-                if(error.response && error.response.data){
-                    let errorMessage = error.response.data.apierror && error.response.data.apierror.message!=="" ? error.response.data.apierror.message :  "Something went wrong, please try again";
-                    toast.error(errorMessage);
-                  }
-                  else{
-                    toast.error("Something went wrong. Please try again...");
-                  }
-              });
-    }
-    
+        setLoading(true);
+
+        axios
+            .get(
+                `${baseUrl}reporting/pharmacy/${objValues.organisationUnitId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    },
+                    responseType: "blob"
+                }
+            )
+            .then((response) => {
+                setLoading(false);
+
+                const blob = new Blob([response.data], {
+                    type:
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+
+                const fileName = `${objValues.organisationUnitName}_PHARMACY_${currentDate}.xlsx`;
+
+                FileSaver.saveAs(blob, fileName);
+
+                toast.success(
+                    "Pharmacy Report generated successfully"
+                );
+            })
+            .catch((error) => {
+                setLoading(false);
+
+                if (error.response?.data?.apierror?.message) {
+                    toast.error(
+                        error.response.data.apierror.message
+                    );
+                } else {
+                    toast.error(
+                        "Something went wrong while generating report."
+                    );
+                }
+            });
+    };
+
     return (
-        <>
-            
-            <Card >
-                <CardBody>
-    
-                <h2 style={{color:'#000'}}>PHARMACY REPORT</h2>
-                <br/>
-                    <>
-                        <div className="row">
-                        
-                            <div className="form-group  col-md-6">
-                                <FormGroup>
-                                    <Label>Facility*</Label>
-                                    <select
-                                        className="form-control"
-                                        name="organisationUnitId"
-                                        id="organisationUnitId"
-                                        value={objValues.organisationUnitId}
-                                        onChange={handleInputChange}
-                                        style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
-                                    >
-                                        <option value={""}></option>
-                                        {facilities.map((value) => (
-                                            <option key={value.id} value={value.organisationUnitId}>
-                                                {value.organisationUnitName}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    
-                                </FormGroup>
-                            </div>
+        <Card>
+            <CardBody>
 
-                            <br />
-                            <div className="row">
-                            <div className="form-group mb-3 col-md-6">
-                            <Button type="submit" content='Generate Report' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={handleSubmit} disabled={objValues.organisationUnitId === "" || loading} />
-                            </div>
-                            </div>
+                {/* HEADER */}
+                <Box mb={3}>
+                    <Typography
+                        variant="h5"
+                        style={{
+                            color: "#014D88",
+                            fontWeight: 600,
+                            display: "flex",
+                            alignItems: "center"
+                        }}
+                    >
+                        <LocalPharmacyIcon
+                            style={{
+                                marginRight: 10,
+                                color: "#014D88"
+                            }}
+                        />
+                        Pharmacy Report
+                    </Typography>
 
-                            {loading && (
-                                <Message icon>
-                                                  <Message.Content>
-                                                        <ProgressComponent/>
-                                                  </Message.Content>
-                                                </Message>
-                            )}
+                    <Typography
+                        variant="body2"
+                        color="textSecondary"
+                    >
+                        Generate pharmacy reports for a selected
+                        facility and export results to Excel.
+                    </Typography>
+                </Box>
+
+                {/* FORM */}
+                <Paper
+                    elevation={2}
+                    style={{
+                        padding: 24,
+                        borderRadius: 12,
+                        backgroundColor: "#FAFAFA"
+                    }}
+                >
+                    <div className="row">
+
+                        {/* FACILITY */}
+                        <div className="col-md-12 mb-4">
+                            <Typography
+                                variant="subtitle2"
+                                style={{
+                                    marginBottom: 8,
+                                    fontWeight: 600,
+                                    display: "flex",
+                                    alignItems: "center"
+                                }}
+                            >
+                                <BusinessIcon
+                                    fontSize="small"
+                                    style={{
+                                        marginRight: 8,
+                                        color: "#014D88"
+                                    }}
+                                />
+                                Facility
+                            </Typography>
+
+                            <Autocomplete
+                                options={facilities}
+                                getOptionLabel={(option) =>
+                                    option?.organisationUnitName || ""
+                                }
+                                value={
+                                    facilities.find(
+                                        (facility) =>
+                                            facility.organisationUnitId ===
+                                            objValues.organisationUnitId
+                                    ) || null
+                                }
+                                onChange={(event, value) => {
+                                    setObjValues({
+                                        ...objValues,
+                                        organisationUnitId:
+                                            value?.organisationUnitId || "",
+                                        organisationUnitName:
+                                            value?.organisationUnitName || ""
+                                    });
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        variant="outlined"
+                                        fullWidth
+                                        placeholder="Search and select facility..."
+                                        helperText="Select facility"
+                                    />
+                                )}
+                            />
                         </div>
-                    </>
 
-                </CardBody>
-            </Card>                                 
-        </>
+                        {/* SUBMIT */}
+                        <div className="col-md-12">
+                            <Button
+                                primary
+                                icon="download"
+                                labelPosition="left"
+                                content={
+                                    loading
+                                        ? "Generating..."
+                                        : "Generate Report"
+                                }
+                                style={{
+                                    backgroundColor: "#014D88"
+                                }}
+                                onClick={handleSubmit}
+                                disabled={
+                                    !objValues.organisationUnitId ||
+                                    loading
+                                }
+                            />
+                        </div>
+
+                    </div>
+                </Paper>
+
+                {/* LOADING */}
+                {loading && (
+                    <Message
+                        info
+                        icon
+                        style={{
+                            marginTop: 20,
+                            borderRadius: 10
+                        }}
+                    >
+                        <Message.Content>
+                            <ProgressComponent />
+                        </Message.Content>
+                    </Message>
+                )}
+
+            </CardBody>
+        </Card>
     );
 };
 
-export default PharmacyReport
+export default PharmacyReport;

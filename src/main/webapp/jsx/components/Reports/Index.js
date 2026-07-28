@@ -111,13 +111,13 @@ const Reports = props => {
   const reportBiometric = [
     { key: 'biometric', value: 'biometric', text: 'BIOMETRIC DATA' , permissionKey: 'report_biometric_data'},
   ];
-  const monthSummaryReport = [
-    { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary',
-      permissionKey: 'report_pmtct_msf'
-    },
+  // const monthSummaryReport = [
+  //   { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary',
+  //     permissionKey: 'report_pmtct_msf'
+  //   },
     // { key: 'HTS-MSF', value: 'HTS-MSF', text: 'HTS Monthly Summary', 
     //   permissionKey: 'report_pmtct_msf' }
-  ];
+  // ];
 
   const reportPrevention = [
     { key: 'prep-report', value: 'prep-report', text: 'PrEP Cross Sectional', permissionKey: 'report_prep_cross_sectional' },
@@ -134,9 +134,9 @@ const Reports = props => {
   ];
 
   const reportMsfs = [
-    { key: 'prep-msf', value: 'prep-msf', text: 'PrEP Monthly Summary Form', permissionKey: 'report_prep_monthly_summary_form' },
-    { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary', permissionKey: 'report_pmtct_msf' },
-    { key: 'hts-msf', value: 'hts-msf', text: 'HTS Monthly Summary', permissionKey: 'report_pmtct_msf' },
+    // { key: 'prep-msf', value: 'prep-msf', text: 'PrEP Monthly Summary Form', permissionKey: 'report_prep_monthly_summary_form' },
+    // { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary', permissionKey: 'report_pmtct_msf' },
+    { key: 'hts-msf', value: 'hts-msf', text: 'HTS Monthly Summary', permissionKey: 'report_pmtct_msf' }, //TODO: Consider creating a separate permission for HTS_MSF if needed.
   ];
 
   const reportOptions = [
@@ -231,7 +231,7 @@ const Reports = props => {
       ...reportPMTCT,
       ...reportPsychosocial,
       ...reportMsfs,
-      ...monthSummaryReport,
+      // ...monthSummaryReport,
     ];
     return allReports.some(option =>
         hasRole("RDE")  || hasRole("Super Admin")|| hasPermission(option.permissionKey)

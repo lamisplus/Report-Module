@@ -1,255 +1,384 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { FormGroup, Label, CardBody, Input } from 'reactstrap';
-import { makeStyles } from '@material-ui/core/styles';
-import { Card } from '@material-ui/core';
-import { token, url as baseUrl } from '../../../api';
-import 'react-phone-input-2/lib/style.css';
-import { Button } from 'semantic-ui-react';
-import { toast } from 'react-toastify';
-import FileSaver from 'file-saver';
-import { Message } from 'semantic-ui-react';
-import ProgressComponent from './ProgressComponent';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import FileSaver from "file-saver";
+import { toast } from "react-toastify";
 
-const useStyles = makeStyles(theme => ({
-  card: {
-    margin: theme.spacing(20),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(3),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-  cardBottom: {
-    marginBottom: 20,
-  },
-  Select: {
-    height: 45,
-    width: 300,
-  },
-  button: {
-    margin: theme.spacing(1),
-  },
-  root: {
-    flexGrow: 1,
-    maxWidth: 752,
-  },
-  demo: {
-    backgroundColor: theme.palette.background.default,
-  },
-  inline: {
-    display: 'inline',
-  },
-  error: {
-    color: '#f85032',
-    fontSize: '12.8px',
-  },
-}));
+import { CardBody } from "reactstrap";
 
-const PrepReport = props => {
-  let currentDate = new Date().toISOString().split('T')[0];
-  const classes = useStyles();
-  const [loading, setLoading] = useState(false);
-  const [facilities, setFacilities] = useState([]);
-  const [status, setStatus] = useState(true);
-  const [objValues, setObjValues] = useState({
-    organisationUnitId: '',
-    organisationUnitName: '',
-    startDate: '',
-    endDate: '',
-  });
-  useEffect(() => {
-    Facilities();
-  }, []);
-  const Facilities = () => {
-    axios
-      .get(`${baseUrl}account`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(response => {
-        setFacilities(response.data.applicationUserOrganisationUnits);
-      })
-      .catch(error => {});
-  };
+import {
+    Card,
+    Paper,
+    Box,
+    Typography,
+    TextField,
+    Switch,
+    FormControlLabel
+} from "@material-ui/core";
 
-  const handleInputChange = e => {
-    const selectedOption = e.target.options
-      ? e.target.options[e.target.selectedIndex]
-      : null;
-    const selectedValue = e.target.value;
-    const name = e.target.name;
+import Autocomplete from "@material-ui/lab/Autocomplete";
 
-    setObjValues(prevValues => ({
-      ...prevValues,
-      [name]: selectedValue,
-      organisationUnitName:
-        name === 'organisationUnitId' && selectedOption
-          ? selectedOption.innerText
-          : prevValues.organisationUnitName,
-    }));
-  };
+import BusinessIcon from "@material-ui/icons/Business";
+import DateRangeIcon from "@material-ui/icons/DateRange";
+import LocalHospitalIcon from "@material-ui/icons/LocalHospital";
 
-  const handleValueChange = () => {
-    setStatus(!status);
+import { Button, Message } from "semantic-ui-react";
 
-    if (status === true) {
-      setObjValues({
-        ...objValues,
-        startDate: '1980-01-01',
-        endDate: currentDate,
-      });
-    } else {
-      setObjValues({ ...objValues, startDate: '', endDate: currentDate });
-    }
-  };
+import { token, url as baseUrl } from "../../../api";
+import ProgressComponent from "./ProgressComponent";
 
-  const handleSubmit = e => {
-    e.preventDefault();
-    setLoading(true);
+const PrepReport = () => {
+    const currentDate = new Date().toISOString().split("T")[0];
 
-    axios
-      .post(
-        `${baseUrl}prep-reporting?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
-        objValues.organisationUnitId,
-        { headers: { Authorization: `Bearer ${token}` }, responseType: 'blob' }
-      )
-      .then(response => {
-        setLoading(false);
-        const fileName = `${objValues.organisationUnitName} PrEP Cross Sectional Report ${currentDate}`;
-        const responseData = response.data;
-        let blob = new Blob([responseData], {
-          type: 'application/octet-stream',
+    const [loading, setLoading] = useState(false);
+    const [facilities, setFacilities] = useState([]);
+    const [asAtToday, setAsAtToday] = useState(false);
+
+    const [objValues, setObjValues] = useState({
+        organisationUnitId: "",
+        organisationUnitName: "",
+        startDate: "",
+        endDate: ""
+    });
+
+    useEffect(() => {
+        loadFacilities();
+    }, []);
+
+    const loadFacilities = () => {
+        axios
+            .get(`${baseUrl}account`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            .then((response) => {
+                setFacilities(
+                    response.data.applicationUserOrganisationUnits || []
+                );
+            })
+            .catch(() => {
+                toast.error("Unable to load facilities");
+            });
+    };
+
+    const handleDateChange = (event) => {
+        setObjValues({
+            ...objValues,
+            [event.target.name]: event.target.value
         });
+    };
 
-        FileSaver.saveAs(blob, `${fileName}.xlsx`);
-        toast.success('PrEP Cross Sectional Report generated successfully');
-      })
-      .catch(error => {
-        setLoading(false);
-        if (error.response && error.response.data) {
-          let errorMessage =
-            error.response.data.apierror &&
-            error.response.data.apierror.message !== ''
-              ? error.response.data.apierror.message
-              : 'Something went wrong, please try again';
-          toast.error(errorMessage);
+    const handleAsAtToday = (event) => {
+        const checked = event.target.checked;
+
+        setAsAtToday(checked);
+
+        if (checked) {
+            setObjValues((prev) => ({
+                ...prev,
+                startDate: "1980-01-01",
+                endDate: currentDate
+            }));
         } else {
-          toast.error('Something went wrong. Please try again...');
+            setObjValues((prev) => ({
+                ...prev,
+                startDate: "",
+                endDate: ""
+            }));
         }
-      });
-  };
+    };
 
-  return (
-    <>
-      <Card>
-        <CardBody>
-          <h2 style={{ color: '#000' }}>PrEP Cross Sectional Report</h2>
-          <br />
-          <>
-            <div className="row">
-              <div className="form-group  col-md-6">
-                <FormGroup>
-                  <Label>From *</Label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    name="startDate"
-                    id="startDate"
-                    min={'1980-01-01'}
-                    max={currentDate}
-                    value={objValues.startDate}
-                    onChange={handleInputChange}
-                    style={{
-                      border: '1px solid #014D88',
-                      borderRadius: '0.2rem',
-                    }}
-                  />
-                </FormGroup>
-              </div>
-              <div className="form-group  col-md-6">
-                <FormGroup>
-                  <Label>To *</Label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    name="endDate"
-                    id="endDate"
-                    min={'1980-01-01'}
-                    max={currentDate}
-                    value={objValues.endDate}
-                    onChange={handleInputChange}
-                    style={{
-                      border: '1px solid #014D88',
-                      borderRadius: '0.2rem',
-                    }}
-                  />
-                </FormGroup>
-              </div>
-              <div className="form-group  col-md-6">
-                <FormGroup check>
-                  <Label check>
-                    <Input type="checkbox" onChange={handleValueChange} />{' '}
-                    &nbsp;&nbsp;<span> As at Today.</span>
-                  </Label>
-                </FormGroup>
-              </div>
-              <div className="form-group  col-md-6">
-                <FormGroup>
-                  <Label>Facility*</Label>
-                  <select
-                    className="form-control"
-                    name="organisationUnitId"
-                    id="organisationUnitId"
-                    value={objValues.organisationUnitId}
-                    onChange={handleInputChange}
-                    style={{
-                      border: '1px solid #014D88',
-                      borderRadius: '0.2rem',
-                    }}
-                  >
-                    <option value={''}></option>
-                    {facilities.map(value => (
-                      <option key={value.id} value={value.organisationUnitId}>
-                        {value.organisationUnitName}
-                      </option>
-                    ))}
-                  </select>
-                </FormGroup>
-              </div>
+    const handleSubmit = (e) => {
+        e.preventDefault();
 
-              <br />
-              <div className="row">
-                <div className="form-group mb-3 col-md-6">
-                  <Button
-                    type="submit"
-                    content="Generate Report"
-                    icon="right arrow"
-                    labelPosition="right"
-                    style={{ backgroundColor: '#014d88', color: '#fff' }}
-                    onClick={handleSubmit}
-                    disabled={objValues.organisationUnitId === '' || loading}
-                  />
-                </div>
-              </div>
+        setLoading(true);
 
-              {loading && (
-                <Message icon>
-                  <Message.Content>
-                    <ProgressComponent />
-                  </Message.Content>
-                </Message>
-              )}
-            </div>
-          </>
-        </CardBody>
-      </Card>
-    </>
-  );
+        axios
+            .post(
+                `${baseUrl}prep-reporting?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
+                objValues.organisationUnitId,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    },
+                    responseType: "blob"
+                }
+            )
+            .then((response) => {
+                setLoading(false);
+
+                const blob = new Blob([response.data], {
+                    type:
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+
+                const fileName = `${objValues.organisationUnitName}_PREP_CROSS_SECTIONAL_REPORT_${objValues.startDate}_${objValues.endDate}.xlsx`;
+
+                FileSaver.saveAs(blob, fileName);
+
+                toast.success(
+                    "PrEP Cross Sectional Report generated successfully"
+                );
+            })
+            .catch((error) => {
+                setLoading(false);
+
+                if (error.response?.data?.apierror?.message) {
+                    toast.error(
+                        error.response.data.apierror.message
+                    );
+                } else {
+                    toast.error(
+                        "Something went wrong while generating report."
+                    );
+                }
+            });
+    };
+
+    return (
+        <Card>
+            <CardBody>
+                <Box mb={3}>
+                    <Typography
+                        variant="h5"
+                        style={{
+                            color: "#014D88",
+                            fontWeight: 600,
+                            display: "flex",
+                            alignItems: "center"
+                        }}
+                    >
+                        <LocalHospitalIcon
+                            style={{
+                                marginRight: 10,
+                                color: "#014D88"
+                            }}
+                        />
+                        PrEP Cross Sectional Report
+                    </Typography>
+
+                    <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        style={{ marginTop: 5 }}
+                    >
+                        Generate PrEP cross-sectional reports using a selected
+                        facility and reporting period.
+                    </Typography>
+                </Box>
+
+                <Paper
+                    elevation={2}
+                    style={{
+                        padding: 24,
+                        borderRadius: 12,
+                        backgroundColor: "#FAFAFA"
+                    }}
+                >
+                    <div className="row">
+
+                        {/* From Date */}
+                        <div className="col-md-6 mb-4">
+                            <Typography
+                                variant="subtitle2"
+                                style={{
+                                    marginBottom: 8,
+                                    fontWeight: 600,
+                                    display: "flex",
+                                    alignItems: "center"
+                                }}
+                            >
+                                <DateRangeIcon
+                                    fontSize="small"
+                                    style={{
+                                        marginRight: 8,
+                                        color: "#014D88"
+                                    }}
+                                />
+                                From Date
+                            </Typography>
+
+                            <TextField
+                                type="date"
+                                fullWidth
+                                variant="outlined"
+                                name="startDate"
+                                value={objValues.startDate}
+                                onChange={handleDateChange}
+                                onKeyDown={(e) => e.preventDefault()}
+                                onPaste={(e) => e.preventDefault()}
+                                InputLabelProps={{
+                                    shrink: true
+                                }}
+                                inputProps={{
+                                    min: "1980-01-01",
+                                    max: currentDate
+                                }}
+                            />
+                        </div>
+
+                        {/* To Date */}
+                        <div className="col-md-6 mb-4">
+                            <Typography
+                                variant="subtitle2"
+                                style={{
+                                    marginBottom: 8,
+                                    fontWeight: 600,
+                                    display: "flex",
+                                    alignItems: "center"
+                                }}
+                            >
+                                <DateRangeIcon
+                                    fontSize="small"
+                                    style={{
+                                        marginRight: 8,
+                                        color: "#014D88"
+                                    }}
+                                />
+                                To Date
+                            </Typography>
+
+                            <TextField
+                                type="date"
+                                fullWidth
+                                variant="outlined"
+                                name="endDate"
+                                value={objValues.endDate}
+                                onChange={handleDateChange}
+                                onKeyDown={(e) => e.preventDefault()}
+                                onPaste={(e) => e.preventDefault()}
+                                InputLabelProps={{
+                                    shrink: true
+                                }}
+                                inputProps={{
+                                    min: "1980-01-01",
+                                    max: currentDate
+                                }}
+                            />
+                        </div>
+
+                        {/* As At Today */}
+                        <div className="col-md-12 mb-4">
+                            <Paper
+                                variant="outlined"
+                                style={{
+                                    padding: 15,
+                                    borderRadius: 10
+                                }}
+                            >
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={asAtToday}
+                                            onChange={
+                                                handleAsAtToday
+                                            }
+                                            color="primary"
+                                        />
+                                    }
+                                    label="Generate Report As At Today"
+                                />
+                            </Paper>
+                        </div>
+
+                        {/* Facility */}
+                        <div className="col-md-12 mb-4">
+                            <Typography
+                                variant="subtitle2"
+                                style={{
+                                    marginBottom: 8,
+                                    fontWeight: 600,
+                                    display: "flex",
+                                    alignItems: "center"
+                                }}
+                            >
+                                <BusinessIcon
+                                    fontSize="small"
+                                    style={{
+                                        marginRight: 8,
+                                        color: "#014D88"
+                                    }}
+                                />
+                                Facility
+                            </Typography>
+
+                            <Autocomplete
+                                options={facilities}
+                                getOptionLabel={(option) =>
+                                    option?.organisationUnitName || ""
+                                }
+                                value={
+                                    facilities.find(
+                                        (facility) =>
+                                            facility.organisationUnitId ===
+                                            objValues.organisationUnitId
+                                    ) || null
+                                }
+                                onChange={(event, value) => {
+                                    setObjValues({
+                                        ...objValues,
+                                        organisationUnitId:
+                                            value?.organisationUnitId || "",
+                                        organisationUnitName:
+                                            value?.organisationUnitName || ""
+                                    });
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        variant="outlined"
+                                        fullWidth
+                                        placeholder="Search and select facility..."
+                                        helperText="Select the facility for the report"
+                                    />
+                                )}
+                            />
+                        </div>
+
+                        {/* Generate Button */}
+                        <div className="col-md-12">
+                            <Button
+                                primary
+                                icon="download"
+                                labelPosition="left"
+                                content={
+                                    loading
+                                        ? "Generating..."
+                                        : "Generate Report"
+                                }
+                                style={{
+                                    backgroundColor: "#014D88"
+                                }}
+                                onClick={handleSubmit}
+                                disabled={
+                                    !objValues.organisationUnitId ||
+                                    !objValues.startDate ||
+                                    !objValues.endDate ||
+                                    loading
+                                }
+                            />
+                        </div>
+
+                    </div>
+                </Paper>
+
+                {loading && (
+                    <Message
+                        info
+                        icon
+                        style={{
+                            marginTop: 20,
+                            borderRadius: 10
+                        }}
+                    >
+                        <Message.Content>
+                            <ProgressComponent />
+                        </Message.Content>
+                    </Message>
+                )}
+            </CardBody>
+        </Card>
+    );
 };
 
 export default PrepReport;
