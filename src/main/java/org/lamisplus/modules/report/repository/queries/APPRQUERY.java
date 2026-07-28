@@ -115,7 +115,7 @@ public class APPRQUERY {
             "    WHERE  r.is_active AND r.verified\n" +
             "      AND  r.dateofcurrentviralload    BETWEEN p.eop_12m AND p.eop\n" +
             "      AND  r.dateofcurrentviralloadsample BETWEEN p.eop_12m AND p.eop\n" +
-            "      AND  (p.eop - r.artstartdate) >= 180\n" +
+            "      AND  (r.dateofcurrentviralloadsample - r.artstartdate) >= 180\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age\n" +
             "),\n" +
             "agg_pvls_n AS (\n" +
@@ -125,7 +125,7 @@ public class APPRQUERY {
             "    WHERE  r.is_active AND r.verified\n" +
             "      AND  r.dateofcurrentviralload    BETWEEN p.eop_12m AND p.eop\n" +
             "      AND  r.dateofcurrentviralloadsample BETWEEN p.eop_12m AND p.eop\n" +
-            "      AND  (p.eop - r.artstartdate) >= 180\n" +
+            "      AND  (r.dateofcurrentviralloadsample - r.artstartdate) >= 180\n" +
             "      AND  r.cleaned_currentviralload < 1000\n" +
             "      AND  r.cleaned_currentviralload IS NOT NULL\n" +
             "    GROUP  BY org_unit, attrib, period, gender, age\n" +
@@ -451,7 +451,7 @@ public class APPRQUERY {
             "    WHERE  r.is_active AND r.verified\n" +
             "      AND  r.dateofcurrentviralload    BETWEEN p.eop_12m AND p.eop\n" +
             "      AND  r.dateofcurrentviralloadsample BETWEEN p.eop_12m AND p.eop\n" +
-            "      AND  (p.eop - r.artstartdate) >= 180\n" +
+            "      AND  (r.dateofcurrentviralloadsample - r.artstartdate) >= 180\n" +
             "      AND  r.modeldevolveto IS NOT NULL AND r.modeldevolveto != ''\n" +
             "    GROUP  BY org_unit, attrib, period, r.modeldevolveto\n" +
             "),\n" +
@@ -462,7 +462,7 @@ public class APPRQUERY {
             "    WHERE  r.is_active AND r.verified\n" +
             "      AND  r.dateofcurrentviralload    BETWEEN p.eop_12m AND p.eop\n" +
             "      AND  r.dateofcurrentviralloadsample BETWEEN p.eop_12m AND p.eop\n" +
-            "      AND  (p.eop - r.artstartdate) >= 180\n" +
+            "      AND  (r.dateofcurrentviralloadsample - r.artstartdate) >= 180\n" +
             "      AND  r.cleaned_currentviralload < 1000\n" +
             "      AND  r.cleaned_currentviralload IS NOT NULL\n" +
             "      AND  r.modeldevolveto IS NOT NULL AND r.modeldevolveto != ''\n" +
