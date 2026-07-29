@@ -70,7 +70,7 @@ public class HTSReportQuery {
             "source, longitude, latitude, facility_id facilityId,\n" +
             "ROW_NUMBER() OVER (PARTITION BY patient_uuid ORDER BY date_of_visit DESC) rnk\n" +
             "FROM hts_encounter\n" +
-            "WHERE archived IS FALSE AND observation->>'finalHivTestResult' IS NOT NULL AND observation->>'finalHivTestResult' <> '' AND date_of_visit BETWEEN ?2 AND ?3 AND facility_id = ?1\n" +
+            "WHERE archived IS FALSE AND date_of_visit BETWEEN ?2 AND ?3 AND facility_id = ?1\n" +
             ") latestHts \n" +
             "LEFT JOIN base_application_codeset basEntry ON basEntry.code = latestHts.entryPoint\n" +
             "LEFT JOIN base_application_codeset baspreviouslyTestedNegative ON baspreviouslyTestedNegative.code = latestHts.previouslyTestedNegative\n" +
