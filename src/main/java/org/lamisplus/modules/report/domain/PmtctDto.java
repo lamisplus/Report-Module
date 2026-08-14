@@ -41,5 +41,6 @@ public interface PmtctDto {
 
         String getGonModalities();
         String getPepfarModalities();
+        String getRefferedFrom();
 
 }
