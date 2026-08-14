@@ -7,15 +7,15 @@ public class PMTCTReportQuery {
             "    patient_uuid,\n" +
             "    date,\n" +
             "    gravida,\n" +
-            "    parity\n" +
+            "    parity, refferedFrom\n" +
             "FROM (\n" +
-            "    SELECT patient_uuid, date_of_enrollment AS date, gravida, parity\n" +
+            "    SELECT patient_uuid, date_of_enrollment AS date, gravida, parity, referred_from_spokes_site AS refferedFrom\n" +
             "    FROM pmtct_anc\n" +
             "    WHERE archived IS FALSE AND facility_id = ?1 AND date_of_enrollment BETWEEN ?2 AND ?3\n" +
             "\n" +
             "    UNION ALL\n" +
             "\n" +
-            "    SELECT patient_uuid, pmtct_enrollment_date AS date, gravida, NULL AS parity\n" +
+            "    SELECT patient_uuid, pmtct_enrollment_date AS date, gravida, NULL AS parity, NULL AS refferedFrom\n" +
             "    FROM pmtct_enrollment\n" +
             "    WHERE archived IS FALSE AND facility_id = ?1 AND pmtct_enrollment_date BETWEEN ?2 AND ?3\n" +
             ") t\n" +
@@ -118,7 +118,7 @@ public class PMTCTReportQuery {
             "WHEN hts.entryPoint = 'HTS_ENTRY_POINT_COMMUNITY' AND hts.facilitySettingRaw = 'COMMUNITY_HTS_TEST_SETTING_SNS' THEN 'SNS'\n" +
             "WHEN hts.entryPoint = 'HTS_ENTRY_POINT_COMMUNITY' AND hts.facilitySettingRaw = 'COMMUNITY_HTS_TEST_SETTING_CT' THEN 'VCT'\n" +
             "WHEN hts.entryPoint = 'HTS_ENTRY_POINT_COMMUNITY' AND hts.facilitySettingRaw = 'COMMUNITY_HTS_TEST_SETTING_OUTREACH' THEN 'Mobile'\n" +
-            "END) AS TEXT) AS pepfarModalities\n" +
+            "END) AS TEXT) AS pepfarModalities, pr.refferedFrom\n" +
             "FROM pmtctRegister pr\n" +
             "LEFT JOIN htsTest hts ON hts.patient_uuid = pr.patient_uuid\n" +
             "INNER JOIN bio_data bio ON bio.personUuid = pr.patient_uuid";
