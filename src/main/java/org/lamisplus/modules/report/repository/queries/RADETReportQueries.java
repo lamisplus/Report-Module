@@ -353,15 +353,15 @@ public class RADETReportQueries {
             "(\n" +
             "CASE WHEN eacSession.status = 'SIXTH EAC' THEN 5\n" +
             "    WHEN eacSession.status = 'FIFTH EAC' THEN 4\n" +
-            "    WHEN eacSession.status = 'FOURTH EAC' THEN 3\n" +
+            "    WHEN (postEacVl.date_sample_collected IS NOT NULL AND postEacVl.date_sample_collected > firstEac.sessionDate) OR eacSession.status = 'FOURTH EAC' THEN 3\n" +
             "    WHEN eacSession.status = 'THIRD EAC' THEN 2\n" +
             "    WHEN eacSession.status = 'SECOND EAC' THEN 1\n" +
             "    WHEN eacSession.status = 'FIRST EAC' THEN 0\n" +
             "END) AS numberOfEACSessionCompleted,\n" +
             "(CASE WHEN eacSession.status = 'SIXTH EAC' THEN COALESCE(fifthEac.sessionDate, fourthEac.sessionDate, thirdEac.sessionDate, secondEac.sessionDate, firstEac.sessionDate)\n" +
             "    WHEN eacSession.status = 'FIFTH EAC' THEN COALESCE(fifthEac.sessionDate, fourthEac.sessionDate, thirdEac.sessionDate, secondEac.sessionDate, firstEac.sessionDate)\n" +
-            "    WHEN eacSession.status = 'FOURTH EAC' THEN COALESCE(fourthEac.sessionDate, thirdEac.sessionDate, secondEac.sessionDate, firstEac.sessionDate)\n" +
-            "    WHEN eacSession.status = 'THIRD EAC' THEN COALESCE(thirdEac.sessionDate, secondEac.sessionDate, firstEac.sessionDate)\n" +
+            "    WHEN eacSession.status = 'FOURTH EAC' THEN COALESCE(postEacVl.date_sample_collected, fourthEac.sessionDate, thirdEac.sessionDate, secondEac.sessionDate, firstEac.sessionDate)\n" +
+            "    WHEN eacSession.status = 'THIRD EAC' THEN COALESCE(postEacVl.date_sample_collected, thirdEac.sessionDate, secondEac.sessionDate, firstEac.sessionDate)\n" +
             "    WHEN eacSession.status = 'SECOND EAC' THEN  COALESCE(secondEac.sessionDate,firstEac.sessionDate)\n" +
             "    WHEN eacSession.status = 'FIRST EAC' THEN NULL END) AS dateOfLastEACSessionCompleted,\n" +
             "COALESCE (fifthEac.sessionDate,sixthEac.sessionDate) dateOfExtendEACCompletion,\n" +
@@ -371,7 +371,7 @@ public class RADETReportQueries {
             "FROM\n" +
             "hiv_eac enrolledEac\n" +
             "INNER JOIN (\n" +
-            "SELECT person_uuid, eac_id, eac_session_date, status, ROW_NUMBER() OVER (PARTITION BY eac_id, person_uuid ORDER BY eac_session_date DESC) eacRank,\n" +
+            "SELECT person_uuid, eac_id, eac_session_date, status, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY eac_session_date DESC, eac_id) eacRank,\n" +
             "COUNT(*) OVER (PARTITION BY eac_id, person_uuid) AS eacCount\n" +
             "FROM hiv_eac_session\n" +
             "WHERE archived = 0 AND eac_session_date BETWEEN ?2 AND ?3\n" +
@@ -566,8 +566,8 @@ public class RADETReportQueries {
             "FROM hiv_art_pharmacy h\n" +
             "INNER JOIN jsonb_array_elements(h.extra -> 'regimens') WITH ORDINALITY p(pharmacy_object) ON TRUE\n" +
             "INNER JOIN hiv_regimen hr ON hr.description = CAST(p.pharmacy_object ->> 'regimenName' AS VARCHAR)\n" +
-            "INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id  AND hrt.id IN (15, 9, 10) AND hrt.id NOT IN (1,2,3,4,14, 16)\n" +
-            "WHERE hrt.id IN (15, 9, 10) AND h.archived = 0 AND hr.description ILIKE '%Isoniazid%'\n" +
+            "INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id  AND hrt.id IN (15) AND hrt.id NOT IN (1,2,3,4,14, 16)\n" +
+            "WHERE hrt.id IN (15) AND h.archived = 0 AND hr.description ILIKE '%Isoniazid%'\n" +
             ") AS ic WHERE ic.rnk = 1 ),\n" +
             " cervical_cancer AS (select * from (select  ho.person_uuid AS person_uuid90, ho.date_of_observation AS dateOfCervicalCancerScreening,\n" +
             "ho.data ->> 'screenTreatmentMethodDate' AS treatmentMethodDate,cc_type.display AS cervicalCancerScreeningType,\n" +
