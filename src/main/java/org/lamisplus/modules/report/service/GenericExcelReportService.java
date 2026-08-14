@@ -106,6 +106,16 @@ public class GenericExcelReportService {
 
         List<ColumnDef> resolved = layoutResolver.flatten(layout);
 
+        // Every section shares the same physical column grid (1 row-label
+        // column + totalColumns-1 value columns), but a narrow section (e.g.
+        // 2 real columns) has far fewer logical fields than the widest one
+        // (e.g. 13). Rather than rendering those fields at native width and
+        // dumping the leftover width into one blank cell at the end, each
+        // logical column is stretched to span several physical columns so
+        // the section's own grid - and its "Total" column in particular -
+        // lines up with the widest section directly above/below it.
+        int[] spans = computeColumnSpans(resolved.size(), totalColumns - 1);
+
         Row titleRow = sheet.createRow(rowIndex++);
         titleRow.setHeightInPoints(18f);
         Cell titleCell = titleRow.createCell(0);
@@ -128,46 +138,44 @@ public class GenericExcelReportService {
         sheet.addMergedRegion(new CellRangeAddress(groupRowNum, subHeaderRowNum, 0, 0));
 
         int col = 1;
+        int leafIndex = 0;
         for (ColumnGroupDef group : layout.getColumnGroups()) {
             if (group.isUngroupedSingle()) {
                 ColumnDef c = group.getColumns().get(0);
+                int span = spans[leafIndex++];
                 Cell cell = groupRow.createCell(col);
                 cell.setCellValue(c.getHeader());
                 cell.setCellStyle(theme.getHeader());
                 subHeaderRow.createCell(col).setCellStyle(theme.getHeader());
-                sheet.addMergedRegion(new CellRangeAddress(groupRowNum, subHeaderRowNum, col, col));
-                col++;
+                for (int cc = col + 1; cc < col + span; cc++) {
+                    groupRow.createCell(cc).setCellStyle(theme.getHeader());
+                    subHeaderRow.createCell(cc).setCellStyle(theme.getHeader());
+                }
+                sheet.addMergedRegion(new CellRangeAddress(groupRowNum, subHeaderRowNum, col, col + span - 1));
+                col += span;
             } else {
                 int groupStart = col;
                 Cell groupCell = groupRow.createCell(col);
                 groupCell.setCellValue(group.getGroupLabel());
                 groupCell.setCellStyle(theme.getHeader());
                 for (ColumnDef c : group.getColumns()) {
+                    int span = spans[leafIndex++];
                     Cell subCell = subHeaderRow.createCell(col);
                     subCell.setCellValue(c.getHeader());
                     subCell.setCellStyle(theme.getHeader());
-                    col++;
+                    for (int cc = col + 1; cc < col + span; cc++) {
+                        subHeaderRow.createCell(cc).setCellStyle(theme.getHeader());
+                    }
+                    if (span > 1) {
+                        sheet.addMergedRegion(new CellRangeAddress(subHeaderRowNum, subHeaderRowNum, col, col + span - 1));
+                    }
+                    col += span;
                 }
                 for (int gc = groupStart + 1; gc < col; gc++) {
                     groupRow.createCell(gc).setCellStyle(theme.getHeader());
                 }
                 sheet.addMergedRegion(new CellRangeAddress(groupRowNum, groupRowNum, groupStart, col - 1));
             }
-        }
-
-        // pad this section's header bar out to the shared width, so a narrow
-        // section (e.g. 3 columns) still spans the same total length as the
-        // widest one in the report, instead of stopping short
-        if (col < totalColumns) {
-            Cell fillerGroup = groupRow.createCell(col);
-            fillerGroup.setCellStyle(theme.getHeader());
-            Cell fillerSub = subHeaderRow.createCell(col);
-            fillerSub.setCellStyle(theme.getHeader());
-            for (int c = col + 1; c < totalColumns; c++) {
-                groupRow.createCell(c).setCellStyle(theme.getHeader());
-                subHeaderRow.createCell(c).setCellStyle(theme.getHeader());
-            }
-            sheet.addMergedRegion(new CellRangeAddress(groupRowNum, subHeaderRowNum, col, totalColumns - 1));
         }
 
         int position = 0;
@@ -181,20 +189,51 @@ public class GenericExcelReportService {
             labelCell.setCellStyle(theme.labelStyle(position, isTotal));
 
             int c = 1;
-            for (ColumnDef column : resolved) {
-                writeValue(row, c++, dto, column.getKey(), theme, position, isTotal);
+            for (int i = 0; i < resolved.size(); i++) {
+                int span = spans[i];
+                writeValue(row, c, span, dto, resolved.get(i).getKey(), theme, position, isTotal, sheet);
+                c += span;
             }
         }
 
         return rowIndex;
     }
 
-    private void writeValue(Row row, int column, ReportRowDTO dto, String key,
-                            ExcelTheme theme, int position, boolean isTotal) {
+    /**
+     * Splits {@code availableWidth} physical columns across {@code columnCount}
+     * logical fields as evenly as possible (e.g. 15 physical columns / 9 fields
+     * -&gt; six 2-wide fields and three 1-wide fields), spreading any remainder
+     * across evenly-spaced fields rather than piling it onto the first few, so
+     * columns near the end of a row aren't visibly narrower than columns near
+     * the start.
+     */
+    private int[] computeColumnSpans(int columnCount, int availableWidth) {
+        int[] spans = new int[columnCount];
+        if (columnCount == 0) {
+            return spans;
+        }
+        int base = availableWidth / columnCount;
+        int remainder = availableWidth % columnCount;
+        java.util.Arrays.fill(spans, base);
+        for (int i = 0; i < remainder; i++) {
+            int idx = (int) ((long) i * columnCount / remainder);
+            spans[idx]++;
+        }
+        return spans;
+    }
+
+    private void writeValue(Row row, int column, int span, ReportRowDTO dto, String key,
+                            ExcelTheme theme, int position, boolean isTotal, Sheet sheet) {
         BigDecimal value = dto.getValues() == null ? null : dto.getValues().get(key);
         Cell cell = row.createCell(column);
         cell.setCellValue(value == null ? 0D : value.doubleValue());
         cell.setCellStyle(theme.valueStyle(position, isTotal));
+        for (int c = column + 1; c < column + span; c++) {
+            row.createCell(c).setCellStyle(theme.valueStyle(position, isTotal));
+        }
+        if (span > 1) {
+            sheet.addMergedRegion(new CellRangeAddress(row.getRowNum(), row.getRowNum(), column, column + span - 1));
+        }
     }
 
     private int widestSectionColumnCount(ReportProjectionDTO report) {
