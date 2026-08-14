@@ -14,6 +14,7 @@ import BusinessIcon from "@material-ui/icons/Business";
 import CalendarTodayIcon from "@material-ui/icons/CalendarToday";
 import PictureAsPdfIcon from "@material-ui/icons/PictureAsPdf";
 import DescriptionIcon from "@material-ui/icons/Description";
+import AssessmentIcon from "@material-ui/icons/Assessment";
 
 import { Button, Message } from "semantic-ui-react";
 
@@ -131,6 +132,13 @@ const HTS_MSF = () => {
                             color: "#014D88",
                         }}
                     >
+                        <AssessmentIcon
+                            style={{
+                                color: "#014D88",
+                                fontSize: 34,
+                                marginRight: 10,
+                            }}
+                        />
                         HTS Monthly Summary Form Report
                     </Typography>
 

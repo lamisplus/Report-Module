@@ -29,10 +29,10 @@ public class SectionLayoutRegistry {
 
     public SectionLayoutRegistry() {
         register("AGE_GROUP", ageGroupLayout());
-        register("RECENCY", recencyLayout());
+        register("RECENCY_RESULT", recencyLayout());
         register("ACUTE_HIV", acuteHivLayout());
         register("KEY_POPULATION", keyPopulationLayout());
-        register("INDEX", indexHivLayout());
+        register("INDEX_POSITIVE", indexHivLayout());
         register("INDEX_PARTNER", indexPartnerLayout());
         register("HIVST", hivstLayout());
         register("HIVST_RESULT", hivstReactiveLayout());
@@ -71,10 +71,10 @@ public class SectionLayoutRegistry {
                 .columnGroups(Arrays.asList(
                         group("In-patient", "inpatientM", "inpatientM"),
                         group("CT", "ctM", "ctF"),
-                        group("Out-patient", "outpatient_m", "outpatient_f"),
+                        group("Out-patient", "outM", "outF"),
                         group("Others", "othersM", "othersF"),
-                        single("Pregnant Women", "pregnantWomen"),
-                        group("Community Others", "communityM", "communityF"),
+                        single("Pregnant Women", "pregnantF"),
+                        group("Community Others", "commM", "commF"),
                         group("Total", "totalM", "totalF")
                 ))
                 .build();
@@ -86,10 +86,10 @@ public class SectionLayoutRegistry {
                 .columnGroups(Arrays.asList(
                         group("In-patient", "inpatientM", "inpatientM"),
                         group("CT", "ctM", "ctF"),
-                        group("Out-patient", "outpatient_m", "outpatient_f"),
+                        group("Out-patient", "outM", "outF"),
                         group("Others", "othersM", "othersF"),
-                        group("Pregnant Women", "pregnantWomen", "pregnantWomen"),
-                        group("Community Others", "communityM", "communityF"),
+                        single("Pregnant Women", "pregnantF"),
+                        group("Community Others", "commM", "commF"),
                         group("Total", "totalM", "totalF")
                 ))
                 .build();
@@ -97,10 +97,15 @@ public class SectionLayoutRegistry {
 
     private static SectionLayoutDef acuteHivLayout() {
         return SectionLayoutDef.builder()
-                .rowLabelHeader("Indicator")
+                .rowLabelHeader("Acute HIV Infection")
                 .columnGroups(Arrays.asList(
-                        single("Male", "total_m"),
-                        single("Female", "total_f")
+                        group("In-patient", "inpatientM", "inpatientM"),
+                        group("CT", "ctM", "ctF"),
+                        group("Out-patient", "outM", "outF"),
+                        group("Others", "othersM", "othersF"),
+                        single("Pregnant Women", "pregnantF"),
+                        group("Community Others", "commM", "commF"),
+                        group("Total", "totalM", "totalF")
                 ))
                 .build();
     }
@@ -123,8 +128,8 @@ public class SectionLayoutRegistry {
         return SectionLayoutDef.builder()
                 .rowLabelHeader("Indicator")
                 .columnGroups(Arrays.asList(
-                        single("Male", "total_m"),
-                        single("Female", "total_f")
+                        single("Male", "male"),
+                        single("Female", "female")
                 ))
                 .build();
     }
@@ -133,10 +138,10 @@ public class SectionLayoutRegistry {
         return SectionLayoutDef.builder()
                 .rowLabelHeader("Result")
                 .columnGroups(Arrays.asList(
-                        group("Biological", "pwid_m", "pwid_f"),
-                        group("Partner", "sex_worker_m", "sex_worker_f"),
-                        group("Social", "ppocs_m", "ppocs_f"),
-                        single("Total", "total")
+                        group("Biological", "maleBio", "femaleBio"),
+                        group("Partner", "malePartner", "femalePartner"),
+                        group("Social", "maleSocial", "femaleSocial"),
+                        single("Total", "totalIndex")
                 ))
                 .build();
     }
@@ -145,11 +150,11 @@ public class SectionLayoutRegistry {
         return SectionLayoutDef.builder()
                 .rowLabelHeader("Entry Point")
                 .columnGroups(Arrays.asList(
-                        group("Self", "pwid_m", "pwid_f"),
-                        group(" Partner", "sex_worker_m", "sex_worker_f"),
-                        group("Caregiver", "ppocs_m", "ppocs_f"),
-                        group("Social Network", "ppocs_m", "ppocs_f"),
-                        single("Total", "total")
+                        group("Self", "maleSelf", "femaleSelf"),
+                        group(" Partner", "malePartner", "femalePartner"),
+                        group("Caregiver", "maleCaregiver", "femaleCaregiver"),
+                        group("Social Network", "maleSocial", "femaleSocial"),
+                        single("Total", "totalHivst")
                 ))
                 .build();
     }
@@ -158,18 +163,20 @@ public class SectionLayoutRegistry {
         return SectionLayoutDef.builder()
                 .rowLabelHeader("Indicator")
                 .columnGroups(Arrays.asList(
-                        single("<15", "total_m"),
-                        single("15+", "total_f")
+                        single("<15", "hivstLess"),
+                        single("15+", "hivstGreater"),
+                        single("Total", "totalHivSt")
                 ))
                 .build();
     }
 
     private static SectionLayoutDef hivstResultLayout() {
         return SectionLayoutDef.builder()
-                .rowLabelHeader("Indicator")
+                .rowLabelHeader("Result Indicator")
                 .columnGroups(Arrays.asList(
-                        single("<15", "total_m"),
-                        single("15+", "total_f")
+                        single("<15", "less15"),
+                        single("15+", "gt15"),
+                        single("Total", "total")
                 ))
                 .build();
     }

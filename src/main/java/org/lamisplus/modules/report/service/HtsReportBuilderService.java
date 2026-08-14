@@ -51,16 +51,16 @@ public class HtsReportBuilderService {
                     "AGE_GROUP", "RESULTS_BY_AGE", "Positive"),
             new SectionSpec(
                     "Number of newly diagnosed HIV-positive persons with Acute HIV Infection",
-                    "ACUTE_HIV", "ACUTE_HIV", null),
+                    "ACUTE_HIV", "ACUTE_HIV", "Suspected Acute Infection"),
             new SectionSpec(
                     "Number of newly diagnosed HIV-positive persons tested for recency",
-                    "RECENCY", "RECENCY", null),
+                    "RECENCY_RESULT", "RECENCY_RESULT", null),
             new SectionSpec(
                     "Number of persons at high risk of HIV infection who were tested for HIV and received their results",
                     "KEY_POPULATION", "KEY_POPULATION", null),
             new SectionSpec(
                     "Number of HIV-positive clients offered and accepted index testing",
-                    "INDEX", "INDEX", null),
+                    "INDEX_POSITIVE", "INDEX_POSITIVE", null),
             new SectionSpec(
                     "Number of elicited contacts of index clients who received HTS and received their test results",
                     "INDEX_PARTNER", "INDEX_PARTNER", null),
