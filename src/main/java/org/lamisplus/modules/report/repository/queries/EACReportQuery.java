@@ -5,9 +5,9 @@ public class EACReportQuery {
     public static final String EAC_REPORT_QUERY = "with eac_clients as ( \n" +
             "     WITH bio_data AS ( \n" +
             "    SELECT \n" +
-            "        facility_lga.name AS lga, facility_state.name AS state, p.uuid as patientId, p.hospital_number as hospitalNumber, h.unique_id as uniqueId, \n" +
+            "        facility_lga.name AS lga, facility_state.name AS state, p.uuid as patientId, p.hospital_number as hospitalNumber, h.uniqueId as uniqueId, \n" +
             "        EXTRACT(YEAR FROM AGE(?3, p.date_of_birth)) AS age, INITCAP(p.sex) AS sex, p.date_of_birth as dateOfBirth, boo.lgaOfResidence as lgaOfResidence, \n" +
-            "        facility.name AS facilityName, boui.code AS datimId, hac.visit_date AS artStartDate, hr.description AS regimenAtArtStart, p.date_of_registration\n" +
+            "        facility.name AS facilityName, boui.code AS datimId, h.artStartDate AS artStartDate, h.regimenLineAtStart AS regimenAtArtStart, p.date_of_registration\n" +
             "    FROM \n" +
             "        patient_person p \n" +
             "    INNER JOIN \n" +
@@ -18,48 +18,46 @@ public class EACReportQuery {
             "        base_organisation_unit facility_state ON facility_state.id = facility_lga.parent_organisation_unit_id \n" +
             "    INNER JOIN \n" +
             "        base_organisation_unit_identifier boui ON boui.organisation_unit_id = p.facility_id AND boui.name='DATIM_ID' \n" +
-            "    INNER JOIN \n" +
-            "        hiv_enrollment h ON h.person_uuid = p.uuid \n" +
-            "    LEFT JOIN \n" +
-            "        base_application_codeset tgroup ON tgroup.id = h.target_group_id \n" +
-            "    LEFT JOIN \n" +
-            "        base_application_codeset eSetting ON eSetting.id = h.enrollment_setting_id \n" +
-            "    LEFT JOIN \n" +
-            "        hiv_art_clinical hac ON hac.hiv_enrollment_uuid = h.uuid \n" +
-            "           AND hac.archived = 0 \n" +
-            "           AND hac.is_commencement = TRUE \n" +
-            "           AND hac.visit_date >= ?2 \n" +
-            "           AND hac.visit_date < ?3\n" +
-            "    LEFT JOIN \n" +
-            "        hiv_regimen hr ON hr.id = hac.regimen_id \n" +
+            "    INNER JOIN (SELECT person_uuid personUuid101, unique_id uniqueId, date_art_started artStartDate, dateEnrolled, hrt.description regimenLineAtStart, hr.description regimenAtStart, ecareEntry.display careEntry, eSetting.display enrollmentSetting, ovc_unique_id ovcNumber, household_unique_number householdNumber FROM (\n" +
+            "            SELECT person_uuid, unique_id, date_art_started, date_enrolled_in_hiv_care dateEnrolled, visit_date, regimen_line_id, regimen_id, care_entry_point_id, enrollment_setting, ovc_data->>'ovc_unique_id' ovc_unique_id, ovc_data->>'household_unique_number' household_unique_number,\n" +
+            "            ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER by visit_date DESC) rnkk\n" +
+            "            FROM hiv_enrollment_commencement\n" +
+            "            WHERE archived = 0 AND visit_date BETWEEN ?2 AND ?3 AND facility_id = ?1 \n" +
+            "AND CAST(regimen_line_id AS INTEGER) IN (1,2,3,4,14, 16) \n" +
+            ") sub \n" +
+            "LEFT JOIN base_application_codeset eSetting ON eSetting.code = sub.enrollment_setting\n" +
+            "            LEFT JOIN base_application_codeset ecareEntry ON ecareEntry.code = sub.care_entry_point_id\n" +
+            "            INNER JOIN hiv_regimen hr ON hr.id = sub.regimen_id\n" +
+            "            INNER JOIN hiv_regimen_type hrt ON hrt.id = sub.regimen_line_id AND sub.regimen_line_id IN (1,2,3,4,14, 16)\n" +
+            "WHERE rnkk = 1) h ON h.personUuid101 = p.uuid \n" +
             "LEFT JOIN (\n" +
             "select DISTINCT ON (personUuid) personUuid as personUuid11, \n" +
-            "            case when (addr ~ '^[0-9\\\\\\.]+$') =TRUE \n" +
+            "            case when (addr ~ '^[0-9\\\\\\\\.]+$') =TRUE \n" +
             "             then (select name from base_organisation_unit where id = cast(addr as int)) ELSE\n" +
             "            (select name from base_organisation_unit where id = cast(facilityLga as int)) end as lgaOfResidence \n" +
             "            from (\n" +
             "             select pp.uuid AS personUuid, facility_lga.parent_organisation_unit_id AS facilityLga, (jsonb_array_elements(pp.address->'address')->>'district') as addr from patient_person pp\n" +
             "            LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id = CAST (pp.organization->'id' AS INTEGER) \n" +
             "            ) dt \n" +
-            "   ) boo ON boo.personUuid11 = p.uuid\n"+
+            "   ) boo ON boo.personUuid11 = p.uuid\n" +
             "    WHERE \n" +
             "        p.archived = 0 \n" +
             "        AND p.facility_id = ?1 \n" +
             "    ) \n" +
             "    SELECT bd.*, \n" +
-            "\teac.dateOfCommencementOfFirstEAC, eac.dateOfCommencementOfSecondEAC, eac.dateOfCommencementOfThirdEAC, eac.dateOfCommencementOfFourthEAC, eac.dateOfCommencementOfFifthEAC, eac.dateOfCommencementOfSixthEAC,\n" +
-            "\teac.numberOfEACSessionsCompleted, eac.dateOfRepeatViralLoadPostEACSampleCollected, eac.repeatViralLoadResultPostEAC, eac.dateOfRepeatViralLoadResultPostEACVL\n" +
-            "\tFROM bio_data bd \n" +
-            "\tJOIN (SELECT * FROM (\n" +
+            "eac.dateOfCommencementOfFirstEAC, eac.dateOfCommencementOfSecondEAC, eac.dateOfCommencementOfThirdEAC, eac.dateOfCommencementOfFourthEAC, eac.dateOfCommencementOfFifthEAC, eac.dateOfCommencementOfSixthEAC,\n" +
+            "eac.numberOfEACSessionsCompleted, eac.dateOfRepeatViralLoadPostEACSampleCollected, eac.repeatViralLoadResultPostEAC, eac.dateOfRepeatViralLoadResultPostEACVL\n" +
+            "FROM bio_data bd \n" +
+            "JOIN (SELECT * FROM (\n" +
             "SELECT enrolledEac.facility_id, enrolledEac.person_uuid personUuid50, enrolledEac.uuid,\n" +
             "firstEac.sessionDate dateOfCommencementOfFirstEAC, secondEac.sessionDate dateOfCommencementOfSecondEAC, thirdEac.sessionDate dateOfCommencementOfThirdEAC, fourthEac.sessionDate dateOfCommencementOfFourthEAC, fifthEac.sessionDate dateOfCommencementOfFifthEAC, sixthEac.sessionDate dateOfCommencementOfSixthEAC,\n" +
             "(\n" +
             "CASE WHEN eacSession.status = 'FIRST EAC' THEN  0\n" +
             "WHEN eacSession.status = 'SECOND EAC' THEN 1\n" +
             "WHEN eacSession.status = 'THIRD EAC' THEN 2\n" +
-            "WHEN eacSession.status = 'FOURTH EAC' THEN 3\n" +
+            "WHEN postEacVl.date_sample_collected IS NOT NULL OR eacSession.status = 'FOURTH EAC' THEN 3\n" +
             "WHEN eacSession.status = 'FIFTH EAC' THEN 4\n" +
-            "WHEN eacSession.status = 'SIXTH EAC' THEN 5\n" +
+            " \n" +
             "END\n" +
             ") numberOfEACSessionsCompleted, COALESCE (fifthEac.sessionDate,sixthEac.sessionDate) dateOfExtendEACCompletion, postEacVl.date_sample_collected,\n" +
             "(CASE WHEN postEacVl.date_sample_collected >= thirdEac.sessionDate THEN postEacVl.date_sample_collected END) dateOfRepeatViralLoadPostEACSampleCollected, (CASE WHEN postEacVl.date_sample_collected >= thirdEac.sessionDate THEN postEacVl.result_reported END) repeatViralLoadResultPostEAC, \n" +
@@ -67,7 +65,7 @@ public class EACReportQuery {
             "FROM \n" +
             "hiv_eac enrolledEac\n" +
             "INNER JOIN (\n" +
-            "SELECT person_uuid, eac_id, eac_session_date, status, ROW_NUMBER() OVER (PARTITION BY eac_id, person_uuid ORDER BY eac_session_date DESC) eacRank\n" +
+            "SELECT person_uuid, eac_id, eac_session_date, status, ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER BY eac_session_date DESC, eac_id) eacRank\n" +
             "FROM hiv_eac_session\n" +
             "WHERE archived = 0 AND status IS NOT NULL AND eac_session_date BETWEEN ?2 AND ?3\n" +
             ") eacSession ON eacSession.eac_id = enrolledEac.uuid AND eacSession.eacRank = 1\n" +
@@ -90,7 +88,7 @@ public class EACReportQuery {
             "SELECT person_uuid, eac_id, eac_session_date sessionDate, status FROM hiv_eac_session WHERE archived = 0 AND status = 'SIXTH EAC'\n" +
             ") sixthEac ON sixthEac.eac_id = eacSession.eac_id\n" +
             "LEFT JOIN (select * from(\n" +
-            " SELECT CAST(ls.date_sample_collected AS DATE ) AS date_sample_collected, ls.patient_uuid as patient_uuid , ls.facility_id as vlFacility, ls.archived as vlArchived, acode.display as viralLoadIndication, \n" +
+            "SELECT CAST(ls.date_sample_collected AS DATE ) AS date_sample_collected, ls.patient_uuid as patient_uuid , ls.facility_id as vlFacility, ls.archived as vlArchived, acode.display as viralLoadIndication, \n" +
             "  sm.result_reported as result_reported, CAST(sm.date_result_reported AS DATE) as date_result_reported,\n" +
             "ROW_NUMBER () OVER (PARTITION BY ls.patient_uuid ORDER BY ls.date_sample_collected DESC) as row\n" +
             "FROM public.laboratory_sample  ls\n" +

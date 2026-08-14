@@ -295,7 +295,12 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfSecondEACSession())));
 
 				map.put(index++, eacReportProjection.getDateOfCommencementOfThirdEAC());
-				map.put(index++, eacReportProjection.getDateOfCommencementOfFourthEAC());
+//				map.put(index++, eacReportProjection.getDateOfCommencementOfFourthEAC());
+                map.put(index++,
+                        eacReportProjection.getDateOfRepeatViralLoadPostEACSampleCollected() != null
+                                ? eacReportProjection.getDateOfRepeatViralLoadPostEACSampleCollected()
+                                : eacReportProjection.getDateOfCommencementOfFourthEAC()
+                );
 				map.put(index++, getStringValue(String.valueOf(eacReportProjection.getMethodOfThirdEACSession())));
 
 				map.put(index++, eacReportProjection.getDateOfCommencementOfFourthEAC());
@@ -864,6 +869,7 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getMaritalStatus())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getSetting())));
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getFacilitySetting())));
+					map.put(index++, getStringValue(String.valueOf(pmtctDto.getRefferedFrom())));
 					map.put(index++, reportType.equals("GoN")  ? getStringValue(String.valueOf(pmtctDto.getGonModalities())) : getStringValue(String.valueOf(pmtctDto.getPepfarModalities())));
 					map.put(index++, pmtctDto.getDate());
 					map.put(index++, getStringValue(String.valueOf(pmtctDto.getGravida())));
