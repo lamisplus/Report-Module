@@ -23,14 +23,15 @@ public class RADETReportQueries {
             "WHERE p.facility_id = ?1 AND p.archived = 0\n" +
             "),\n" +
             "hivEnrollment AS (\n" +
-            "SELECT person_uuid personUuid101, unique_id uniqueId, date_art_started artStartDate, dateEnrolled, hrt.description regimenLineAtStart, hr.description regimenAtStart, ecareEntry.display careEntry, eSetting.display enrollmentSetting, ovc_unique_id ovcNumber, household_unique_number householdNumber FROM (\n" +
-            "SELECT person_uuid, unique_id, date_art_started, date_enrolled_in_hiv_care dateEnrolled, visit_date, regimen_line_id, regimen_id, care_entry_point_id, enrollment_setting, ovc_data->>'ovc_unique_id' ovc_unique_id, ovc_data->>'household_unique_number' household_unique_number,\n" +
+            "SELECT person_uuid personUuid101, unique_id uniqueId, date_art_started artStartDate, dateEnrolled, hrt.description regimenLineAtStart, hr.description regimenAtStart, ecareEntry.display careEntry, eSetting.display enrollmentSetting, ovc_unique_id ovcNumber, household_unique_number householdNumber, hrInh.description tpt_medication, tpt_dose, tpt_start_date, tpt_completed, tpt_completion_date, cd_4 FROM (\n" +
+            "SELECT person_uuid, unique_id, date_art_started, date_enrolled_in_hiv_care dateEnrolled, visit_date, regimen_line_id, regimen_id, care_entry_point_id, enrollment_setting, ovc_data->>'ovc_unique_id' ovc_unique_id, ovc_data->>'household_unique_number' household_unique_number, tpt_medication, tpt_dose, tpt_start_date, tpt_completed, tpt_completion_date,COALESCE(cd4_at_art_start, cd4_percentage) AS cd_4,\n" +
             "ROW_NUMBER() OVER (PARTITION BY person_uuid ORDER by visit_date DESC) rnkk\n" +
             "FROM hiv_enrollment_commencement\n" +
             "WHERE archived = 0 AND visit_date BETWEEN ?2 AND ?3 AND facility_id = ?1 AND CAST(regimen_line_id AS INTEGER) IN (1,2,3,4,14, 16)\n" +
             ") sub \n" +
             "LEFT JOIN base_application_codeset eSetting ON eSetting.code = sub.enrollment_setting\n" +
             "LEFT JOIN base_application_codeset ecareEntry ON ecareEntry.code = sub.care_entry_point_id\n" +
+            "LEFT JOIN hiv_regimen hrInh ON hrInh.id = sub.tpt_medication\n" +
             "INNER JOIN hiv_regimen hr ON hr.id = sub.regimen_id\n" +
             "INNER JOIN hiv_regimen_type hrt ON hrt.id = sub.regimen_line_id AND sub.regimen_line_id IN (1,2,3,4,14, 16)\n" +
             "WHERE rnkk = 1\n" +
@@ -189,14 +190,6 @@ public class RADETReportQueries {
             "WHERE vl_result.rank2 = 1 AND vl_result.dateOfCurrentViralLoad <= ?3\n" +
             "AND (vl_result.vlArchived = 0 OR vl_result.vlArchived is null)\n" +
             "AND  vl_result.vlFacility = ?1\n" +
-            "),\n" +
-            "careCardCD4 AS (SELECT visit_date, coalesce(cast(cd_4 as varchar), cd4_semi_quantitative) as cd_4, person_uuid AS cccd4_person_uuid\n" +
-            "  FROM public.hiv_art_clinical\n" +
-            "  WHERE is_commencement is true\n" +
-            "AND  archived = 0\n" +
-            "AND  cd_4 != 0\n" +
-            "AND visit_date <= ?3\n" +
-            "AND facility_id = ?1\n" +
             "),\n" +
             "labCD4 AS (SELECT * FROM (\n" +
             "SELECT sm.patient_uuid AS cd4_person_uuid,  sm.result_reported as cd4Lb,sm.date_result_reported as dateOfCD4Lb, ROW_NUMBER () OVER (PARTITION BY sm.patient_uuid ORDER BY date_result_reported DESC) as rnk\n" +
@@ -835,10 +828,10 @@ public class RADETReportQueries {
             "e.*,\n" +
             "ca.dateOfCurrentRegimen,\n" +
             "ca.person_uuid70,\n" +
-            "iptStart.dateOfIptStart AS dateOfIptStart,\n" +
-            "COALESCE(CAST (iptN.tptCompletionDate AS DATE), ipt.iptCompletionDate) AS iptCompletionDate,\n" +
+            "COALESCE(enroll.tpt_start_date, iptStart.dateOfIptStart) AS dateOfIptStart,\n" +
+            "COALESCE(enroll.tpt_completion_date, CAST(iptN.tptCompletionDate AS DATE), ipt.iptCompletionDate) AS iptCompletionDate,\n" +
             "(CASE WHEN COALESCE(iptN.tptCompletionStatus, ipt.iptCompletionStatus) = 'IPT Completed' THEN 'Treatment completed' ELSE COALESCE(iptN.tptCompletionStatus, ipt.iptCompletionStatus) END) AS iptCompletionStatus,\n" +
-            "iptStart.iptType AS iptType, iptN.eligibilityTpt,\n" +
+            "COALESCE(enroll.tpt_medication, iptStart.iptType) AS iptType, iptN.eligibilityTpt,\n" +
             "cc.*,\n" +
             "dsd1.*, dsd2.*,  \n" +
             "(CASE WHEN COALESCE(tbTmentNew.tbTreatmentType, tbTment.tbTreatementType) IN ('New', 'Relapse', 'Relapsed') THEN 'New/Relapse' ELSE COALESCE(tbTmentNew.tbTreatmentType, tbTment.tbTreatementType) END)  AS tbTreatementType, tbTmentNew.cadScore,\n" +
@@ -888,9 +881,7 @@ public class RADETReportQueries {
             "CASE WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%out%' OR pre.status ILIKE '%stop%') THEN pre.status_date ELSE ct.status_date END\n" +
             "WHEN ct.status ILIKE '%stop%' THEN\n" +
             "CASE\n" +
-            "WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%out%' OR pre.status ILIKE '%IIT%') THEN pre.status_date\n" +
-            "ELSE ct.status_date\n" +
-            "END\n" +
+            "WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%out%' OR pre.status ILIKE '%IIT%') THEN ct.status_date ELSE pre.status_date END\n" +
             "WHEN ct.status ILIKE '%out%' THEN\n" +
             "CASE WHEN (pre.status ILIKE '%DEATH%' OR pre.status ILIKE '%stop%' OR pre.status ILIKE '%IIT%') THEN pre.status_date\n" +
             "ELSE ct.status_date END\n" +
@@ -979,10 +970,10 @@ public class RADETReportQueries {
             "AND CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 < ?3 AND ct.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' AND prepre.status ILIKE '%ACTIVE%' THEN\n" +
             "CAST(scd.dateofviralloadsamplecollection AS DATE) + 91 ELSE NULL END) AS dateOfVlEligibilityStatus,\n" +
             "(CASE WHEN cd.cd4lb IS NOT NULL THEN  cd.cd4lb\n" +
-            "WHEN  ccd.cd_4 IS NOT NULL THEN CAST(ccd.cd_4 as VARCHAR)\n" +
+            "WHEN  enroll.cd_4 IS NOT NULL THEN CAST(enroll.cd_4 as VARCHAR)\n" +
             "ELSE NULL END) as lastCd4Count,\n" +
-            "(CASE WHEN cd.dateOfCd4Lb IS NOT NULL THEN  CAST(cd.dateOfCd4Lb as DATE)\n" +
-            "WHEN ccd.visit_date IS NOT NULL THEN CAST(ccd.visit_date as DATE)\n" +
+            "(CASE WHEN cd.dateOfCd4Lb IS NOT NULL AND cd.cd4lb IS NOT NULL THEN  CAST(cd.dateOfCd4Lb as DATE)\n" +
+            "WHEN enroll.artStartDate IS NOT NULL AND enroll.cd_4 IS NOT NULL THEN CAST(enroll.artStartDate as DATE)\n" +
             "ELSE NULL END) as dateOfLastCd4Count,\n" +
             "INITCAP(cm.caseManager) AS caseManager\n" +
             "FROM bio_data bd\n" +
@@ -993,7 +984,6 @@ public class RADETReportQueries {
             " LEFT JOIN sample_collection_date scd ON scd.person_uuid120 = bd.personUuid\n" +
             " LEFT JOIN current_vl_result  cvlr ON cvlr.person_uuid130 = bd.personUuid\n" +
             " LEFT JOIN  labCD4 cd on cd.cd4_person_uuid = bd.personUuid\n" +
-            " LEFT JOIN  careCardCD4 ccd on ccd.cccd4_person_uuid = bd.personUuid\n" +
             " LEFT JOIN eac e ON e.person_uuid50 = bd.personUuid\n" +
             " LEFT JOIN biometric b ON b.person_uuid60 = bd.personUuid\n" +
             " LEFT JOIN current_regimen  ca ON ca.person_uuid70 = bd.personUuid\n" +
