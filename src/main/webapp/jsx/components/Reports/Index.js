@@ -44,6 +44,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Divider from '@mui/material/Divider';
 import PrEPMSF from './PrEPMSF';
 import HTS_MSF from './HTS_MSF';
+import ARTMonthlySummaryReport from './ARTMonthlySummaryReport';
 import TbReportLongitudinal from './TbReportLongitudinal';
 import { useRoles } from "../../../hooks/useRoles";
 import { usePermissions } from "../../../hooks/usePermissions";
@@ -134,9 +135,10 @@ const Reports = props => {
   ];
 
   const reportMsfs = [
-    // { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary', permissionKey: 'report_pmtct_msf' },
-    { key: 'hts-msf', value: 'hts-msf', text: 'HTS Monthly Summary', permissionKey: 'report_pmtct_msf' }, //TODO: Consider creating a separate permission for HTS_MSF if needed.
-    { key: 'prep-msf', value: 'prep-msf', text: 'PrEP Monthly Summary Form', permissionKey: 'report_prep_monthly_summary_form' },
+    { key: 'hts-msf', value: 'hts-msf', text: 'HTS Monthly Summary', permissionKey: 'report_hts_msf' }, //TODO: Consider creating a separate permission for HTS_MSF if needed.
+    { key: 'prep-msf', value: 'prep-msf', text: 'PrEP Monthly Summary', permissionKey: 'report_prep_monthly_summary_form' },
+    { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary', permissionKey: 'report_pmtct_msf' },
+    { key: 'ART-MSF', value: 'ART-MSF', text: 'ART Monthly Summary', permissionKey: 'report_art_msf' },
 
   ];
 
@@ -146,7 +148,7 @@ const Reports = props => {
     { key: 'line-list', value: 'line-list', text: 'PATIENT LINE LIST', permissionKey: 'report_patient_line_list' },
     { key: 'pharmacy-report', value: 'pharmacy-report', text: 'PHARMACY DATA', permissionKey: 'report_pharmacy_data' },
     { key: 'laboratory-report', value: 'laboratory-report', text: 'LABORATORY DATA', permissionKey: 'report_laboratory_data' },
-    { key: 'clinic-data-report', value: 'clinic-data-report', text: 'CLINIC DATA REPORT', permissionKey: 'report_clinic_data_report' },
+    // { key: 'clinic-data-report', value: 'clinic-data-report', text: 'CLINIC DATA REPORT', permissionKey: 'report_clinic_data_report' },
     { key: 'client-verification', value: 'client-verification', text: 'CLIENT VERIFICATION', permissionKey: 'report_client_verification' },
     { key: 'tb-report-longitudinal', value: 'tb-report-longitudinal', text: 'TB LONGITUDINAL REPORT', permissionKey: 'report_tb_longitudinal' },
     { key: 'ncd-report', value: 'ncd-report', text: 'NCD Report', permissionKey: 'report_ncd_report' },
@@ -184,6 +186,7 @@ const Reports = props => {
         canViewPrepMSF: true,
         canViewHTS_MSF: true,
         canViewPMTCTMSF: true,
+        canViewARTMSF: true,
         canViewBiometricData: true,
         canViewMHPSSReport: true,
       };
@@ -217,7 +220,8 @@ const Reports = props => {
       canViewPrepLongitudinal: hasPermission("report_prep_longitudinal"),
       canViewPrepMSF: hasPermission("report_prep_monthly_summary_form"),
       canViewPMTCTMSF: hasPermission("report_pmtct_msf"),
-      canViewHTS_MSF: hasPermission("report_pmtct_msf"), //TODO: Consider creating a separate permission for HTS_MSF if needed.
+      canViewARTMSF: hasPermission("report_pmtct_msf"),
+      canViewHTS_MSF: hasPermission("report_hts_msf"), //TODO: Consider creating a separate permission for HTS_MSF if needed.
       canViewBiometricData: hasPermission("report_biometric_data"),
       canViewMHPSSReport: hasPermission("report_mhpss_report"),
     };
@@ -497,6 +501,14 @@ const Reports = props => {
       case 'PMTCT-MSF':
         return (
           <PMTCTMonthlySummaryReport
+            handleItemClick={handleItemClick1}
+            setCompleted={setCompleted}
+            completed={completed}
+          />
+        );
+        case 'ART-MSF':
+        return (
+          <ARTMonthlySummaryReport
             handleItemClick={handleItemClick1}
             setCompleted={setCompleted}
             completed={completed}
