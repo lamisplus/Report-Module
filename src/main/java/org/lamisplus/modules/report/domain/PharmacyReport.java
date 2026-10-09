@@ -31,5 +31,7 @@ public interface PharmacyReport {
 	String getRefillPeriod();
 	
 	String getRegimens();
+
+    String getFullname();
 	
 }
