@@ -80,7 +80,7 @@ const PMTCTMonthlySummaryReport = () => {
 
         axios
             .get(
-                `${baseUrl}prep_msf?facilityId=${objValues.organisationUnitId}&month=${objValues.month}&format=${objValues.format}`,
+                `${baseUrl}pmtct_msf?facilityId=${objValues.organisationUnitId}&month=${objValues.month}&format=${objValues.format}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -103,7 +103,7 @@ const PMTCTMonthlySummaryReport = () => {
                     type: mimeType,
                 });
 
-                const fileName = `${objValues.organisationUnitName}_PrEP_&_PEP_MSF_${objValues.month}.${extension}`;
+                const fileName = `${objValues.organisationUnitName}_PMTCT_MSF_${objValues.month}.${extension}`;
 
                 FileSaver.saveAs(blob, fileName);
 
