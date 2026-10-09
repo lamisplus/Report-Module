@@ -2,19 +2,20 @@ package org.lamisplus.modules.report.repository.queries;
 
 public class TBLongitudinalReportQuery {
     public static final String TB_LONGITUDINAL_REPORT_QUERY = "SELECT facility.name as facilityName, facility_lga.name as lga, facility_state.name as state, p.uuid AS personUuid, p.hospital_number AS hospitalNumber,\n" +
-            "he.unique_id AS uniqueId, INITCAP(p.sex) AS gender, p.date_of_birth AS dateOfBirth, EXTRACT(YEAR FROM  AGE(?3, date_of_birth)) AS age, COALESCE(he.date_art_started) dateStarted,\n" +
+            "he.unique_id AS uniqueId, INITCAP(p.sex) AS gender, p.date_of_birth AS dateOfBirth, EXTRACT(YEAR FROM  AGE(?3, date_of_birth)) AS age, COALESCE(he.date_art_started, he.visit_date, he.date_enrolled_in_hiv_care) dateStarted,\n" +
             "clientObservation.dateOfObservation, clientObservation.tbScreeningType, clientObservation.cadScore, clientObservation.tbStatus,\n" +
             "clientObservation.specimenType, clientObservation.dateSpecimenSent, clientObservation.diagnosticTestDone, clientObservation.clinicallyEvaulated, clientObservation.dateOfObservation dateOfEvaluation,\n" +
             "clientObservation.resultOfClinicalEvaluation, clientObservation.tbType, clientObservation.dateOfChestXrayResultTestDone,clientObservation.chestXrayResult, clientObservation.tbTreatmentStartDate,\n" +
             "clientObservation.treatmentOutcome, clientObservation.tbCompletionDate, clientObservation.eligibleForTPT, clientObservation.contractionForTpt, clientObservation.contractionOptions,\n" +
-            "COALESCE(he.tpt_start_date, tptClients.dateOfIptStart) dateOfIptStart, COALESCE(he.tpt_medication, tptClients.regimenName) regimenName, COALESCE(tpt_completion_date, clientObservation.iptCompletionDate, iptCompletionFromPharmacy.iptCompletionDate) iptCompletionDate, COALESCE(CAST(clientObservation.iptCompletionStatus AS VARCHAR), CAST(iptCompletionFromPharmacy.iptCompletionStatus AS VARCHAR)) iptCompletionStatus, \n" +
+            "COALESCE(he.tpt_start_date, tptClients.dateOfIptStart) dateOfIptStart, COALESCE(hrInh.description, tptClients.regimenName) regimenName, COALESCE(he.tpt_completion_date, clientObservation.iptCompletionDate, iptCompletionFromPharmacy.iptCompletionDate) iptCompletionDate, COALESCE(CAST(clientObservation.iptCompletionStatus AS VARCHAR), CAST(iptCompletionFromPharmacy.iptCompletionStatus AS VARCHAR)) iptCompletionStatus, \n" +
             "clientObservation.weightAt, tbLabSample.tbDiagnosticTestType, tbLabSample.dateofDiagnosticTestSampleCollected,\n" +
             "tbLabSample.tbDiagnosticResult, tbLabSample.dateofTbDiagnosticResultReceived, tbLabSample.dateDiagnosticEvaluation, (CASE WHEN (clientObservation.clinicallyEvaulated = 'Yes' AND clientObservation.tbScreeningType ILIKE '%Chest X-Ray with CAD and/or Symptom screening%' AND clientObservation.chestXrayDone = 'Yes' AND negativeResult.tbDiagnosticResult IS NOT NULL AND clientObservation.cadScore >= 40) THEN CAST(clientObservation.dateOfChestXrayResultTestDone AS DATE) ELSE NULL END)  AS dateTbScoreCad, " +
             "(CASE WHEN (clientObservation.clinicallyEvaulated = 'Yes' AND clientObservation.tbScreeningType ILIKE '%Chest X-Ray with CAD and/or Symptom screening%' AND clientObservation.chestXrayResult = 'Yes' AND clientObservation.cadScore >= 40 AND negativeResult.tbDiagnosticResult IS NOT NULL) THEN clientObservation.chestXrayResult ELSE NULL END) AS resultTbScoreCad,\n" +
             "clientObservation.rank1\n" +
             "FROM patient_person p\n" +
             "INNER JOIN hiv_enrollment_commencement he ON he.person_uuid = p.uuid\n" +
-            " LEFT JOIN base_organisation_unit facility ON facility.id=p.facility_id\n" +
+            "LEFT JOIN hiv_regimen hrInh ON hrInh.id = he.tpt_medication\n" +
+            "LEFT JOIN base_organisation_unit facility ON facility.id=p.facility_id\n" +
             "LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id=facility.parent_organisation_unit_id\n" +
             "LEFT JOIN base_organisation_unit facility_state ON facility_state.id=facility_lga.parent_organisation_unit_id\n" +
             "LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=p.facility_id AND boui.name='DATIM_ID'\n" +
