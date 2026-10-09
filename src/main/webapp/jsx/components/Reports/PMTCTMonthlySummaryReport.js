@@ -1,195 +1,364 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {FormGroup, Label , CardBody, Input} from "reactstrap";
-import {makeStyles} from "@material-ui/core/styles";
-import {Card} from "@material-ui/core";
-import {token, url as baseUrl } from "../../../api";
-import 'react-phone-input-2/lib/style.css'
-import { Button} from 'semantic-ui-react'
-import { toast} from "react-toastify";
 import FileSaver from "file-saver";
-import { Message } from 'semantic-ui-react'
-import ProgressComponent from "./ProgressComponent"
+import { toast } from "react-toastify";
 
+import { CardBody } from "reactstrap";
+import { Card, Paper, Box, Typography, TextField } from "@material-ui/core";
 
-const useStyles = makeStyles((theme) => ({
-    card: {
-        margin: theme.spacing(20),
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center"
-    },
-    form: {
-        width: "100%", // Fix IE 11 issue.
-        marginTop: theme.spacing(3),
-    },
-    submit: {
-        margin: theme.spacing(3, 0, 2),
-    },
-    cardBottom: {
-        marginBottom: 20,
-    },
-    Select: {
-        height: 45,
-        width: 300,
-    },
-    button: {
-        margin: theme.spacing(1),
-    },
-    root: {
-        flexGrow: 1,
-        maxWidth: 752,
-    },
-    demo: {
-        backgroundColor: theme.palette.background.default,
-    },
-    inline: {
-        display: "inline",
-    },
-    error:{
-        color: '#f85032',
-        fontSize: '12.8px'
-    }
-}));
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import ToggleButton from "@material-ui/lab/ToggleButton";
+import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 
+import BusinessIcon from "@material-ui/icons/Business";
+import CalendarTodayIcon from "@material-ui/icons/CalendarToday";
+import PictureAsPdfIcon from "@material-ui/icons/PictureAsPdf";
+import DescriptionIcon from "@material-ui/icons/Description";
+import AssessmentIcon from "@material-ui/icons/Assessment";
+import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom';
 
-const PMTCTMonthlySummaryReport = (props) => {
-  let currentDate = new Date().toISOString().split('T')[0]
-  const classes = useStyles();
-  const [loading, setLoading] = useState(false)
-  const [facilities, setFacilities] = useState([]);
+import { Button, Message } from "semantic-ui-react";
 
+import { token, url as baseUrl } from "../../../api";
+import ProgressComponent from "./ProgressComponent";
 
-  const[months, setMonths]=useState(['January','Febuary','March','April','May','June','July','August','September','October','November','December'])
-  const [status, setStatus] = useState(true);
-  const [objValues, setObjValues]=useState({ 
-      month: ""
-  })
-  useEffect(() => {
-      Facilities()
+const PMTCTMonthlySummaryReport = () => {
+    const currentDate = new Date().toISOString().split("T")[0];
+
+    const [loading, setLoading] = useState(false);
+    const [facilities, setFacilities] = useState([]);
+    const [months, setMonths] = useState([]);
+
+    const [objValues, setObjValues] = useState({
+        organisationUnitId: "",
+        organisationUnitName: "",
+        month: "",
+        format: "excel",
+    });
+
+    useEffect(() => {
+        loadFacilities();
+        loadMonths();
     }, []);
-  const Facilities =()=>{
-  axios
-      .get(`${baseUrl}account`,
-          { headers: {"Authorization" : `Bearer ${token}`} }
-      )
-      .then((response) => {
-          console.log(response.data);
-          setFacilities(response.data.applicationUserOrganisationUnits);
-      })
-      .catch((error) => {
-      });
-  }
 
-  const handleInputChange = (e) => {
-    const selectedOption = e.target.options[e.target.selectedIndex];
-    const selectedValue = e.target.value;
-    objValues.organisationUnitName = selectedOption.innerText;
-    setObjValues(prevValues => ({
-      ...prevValues,
-      [e.target.name]: selectedValue,
-    }));
-};
+    const loadFacilities = () => {
+        axios
+            .get(`${baseUrl}account`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then((response) => {
+                setFacilities(
+                    response.data.applicationUserOrganisationUnits || []
+                );
+            })
+            .catch(() => {
+                toast.error("Unable to load facilities");
+            });
+    };
 
-  const handleValueChange = () => {
-      setStatus(!status)
+    const loadMonths = () => {
+        axios
+            .get(`${baseUrl}months`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then((response) => {
+                setMonths(response.data || []);
+            })
+            .catch(() => {
+                toast.error("Unable to load months");
+            });
+    };
 
-      if (status === true) {
-        setObjValues ({...objValues,  startDate: "1980-01-01", endDate: currentDate});
-      } else {
-        setObjValues ({...objValues,  startDate: "", endDate: currentDate});
-      }
-
-  }
-  
-    const handleSubmit = (e) => {      
+    const handleSubmit = (e) => {
         e.preventDefault();
-        setLoading(true)
-        axios.get(`${baseUrl}reporting/biometric?facilityId=${objValues.organisationUnitId}&startDate=${objValues.startDate}&endDate=${objValues.endDate}`,
-           { headers: {"Authorization" : `Bearer ${token}`}, responseType: 'blob'},
-          
-          )
-              .then(response => {
-                setLoading(false)
-                const fileName = `${objValues.organisationUnitName} Biometric-Report ${currentDate}`
-                const responseData = response.data
-                let blob = new Blob([responseData], {type: "application/octet-stream"});
-                FileSaver.saveAs(blob, `${fileName}.xlsx`);
-                toast.success(" Report generated successful");
-              })
-              .catch(error => {
-                setLoading(false)
-                if(error.response && error.response.data){
-                    let errorMessage = error.response.data.apierror && error.response.data.apierror.message!=="" ? error.response.data.apierror.message :  "Something went wrong, please try again";
-                    toast.error(errorMessage);
-                  }
-                  else{
-                    toast.error("Something went wrong. Please try again...");
-                  }
-              });
-    }
-    
+
+        setLoading(true);
+
+        axios
+            .get(
+                `${baseUrl}prep_msf?facilityId=${objValues.organisationUnitId}&month=${objValues.month}&format=${objValues.format}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    responseType: "blob",
+                }
+            )
+            .then((response) => {
+                setLoading(false);
+
+                const extension =
+                    objValues.format === "pdf" ? "pdf" : "xlsx";
+
+                const mimeType =
+                    objValues.format === "pdf"
+                        ? "application/pdf"
+                        : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                const blob = new Blob([response.data], {
+                    type: mimeType,
+                });
+
+                const fileName = `${objValues.organisationUnitName}_PrEP_&_PEP_MSF_${objValues.month}.${extension}`;
+
+                FileSaver.saveAs(blob, fileName);
+
+                toast.success("Report generated successfully");
+            })
+            .catch((error) => {
+                setLoading(false);
+
+                if (error.response?.data?.apierror?.message) {
+                    toast.error(error.response.data.apierror.message);
+                } else {
+                    toast.error(
+                        "Something went wrong while generating report."
+                    );
+                }
+            });
+    };
+
     return (
-      <>
         <Card>
-          <CardBody>
-            <h2 style={{ color: "#000" }}>PMTCT MONTHLY SUMMARY REPORT</h2>
-            <br />
-            < >
-                        <div className="row">
-       
-                            <div className="form-group  col-md-6">
-                                <FormGroup>
-                                    <Label>Select Month*</Label>
-                                    <select
-                                        className="form-control"
-                                        name="month"
-                                        id="month"
-                                        value={objValues.organisationUnitId}
-                                        onChange={handleInputChange}
-                                        style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
-                                    >
-                                        <option value={""}></option>
-                                        {months.map((value) => (
-                                            <option key={value} value={value}>
-                                                {value}
-                                            </option>
-                                        ))}
-                                    </select>
+            <CardBody>
+                <Box mb={3}>
+                    <Typography
+                        variant="h5"
+                        style={{
+                            fontWeight: 600,
+                            color: "#014D88",
+                        }}
+                    >
+                        <FamilyRestroomIcon
+                            style={{
+                                color: "#014D88",
+                                fontSize: 34,
+                                marginRight: 10,
+                            }}
+                        />
+                        PMTCT Monthly Summary Form Report
+                    </Typography>
 
-                                </FormGroup>
-                            </div>
+                    <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        style={{ marginTop: 5 }}
+                    >
+                        Select your reporting month, facility and preferred
+                        export format.
+                    </Typography>
+                </Box>
 
-                <br />
-                <div className="row">
-                  <div className="form-group mb-3 col-md-6">
-                    <Button
-                      type="submit"
-                      content="Generate Report"
-                      icon="right arrow"
-                      labelPosition="right"
-                      style={{ backgroundColor: "#014d88", color: "#fff" }}
-                      onClick={handleSubmit}
-                      disabled={objValues.organisationUnitId === "" || loading} 
-                      // }
-                    />
-                  </div>
-                </div>
+                <Paper
+                    elevation={2}
+                    style={{
+                        padding: 24,
+                        borderRadius: 12,
+                        backgroundColor: "#fafafa",
+                    }}
+                >
+                    <div className="row">
+                        {/* REPORTING MONTH */}
+                        <div className="col-md-6 mb-4">
+                            <Typography
+                                variant="subtitle2"
+                                style={{
+                                    marginBottom: 8,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    fontWeight: 600,
+                                }}
+                            >
+                                <CalendarTodayIcon
+                                    fontSize="small"
+                                    style={{
+                                        marginRight: 8,
+                                        color: "#014D88",
+                                    }}
+                                />
+                                Reporting Month
+                            </Typography>
+
+                            <Autocomplete
+                                options={months}
+                                value={objValues.month}
+                                onChange={(event, value) =>
+                                    setObjValues({
+                                        ...objValues,
+                                        month: value || "",
+                                    })
+                                }
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        variant="outlined"
+                                        fullWidth
+                                        placeholder="Search reporting month..."
+                                        helperText="Select reporting period"
+                                    />
+                                )}
+                            />
+                        </div>
+
+                        {/* FACILITY */}
+                        <div className="col-md-6 mb-4">
+                            <Typography
+                                variant="subtitle2"
+                                style={{
+                                    marginBottom: 8,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    fontWeight: 600,
+                                }}
+                            >
+                                <BusinessIcon
+                                    fontSize="small"
+                                    style={{
+                                        marginRight: 8,
+                                        color: "#014D88",
+                                    }}
+                                />
+                                Facility
+                            </Typography>
+
+                            <Autocomplete
+                                options={facilities}
+                                getOptionLabel={(option) =>
+                                    option?.organisationUnitName || ""
+                                }
+                                value={
+                                    facilities.find(
+                                        (facility) =>
+                                            facility.organisationUnitId ===
+                                            objValues.organisationUnitId
+                                    ) || null
+                                }
+                                onChange={(event, value) => {
+                                    setObjValues({
+                                        ...objValues,
+                                        organisationUnitId:
+                                            value?.organisationUnitId || "",
+                                        organisationUnitName:
+                                            value?.organisationUnitName || "",
+                                    });
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        variant="outlined"
+                                        fullWidth
+                                        placeholder="Search facility..."
+                                        helperText="Select facility"
+                                    />
+                                )}
+                            />
+                        </div>
+
+                        {/* EXPORT FORMAT */}
+                        <div className="col-md-12 mb-4">
+                            <Typography
+                                variant="subtitle2"
+                                style={{
+                                    marginBottom: 12,
+                                    fontWeight: 600,
+                                }}
+                            >
+                                Export Format
+                            </Typography>
+
+                            <ToggleButtonGroup
+                                value={objValues.format}
+                                exclusive
+                                onChange={(event, value) => {
+                                    if (value) {
+                                        setObjValues({
+                                            ...objValues,
+                                            format: value,
+                                        });
+                                    }
+                                }}
+                            >
+                                <ToggleButton
+                                    value="excel"
+                                    style={{
+                                        padding: "12px 24px",
+                                        textTransform: "none",
+                                    }}
+                                >
+                                    <DescriptionIcon
+                                        style={{
+                                            marginRight: 8,
+                                            color: "#217346",
+                                        }}
+                                    />
+                                    Excel (.xlsx)
+                                </ToggleButton>
+
+                                <ToggleButton
+                                    value="pdf"
+                                    style={{
+                                        padding: "12px 24px",
+                                        textTransform: "none",
+                                    }}
+                                >
+                                    <PictureAsPdfIcon
+                                        style={{
+                                            marginRight: 8,
+                                            color: "#E53935",
+                                        }}
+                                    />
+                                    PDF (.pdf)
+                                </ToggleButton>
+                            </ToggleButtonGroup>
+                        </div>
+
+                        {/* ACTION */}
+                        <div className="col-md-12">
+                            <Button
+                                primary
+                                icon="download"
+                                content={
+                                    loading
+                                        ? "Generating..."
+                                        : "Generate Report"
+                                }
+                                labelPosition="left"
+                                style={{
+                                    backgroundColor: "#014D88",
+                                }}
+                                onClick={handleSubmit}
+                                disabled={
+                                    !objValues.month ||
+                                    !objValues.organisationUnitId ||
+                                    !objValues.format ||
+                                    loading
+                                }
+                            />
+                        </div>
+                    </div>
+                </Paper>
 
                 {loading && (
-                  <Message icon>
-                                    <Message.Content>
-                                          <ProgressComponent/>
-                                    </Message.Content>
-                                  </Message>
-
+                    <Message
+                        info
+                        icon
+                        style={{
+                            marginTop: 20,
+                            borderRadius: 10,
+                        }}
+                    >
+                        <Message.Content>
+                            <ProgressComponent />
+                        </Message.Content>
+                    </Message>
                 )}
-              </div>
-            </>
-          </CardBody>
+            </CardBody>
         </Card>
-      </>
     );
 };
 
-export default PMTCTMonthlySummaryReport
+export default PMTCTMonthlySummaryReport;
