@@ -49,6 +49,7 @@ public  interface HtsReportDto {
         String getLongitude();
         String getLatitude();
 //        Integer getFacilityId();
+        String getTimeOfLastNegativeTest();
         String getPositiveUuid();
         String getSuspected();
         // previousHts

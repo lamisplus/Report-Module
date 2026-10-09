@@ -43,7 +43,7 @@ public class HTSReportQuery {
             "WHEN latestHts.entryPoint = 'HTS_ENTRY_POINT_COMMUNITY' AND latestHts.facilitySetting = 'COMMUNITY_HTS_TEST_SETTING_SNS' THEN 'SNS'\n" +
             "WHEN latestHts.entryPoint = 'HTS_ENTRY_POINT_COMMUNITY' AND latestHts.facilitySetting = 'COMMUNITY_HTS_TEST_SETTING_CT' THEN 'VCT'\n" +
             "WHEN latestHts.entryPoint = 'HTS_ENTRY_POINT_COMMUNITY' AND latestHts.facilitySetting = 'COMMUNITY_HTS_TEST_SETTING_OUTREACH' THEN 'Mobile'\n" +
-            "END) AS TEXT) AS pepfarModalities\n" +
+            "END) AS TEXT) AS pepfarModalities, basTimeOfHiv.display timeOfLastNegativeTest\n" +
             "FROM (\n" +
             "SELECT CAST(patient_uuid AS TEXT) patientUuid, client_code clientCode, CAST(date_of_visit AS DATE) dateOfVisit, setting entryPoint, \n" +
             "observation->>'previouslyTestedNegative' previouslyTestedNegative,\n" +
@@ -66,7 +66,7 @@ public class HTSReportQuery {
             "observation->>'hivTestKitsProvided' hivTestKitsProvided,\n" +
             "observation->>'categoryOfClients' categoryOfClients,\n" +
             "observation->>'condomsProvided' condomsProvided,\n" +
-            "observation->>'completedBy' completedBy, \n" +
+            "observation->>'completedBy' completedBy, observation->>'timeOfLastNegativeTest' timeOfLastNegativeTest, \n" +
             "source, longitude, latitude, facility_id facilityId,\n" +
             "ROW_NUMBER() OVER (PARTITION BY patient_uuid ORDER BY date_of_visit DESC) rnk\n" +
             "FROM hts_encounter\n" +
@@ -76,7 +76,7 @@ public class HTSReportQuery {
             "LEFT JOIN base_application_codeset baspreviouslyTestedNegative ON baspreviouslyTestedNegative.code = latestHts.previouslyTestedNegative\n" +
             "LEFT JOIN base_application_codeset basFacility ON basFacility.code = latestHts.facilitySetting\n" +
             "LEFT JOIN base_application_codeset basSession ON basSession.code = latestHts.typeOfSession\n" +
-            "LEFT JOIN base_application_codeset basPreg ON basPreg.code = latestHts.fixPstatus\n" +
+            "LEFT JOIN base_application_codeset basPreg ON basPreg.code = latestHts.pregnancyStatus\n" +
             "LEFT JOIN base_application_codeset basIndexTest ON basIndexTest.code = latestHts.indexTesting\n" +
             "LEFT JOIN base_application_codeset basIndexRel ON basIndexRel.code = latestHts.indexRelationship\n" +
             "LEFT JOIN base_application_codeset basHivTest ON basHivTest.code = latestHts.typeOfHivTestDone\n" +
@@ -85,6 +85,7 @@ public class HTSReportQuery {
             "LEFT JOIN base_application_codeset basKits ON basKits.code = latestHts.hivTestKitsProvided\n" +
             "LEFT JOIN base_application_codeset basCategory ON basCategory.code = latestHts.categoryOfClients\n" +
             "LEFT JOIN base_application_codeset basCondom ON basCondom.code = latestHts.condomsProvided\n" +
+            "LEFT JOIN base_application_codeset basTimeOfHiv ON basTimeOfHiv.code = latestHts.timeOfLastNegativeTest\n" +
             "WHERE rnk = 1\n" +
             "),\n" +
             "previousHts AS (\n" +
