@@ -16,6 +16,9 @@ import java.util.Optional;
 
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
+        @Query(value = PMTCTMSFQuery.PMTCT_MONTHLY_MSF_QUERY, nativeQuery = true)
+        List<HtsMsfProjection> getPMTCTMSFReport(Long facilityId, LocalDate start, LocalDate end);
+
         @Query(value = PrEPMsfREPORT.PREP_MONTHLY_MSF_QUERY, nativeQuery = true)
         List<HtsMsfProjection> findPrEPMsf(Long facilityId, LocalDate start, LocalDate end);
 
