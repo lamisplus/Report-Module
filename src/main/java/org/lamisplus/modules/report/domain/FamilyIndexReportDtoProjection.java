@@ -14,7 +14,7 @@ public interface FamilyIndexReportDtoProjection {
         String getClientCode();
         LocalDate getDateOfService();
 
-//        String getPatientUuid();
+        String getPatientUuid();
 
         String getEntryPoint();
         String getClientCategory();

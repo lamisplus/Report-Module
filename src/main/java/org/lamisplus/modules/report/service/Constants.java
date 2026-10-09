@@ -325,7 +325,8 @@ public class Constants {
 					"Refill Period",
 					"MMD_Type",
 					"Next Appointment (yyyy-mm-dd)",
-					"DSD Model"
+					"DSD Model",
+                    "Dispensed By"
 			);
 
 	public static final List<String> LAB_HEADER =
@@ -380,6 +381,7 @@ public class Constants {
             "Date Of Current HIV Testing (yyyy-mm-dd)",
             "Type of HIV Test?",
             "Final HIV Test Result",
+            "Time of last HIV Negative test Result",
             "Suspected Acute HIV Infection?",
             "Patient UUID",
             "Recency Test Result",
@@ -591,6 +593,7 @@ public class Constants {
                     "LGA",
                     "Facility",
                     "Facility Id (Datim)",
+                    "Patient ID",
                     "Index Client Surname",
                     "Index Client Other Names",
                     "Index client code/unique ID",

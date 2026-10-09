@@ -519,9 +519,9 @@ public class GenerateExcelDataHelper {
 				map.put(index++, radetReportDto.getAge());
 				map.put(index++, getStringValue(String.valueOf(radetReportDto.getCareEntry())));
 				map.put(index++, radetReportDto.getDateOfRegistration());
-				map.put(index++, radetReportDto.getArtStartDate());
 				map.put(index++, radetReportDto.getDateEnrolled());
-				map.put(index++, radetReportDto.getLastPickupDate());
+                map.put(index++, radetReportDto.getArtStartDate());
+                map.put(index++, radetReportDto.getLastPickupDate());
 				map.put(index++, radetReportDto.getMonthsOfARVRefill());
 
 				map.put(index++, radetReportDto.getRegimenLineAtStart());
@@ -958,6 +958,7 @@ public class GenerateExcelDataHelper {
 					map.put(index++, htsReportDto.getDateOfVisit());
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getTypeOfHivTestDone())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getFinalHivTestResult())));
+					map.put(index++, getStringValue(String.valueOf(htsReportDto.getTimeOfLastNegativeTest())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getSuspected())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getPositiveUuid())));
 					map.put(index++, getStringValue(String.valueOf(htsReportDto.getRecencyTest())));
@@ -1060,7 +1061,8 @@ public class GenerateExcelDataHelper {
 				map.put(index++, getStringValue(String.valueOf(pharmacy.getRefillPeriod())));
 				map.put(index++, getStringValue(String.valueOf(pharmacy.getMmdType())));
 				map.put(index++, pharmacy.getNextAppointment());
-				map.put(index, pharmacy.getDsdModel());
+				map.put(index++, pharmacy.getDsdModel());
+                map.put(index, getStringValue(String.valueOf(pharmacy.getFullname())));
 				result.add(map);
 				sn++;
 			}
@@ -1171,6 +1173,7 @@ public class GenerateExcelDataHelper {
 					map.put(index++, getStringValue(familyIndex.getLga()));
 					map.put(index++, getStringValue(familyIndex.getFacilityName()));
 					map.put(index++, getStringValue(familyIndex.getDatimId()));
+					map.put(index++, getStringValue(familyIndex.getPatientUuid()));
 					map.put(index++, getStringValue(familyIndex.getSurname()));
 					map.put(index++, getStringValue(familyIndex.getFirstName()));
 					map.put(index++, getStringValue(familyIndex.getClientCode()));
