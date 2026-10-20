@@ -219,7 +219,7 @@ public class EACReportQuery {
             "            LEFT JOIN laboratory_sample ls ON ls.test_id = lt.id AND ls.archived = 0 \n" +
             "            LEFT JOIN laboratory_result lr ON lr.test_id = lt.id AND lr.date_result_reported BETWEEN ?2 AND ?3 and lr.archived = 0 \n" +
             "            LEFT JOIN base_application_codeset bac on bac.id = lt.viral_load_indication \n" +
-            "            WHERE lt.viral_load_indication not in (302, 719) and lt.viral_load_indication is not null AND lt.archived = 0 \n" +
+            "            WHERE lt.viral_load_indication not in (302, 719, 0) and lt.viral_load_indication is not null AND lt.archived = 0 \n" +
             "            and lr.archived = 0 and ls.archived = 0 \n" +
             "    ) \n" +
             "    select \n" +
