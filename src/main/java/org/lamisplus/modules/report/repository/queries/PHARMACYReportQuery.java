@@ -15,14 +15,15 @@ public class PHARMACYReportQuery {
             "dsd.dsd_model AS dsdModel,\n" +
             "result.visit_date AS dateVisit,\n" +
             "result.duration AS refillPeriod,\n" +
-            "result.regimen_name AS regimens\n" +
+            "result.regimen_name AS regimens, result.fullname\n" +
             "FROM (\n" +
             "SELECT\n" +
-            "    h.*,\n" +
+            "    h.*, CONCAT(baseUser.first_name,' ',baseUser.last_name) AS fullname,\n" +
             "    pharmacy_object ->> 'duration' AS duration,\n" +
             "    CAST(pharmacy_object ->> 'regimenName' AS VARCHAR) AS regimen_name\n" +
-            "FROM hiv_art_pharmacy h,\n" +
-            "    jsonb_array_elements(h.extra->'regimens') WITH ORDINALITY p(pharmacy_object) WHERE archived = 0\n" +
+            "FROM hiv_art_pharmacy h\n" +
+            "LEFT JOIN base_application_user baseUser ON baseUser.uuid = h.dispensed_by_user_uuid AND baseUser.archived = 0,\n" +
+            "    jsonb_array_elements(h.extra->'regimens') WITH ORDINALITY p(pharmacy_object) WHERE h.archived = 0\n" +
             ") AS result\n" +
             "INNER JOIN patient_person p ON p.uuid = result.person_uuid\n" +
             "LEFT JOIN ( SELECT * FROM (\n" +

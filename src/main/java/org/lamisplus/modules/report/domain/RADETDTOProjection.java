@@ -26,11 +26,13 @@ public interface RADETDTOProjection {
 
 	String getGender();
 
-	String getTargetGroup();
+//	String getTargetGroup();
 
 	String getEnrollmentSetting();
 
 	Date getArtStartDate();
+
+    LocalDate getDateEnrolled();
 
 	String getRegimenAtStart();
 
@@ -98,6 +100,7 @@ public interface RADETDTOProjection {
 	String getTbStatus();
 	LocalDate getDateOfTbScreened();
 	LocalDate getDateOfCurrentRegimen();
+    String getEligibilityTpt();
 	LocalDate getDateOfIptStart();
 	LocalDate getIptCompletionDate();
 	String getIptType();

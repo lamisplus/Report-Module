@@ -10,7 +10,13 @@ import org.lamisplus.modules.report.domain.*;
 import org.lamisplus.modules.report.config.Application;
 import org.lamisplus.modules.report.domain.HtsReportDto;
 import org.lamisplus.modules.report.domain.RADETDTOProjection;
+import org.lamisplus.modules.report.domain.dto.AppPreviewProjection;
+import org.lamisplus.modules.report.domain.dto.ApprCollectionProjection;
+import org.lamisplus.modules.report.domain.dto.ApprProjection;
 import org.lamisplus.modules.report.domain.dto.ClinicDataDto;
+import org.lamisplus.modules.report.domain.entity.Period;
+import org.lamisplus.modules.report.repository.MonthRepository;
+import org.lamisplus.modules.report.repository.PeriodRepository;
 import org.lamisplus.modules.report.repository.ReportRepository;
 import org.lamisplus.modules.report.utility.DateUtil;
 import org.lamisplus.modules.report.utility.ResultSetExtract;
@@ -23,8 +29,10 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -41,16 +49,18 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 	private final DateUtil dateUtil;
 	private final SimpMessageSendingOperations messagingTemplate;
 	private final QuarterService quarterService;
+    private final PeriodRepository  periodRepository;
+    private final MonthRepository monthRepository;
 
 
 	@Override
-	public ByteArrayOutputStream generatePatientLine(HttpServletResponse response, Long facilityId) {
+	public ByteArrayOutputStream generatePatientLine(HttpServletResponse response, Long facilityId, Boolean scrambler) {
 		LOG.info("Start generating patient line list for facility: " + getFacilityName(facilityId));
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		try {
 			List<PatientLineDto> data = reportRepository.getPatientLineByFacilityId(facilityId);
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
-			List<Map<Integer, Object>> fullData = GenerateExcelDataHelper.fillPatientLineListDataMapper(data);
+			List<Map<Integer, Object>> fullData = excelDataHelper.fillPatientLineListDataMapper(data, scrambler);
 			LOG.info("fullData 2: " + data.size());
 			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
 			return excelService.generate(Constants.PATIENT_LINE_LIST, fullData, Constants.PATIENT_LINE_LIST_HEADER);
@@ -183,8 +193,9 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("End generate patient Radet");
 		return null;
 	}
-	
-	@Override
+
+
+    @Override
 	public ByteArrayOutputStream generatePharmacyReport(Long facilityId) {
 		LOG.info("generating Pharmacy");
 		try {
@@ -279,24 +290,44 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		return organisationUnitService.getOrganizationUnit(facilityId).getName();
 	}
 
-	@Override
-	public ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, LocalDate end, String reportType, Boolean scrambler) {
-		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
-		LOG.info("Start generating hts for facility:" + getFacilityName(facilityId));
-		try {
-			List<HtsReportDto> htsReport = htsReportService.getHtsReport(facilityId, start, end);
-			LOG.error("Hts Size: {}", htsReport.size());
-			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
-			List<Map<Integer, Object>> data = excelDataHelper.fillHtsDataMapper(htsReport, reportType, scrambler);
-			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
-			return excelService.generate(Constants.HTS_SHEET, data, Constants.HTS_HEADER);
-		} catch (Exception e) {
-			LOG.error("Error Occurred when generating HTS !!!");
-			e.printStackTrace();
-		}
-		LOG.info("End generate patient HTS");
-		return null;
-	}
+//	@Override
+//	public ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, LocalDate end, String reportType, Boolean scrambler) {
+//		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
+//		LOG.info("Start generating hts for facility:" + getFacilityName(facilityId));
+//		try {
+//			List<HtsReportDto> htsReport = htsReportService.getHtsReport(facilityId, start, end);
+//			LOG.error("Hts Size: {}", htsReport.size());
+//			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
+//			List<Map<Integer, Object>> data = excelDataHelper.fillHtsDataMapper(htsReport, reportType, scrambler);
+//			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
+//			return excelService.generate(Constants.HTS_SHEET, data, Constants.HTS_HEADER);
+//		} catch (Exception e) {
+//			LOG.error("Error Occurred when generating HTS !!!");
+//			e.printStackTrace();
+//		}
+//		LOG.info("End generate patient HTS");
+//		return null;
+//	}
+    
+@Override
+public ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, LocalDate end,
+                                         String reportType, Boolean scrambler) {
+    messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC,
+            "Retrieving records from database ...");
+    LOG.info("Start generating HTS for facility: {}", getFacilityName(facilityId));
+
+    List<HtsReportDto> htsReport = htsReportService.getHtsReport(facilityId, start, end);
+    LOG.info("HTS report size: {}", htsReport.size());
+
+    messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC,
+            "Mapping result set ...");
+    List<Map<Integer, Object>> data = excelDataHelper.fillHtsDataMapper(htsReport, reportType, scrambler);
+
+    messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC,
+            "Retrieving report headers ...");
+    return excelService.generate(Constants.HTS_SHEET, data, Constants.HTS_HEADER);
+    // Let exceptions propagate — caller (controller) handles them
+}
 
 	@Override
 	public ByteArrayOutputStream generatePmtctHts(Long facilityId, LocalDate start, LocalDate end, String reportType) {
@@ -314,6 +345,25 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 			e.printStackTrace();
 		}
 		LOG.info("End generate patient PMTCT HTS");
+		return null;
+	}
+
+    @Override
+	public ByteArrayOutputStream generatePep(Long facilityId, LocalDate start, LocalDate end) {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
+		LOG.info("Start generating Pep for facility:" + getFacilityName(facilityId)+ "startDate: " +start + "endDate: " +end);
+		try {
+			List<PepDto> pepReport = reportRepository.getPepReport(facilityId, start, end);
+			LOG.error("PEP Size: {}", pepReport.size());
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
+			List<Map<Integer, Object>> data = excelDataHelper.fillPepMapper(pepReport);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
+			return excelService.generate(Constants.PEP_SHEET, data, Constants.PEP_HEADER);
+		} catch (Exception e) {
+			LOG.error("Error Occurred when generating PEP !!!");
+			e.printStackTrace();
+		}
+		LOG.info("End generate patient PEP");
 		return null;
 	}
 
@@ -600,8 +650,56 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		return null;
 	}
 
+//    @Override
+//    public ByteArrayOutputStream pullRadetRecord(Long facilityId, String weekPeriod) {
+//        return null;
+//    }
 
-	public ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException {
+    @Override
+    public List<ApprProjection> pullRadetRecords(Long facilityId, String weekPeriod) {
+        Period period = periodRepository.findById(weekPeriod)
+                .orElseThrow(() -> new RuntimeException("Period not found"));
+
+        LocalDate startDate = period.getStartDate();
+        LocalDate endDate   = period.getEndDate();
+
+
+        LocalDate previousQuarterEnd = quarterService.getPreviousQuarter(endDate).getEnd();
+        LocalDate previousPreviousQuarterEnd = quarterService.getPreviousQuarter(previousQuarterEnd).getEnd();
+        LOG.info("facilityId: " + facilityId +" "  +startDate + "  to " + endDate);
+        LOG.info("previous : "+previousQuarterEnd);
+        LOG.info("previousPreviousQuarterEnd : "+previousPreviousQuarterEnd);
+
+
+        System.out.println("Here are the extracted dates: " + startDate + " " + endDate.toString() );
+        reportRepository.truncateRadet();
+        System.out.println("Start truncate radet report");
+        reportRepository.pullRadet(facilityId, startDate, endDate,
+                previousQuarterEnd, previousPreviousQuarterEnd, weekPeriod);
+        System.out.println("End truncate radet report");
+        System.out.println("updating radet clean radet report");
+        reportRepository.updateCleanColumn();
+        System.out.println("End updating radet clean radet report");
+        System.out.println("Start pulling appr report");
+        return reportRepository.getApprReport(startDate, endDate);
+    }
+
+    @Override
+    public List<String> getMonths() {
+        return monthRepository.findAllMonth();
+    }
+
+
+    @Override
+    public List<String> getAllWeekForAppr(Long year) {
+        return Optional.ofNullable(periodRepository.findAllPeriodCode(year))
+                .orElseGet(Collections::emptyList)
+                .stream()
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    public ByteArrayOutputStream getReports(String reportId, Long facilityId, LocalDate start, LocalDate end) throws SQLException {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
 		String startDate = dateUtil.ConvertDateToString(start == null ? LocalDate.of(1985, 1, 1) : start);
 		String endDate = dateUtil.ConvertDateToString(end == null ? LocalDate.now() : end);
@@ -639,5 +737,58 @@ public class GenerateExcelServiceImpl implements GenerateExcelService {
 		LOG.info("query size is : {}" + fullData.size());
 		return excelService.generate(reportName, fullData, headers);
 	}
+
+
+
+    @Override
+    @SneakyThrows
+    public ByteArrayOutputStream pullRadetRecord(Long facilityId, String weekPeriod) {
+        LOG.info("Start generating APPR for facility:{}", getFacilityName(facilityId));
+        messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
+
+        Period period = periodRepository.findById(weekPeriod)
+                .orElseThrow(() -> new RuntimeException("Period not found"));
+
+        LocalDate startDate = period.getStartDate();
+        LocalDate endDate   = period.getEndDate();
+
+        try {
+            List<ApprProjection> apprDto = reportRepository.getApprReport(startDate, endDate);
+            LOG.info("RADET Size {}", apprDto.size());
+            messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
+            List<Map<Integer, Object>> data = excelDataHelper.fillApprDataMapper(apprDto);
+
+            messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
+            return excelService.generate(Constants.APPR_SHEET, data, Constants.APPR_HEADER);
+
+        } catch (Exception e) {
+            LOG.error("Error generating RADET: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to generate RADET report", e);
+        } finally {
+            LOG.info("End generate patient Radet");
+        }
+    }
+
+    @Override
+    @SneakyThrows
+    public ByteArrayOutputStream generateApprRadet() {
+        messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
+        try {
+            List<ApprRADETProjection> radetDtos = reportRepository.apprRadet();
+
+            LOG.info("RADET Size {}", radetDtos.size());
+            messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
+            List<Map<Integer, Object>> data = excelDataHelper.fillApprRadetDataMapper(radetDtos);
+            messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
+            return excelService.generate(Constants.RADET_SHEET, data, Constants.APPR_RADET_HEADER);
+
+        } catch (Exception e) {
+            LOG.info("An error Occurred when generating RADET...");
+            LOG.error("Error message: {}", e.getMessage());
+        }
+        LOG.info("End generate patient Radet");
+        return null;
+    }
+
 }
 

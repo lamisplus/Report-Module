@@ -1,21 +1,21 @@
 package org.lamisplus.modules.report.repository.queries;
 
 public class TBLongitudinalReportQuery {
-
     public static final String TB_LONGITUDINAL_REPORT_QUERY = "SELECT facility.name as facilityName, facility_lga.name as lga, facility_state.name as state, p.uuid AS personUuid, p.hospital_number AS hospitalNumber,\n" +
-            "he.unique_id AS uniqueId, INITCAP(p.sex) AS gender, p.date_of_birth AS dateOfBirth, EXTRACT(YEAR FROM  AGE(?3, date_of_birth)) AS age, he.date_started dateStarted,\n" +
+            "he.unique_id AS uniqueId, INITCAP(p.sex) AS gender, p.date_of_birth AS dateOfBirth, EXTRACT(YEAR FROM  AGE(?3, date_of_birth)) AS age, COALESCE(he.date_art_started, he.visit_date, he.date_enrolled_in_hiv_care) dateStarted,\n" +
             "clientObservation.dateOfObservation, clientObservation.tbScreeningType, clientObservation.cadScore, clientObservation.tbStatus,\n" +
             "clientObservation.specimenType, clientObservation.dateSpecimenSent, clientObservation.diagnosticTestDone, clientObservation.clinicallyEvaulated, clientObservation.dateOfObservation dateOfEvaluation,\n" +
             "clientObservation.resultOfClinicalEvaluation, clientObservation.tbType, clientObservation.dateOfChestXrayResultTestDone,clientObservation.chestXrayResult, clientObservation.tbTreatmentStartDate,\n" +
             "clientObservation.treatmentOutcome, clientObservation.tbCompletionDate, clientObservation.eligibleForTPT, clientObservation.contractionForTpt, clientObservation.contractionOptions,\n" +
-            "tptClients.dateOfIptStart, tptClients.regimenName, COALESCE(clientObservation.iptCompletionDate, iptCompletionFromPharmacy.iptCompletionDate) iptCompletionDate, COALESCE(CAST(clientObservation.iptCompletionStatus AS VARCHAR), CAST(iptCompletionFromPharmacy.iptCompletionStatus AS VARCHAR)) iptCompletionStatus, \n" +
+            "COALESCE(he.tpt_start_date, tptClients.dateOfIptStart) dateOfIptStart, COALESCE(hrInh.description, tptClients.regimenName) regimenName, COALESCE(he.tpt_completion_date, clientObservation.iptCompletionDate, iptCompletionFromPharmacy.iptCompletionDate) iptCompletionDate, COALESCE(CAST(clientObservation.iptCompletionStatus AS VARCHAR), CAST(iptCompletionFromPharmacy.iptCompletionStatus AS VARCHAR)) iptCompletionStatus, \n" +
             "clientObservation.weightAt, tbLabSample.tbDiagnosticTestType, tbLabSample.dateofDiagnosticTestSampleCollected,\n" +
             "tbLabSample.tbDiagnosticResult, tbLabSample.dateofTbDiagnosticResultReceived, tbLabSample.dateDiagnosticEvaluation, (CASE WHEN (clientObservation.clinicallyEvaulated = 'Yes' AND clientObservation.tbScreeningType ILIKE '%Chest X-Ray with CAD and/or Symptom screening%' AND clientObservation.chestXrayDone = 'Yes' AND negativeResult.tbDiagnosticResult IS NOT NULL AND clientObservation.cadScore >= 40) THEN CAST(clientObservation.dateOfChestXrayResultTestDone AS DATE) ELSE NULL END)  AS dateTbScoreCad, " +
             "(CASE WHEN (clientObservation.clinicallyEvaulated = 'Yes' AND clientObservation.tbScreeningType ILIKE '%Chest X-Ray with CAD and/or Symptom screening%' AND clientObservation.chestXrayResult = 'Yes' AND clientObservation.cadScore >= 40 AND negativeResult.tbDiagnosticResult IS NOT NULL) THEN clientObservation.chestXrayResult ELSE NULL END) AS resultTbScoreCad,\n" +
             "clientObservation.rank1\n" +
             "FROM patient_person p\n" +
-            "INNER JOIN hiv_enrollment he ON he.person_uuid = p.uuid\n" +
-            " LEFT JOIN base_organisation_unit facility ON facility.id=p.facility_id\n" +
+            "INNER JOIN hiv_enrollment_commencement he ON he.person_uuid = p.uuid\n" +
+            "LEFT JOIN hiv_regimen hrInh ON hrInh.id = he.tpt_medication\n" +
+            "LEFT JOIN base_organisation_unit facility ON facility.id=p.facility_id\n" +
             "LEFT JOIN base_organisation_unit facility_lga ON facility_lga.id=facility.parent_organisation_unit_id\n" +
             "LEFT JOIN base_organisation_unit facility_state ON facility_state.id=facility_lga.parent_organisation_unit_id\n" +
             "LEFT JOIN base_organisation_unit_identifier boui ON boui.organisation_unit_id=p.facility_id AND boui.name='DATIM_ID'\n" +
@@ -25,7 +25,7 @@ public class TBLongitudinalReportQuery {
             "INITCAP(data->'tbIptScreening'->>'diagnosticTestDone') diagnosticTestDone, INITCAP(data->'tptMonitoring'->>'clinicallyEvaulated') clinicallyEvaulated, data->'tbIptScreening'->>'resultOfClinicalEvaluation' resultOfClinicalEvaluation,\n" +
             "data->'tbIptScreening'->>'tbType' tbType, NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'dateOfChestXrayResultTestDone', '') AS DATE), NULL) dateOfChestXrayResultTestDone, data->'tbIptScreening'->>'chestXrayResult' chestXrayResult, NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'tbTreatmentStartDate', '') AS DATE), NULL) tbTreatmentStartDate,\n" +
             "data->'tbIptScreening'->>'completedTbTreatment' completedTbTreatment,  data->'tbIptScreening'->>'treatmentOutcome' treatmentOutcome, NULLIF(CAST(NULLIF(data->'tbIptScreening'->>'completionDate', '') AS DATE), NULL) tbCompletionDate,\n" +
-            "COALESCE(data->'tbIptScreening'->>'eligibleForTPT', data->'tptMonitoring'->>'eligibilityTpt', NULL) eligibleForTPT, data->'tptMonitoring'->>'contractionForTpt' contractionForTpt, data->'tbIptScreening'->>'chestXrayDone' chestXrayDone,\n" +
+            "COALESCE(NULLIF(data->'tbIptScreening'->>'eligibleForTPT', ''), data->'tptMonitoring'->>'eligibilityTpt', NULL) eligibleForTPT, data->'tptMonitoring'->>'contractionForTpt' contractionForTpt, data->'tbIptScreening'->>'chestXrayDone' chestXrayDone,\n" +
             "TRIM(BOTH ',' FROM\n" +
             "COALESCE(\n" +
             "CASE WHEN (data->'tptMonitoring'->>'liverSymptoms' IS NOT NULL AND data->'tptMonitoring'->>'liverSymptoms' != '' AND data->'tptMonitoring'->>'liverSymptoms' != 'No') THEN ',Liver Symptoms' ELSE '' END ||\n" +
@@ -35,7 +35,7 @@ public class TBLongitudinalReportQuery {
             "'')) AS contractionOptions, COALESCE(NULLIF(CAST(NULLIF(data->'tptMonitoring'->>'dateTptEnded', '') AS DATE), NULL), NULLIF(CAST(NULLIF(data->'tptMonitoring'->>'dateOfTptCompleted', '') AS DATE), NULL)) iptCompletionDate, \n" +
             "CAST(data->'tptMonitoring'->>'outComeOfIpt' AS VARCHAR) iptCompletionStatus, data->'tptMonitoring'->>'weight' weightAt,\n" +
             "ROW_NUMBER () OVER (PARTITION BY person_uuid ORDER BY date_of_observation DESC) as rank1\n" +
-            "FROM hiv_observation where type= 'Chronic Care' AND date_of_observation BETWEEN ?2 AND ?3\n" +
+            "FROM hiv_observation where archived = 0 AND type= 'Chronic Care' AND date_of_observation BETWEEN ?2 AND ?3\n" +
             ") clientObservation ON clientObservation.personUuid = he.person_uuid\n" +
             "LEFT JOIN (\n" +
             "SELECT person_uuid, visit_date as dateOfIptStart, regimen_name regimenName\n" +
@@ -45,8 +45,8 @@ public class TBLongitudinalReportQuery {
             "FROM hiv_art_pharmacy h \n" +
             "INNER JOIN jsonb_array_elements(h.extra -> 'regimens') WITH ORDINALITY p(pharmacy_object) ON TRUE \n" +
             "INNER JOIN hiv_regimen hr ON hr.description = CAST(p.pharmacy_object ->> 'regimenName' AS VARCHAR) \n" +
-            "INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id  AND hrt.id = 15 AND hrt.id NOT IN (1,2,3,4,14, 16) \n" +
-            "WHERE hrt.id = 15 AND h.archived = 0 AND h.visit_date BETWEEN ?2 AND ?3\n" +
+            "INNER JOIN hiv_regimen_type hrt ON hrt.id = hr.regimen_type_id  AND hrt.id IN (15, 9, 10) AND hrt.id NOT IN (1,2,3,4,14, 16) \n" +
+            "WHERE hrt.id = 15 AND h.archived = 0 AND hr.description ILIKE '%Isoniazid%' AND h.visit_date BETWEEN ?2 AND ?3\n" +
             ") AS ic \n" +
             "WHERE ic.rnk = 1\n" +
             ") tptClients ON tptClients.person_uuid = he.person_uuid\n" +
@@ -59,7 +59,7 @@ public class TBLongitudinalReportQuery {
             "and archived = 0) ic where ic.rnk = 1\n" +
             ") iptCompletionFromPharmacy ON iptCompletionFromPharmacy.person_uuid = he.person_uuid\n" +
             "LEFT JOIN (\n" +
-            "SELECT (CASE WHEN llt.lab_test_name ILIKE '%TB LAMP%' THEN 'TB-LAM' ELSE llt.lab_test_name END) AS tbDiagnosticTestType, llt.id, CAST(sm.date_sample_collected AS DATE) dateofDiagnosticTestSampleCollected, \n" +
+            "SELECT llt.lab_test_name AS tbDiagnosticTestType, llt.id, CAST(sm.date_sample_collected AS DATE) dateofDiagnosticTestSampleCollected, \n" +
             "(CASE WHEN lr.result_reported ILIKE '%Negative%' THEN 'Negative' ELSE result_reported END) as tbDiagnosticResult, CAST(lr.date_result_reported AS DATE) as dateofTbDiagnosticResultReceived, sm.patient_uuid,\n" +
             "CAST(lr.date_assayed AS DATE) dateDiagnosticEvaluation, ROW_NUMBER() OVER (PARTITION BY sm.patient_uuid ORDER BY sm.date_sample_collected DESC) rnkkkk\n" +
             "FROM public.laboratory_sample  sm\n" +
@@ -70,7 +70,7 @@ public class TBLongitudinalReportQuery {
             "AND sm.archived = 0 \n" +
             "AND lr.archived = 0\n" +
             "AND date_sample_collected IS NOT null \n" +
-            "AND sm.date_sample_collected <= ?3\n" +
+            "AND CAST(sm.date_sample_collected AS DATE) <= ?3\n" +
             ") tbLabSample ON tbLabSample.patient_uuid = clientObservation.personUuid AND tbLabSample.dateofDiagnosticTestSampleCollected = clientObservation.dateOfObservation\n" +
             "LEFT JOIN (\n" +
             "SELECT sm.patient_uuid as personTbResult, CASE WHEN (CAST(lr.date_result_reported AS DATE) > NOW() AND lr.result_reported IS NOT NULL) THEN NULL ELSE lr.result_reported END  as tbDiagnosticResult,\n" +

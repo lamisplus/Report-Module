@@ -16,6 +16,7 @@ import LaboratoryReport from './LaboratoryReport';
 import HTSReport from './HTSReport';
 import HtsRegister from './HtsRegister';
 import PrepReport from './PrepReport';
+import PepReport from './PepReport';
 import ClinicData from './ClinicData';
 import ClientVerification from './ClientVerification';
 import TbReport from './TbReport';
@@ -43,6 +44,8 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Divider from '@mui/material/Divider';
 import PrEPMSF from './PrEPMSF';
+import HTS_MSF from './HTS_MSF';
+import ARTMonthlySummaryReport from './ARTMonthlySummaryReport';
 import TbReportLongitudinal from './TbReportLongitudinal';
 import { useRoles } from "../../../hooks/useRoles";
 import { usePermissions } from "../../../hooks/usePermissions";
@@ -87,18 +90,18 @@ const Reports = props => {
       text: 'HTS REPORT',
       permissionKey: 'report_hts_report',
     },
-    {
-      key: 'hts-register',
-      value: 'hts-register',
-      text: 'HTS REGISTER',
-      permissionKey: 'report_hts_register',
-    },
-    {
-      key: 'hivst-report',
-      value: 'hivst-report',
-      text: 'HIVST REPORT',
-      permissionKey: 'report_hivst_report',
-    },
+    // {
+    //   key: 'hts-register',
+    //   value: 'hts-register',
+    //   text: 'HTS REGISTER',
+    //   permissionKey: 'report_hts_register',
+    // },
+    // {
+    //   key: 'hivst-report',
+    //   value: 'hivst-report',
+    //   text: 'HIVST REPORT',
+    //   permissionKey: 'report_hivst_report',
+    // },
     {
       key: 'hts-index-report',
       value: 'hts-index-report',
@@ -110,18 +113,16 @@ const Reports = props => {
   const reportBiometric = [
     { key: 'biometric', value: 'biometric', text: 'BIOMETRIC DATA' , permissionKey: 'report_biometric_data'},
   ];
-  const monthSummaryReport = [
-    { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary' },
-  ];
 
   const reportPrevention = [
     { key: 'prep-report', value: 'prep-report', text: 'PrEP Cross Sectional', permissionKey: 'report_prep_cross_sectional' },
     { key: 'prep-longitudinal-report', value: 'prep-longitudinal-report', text: 'PrEP Longitudinal REPORT', permissionKey: 'report_prep_longitudinal' },
+    { key: 'pep-report', value: 'pep-report', text: 'PEP REPORT', permissionKey: 'report_prep_cross_sectional' },
   ];
 
   const reportPMTCT = [
     { key: 'pmtct-hts', value: 'pmtct-hts', text: 'PMTCT HTS', permissionKey: 'report_pmtct_hts' },
-    { key: 'pmtct-maternal-cohort', value: 'pmtct-maternal-cohort', text: 'PMTCT MATERNAL COHORT', permissionKey: 'report_pmtct_maternal_cohort' },
+    { key: 'pmtct-maternal-cohort', value: 'pmtct-maternal-cohort', text: 'CHILD Follow-up report', permissionKey: 'report_child_followup_' },
   ];
 
   const reportPsychosocial = [
@@ -129,8 +130,11 @@ const Reports = props => {
   ];
 
   const reportMsfs = [
-    { key: 'prep-msf', value: 'prep-msf', text: 'PrEP Monthly Summary Form', permissionKey: 'report_prep_monthly_summary_form' },
+    { key: 'hts-msf', value: 'hts-msf', text: 'HTS Monthly Summary', permissionKey: 'report_hts_msf' }, //TODO: Consider creating a separate permission for HTS_MSF if needed.
+    { key: 'prep-msf', value: 'prep-msf', text: 'PrEP Monthly Summary', permissionKey: 'report_prep_monthly_summary_form' },
     { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary', permissionKey: 'report_pmtct_msf' },
+    // { key: 'ART-MSF', value: 'ART-MSF', text: 'ART Monthly Summary', permissionKey: 'report_art_msf' },
+
   ];
 
   const reportOptions = [
@@ -139,7 +143,7 @@ const Reports = props => {
     { key: 'line-list', value: 'line-list', text: 'PATIENT LINE LIST', permissionKey: 'report_patient_line_list' },
     { key: 'pharmacy-report', value: 'pharmacy-report', text: 'PHARMACY DATA', permissionKey: 'report_pharmacy_data' },
     { key: 'laboratory-report', value: 'laboratory-report', text: 'LABORATORY DATA', permissionKey: 'report_laboratory_data' },
-    { key: 'clinic-data-report', value: 'clinic-data-report', text: 'CLINIC DATA REPORT', permissionKey: 'report_clinic_data_report' },
+    // { key: 'clinic-data-report', value: 'clinic-data-report', text: 'CLINIC DATA REPORT', permissionKey: 'report_clinic_data_report' },
     { key: 'client-verification', value: 'client-verification', text: 'CLIENT VERIFICATION', permissionKey: 'report_client_verification' },
     { key: 'tb-report-longitudinal', value: 'tb-report-longitudinal', text: 'TB LONGITUDINAL REPORT', permissionKey: 'report_tb_longitudinal' },
     { key: 'ncd-report', value: 'ncd-report', text: 'NCD Report', permissionKey: 'report_ncd_report' },
@@ -175,7 +179,9 @@ const Reports = props => {
         canViewPrepCrossSectional: true,
         canViewPrepLongitudinal: true,
         canViewPrepMSF: true,
+        canViewHTS_MSF: true,
         canViewPMTCTMSF: true,
+        canViewARTMSF: true,
         canViewBiometricData: true,
         canViewMHPSSReport: true,
       };
@@ -209,6 +215,8 @@ const Reports = props => {
       canViewPrepLongitudinal: hasPermission("report_prep_longitudinal"),
       canViewPrepMSF: hasPermission("report_prep_monthly_summary_form"),
       canViewPMTCTMSF: hasPermission("report_pmtct_msf"),
+      canViewARTMSF: hasPermission("report_pmtct_msf"),
+      canViewHTS_MSF: hasPermission("report_hts_msf"), //TODO: Consider creating a separate permission for HTS_MSF if needed.
       canViewBiometricData: hasPermission("report_biometric_data"),
       canViewMHPSSReport: hasPermission("report_mhpss_report"),
     };
@@ -223,7 +231,7 @@ const Reports = props => {
       ...reportPMTCT,
       ...reportPsychosocial,
       ...reportMsfs,
-      ...monthSummaryReport,
+      // ...monthSummaryReport,
     ];
     return allReports.some(option =>
         hasRole("RDE")  || hasRole("Super Admin")|| hasPermission(option.permissionKey)
@@ -366,6 +374,14 @@ const Reports = props => {
             completed={completed}
           />
         );
+        case 'pep-report':
+        return (
+          <PepReport
+            handleItemClick={handleItemClick1}
+            setCompleted={setCompleted}
+            completed={completed}
+          />
+        );
       case 'clinic-data-report':
         return (
           <ClinicData
@@ -493,9 +509,25 @@ const Reports = props => {
             completed={completed}
           />
         );
+        case 'ART-MSF':
+        return (
+          <ARTMonthlySummaryReport
+            handleItemClick={handleItemClick1}
+            setCompleted={setCompleted}
+            completed={completed}
+          />
+        );
       case 'prep-msf':
         return (
           <PrEPMSF
+            handleItemClick={handleItemClick1}
+            setCompleted={setCompleted}
+            completed={completed}
+          />
+        );
+        case 'hts-msf':
+        return (
+          <HTS_MSF
             handleItemClick={handleItemClick1}
             setCompleted={setCompleted}
             completed={completed}
@@ -1050,27 +1082,6 @@ const Reports = props => {
                     </AccordionDetails>
                   </Accordion>
                   }
-                  {/* monthly Summary Form Accordion */}
-                  {/* <Accordion expanded={expanded === 'panel7'} onChange={handleChange('panel7')} style={{ backgroundColor: "#014D88" }}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel3bh-content"
-          id="panel3bh-header"
-        >
-         
-          <Typography sx={{  flexShrink: 0, color: "#fff" }}>
-          Select Monthly Summary Report
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
-          {Object.values(monthSummaryReport).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
-            <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
-    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
-    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>
-  ))}
-        </AccordionDetails>
-      </Accordion> */}
-                  {/*End of monthly Summary Form Accordion  Accordion  */}
 
                   <br />
 
@@ -1228,6 +1239,13 @@ const Reports = props => {
                 )}
                 {activeItem === 'prep-longitudinal-report' && (
                   <PrepLongitudinalReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
+                {activeItem === 'pep-report' && (
+                  <PepReport
                     handleItemClick={handleItemClick}
                     setCompleted={setCompleted}
                     completed={completed}

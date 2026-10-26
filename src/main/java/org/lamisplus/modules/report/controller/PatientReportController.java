@@ -42,10 +42,10 @@ public class PatientReportController {
 
 	
 	@PostMapping("/patient-line-list")
-	public void patientLineList(HttpServletResponse response, @RequestParam("facilityId") Long facility) throws IOException {
+	public void patientLineList(HttpServletResponse response, @RequestParam("facilityId") Long facility, @RequestParam("scrambler") Boolean scrambler) throws IOException {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting Patient line list report");
 		messagingTemplate.convertAndSend("/topic/patient-line-list/status", "start");
-		ByteArrayOutputStream baos = generateExcelService.generatePatientLine(response, facility);
+		ByteArrayOutputStream baos = generateExcelService.generatePatientLine(response, facility, scrambler);
 		setStream(baos, response);
 		messagingTemplate.convertAndSend("/topic/patient-line-list/status", "end");
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating Patient line list report");
@@ -62,14 +62,14 @@ public class PatientReportController {
 	}
 	
 	@GetMapping("/patient-line-list/{facilityId}")
-	public void patientLineList1(HttpServletResponse response, @PathVariable("facilityId") Long facility) {
+	public void patientLineList1(HttpServletResponse response, @PathVariable("facilityId") Long facility, Boolean scrambler) throws IOException {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting patient line list report");
 		String facilityName = generateExcelService.getFacilityName(facility);
 		response.setContentType("application/octet-stream");
 		String headerKey = "Content-Disposition";
 		String headerValue = "attachment; filename=radet_" + facilityName + Constants.EXCEL_EXTENSION_XLSX;
 		response.setHeader(headerKey, headerValue);
-		generateExcelService.generatePatientLine(response, facility);
+		generateExcelService.generatePatientLine(response, facility, scrambler);
 	}
 	
 	@GetMapping("/radet")

@@ -16,11 +16,8 @@ public class CLINICALReportQuery {
             "tvs.*, \n" +
             "tvs.body_weight as BodyWeight,  \n" +
             "(CASE\n" +
-            "WHEN hac.pregnancy_status = 'Not Pregnant' THEN hac.pregnancy_status\n" +
-            "WHEN hac.pregnancy_status = 'Pregnant' THEN hac.pregnancy_status\n" +
-            "WHEN hac.pregnancy_status = 'Breastfeeding' THEN hac.pregnancy_status\n" +
-            "WHEN hac.pregnancy_status = 'Post Partum' THEN hac.pregnancy_status\n" +
-            "WHEN preg.display IS NOT NULL THEN hac.pregnancy_status\n" +
+            "WHEN hac.pregnancy_status IS NOT NULL THEN preg.display\n" +
+            "WHEN hac.pregnancy_status IS NULL THEN hac.pregnancy_status\n" +
             "ELSE NULL END ) AS pregnancyStatus, \n" +
             "hac.next_appointment as nextAppointment , \n" +
             "hac.visit_date as visitDate, \n" +

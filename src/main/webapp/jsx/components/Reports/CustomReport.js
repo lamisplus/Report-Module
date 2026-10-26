@@ -1,8 +1,6 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { FormGroup, Label, CardBody, Input } from "reactstrap";
-import { makeStyles } from "@material-ui/core/styles";
-import { Card } from "@material-ui/core";
 import { token, url as baseUrl } from "../../../api";
 import 'react-phone-input-2/lib/style.css'
 import { Button } from 'semantic-ui-react'
@@ -12,49 +10,20 @@ import { Message, TextArea, Dropdown } from 'semantic-ui-react'
 import ScrollableDiv from "../Shared/Scrollable"
 import ProgressComponent from "./ProgressComponent"
 
-const useStyles = makeStyles((theme) => ({
-    card: {
-        margin: theme.spacing(20),
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center"
-    },
-    form: {
-        width: "100%", // Fix IE 11 issue.
-        marginTop: theme.spacing(3),
-    },
-    submit: {
-        margin: theme.spacing(3, 0, 2),
-    },
-    cardBottom: {
-        marginBottom: 20,
-    },
-    Select: {
-        height: 45,
-        width: 300,
-    },
-    button: {
-        margin: theme.spacing(1),
-    },
-    root: {
-        flexGrow: 1,
-        maxWidth: 752,
-    },
-    demo: {
-        backgroundColor: theme.palette.background.default,
-    },
-    inline: {
-        display: "inline",
-    },
-    error: {
-        color: '#f85032',
-        fontSize: '12.8px'
-    }
-}));
+import {
+    Card,
+    Paper,
+    Box,
+    Typography,
+    TextField
+} from "@material-ui/core";
+
+import AssessmentIcon from "@material-ui/icons/Assessment";
+
 
 const CustomReport = (props) => {
     let currentDate = new Date().toISOString().split('T')[0]
-    const classes = useStyles();
+    // const classes = useStyles();
     const [loading, setLoading] = useState(false)
     const [listOfParams, setListOfParams] = useState([]);
     const [facilities, setFacilities] = useState([]);
@@ -72,13 +41,13 @@ const CustomReport = (props) => {
     const [formData, setFormData] = useState(objValues)
 
     const loadFacilities = useCallback(async () => {
-        try{
+        try {
             const response = await axios.get(
                 `${baseUrl}account`,
-                {headers: { "Authorization": `Bearer ${token}` }}
+                { headers: { "Authorization": `Bearer ${token}` } }
             );
             setFacilities(response.data.applicationUserOrganisationUnits);
-        }catch(e){
+        } catch (e) {
             console.log(e);
         }
     }, []);
@@ -134,35 +103,35 @@ const CustomReport = (props) => {
             `${baseUrl}customized-reports/generate-report`,
             {},
             {
-              params: {
-                query: customQuery,
-                reportName: objValues.reportName,
-              },
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-              responseType: 'blob',
+                params: {
+                    query: customQuery,
+                    reportName: objValues.reportName,
+                },
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                responseType: 'blob',
             }
-          )
+        )
             .then((response) => {
-              console.log("Here ******" + response.data);
-              setLoading(false);
-              const fileName = `${objValues.organisationUnitName} ${objValues.reportName} Report ${currentDate}`;
-              const responseData = response.data;
-              let blob = new Blob([responseData], { type: "application/octet-stream" });
-              FileSaver.saveAs(blob, `${fileName}.xlsx`);
-              toast.success("Custom Report generated successfully");
+                console.log("Here ******" + response.data);
+                setLoading(false);
+                const fileName = `${objValues.organisationUnitName} ${objValues.reportName} Report ${currentDate}`;
+                const responseData = response.data;
+                let blob = new Blob([responseData], { type: "application/octet-stream" });
+                FileSaver.saveAs(blob, `${fileName}.xlsx`);
+                toast.success("Custom Report generated successfully");
             })
             .catch((error) => {
-              setLoading(false);
-              if (error.response && error.response.data) {
-                let errorMessage = error.response.data.apierror && error.response.data.apierror.message !== "" ? error.response.data.apierror.message : "Something went wrong, please try again";
-                toast.error(errorMessage);
-              } else {
-                toast.error("Something went wrong. Please try again...");
-              }
+                setLoading(false);
+                if (error.response && error.response.data) {
+                    let errorMessage = error.response.data.apierror && error.response.data.apierror.message !== "" ? error.response.data.apierror.message : "Something went wrong, please try again";
+                    toast.error(errorMessage);
+                } else {
+                    toast.error("Something went wrong. Please try again...");
+                }
             });
-    }   
+    }
 
     function replaceValues(query, customDataFields) {
         return query.replace(/{{\s*([^}]+)\s*}}/g, (match, key) => {
@@ -178,7 +147,7 @@ const CustomReport = (props) => {
             .then(response => {
                 getCustomReports();
                 toast.success("Custom report successfully saved...")
-                
+
             })
             .catch(error => {
                 console.log(error)
@@ -201,7 +170,7 @@ const CustomReport = (props) => {
             })
             .catch((error) => { });
     }
-    
+
     useEffect(() => {
         getCustomReports();
         loadFacilities();
@@ -225,46 +194,73 @@ const CustomReport = (props) => {
         customQuery = replaceValues(customQuery, customDataFields);
         setCustomQuery(customQuery);
         axios.post(
-          `${baseUrl}customized-reports/generate-report`,
-          {},
-          {
-            params: {
-              query: customQuery,
-              reportName: objValues.reportName,
-            },
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            responseType: 'blob',
-          }
-        )
-          .then((response) => {
-            setLoading(false);
-            const fileName = `${objValues.organisationUnitName} ${objValues.reportName} Report ${currentDate}`;
-            const responseData = response.data;
-            let blob = new Blob([responseData], { type: "application/octet-stream" });
-            FileSaver.saveAs(blob, `${fileName}.xlsx`);
-            toast.success("Custom Report generated successfully");
-          })
-          .catch((error) => {
-            setLoading(false);
-            if (error.response && error.response.data) {
-              let errorMessage = error.response.data.apierror && error.response.data.apierror.message !== "" ? error.response.data.apierror.message : "Something went wrong, please try again";
-              toast.error(errorMessage);
-            } else {
-              toast.error("Something went wrong. Please try again...");
+            `${baseUrl}customized-reports/generate-report`,
+            {},
+            {
+                params: {
+                    query: customQuery,
+                    reportName: objValues.reportName,
+                },
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                responseType: 'blob',
             }
-          });
-      };
-      
-    
+        )
+            .then((response) => {
+                setLoading(false);
+                const fileName = `${objValues.organisationUnitName} ${objValues.reportName} Report ${currentDate}`;
+                const responseData = response.data;
+                let blob = new Blob([responseData], { type: "application/octet-stream" });
+                FileSaver.saveAs(blob, `${fileName}.xlsx`);
+                toast.success("Custom Report generated successfully");
+            })
+            .catch((error) => {
+                setLoading(false);
+                if (error.response && error.response.data) {
+                    let errorMessage = error.response.data.apierror && error.response.data.apierror.message !== "" ? error.response.data.apierror.message : "Something went wrong, please try again";
+                    toast.error(errorMessage);
+                } else {
+                    toast.error("Something went wrong. Please try again...");
+                }
+            });
+    };
+
+
     return (
         <>
 
             <Card >
                 <CardBody>
 
-                    <h2 style={{ color: '#000' }}>CUSTOM REPORT</h2>
+                    <Box mb={3}>
+                        <Typography
+                            variant="h5"
+                            style={{
+                                color: "#014D88",
+                                fontWeight: 600,
+                                display: "flex",
+                                alignItems: "center"
+                            }}
+                        >
+                            <AssessmentIcon
+                                style={{
+                                    marginRight: 10,
+                                    color: "#014D88"
+                                }}
+                            />
+                            Custom Report Builder
+                        </Typography>
+
+                        <Typography
+                            variant="body2"
+                            color="textSecondary"
+                        >
+                            Create, analyze, save and generate
+                            custom SQL reports using configurable
+                            parameters.
+                        </Typography>
+                    </Box>
                     <br />
                     <FormGroup>
                         <Label style={{ color: '#014d88', fontWeight: 'bolder' }}>List of Reports <span style={{ cursor: "pointer", color: "blue" }}
@@ -287,14 +283,13 @@ const CustomReport = (props) => {
                             <div className="form-group  col-md-6">
                                 <FormGroup>
                                     <Label>Query Name*</Label>
-                                    <Input
-                                        type="text"
-                                        className="form-control"
+                                    <TextField
+                                        fullWidth
+                                        variant="outlined"
+                                        label="Query Name"
                                         name="reportName"
-                                        id="reportName"
+                                        value={objValues?.reportName || ""}
                                         onChange={handleInputChange}
-                                        value={objValues?.reportName}
-                                        style={{ border: "1px solid #014D88", borderRadius: "0.2rem" }}
                                     />
                                 </FormGroup>
                             </div>
@@ -302,25 +297,39 @@ const CustomReport = (props) => {
                             <div className="row">
                                 <div className="form-group  col-md-6">
                                     <FormGroup>
-                                        <Label>Custom Query*</Label>
-                                        <TextArea
-                                            id="query"
+                                        <Typography
+                                            variant="subtitle2"
+                                            style={{
+                                                marginBottom: 8,
+                                                fontWeight: 600
+                                            }}
+                                        >
+                                            Custom Query
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            multiline
+                                            rows={18}
+                                            variant="outlined"
+                                            label="Custom Query"
                                             name="query"
-                                            multiline="multiline"
-                                            rows={20}
+                                            value={objValues?.query || ""}
                                             onChange={handleInputChange}
-                                            style={{ border: "1px solid #014D88", borderRadius: "0.2rem", width: "100%" }}
-                                            value={objValues?.query}
-                                            className="w-100"
-                                            width={100}
-
                                         />
                                     </FormGroup>
                                 </div>
 
                                 <div className="form-group  col-md-6">
                                     <FormGroup>
-                                        <Label>Query Parameters *</Label>
+                                        <Typography
+                                            variant="subtitle2"
+                                            style={{
+                                                marginBottom: 8,
+                                                fontWeight: 600
+                                            }}
+                                        >
+                                            Query Parameters
+                                        </Typography>
                                         <ScrollableDiv listOfParams={listOfParams} objValues={objValues} facilityData={facilities} onData={onData}
 
                                         />
@@ -329,27 +338,80 @@ const CustomReport = (props) => {
                                 <br />
                                 <div className="row">
                                     <div className="mb-3 col-md-2">
-                                        <Button type="submit" content='Analyze' icon='up arrow' labelPosition='right' style={{ backgroundColor: "#014d88", color: '#fff' }} onClick={handleAnalyze} />
+                                        <Button
+                                            content="Analyze"
+                                            icon="search"
+                                            labelPosition="left"
+                                            style={{
+                                                backgroundColor: "#014D88",
+                                                color: "#fff"
+                                            }}
+                                            onClick={handleAnalyze}
+                                        />
                                     </div>
                                     <div className="mb-3 col-md-2">
-                                        <Button type="submit" content='Dry Run' icon='up down' labelPosition='right' style={{ backgroundColor: "black", color: '#fff' }} onClick={handleDryRun} />
+                                        <Button
+                                            content="Dry Run"
+                                            icon="play"
+                                            labelPosition="left"
+                                            style={{
+                                                backgroundColor: "#000",
+                                                color: "#fff"
+                                            }}
+                                            onClick={handleDryRun}
+                                        />
                                     </div>
                                     <div className="mb-3 col-md-3">
-                                        <Button type="submit" content='Save Query' icon='up arrow' labelPosition='right' style={{ backgroundColor: "blue", color: '#fff' }} onClick={handleSaveCustomReport} />
+                                        <Button
+                                            content="Save Query"
+                                            icon="save"
+                                            labelPosition="left"
+                                            style={{
+                                                backgroundColor: "#1976D2",
+                                                color: "#fff"
+                                            }}
+                                            onClick={handleSaveCustomReport}
+                                        />
                                     </div>
 
                                     <div className="mb-3 col-md-2" >
-                                        <Button type="submit" content='Generate' icon='right arrow' labelPosition='right' style={{ backgroundColor: "#008000", color: '#fff' }} onClick={handleSubmit} />
+                                        <Button
+                                            content="Generate Report"
+                                            icon="download"
+                                            labelPosition="left"
+                                            style={{
+                                                backgroundColor: "#008000",
+                                                color: "#fff"
+                                            }}
+                                            onClick={handleSubmit}
+                                        />
                                     </div>
                                 </div>
 
-                                {loading && (
-                                    <Message icon>
-                                                      <Message.Content>
-                                                            <ProgressComponent/>
-                                                      </Message.Content>
-                                                    </Message>
-                                )}
+
+                                <Paper
+                                    elevation={2}
+                                    style={{
+                                        padding: 24,
+                                        borderRadius: 12,
+                                        backgroundColor: "#FAFAFA"
+                                    }}
+                                >
+                                    {loading && (
+                                        <Message
+                                            info
+                                            icon
+                                            style={{
+                                                marginTop: 20,
+                                                borderRadius: 10
+                                            }}
+                                        >
+                                            <Message.Content>
+                                                <ProgressComponent />
+                                            </Message.Content>
+                                        </Message>
+                                    )}
+                                </Paper>
                             </div>
                         </div>
                     </>

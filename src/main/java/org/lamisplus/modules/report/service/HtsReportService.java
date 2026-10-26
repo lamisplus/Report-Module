@@ -19,7 +19,7 @@ public class HtsReportService {
 
     public List<HtsReportDto> getHtsReport(Long facilityId, LocalDate start, LocalDate end){
 
-        return reportRepository.getHtsReport(facilityId, start, dateUtil.datePadding(end));
+        return reportRepository.getHtsReport(facilityId, start, (end));
     }
 
 }
