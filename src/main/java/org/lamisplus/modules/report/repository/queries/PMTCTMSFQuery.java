@@ -244,7 +244,7 @@ public class PMTCTMSFQuery {
             "            'FACILITY_HTS_TEST_SETTING_ANC',\n" +
             "            'FACILITY_HTS_TEST_SETTING_L&D',\n" +
             "            'FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING'\n" +
-            "        ) AND p.ageGroup IS NOT NULL) AS total\n" +
+            "        ) AND p.ageGroup IS NOT NULL AND suspectedAcuteInfection = 'Yes') AS total\n" +
             "    FROM  retestes r\n" +
             "\tLEFT JOIN pmtctSummary p ON (\n" +
             "           (r.sort_order = 1 AND p.retest = 'RETESTING' AND p.finalhivtestresult !='Positive')\n" +
