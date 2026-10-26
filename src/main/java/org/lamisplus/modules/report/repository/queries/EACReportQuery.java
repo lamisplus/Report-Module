@@ -52,11 +52,12 @@ public class EACReportQuery {
             "SELECT enrolledEac.facility_id, enrolledEac.person_uuid personUuid50, enrolledEac.uuid,\n" +
             "firstEac.sessionDate dateOfCommencementOfFirstEAC, secondEac.sessionDate dateOfCommencementOfSecondEAC, thirdEac.sessionDate dateOfCommencementOfThirdEAC, fourthEac.sessionDate dateOfCommencementOfFourthEAC, fifthEac.sessionDate dateOfCommencementOfFifthEAC, sixthEac.sessionDate dateOfCommencementOfSixthEAC,\n" +
             "(\n" +
-            "CASE WHEN eacSession.status = 'FIRST EAC' THEN  0\n" +
-            "WHEN eacSession.status = 'SECOND EAC' THEN 1\n" +
-            "WHEN eacSession.status = 'THIRD EAC' THEN 2\n" +
-            "WHEN postEacVl.date_sample_collected IS NOT NULL OR eacSession.status = 'FOURTH EAC' THEN 3\n" +
+            "CASE WHEN eacSession.status = 'SIXTH EAC' THEN 5\n" +
             "WHEN eacSession.status = 'FIFTH EAC' THEN 4\n" +
+            "WHEN (postEacVl.date_sample_collected IS NOT NULL AND postEacVl.date_sample_collected > thirdEac.sessionDate) OR eacSession.status = 'FOURTH EAC' THEN 3\n" +
+            "WHEN eacSession.status = 'THIRD EAC' THEN 2\n" +
+            "WHEN eacSession.status = 'SECOND EAC' THEN 1\n" +
+            "WHEN eacSession.status = 'FIRST EAC' THEN  0\n" +
             " \n" +
             "END\n" +
             ") numberOfEACSessionsCompleted, COALESCE (fifthEac.sessionDate,sixthEac.sessionDate) dateOfExtendEACCompletion, postEacVl.date_sample_collected,\n" +
