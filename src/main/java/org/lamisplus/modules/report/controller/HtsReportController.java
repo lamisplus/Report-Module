@@ -59,6 +59,19 @@ public class HtsReportController {
 		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating PMTCT HTS report");
 	}
 
+
+    @PostMapping(REPORT_URL_VERSION_ONE + "/pep-reporting")
+	@ApiOperation(value = "Generate PEP Report", notes = "This Api generates PEP report", code = 200)
+	public void generatePepReport (HttpServletResponse response, @RequestParam("facilityId") Long facility,
+							@RequestParam("startDate") LocalDate start,
+							@RequestParam("endDate") LocalDate end) throws IOException {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Starting PEP report");
+		ByteArrayOutputStream baos = generateExcelService.generatePep(facility, start, end);
+
+		setStream(baos, response);
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Done generating PEP report");
+	}
+
 	private void setStream(ByteArrayOutputStream baos, HttpServletResponse response) throws IOException {
 		response.setHeader("Content-Type", "application/octet-stream");
 		response.setHeader("Content-Length", Integer.toString(baos.size()));
