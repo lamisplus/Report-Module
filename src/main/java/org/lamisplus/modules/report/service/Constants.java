@@ -23,6 +23,7 @@ public class Constants {
 	public static final String EAC_SHEET = "eac";
 	public static final String HTS_SHEET = "hts";
 	public static final String PMTCT_HTS_SHEET = "pmtct-hts";
+	public static final String PEP_SHEET = "pep";
 
 	public static final String FAMILY_INDEX_SHEET = "hts_index";
 
@@ -36,7 +37,46 @@ public class Constants {
 	public static final List<String> AGE_GROUPS = Arrays.asList(
 			"15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49", "50+"
 	);
-	public static final List<String> PATIENT_LINE_LIST_HEADER = Arrays.asList(
+
+    public static final List<String> PEP_HEADER = Arrays.asList(
+            "SN",
+            "State",
+            "LGA",
+            "Facility Name",
+            "DATIM ID",
+            "Patient ID",
+            "Sex",
+            "Age",
+            "Enrollment Type",
+            "Mode of Exposure",
+            "HIV Status at Exposure",
+            "Duration before PEP provided",
+            "Start Date",
+            "Population Type",
+            "Pregnancy Status",
+            "HIV EARLY DETECT",
+            "Viral Load Result",
+            "Syndromic STI Screening",
+            "PEP Regimen",
+            "Adherence Level",
+            "Noted Side Effects",
+            "Risk Reduction Services",
+            "Date PEP Given",
+            "Date PEP Stop",
+            "Pep Completion",
+            "FollowUp VisitDate",
+            "FollowUp HIV TestResult",
+            "FollowUp Visit Date",
+            "FollowUp HIV TestResult",
+            "FollowUp Visit Date",
+            "FollowUp HIV Test Result",
+            "Next Appointment Date",
+            "Discontinued PEP Date",
+            "Reasons Discontinued PEP",
+            "ART Link"
+    );
+
+    public static final List<String> PATIENT_LINE_LIST_HEADER = Arrays.asList(
 			"State",
 			"LGA",
 			"Facility Name",
