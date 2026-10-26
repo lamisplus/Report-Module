@@ -16,6 +16,7 @@ import LaboratoryReport from './LaboratoryReport';
 import HTSReport from './HTSReport';
 import HtsRegister from './HtsRegister';
 import PrepReport from './PrepReport';
+import PepReport from './PepReport';
 import ClinicData from './ClinicData';
 import ClientVerification from './ClientVerification';
 import TbReport from './TbReport';
@@ -112,17 +113,11 @@ const Reports = props => {
   const reportBiometric = [
     { key: 'biometric', value: 'biometric', text: 'BIOMETRIC DATA' , permissionKey: 'report_biometric_data'},
   ];
-  // const monthSummaryReport = [
-  //   { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary',
-  //     permissionKey: 'report_pmtct_msf'
-  //   },
-    // { key: 'HTS-MSF', value: 'HTS-MSF', text: 'HTS Monthly Summary', 
-    //   permissionKey: 'report_pmtct_msf' }
-  // ];
 
   const reportPrevention = [
     { key: 'prep-report', value: 'prep-report', text: 'PrEP Cross Sectional', permissionKey: 'report_prep_cross_sectional' },
     { key: 'prep-longitudinal-report', value: 'prep-longitudinal-report', text: 'PrEP Longitudinal REPORT', permissionKey: 'report_prep_longitudinal' },
+    { key: 'pep-report', value: 'pep-report', text: 'PEP REPORT', permissionKey: 'report_prep_cross_sectional' },
   ];
 
   const reportPMTCT = [
@@ -138,7 +133,7 @@ const Reports = props => {
     { key: 'hts-msf', value: 'hts-msf', text: 'HTS Monthly Summary', permissionKey: 'report_hts_msf' }, //TODO: Consider creating a separate permission for HTS_MSF if needed.
     { key: 'prep-msf', value: 'prep-msf', text: 'PrEP Monthly Summary', permissionKey: 'report_prep_monthly_summary_form' },
     { key: 'PMTCT-MSF', value: 'PMTCT-MSF', text: 'PMTCT Monthly Summary', permissionKey: 'report_pmtct_msf' },
-    { key: 'ART-MSF', value: 'ART-MSF', text: 'ART Monthly Summary', permissionKey: 'report_art_msf' },
+    // { key: 'ART-MSF', value: 'ART-MSF', text: 'ART Monthly Summary', permissionKey: 'report_art_msf' },
 
   ];
 
@@ -374,6 +369,14 @@ const Reports = props => {
       case 'prep-longitudinal-report':
         return (
           <PrepLongitudinalReport
+            handleItemClick={handleItemClick1}
+            setCompleted={setCompleted}
+            completed={completed}
+          />
+        );
+        case 'pep-report':
+        return (
+          <PepReport
             handleItemClick={handleItemClick1}
             setCompleted={setCompleted}
             completed={completed}
@@ -1079,27 +1082,6 @@ const Reports = props => {
                     </AccordionDetails>
                   </Accordion>
                   }
-                  {/* monthly Summary Form Accordion */}
-                  {/* <Accordion expanded={expanded === 'panel7'} onChange={handleChange('panel7')} style={{ backgroundColor: "#014D88" }}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel3bh-content"
-          id="panel3bh-header"
-        >
-
-          <Typography sx={{  flexShrink: 0, color: "#fff" }}>
-          Select Monthly Summary Report
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails style={{paddingTop: 0, marginTop:0, backgroundColor: "#014D88" }}>
-          {Object.values(monthSummaryReport).map((option) => (<div style={{marginTop:"10px", marginLeft: "10px", display:"flex", justifyContent:"flex-start", alignItems:"center"}}>
-            <div style={{width:"10px", height:"10px", backgroundColor:"white", borderRadius:"50%"}}/>
-    <Typography><div style={{cursor:"pointer", marginBottom: "0px",  marginLeft: "10px", color: "#fff"}} onClick={() => handleItemClick1(option.value)} key={option.key}>{option.text}</div></Typography>
-    <Divider orientation={"horizontal"} variant="fullWidth" component="li"/></div>
-  ))}
-        </AccordionDetails>
-      </Accordion> */}
-                  {/*End of monthly Summary Form Accordion  Accordion  */}
 
                   <br />
 
@@ -1257,6 +1239,13 @@ const Reports = props => {
                 )}
                 {activeItem === 'prep-longitudinal-report' && (
                   <PrepLongitudinalReport
+                    handleItemClick={handleItemClick}
+                    setCompleted={setCompleted}
+                    completed={completed}
+                  />
+                )}
+                {activeItem === 'pep-report' && (
+                  <PepReport
                     handleItemClick={handleItemClick}
                     setCompleted={setCompleted}
                     completed={completed}
