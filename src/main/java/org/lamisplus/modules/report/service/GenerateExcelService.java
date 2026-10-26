@@ -21,6 +21,7 @@ public interface GenerateExcelService {
  String getFacilityName(Long facilityId);
  ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, LocalDate end, String reportType, Boolean scrambler);
  ByteArrayOutputStream generatePmtctHts(Long facilityId, LocalDate start, LocalDate end, String reportType);
+ ByteArrayOutputStream generatePep(Long facilityId, LocalDate start, LocalDate end);
  ByteArrayOutputStream generatePrep(Long facilityId, LocalDate start, LocalDate end);
  ByteArrayOutputStream generateKpPrevReport (Long facilityId, LocalDate start, LocalDate end);
  ByteArrayOutputStream generateLongitudinalPrepReport(Long facilityId, LocalDate start, LocalDate end);

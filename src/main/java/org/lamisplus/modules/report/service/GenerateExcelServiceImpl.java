@@ -348,6 +348,25 @@ public ByteArrayOutputStream generateHts(Long facilityId, LocalDate start, Local
 		return null;
 	}
 
+    @Override
+	public ByteArrayOutputStream generatePep(Long facilityId, LocalDate start, LocalDate end) {
+		messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving records from database ...");
+		LOG.info("Start generating Pep for facility:" + getFacilityName(facilityId)+ "startDate: " +start + "endDate: " +end);
+		try {
+			List<PepDto> pepReport = reportRepository.getPepReport(facilityId, start, end);
+			LOG.error("PEP Size: {}", pepReport.size());
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Mapping result set ...");
+			List<Map<Integer, Object>> data = excelDataHelper.fillPepMapper(pepReport);
+			messagingTemplate.convertAndSend(Constants.REPORT_GENERATION_PROGRESS_TOPIC, "Retrieving report headers ...");
+			return excelService.generate(Constants.PEP_SHEET, data, Constants.PEP_HEADER);
+		} catch (Exception e) {
+			LOG.error("Error Occurred when generating PEP !!!");
+			e.printStackTrace();
+		}
+		LOG.info("End generate patient PEP");
+		return null;
+	}
+
 
 
 	@Override

@@ -912,6 +912,67 @@ public class GenerateExcelDataHelper {
 	}
 
 
+    public  List<Map<Integer, Object>> fillPepMapper(@NonNull List<PepDto> pepReportDtos) {
+		List<Map<Integer, Object>> result = new ArrayList<>();
+		int sn = 1;
+		Log.info("converting PEP db records to excel ....");
+		try {
+			for (PepDto pepDto : pepReportDtos) {
+				if (pepDto != null) {
+					Map<Integer, Object> map = new HashMap<>();
+					int index = 0;
+					map.put(index++, String.valueOf(sn));
+					map.put(index++, getStringValue(String.valueOf(pepDto.getState())));
+					map.put(index++, getStringValue(String.valueOf(pepDto.getLga())));
+					map.put(index++, getStringValue(String.valueOf(pepDto.getFacilityName())));
+					map.put(index++, getStringValue(String.valueOf(pepDto.getDatimId())));
+					map.put(index++, getStringValue(String.valueOf(pepDto.getPersonUuid())));
+                    map.put(index++, getStringValue(String.valueOf(pepDto.getGender())));
+                    map.put(index++, getStringValue(String.valueOf(pepDto.getAge())));
+
+					map.put(index++, getStringValue(String.valueOf(pepDto.getEnrollmentType())));
+					map.put(index++, getStringValue(String.valueOf(pepDto.getModeOfExposure())));
+					map.put(index++, getStringValue(String.valueOf(pepDto.getHivStatusAtExposure())));
+					map.put(index++, getStringValue(String.valueOf(pepDto.getDurationBeforePep())));
+                    map.put(index++, pepDto.getDateEnrolled());
+
+					map.put(index++, getStringValue(String.valueOf(pepDto.getPopulationType())));
+					map.put(index++, getStringValue(String.valueOf(pepDto.getPregnancyStatus())));
+					map.put(index++, getStringValue(String.valueOf(pepDto.getFinalHivTestResult())));
+					map.put(index++, getStringValue(String.valueOf(pepDto.getEarlyDetectVLResult())));
+                    map.put(index++, getStringValue(String.valueOf(pepDto.getStiScreening())));
+                    map.put(index++, getStringValue(String.valueOf(pepDto.getPrepRegimen())));
+                    map.put(index++, getStringValue(String.valueOf(pepDto.getAdherenceLevel())));
+                    map.put(index++, getStringValue(String.valueOf(pepDto.getNotedSideEffects())));
+                    map.put(index++, getStringValue(String.valueOf(pepDto.getRiskReduction())));
+                    map.put(index++, pepDto.getDatePrepStarted());
+                    map.put(index++, pepDto.getDateStopPep());
+                    map.put(index++, getStringValue(String.valueOf(pepDto.getPepCompletion())));
+                    map.put(index++, pepDto.getFirstVisitDate());
+                    map.put(index++, getStringValue(String.valueOf(pepDto.getFirstFinalHivTestResult())));
+                    map.put(index++, pepDto.getSecondVisitDate());
+                    map.put(index++, getStringValue(String.valueOf(pepDto.getSecondHivTestResult())));
+                    map.put(index++, pepDto.getThirdVisitDate());
+                    map.put(index++, getStringValue(String.valueOf(pepDto.getThirdHivTestResult())));
+                    map.put(index++, pepDto.getNextAppointment());
+                    map.put(index++, pepDto.getInterruptionDate());
+                    map.put(index++, getStringValue(String.valueOf(pepDto.getInterruptionReason())));
+                    map.put(index, getStringValue(String.valueOf(pepDto.getLink2Art())));
+					result.add(map);
+					sn++;
+				}
+			}
+			LOG.info(RECORD_OUTPUT, result.size());
+			return result;
+		}catch (Exception e) {
+			LOG.error("An error occurred when converting db records to excel");
+			LOG.error(ERROR_OUTPUT + e.getMessage());
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+
 	public List<Map<Integer, Object>> fillHtsDataMapper(@NonNull List<HtsReportDto> htsReportDtos, String reportType, Boolean scramble) {
 		List<Map<Integer, Object>> result = new ArrayList<>();
 		int sn = 1;
