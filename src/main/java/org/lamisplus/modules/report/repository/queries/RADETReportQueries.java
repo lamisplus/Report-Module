@@ -255,7 +255,7 @@ public class RADETReportQueries {
             " person_uuid as tbTreatmentPersonUuid,\n" +
             " ROW_NUMBER() OVER ( PARTITION BY person_uuid ORDER BY date_of_observation DESC)\n" +
             "FROM public.hiv_observation WHERE type = 'Chronic Care' AND date_of_observation BETWEEN ?2 AND ?3\n" +
-            "AND facility_id = ?1 and archived = 0\n" +
+            "AND facility_id = ?1 and archived = 0 AND data->'tbIptScreening'->>'tbTreatmentStartDate' <> ''\n" +
             ") tbTreatment WHERE row_number = 1\n" +
             "AND tbTreatmentStartDate IS NOT NULL),\n" +
             "tbTreatmentNew AS (\n" +
@@ -264,7 +264,7 @@ public class RADETReportQueries {
             "SELECT\n" +
             " person_uuid AS person_uuid,\n" +
             "date_of_observation as screeningDate,\n" +
-            " NULLIF(CAST(NULLIF(data->'tptMonitoring'->>'tbTreatmentStartDate' , NULL) AS DATE), NULL) AS tbTreatmentStartDate,\n" +
+            " NULLIF(CAST(NULLIF(data->'tptMonitoring'->>'tbTreatmentStartDate' , '') AS DATE), NULL) AS tbTreatmentStartDate,\n" +
             " data->'tbIptScreening'->>'tbTestResult' AS tbDiagnosticResult,\n" +
             "data->'tbIptScreening'->>'chestXrayResult' as chestXrayResult,\n" +
             " data->'tbIptScreening'->>'diagnosticTestType' AS tbDiagnosticTestType,\n" +
@@ -740,7 +740,7 @@ public class RADETReportQueries {
             "      hst.person_id, hst.status_date, hst.hiv_status, hst.cause_of_death,\n" +
             "      hst.va_cause_of_death,ROW_NUMBER() OVER (PARTITION BY hst.person_id ORDER BY hst.status_date DESC ) AS rn\n" +
             "    FROM hiv_status_tracker hst\n" +
-            "    WHERE hst.archived = 0\n" +
+            "    WHERE hst.archived = 0 AND hst.hiv_status != 'ART Start'\n" +
             "      AND hst.status_date <= ?3\n" +
             "  ) AS status\n" +
             "  WHERE status.rn = 1\n" +
@@ -839,7 +839,7 @@ public class RADETReportQueries {
             "(CASE WHEN COALESCE(iptN.tptCompletionStatus, ipt.iptCompletionStatus) = 'IPT Completed' THEN 'Treatment completed' ELSE COALESCE(iptN.tptCompletionStatus, ipt.iptCompletionStatus) END) AS iptCompletionStatus,\n" +
             "COALESCE(enroll.tpt_medication, iptStart.iptType) AS iptType, iptN.eligibilityTpt,\n" +
             "cc.*,\n" +
-            "COALESCE(c.date_devolved, dsd1.dateOfDevolvement) dateOfDevolvement, COALESCE(c.dsd_status, dsd1.modelDevolvedTo) modelDevolvedTo,  dsd2.dateOfCurrentDSD, COALESCE(c.dsd_model, dsd2.currentDSDModel) currentDSDModel, dsd2.dateReturnToSite, dsd2.currentDsdOutlet, dsd2.dsdOutlet,  \n" +
+            "COALESCE(c.date_devolved, dsd1.dateOfDevolvement) dateOfDevolvement, COALESCE(c.dsd_status, dsd1.modelDevolvedTo) modelDevolvedTo, COALESCE(c.date_devolved, dsd2.dateOfCurrentDSD) dateOfCurrentDSD, COALESCE(c.dsd_model, dsd2.currentDSDModel) currentDSDModel, dsd2.dateReturnToSite, dsd2.currentDsdOutlet, dsd2.dsdOutlet,  \n" +
             "(CASE WHEN COALESCE(tbTmentNew.tbTreatmentType, tbTment.tbTreatementType) IN ('New', 'Relapse', 'Relapsed') THEN 'New/Relapse' ELSE COALESCE(tbTmentNew.tbTreatmentType, tbTment.tbTreatementType) END)  AS tbTreatementType, tbTmentNew.cadScore,\n" +
             "COALESCE(tbTmentNew.tbTreatmentStartDate, tbTment.tbTreatmentStartDate) AS tbTreatmentStartDate,\n" +
             "COALESCE(tbTmentNew.treatmentOutcome, tbTment.tbTreatmentOutcome) AS tbTreatmentOutcome,\n" +

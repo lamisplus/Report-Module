@@ -16,6 +16,10 @@ import java.util.Optional;
 
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
+        @Query(value = PEPReportQuery.PEP_REPORT_QUERY, nativeQuery = true)
+        List<PepDto> getPepReport(Long facilityId, LocalDate start, LocalDate end);
+
+
         @Query(value = PMTCTMSFQuery.PMTCT_MONTHLY_MSF_QUERY, nativeQuery = true)
         List<HtsMsfProjection> getPMTCTMSFReport(Long facilityId, LocalDate start, LocalDate end);
 
